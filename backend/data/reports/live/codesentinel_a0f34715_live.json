@@ -1,0 +1,769 @@
+{
+  "job_id": "a0f347156f174b8d",
+  "status": "in_progress",
+  "folder_path": "C:\\Users\\sandeep\\Downloads\\Claudes\\CampusPlacement\\campus-placement",
+  "model_used": "nvidia/meta/llama-3.3-70b-instruct",
+  "updated_at": "2026-05-01T10:11:04.564420",
+  "files_done": 22,
+  "total_files": 50,
+  "files": [
+    {
+      "filename": "src/app/api/audit/logs/route.js",
+      "score": 96,
+      "summary": "The provided code is a well-structured API route for retrieving audit logs. It handles authentication and authorization properly, and it also handles errors. However, there are some potential issues that need to be addressed, such as input validation, error handling, and database query optimization. The code score is 85 due to some minor issues and suggestions for improvement.",
+      "issues": [
+        {
+          "type": "input_validation",
+          "severity": "medium",
+          "message": "The parseDate function does not handle invalid date formats robustly. It should throw an error or return a default value instead of returning the original value.",
+          "line": 7,
+          "suggestion": "Use a more robust date parsing library or add additional error handling to the parseDate function.",
+          "code_snippet": "function parseDate(value, fallback) { ... }",
+          "fixed_snippet": "function parseDate(value, fallback) { try { const date = new Date(value); if (isNaN(date.getTime())) { throw new Error('Invalid date format'); } return date.toISOString().split('T')[0]; } catch (error) { return fallback; } }"
+        },
+        {
+          "type": "code_smell",
+          "severity": "low",
+          "message": "The code uses multiple variables to store query parameters. It would be more efficient to use a single object to store all query parameters.",
+          "line": 20,
+          "suggestion": "Use a single object to store all query parameters.",
+          "code_snippet": "const from = parseDate(url.searchParams.get('from'), '1970-01-01'); const to = parseDate(url.searchParams.get('to'), '2999-12-31'); ...",
+          "fixed_snippet": "const queryParams = { from: parseDate(url.searchParams.get('from'), '1970-01-01'), to: parseDate(url.searchParams.get('to'), '2999-12-31'), ... };"
+        }
+      ]
+    },
+    {
+      "filename": "src/app/api/admin/settings/route.js",
+      "score": 86,
+      "summary": "The provided code is a well-structured API route for admin settings. It handles authentication, authorization, and error handling properly. However, there are some potential issues that need to be addressed, such as missing input validation, potential SQL injection vulnerabilities, and lack of logging for certain actions. The code also uses some deprecated functions and has some areas that can be improved for better performance and security.",
+      "issues": [
+        {
+          "type": "security",
+          "severity": "medium",
+          "message": "Missing input validation for admin settings",
+          "line": 75,
+          "suggestion": "Add input validation for admin settings to prevent potential security vulnerabilities",
+          "code_snippet": "const normalized = { ... };",
+          "fixed_snippet": "const normalized = validateAdminSettings(payload);"
+        },
+        {
+          "type": "security",
+          "severity": "high",
+          "message": "Potential SQL injection vulnerability",
+          "line": 102,
+          "suggestion": "Use parameterized queries to prevent SQL injection attacks",
+          "code_snippet": "await query(`UPDATE tenants SET settings = $1::jsonb, updated_at = NOW() WHERE id = $2::uuid`, [JSON.stringify(merged), tenantId])",
+          "fixed_snippet": "await query('UPDATE tenants SET settings = $1, updated_at = NOW() WHERE id = $2', [merged, tenantId])"
+        },
+        {
+          "type": "best_practice",
+          "severity": "low",
+          "message": "Missing logging for admin settings update",
+          "line": 108,
+          "suggestion": "Add logging for admin settings update to track changes",
+          "code_snippet": "void writeAuditLog({ ... });",
+          "fixed_snippet": "writeAuditLog({ ... });"
+        }
+      ]
+    },
+    {
+      "filename": "src/app/api/admin/users/route.js",
+      "score": 93,
+      "summary": "The provided code is a well-structured API route for the admin dashboard. It handles authentication and authorization properly, and it also handles errors. However, there are some potential issues that need to be addressed, such as input validation, error handling, and potential SQL injection vulnerabilities. The code score is 85 due to the lack of input validation and potential SQL injection vulnerabilities.",
+      "issues": [
+        {
+          "type": "security",
+          "severity": "medium",
+          "message": "The code does not validate the session object before accessing its properties. This could lead to a null pointer exception if the session object is null or undefined.",
+          "line": 9,
+          "suggestion": "Add a null check for the session object before accessing its properties.",
+          "code_snippet": "if (!session || session.user.role !== 'super_admin')",
+          "fixed_snippet": "if (session && session.user && session.user.role !== 'super_admin')"
+        },
+        {
+          "type": "best_practice",
+          "severity": "low",
+          "message": "The SQL query is not parameterized, which could lead to SQL injection vulnerabilities.",
+          "line": 14,
+          "suggestion": "Use a parameterized query to prevent SQL injection vulnerabilities.",
+          "code_snippet": "const result = await query(`SELECT id, first_name, last_name, email, role, is_active FROM users ORDER BY created_at DESC`);",
+          "fixed_snippet": "const result = await query('SELECT id, first_name, last_name, email, role, is_active FROM users ORDER BY created_at DESC');"
+        },
+        {
+          "type": "error_handling",
+          "severity": "medium",
+          "message": "The error handling is not robust, as it only logs the error and returns a generic 500 error message.",
+          "line": 29,
+          "suggestion": "Improve the error handling by logging more details about the error and returning a more informative error message.",
+          "code_snippet": "console.error('Failed to load admin users:', error);",
+          "fixed_snippet": "console.error('Failed to load admin users:', error); return NextResponse.json({ error: 'Failed to load users: ' + error.message }, { status: 500 });"
+        }
+      ]
+    },
+    {
+      "filename": "src/app/api/audit/reports/export/route.js",
+      "score": 92,
+      "summary": "The provided code is a well-structured API route for exporting audit reports. It handles authentication, authorization, and error handling properly. However, there are some potential issues that require attention, such as missing input validation, potential SQL injection vulnerabilities, and unhandled errors. The code also lacks logging and monitoring, which can make it difficult to debug and troubleshoot issues. Overall, the code is well-organized, but it requires some improvements to ensure security, reliability, and maintainability.",
+      "issues": [
+        {
+          "type": "security",
+          "severity": "medium",
+          "message": "Missing input validation for request body",
+          "line": 27,
+          "suggestion": "Add input validation for request body using a library like Joi or express-validator",
+          "code_snippet": "const body = await request.json().catch(() => ({}));",
+          "fixed_snippet": "const body = await request.json().catch(() => ({}));\nconst { error } = validateBody(body);\nif (error) {\n  return NextResponse.json({ error: 'Invalid request body' }, { status: 400 });\n}"
+        },
+        {
+          "type": "security",
+          "severity": "low",
+          "message": "Potential SQL injection vulnerability",
+          "line": 48,
+          "suggestion": "Use parameterized queries or an ORM to prevent SQL injection",
+          "code_snippet": "const created = await query(`INSERT INTO audit_report_exports ...`, [tenantId, session.user.id || null, from, to, requestedEmail]);",
+          "fixed_snippet": "const created = await query(`INSERT INTO audit_report_exports ...`, { tenantId, userId: session.user.id, from, to, email: requestedEmail });"
+        },
+        {
+          "type": "security",
+          "severity": "low",
+          "message": "Potential SQL injection vulnerability",
+          "line": 57,
+          "suggestion": "Use parameterized queries or an ORM to prevent SQL injection",
+          "code_snippet": "const logs = await query(`SELECT ... FROM audit_logs ...`, [tenantId, from, to]);",
+          "fixed_snippet": "const logs = await query(`SELECT ... FROM audit_logs ...`, { tenantId, from, to });"
+        },
+        {
+          "type": "error_handling",
+          "severity": "medium",
+          "message": "Unhandled error in inner catch block",
+          "line": 117,
+          "suggestion": "Handle the error properly, e.g., log it and return a meaningful error message",
+          "code_snippet": "catch (innerError) {\n  await query(`UPDATE audit_report_exports ...`, [innerError.message || 'Export failed', exportId]);\n  throw innerError;\n}",
+          "fixed_snippet": "catch (innerError) {\n  console.error('Error exporting audit report:', innerError);\n  return NextResponse.json({ error: 'Failed to export audit report' }, { status: 500 });\n}"
+        }
+      ]
+    },
+    {
+      "filename": "src/app/api/audit/reports/route.js",
+      "score": 93,
+      "summary": "The provided code is a well-structured API route for audit reports. It handles authentication and authorization properly, and it also handles errors. However, there are some potential issues that require attention to improve the code's reliability and security. The code does not validate the 'limit' parameter properly, which could lead to potential SQL injection vulnerabilities. Additionally, the code does not handle the case where the 'tenantId' parameter is not a valid UUID. The error handling mechanism is also not robust, as it returns a generic error message for all types of errors.",
+      "issues": [
+        {
+          "type": "security",
+          "severity": "medium",
+          "message": "The 'limit' parameter is not validated properly, which could lead to potential SQL injection vulnerabilities.",
+          "line": 25,
+          "suggestion": "Validate the 'limit' parameter to ensure it is a positive integer.",
+          "code_snippet": "const limit = Math.min(100, Math.max(1, Number.parseInt(url.searchParams.get('limit') || '30', 10)));",
+          "fixed_snippet": "const limit = parseInt(url.searchParams.get('limit'), 10); if (isNaN(limit) || limit < 1 || limit > 100) { return NextResponse.json({ error: 'Invalid limit parameter' }, { status: 400 }); }"
+        },
+        {
+          "type": "security",
+          "severity": "medium",
+          "message": "The 'tenantId' parameter is not validated properly, which could lead to potential SQL injection vulnerabilities.",
+          "line": 19,
+          "suggestion": "Validate the 'tenantId' parameter to ensure it is a valid UUID.",
+          "code_snippet": "if (session.user.role === 'super_admin' && requestedTenant && isUuid(requestedTenant)) {",
+          "fixed_snippet": "if (session.user.role === 'super_admin' && requestedTenant && isUuid(requestedTenant)) { if (!isUuid(requestedTenant)) { return NextResponse.json({ error: 'Invalid tenantId parameter' }, { status: 400 }); } }"
+        },
+        {
+          "type": "error_handling",
+          "severity": "low",
+          "message": "The error handling mechanism is not robust, as it returns a generic error message for all types of errors.",
+          "line": 36,
+          "suggestion": "Improve the error handling mechanism to return more specific error messages.",
+          "code_snippet": "console.error('GET /api/audit/reports failed:', error);",
+          "fixed_snippet": "console.error('GET /api/audit/reports failed:', error); return NextResponse.json({ error: 'Failed to load audit report exports: ' + error.message }, { status: 500 });"
+        }
+      ]
+    },
+    {
+      "filename": "src/app/api/auth/[...nextauth]/route.js",
+      "score": 96,
+      "summary": "The provided code is a simple NextAuth handler for authentication routes. It imports the authentication options and creates a NextAuth instance. However, there are potential security and reliability issues due to the lack of error handling and input validation. The code does not handle potential errors that may occur during the authentication process, which could lead to crashes or unexpected behavior. Additionally, the code does not validate the authentication options, which could lead to security vulnerabilities if the options are not properly sanitized.",
+      "issues": [
+        {
+          "type": "error_handling",
+          "severity": "medium",
+          "message": "The code does not handle potential errors that may occur during the authentication process",
+          "line": 4,
+          "suggestion": "Add try-catch blocks to handle potential errors",
+          "code_snippet": "const handler = NextAuth(authOptions);",
+          "fixed_snippet": "try { const handler = NextAuth(authOptions); } catch (error) { console.error(error); }"
+        },
+        {
+          "type": "input_validation",
+          "severity": "low",
+          "message": "The code does not validate the authentication options",
+          "line": 1,
+          "suggestion": "Add input validation to ensure the authentication options are properly sanitized",
+          "code_snippet": "import { authOptions } from '@/lib/auth';",
+          "fixed_snippet": "import { authOptions } from '@/lib/auth'; if (!authOptions || typeof authOptions !== 'object') { throw new Error('Invalid authentication options'); }"
+        }
+      ]
+    },
+    {
+      "filename": "src/app/api/clarifications/route.js",
+      "score": 61,
+      "summary": "The provided code is a well-structured API route for clarifications. It handles authentication and authorization properly, and it also handles errors and edge cases. However, there are some potential issues with data validation, error handling, and database queries. The code is generally well-organized, but there are some areas that require attention to improve its reliability and security.",
+      "issues": [
+        {
+          "type": "validation",
+          "severity": "medium",
+          "message": "The MAX_QUESTIONS constant is not validated",
+          "line": 17,
+          "suggestion": "Add validation for MAX_QUESTIONS",
+          "code_snippet": "const MAX_QUESTIONS = 5;",
+          "fixed_snippet": "const MAX_QUESTIONS = 5; if (MAX_QUESTIONS <= 0) { throw new Error('MAX_QUESTIONS must be a positive integer'); }"
+        },
+        {
+          "type": "error_handling",
+          "severity": "high",
+          "message": "The GET function does not handle errors properly",
+          "line": 63,
+          "suggestion": "Add proper error handling for the GET function",
+          "code_snippet": "export async function GET() {",
+          "fixed_snippet": "export async function GET() { try { ... } catch (error) { console.error('Error:', error); return NextResponse.json({ error: 'Error occurred' }, { status: 500 }); } }"
+        },
+        {
+          "type": "error_handling",
+          "severity": "high",
+          "message": "The POST function does not handle errors properly",
+          "line": 81,
+          "suggestion": "Add proper error handling for the POST function",
+          "code_snippet": "export async function POST(request) {",
+          "fixed_snippet": "export async function POST(request) { try { ... } catch (error) { console.error('Error:', error); return NextResponse.json({ error: 'Error occurred' }, { status: 500 }); } }"
+        },
+        {
+          "type": "error_handling",
+          "severity": "high",
+          "message": "The PATCH function does not handle errors properly",
+          "line": 123,
+          "suggestion": "Add proper error handling for the PATCH function",
+          "code_snippet": "export async function PATCH(request) {",
+          "fixed_snippet": "export async function PATCH(request) { try { ... } catch (error) { console.error('Error:', error); return NextResponse.json({ error: 'Error occurred' }, { status: 500 }); } }"
+        },
+        {
+          "type": "validation",
+          "severity": "medium",
+          "message": "The company and postedBy fields are not validated",
+          "line": 99,
+          "suggestion": "Add validation for company and postedBy fields",
+          "code_snippet": "const company = String(body?.company || '').trim();",
+          "fixed_snippet": "const company = String(body?.company || '').trim(); if (!company) { throw new Error('Company is required'); }"
+        },
+        {
+          "type": "validation",
+          "severity": "medium",
+          "message": "The batchId and questionId fields are not validated",
+          "line": 141,
+          "suggestion": "Add validation for batchId and questionId fields",
+          "code_snippet": "const batchId = String(body?.batchId || '').trim();",
+          "fixed_snippet": "const batchId = String(body?.batchId || '').trim(); if (!batchId) { throw new Error('Batch ID is required'); }"
+        }
+      ]
+    },
+    {
+      "filename": "src/app/api/college/dashboard/route.js",
+      "score": 84,
+      "summary": "The provided code is a well-structured API route for the college dashboard. It handles authentication and authorization properly, and it also handles errors. However, there are some potential issues with database queries and error handling that need to be addressed. The code score is 85 due to some minor issues with database query efficiency and error handling.",
+      "issues": [
+        {
+          "type": "performance",
+          "severity": "medium",
+          "message": "The database query is not optimized for performance. It uses multiple subqueries which can lead to slow performance.",
+          "line": 17,
+          "suggestion": "Optimize the database query to use joins instead of subqueries.",
+          "code_snippet": "const statsQuery = await query(`SELECT ... FROM student_profiles WHERE tenant_id = $1`, [tenantId]);",
+          "fixed_snippet": "const statsQuery = await query(`SELECT ... FROM student_profiles JOIN placement_drives ON student_profiles.tenant_id = placement_drives.tenant_id WHERE student_profiles.tenant_id = $1`, [tenantId]);"
+        },
+        {
+          "type": "performance",
+          "severity": "medium",
+          "message": "The database query is not optimized for performance. It uses multiple subqueries which can lead to slow performance.",
+          "line": 43,
+          "suggestion": "Optimize the database query to use joins instead of subqueries.",
+          "code_snippet": "const pendingQuery = await query(`SELECT ... FROM placement_drives WHERE tenant_id = $1 AND status = 'requested'`, [tenantId]);",
+          "fixed_snippet": "const pendingQuery = await query(`SELECT ... FROM placement_drives JOIN student_profiles ON placement_drives.tenant_id = student_profiles.tenant_id WHERE placement_drives.tenant_id = $1 AND placement_drives.status = 'requested'`, [tenantId]);"
+        },
+        {
+          "type": "error_handling",
+          "severity": "high",
+          "message": "The error handling is not robust. It only logs the error and returns a generic 500 error message.",
+          "line": 76,
+          "suggestion": "Improve the error handling to provide more detailed error messages and logging.",
+          "code_snippet": "catch (error) { console.error('Failed to load college dashboard data:', error); return NextResponse.json({ error: 'Failed to load college dashboard data' }, { status: 500 }); }",
+          "fixed_snippet": "catch (error) { console.error('Failed to load college dashboard data:', error); return NextResponse.json({ error: 'Failed to load college dashboard data: ' + error.message }, { status: 500 }); }"
+        }
+      ]
+    },
+    {
+      "filename": "src/app/api/college/applications/route.js",
+      "score": 95,
+      "summary": "The provided API route for college applications is well-structured and handles authentication, authorization, and error handling properly. However, there are some areas that require attention to improve the code's reliability, security, and performance. The code uses parameterized queries, which is good for preventing SQL injection attacks. The route also handles errors and returns informative error messages. Nevertheless, there are some potential issues, such as the lack of input validation for the tenant ID and the potential for a large amount of data being returned from the database.",
+      "issues": [
+        {
+          "type": "validation",
+          "severity": "medium",
+          "message": "The tenant ID is not validated before being used in the database query. This could potentially lead to a SQL injection attack if the tenant ID is not properly sanitized.",
+          "line": 13,
+          "suggestion": "Validate the tenant ID to ensure it is a valid UUID.",
+          "code_snippet": "const tenantId = session.user.tenantId || session.user.tenant_id;",
+          "fixed_snippet": "const tenantId = validateUUID(session.user.tenantId || session.user.tenant_id);"
+        },
+        {
+          "type": "performance",
+          "severity": "low",
+          "message": "The database query returns a large amount of data, which could potentially lead to performance issues. Consider implementing pagination or limiting the amount of data returned.",
+          "line": 18,
+          "suggestion": "Implement pagination or limit the amount of data returned from the database query.",
+          "code_snippet": "const res = await query(...);",
+          "fixed_snippet": "const res = await query(...).limit(100).offset(0);"
+        },
+        {
+          "type": "security",
+          "severity": "low",
+          "message": "The error message returned in the case of a database error could potentially reveal sensitive information about the database or the application. Consider returning a more generic error message.",
+          "line": 40,
+          "suggestion": "Return a more generic error message in the case of a database error.",
+          "code_snippet": "return NextResponse.json({ error: 'Failed to load applications' }, { status: 500 });",
+          "fixed_snippet": "return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });"
+        }
+      ]
+    },
+    {
+      "filename": "src/app/api/college/drives/[id]/facebook-post/route.js",
+      "score": 93,
+      "summary": "The provided code is a well-structured API route for publishing a placement drive summary to a Facebook page. However, there are some areas that require attention to improve security, reliability, and performance. The code lacks input validation for the driveId parameter, and it does not handle errors properly in the postToFacebookPageFeed function. Additionally, the code uses a try-catch block to handle errors, but it does not provide specific error messages, which can make debugging difficult.",
+      "issues": [
+        {
+          "type": "input_validation",
+          "severity": "medium",
+          "message": "The driveId parameter is not validated for invalid or malicious input",
+          "line": 40,
+          "suggestion": "Add input validation for the driveId parameter to prevent potential security vulnerabilities",
+          "code_snippet": "const { id: driveId } = await params;",
+          "fixed_snippet": "const { id: driveId } = await params; if (!driveId || typeof driveId !== 'string') { return NextResponse.json({ error: 'Invalid driveId parameter' }, { status: 400 }); }"
+        },
+        {
+          "type": "error_handling",
+          "severity": "medium",
+          "message": "The postToFacebookPageFeed function does not handle errors properly",
+          "line": 87,
+          "suggestion": "Add error handling for the postToFacebookPageFeed function to prevent unexpected errors",
+          "code_snippet": "const { postId } = await postToFacebookPageFeed({",
+          "fixed_snippet": "try { const { postId } = await postToFacebookPageFeed({ ... }); } catch (error) { console.error('Error posting to Facebook:', error); return NextResponse.json({ error: 'Failed to post to Facebook' }, { status: 500 }); }"
+        },
+        {
+          "type": "error_handling",
+          "severity": "low",
+          "message": "The try-catch block does not provide specific error messages for debugging",
+          "line": 94,
+          "suggestion": "Add specific error messages for debugging to improve error handling",
+          "code_snippet": "console.error('Facebook post error:', error);",
+          "fixed_snippet": "console.error('Facebook post error:', error?.message || 'Failed to post to Facebook');"
+        }
+      ]
+    },
+    {
+      "filename": "src/app/api/college/drives/[id]/report/route.js",
+      "score": 81,
+      "summary": "The provided API route for generating a drive report is well-structured and handles authentication, authorization, and error handling properly. However, there are some potential issues with database queries, error handling, and data processing. The code is generally readable and maintainable, but some improvements can be made to enhance its reliability and performance.",
+      "issues": [
+        {
+          "type": "database",
+          "severity": "medium",
+          "message": "The drive query uses a LEFT JOIN, which may not be necessary and could impact performance. Consider using an INNER JOIN if the joined tables have a one-to-one relationship.",
+          "line": 20,
+          "suggestion": "Review the database schema and adjust the query accordingly.",
+          "code_snippet": "const driveQuery = await query(`SELECT pd.title, pd.drive_date, pd.drive_type, pd.status, ep.company_name, jp.job_type, jp.salary_max FROM placement_drives pd LEFT JOIN employer_profiles ep ON pd.employer_id = ep.id LEFT JOIN job_postings jp ON pd.job_id = jp.id WHERE pd.id = $1 AND pd.tenant_id = $2`, [driveId, tenantId]);",
+          "fixed_snippet": "const driveQuery = await query(`SELECT pd.title, pd.drive_date, pd.drive_type, pd.status, ep.company_name, jp.job_type, jp.salary_max FROM placement_drives pd INNER JOIN employer_profiles ep ON pd.employer_id = ep.id INNER JOIN job_postings jp ON pd.job_id = jp.id WHERE pd.id = $1 AND pd.tenant_id = $2`, [driveId, tenantId]);"
+        },
+        {
+          "type": "database",
+          "severity": "medium",
+          "message": "The stats query uses a GROUP BY clause, which may not be necessary and could impact performance. Consider using a simpler query if the statistics can be calculated in the application code.",
+          "line": 36,
+          "suggestion": "Review the database schema and adjust the query accordingly.",
+          "code_snippet": "const statsQuery = await query(`SELECT status, COUNT(*) as count FROM applications WHERE drive_id = $1 GROUP BY status`, [driveId]);",
+          "fixed_snippet": "const statsQuery = await query(`SELECT status, COUNT(*) as count FROM applications WHERE drive_id = $1`, [driveId]);"
+        },
+        {
+          "type": "database",
+          "severity": "medium",
+          "message": "The selected query uses a JOIN clause, which may not be necessary and could impact performance. Consider using a simpler query if the selected students can be retrieved in a single query.",
+          "line": 60,
+          "suggestion": "Review the database schema and adjust the query accordingly.",
+          "code_snippet": "const selectedQuery = await query(`SELECT sp.roll_number, sp.department, sp.branch, sp.cgpa, u.first_name, u.last_name FROM applications a JOIN student_profiles sp ON a.student_id = sp.id JOIN users u ON sp.user_id = u.id WHERE a.drive_id = $1 AND a.status = 'selected'`, [driveId]);",
+          "fixed_snippet": "const selectedQuery = await query(`SELECT sp.roll_number, sp.department, sp.branch, sp.cgpa, u.first_name, u.last_name FROM student_profiles sp JOIN users u ON sp.user_id = u.id WHERE sp.id IN (SELECT student_id FROM applications WHERE drive_id = $1 AND status = 'selected')`, [driveId]);"
+        },
+        {
+          "type": "error_handling",
+          "severity": "high",
+          "message": "The error handling in the catch block is not robust and may not handle all possible error scenarios. Consider adding more specific error handling and logging.",
+          "line": 84,
+          "suggestion": "Review the error handling and add more specific error handling and logging as needed.",
+          "code_snippet": "catch (error) { console.error('Report Generation Error:', error); return NextResponse.json({ error: error.message || 'Failed to generate drive report' }, { status: 500 }); }",
+          "fixed_snippet": "catch (error) { console.error('Report Generation Error:', error); if (error instanceof DatabaseError) { return NextResponse.json({ error: 'Database error' }, { status: 500 }); } else { return NextResponse.json({ error: 'Unknown error' }, { status: 500 }); } }"
+        }
+      ]
+    },
+    {
+      "filename": "src/app/api/college/drives/route.js",
+      "score": 90,
+      "summary": "The provided code is a well-structured API route for college drives, handling authentication, authorization, and error handling properly. However, there are some areas that require improvement, such as input validation, error handling, and potential SQL injection vulnerabilities. The code also lacks logging and monitoring, which is crucial for a production-ready application.",
+      "issues": [
+        {
+          "type": "sql_injection",
+          "severity": "medium",
+          "message": "Potential SQL injection vulnerability in query parameter $1::uuid",
+          "line": 23,
+          "suggestion": "Use parameterized queries or prepared statements to prevent SQL injection",
+          "code_snippet": "const drives = await query(`SELECT ... FROM placement_drives ... WHERE d.tenant_id = $1::uuid`, [tenantId])",
+          "fixed_snippet": "const drives = await query(`SELECT ... FROM placement_drives ... WHERE d.tenant_id = $1`, [tenantId])"
+        },
+        {
+          "type": "sql_injection",
+          "severity": "medium",
+          "message": "Potential SQL injection vulnerability in query parameter $1::uuid",
+          "line": 42,
+          "suggestion": "Use parameterized queries or prepared statements to prevent SQL injection",
+          "code_snippet": "const staff = await query(`SELECT ... FROM users ... WHERE tenant_id = $1::uuid`, [tenantId])",
+          "fixed_snippet": "const staff = await query(`SELECT ... FROM users ... WHERE tenant_id = $1`, [tenantId])"
+        },
+        {
+          "type": "sql_injection",
+          "severity": "medium",
+          "message": "Potential SQL injection vulnerability in query parameter $1",
+          "line": 88,
+          "suggestion": "Use parameterized queries or prepared statements to prevent SQL injection",
+          "code_snippet": "const updated = await query(`UPDATE placement_drives ... SET status = $1 ...`, [nextStatus, session.user.id, driveId, tenantId])",
+          "fixed_snippet": "const updated = await query(`UPDATE placement_drives ... SET status = $1 ...`, [nextStatus, session.user.id, driveId, tenantId])"
+        },
+        {
+          "type": "input_validation",
+          "severity": "low",
+          "message": "Missing input validation for driveId and action",
+          "line": 83,
+          "suggestion": "Add input validation to ensure driveId and action are valid",
+          "code_snippet": "if (!driveId || !['approve', 'reject'].includes(action))",
+          "fixed_snippet": "if (!driveId || !['approve', 'reject'].includes(action)) { return NextResponse.json({ error: 'Invalid driveId or action' }, { status: 400 }); }"
+        }
+      ]
+    },
+    {
+      "filename": "src/app/api/college/drives/[id]/route.js",
+      "score": 87,
+      "summary": "The provided code is a well-structured API route for updating placement drive fields for a college. It handles authentication, authorization, and error handling properly. However, there are some areas that require improvement, such as input validation, error handling, and potential SQL injection vulnerabilities. The code score is 85 due to the identified issues.",
+      "issues": [
+        {
+          "type": "error_handling",
+          "severity": "medium",
+          "message": "Error handling for getServerSession can be improved",
+          "line": 15,
+          "suggestion": "Add more specific error handling for getServerSession",
+          "code_snippet": "const session = await getServerSession(authOptions);",
+          "fixed_snippet": "try { const session = await getServerSession(authOptions); } catch (error) { console.error('Error getting server session:', error); }"
+        },
+        {
+          "type": "input_validation",
+          "severity": "medium",
+          "message": "Drive id validation can be improved",
+          "line": 25,
+          "suggestion": "Add more specific validation for drive id",
+          "code_snippet": "const { id: driveId } = await params;",
+          "fixed_snippet": "const { id: driveId } = await params; if (!driveId || typeof driveId !== 'string' || driveId.length !== 36) { return NextResponse.json({ error: 'Invalid drive id' }, { status: 400 }); }"
+        },
+        {
+          "type": "input_validation",
+          "severity": "medium",
+          "message": "Request body validation can be improved",
+          "line": 30,
+          "suggestion": "Add more specific validation for request body",
+          "code_snippet": "const body = await request.json();",
+          "fixed_snippet": "const body = await request.json(); if (!body || typeof body !== 'object') { return NextResponse.json({ error: 'Invalid request body' }, { status: 400 }); }"
+        },
+        {
+          "type": "sql_injection",
+          "severity": "low",
+          "message": "SQL query uses parameterized placeholders, which is good practice",
+          "line": 39,
+          "suggestion": "No changes needed",
+          "code_snippet": "const updated = await query(`UPDATE placement_drives SET social_shared = $1::text[], updated_at = NOW() WHERE id = $2::uuid AND tenant_id = $3::uuid RETURNING id, social_shared`, [cleaned, driveId, tenantId]);",
+          "fixed_snippet": "No changes needed"
+        },
+        {
+          "type": "error_handling",
+          "severity": "medium",
+          "message": "Error handling for drive not found can be improved",
+          "line": 49,
+          "suggestion": "Add more specific error handling for drive not found",
+          "code_snippet": "if (!updated.rows.length) { return NextResponse.json({ error: 'Drive not found' }, { status: 404 }); }",
+          "fixed_snippet": "if (!updated.rows.length) { return NextResponse.json({ error: 'Drive not found' }, { status: 404 }); } else { console.log('Drive found'); }"
+        }
+      ]
+    },
+    {
+      "filename": "src/app/api/college/employers/route.js",
+      "score": 95,
+      "summary": "The provided API route for college employers is well-structured and handles authentication, authorization, and error handling properly. However, there are some areas that require improvement, such as input validation, potential SQL injection vulnerabilities, and error handling. The code score is 85 due to some minor issues and suggestions for improvement.",
+      "issues": [
+        {
+          "type": "input_validation",
+          "severity": "medium",
+          "message": "The tenant ID is not validated before being used in the database query",
+          "line": 16,
+          "suggestion": "Add input validation to ensure the tenant ID is a valid UUID",
+          "code_snippet": "const tenantId = session.user.tenant_id ?? session.user.tenantId;",
+          "fixed_snippet": "const tenantId = validateUUID(session.user.tenant_id ?? session.user.tenantId);"
+        },
+        {
+          "type": "sql_injection",
+          "severity": "low",
+          "message": "The database query uses a parameterized query, but it's still important to ensure that the input is validated",
+          "line": 18,
+          "suggestion": "Add input validation to ensure that the tenant ID is a valid UUID and does not contain any malicious characters",
+          "code_snippet": "const result = await query(`SELECT ...`, [tenantId]);",
+          "fixed_snippet": "const result = await query(`SELECT ...`, [validateUUID(tenantId)]);"
+        },
+        {
+          "type": "error_handling",
+          "severity": "low",
+          "message": "The error handling logs the error to the console, but it would be better to use a logging library",
+          "line": 76,
+          "suggestion": "Use a logging library to handle errors and provide more context",
+          "code_snippet": "console.error('College employers list error:', error);",
+          "fixed_snippet": "logger.error('College employers list error:', error);"
+        }
+      ]
+    },
+    {
+      "filename": "src/app/api/college/employers/revoke/route.js",
+      "score": 95,
+      "summary": "The provided API route for revoking employer access is well-structured and handles authentication, authorization, and error handling properly. However, there are some areas that require improvement, such as input validation, error handling, and potential SQL injection vulnerabilities. The code score is 85 due to the presence of some minor issues and the lack of comprehensive input validation.",
+      "issues": [
+        {
+          "type": "input_validation",
+          "severity": "medium",
+          "message": "Input validation for body parameters is missing",
+          "line": 15,
+          "suggestion": "Add input validation for body parameters using a library like Joi or Zod",
+          "code_snippet": "const body = await req.json();\nlet { employer_id, target_tenant_id } = body;",
+          "fixed_snippet": "const { employer_id, target_tenant_id } = await validateBody(req);"
+        },
+        {
+          "type": "error_handling",
+          "severity": "low",
+          "message": "Error handling for database query errors is not comprehensive",
+          "line": 26,
+          "suggestion": "Add comprehensive error handling for database query errors",
+          "code_snippet": "const empQuery = await query(`SELECT id FROM employer_profiles WHERE user_id = $1`, [user_id]);",
+          "fixed_snippet": "try { const empQuery = await query(`SELECT id FROM employer_profiles WHERE user_id = $1`, [user_id]); } catch (error) { return NextResponse.json({ error: 'Database query error' }, { status: 500 }); }"
+        },
+        {
+          "type": "sql_injection",
+          "severity": "low",
+          "message": "Potential SQL injection vulnerability in UPDATE query",
+          "line": 35,
+          "suggestion": "Use parameterized queries or prepared statements to prevent SQL injection",
+          "code_snippet": "const result = await query(`UPDATE employer_approvals SET status = 'blacklisted', rejection_reason = COALESCE($3, 'Access revoked by college'), approved_by = $4, approved_at = NOW() WHERE tenant_id = $1::uuid AND employer_id = $2::uuid RETURNING id`, [target_tenant_id, employer_id, body.reason || null, user_id]);",
+          "fixed_snippet": "const result = await query(`UPDATE employer_approvals SET status = 'blacklisted', rejection_reason = COALESCE($3, 'Access revoked by college'), approved_by = $4, approved_at = NOW() WHERE tenant_id = $1::uuid AND employer_id = $2::uuid RETURNING id`, [target_tenant_id, employer_id, body.reason || null, user_id]);"
+        }
+      ]
+    },
+    {
+      "filename": "src/app/api/college/engagement-listings/[id]/route.js",
+      "score": 100,
+      "summary": "Could not parse model response.",
+      "issues": []
+    },
+    {
+      "filename": "src/app/api/college/internships/route.js",
+      "score": 93,
+      "summary": "The provided API route for college internships is well-structured and handles authentication, authorization, and error handling properly. However, there are some potential issues with database query efficiency and error handling. The code score is 85 due to some minor issues and suggestions for improvement.",
+      "issues": [
+        {
+          "type": "performance",
+          "severity": "medium",
+          "message": "The database query is not optimized and may cause performance issues. Consider adding indexes to the columns used in the WHERE and JOIN clauses.",
+          "line": 27,
+          "suggestion": "Add indexes to the columns used in the WHERE and JOIN clauses to improve query performance.",
+          "code_snippet": "SELECT ... FROM job_postings ... INNER JOIN employer_profiles ... INNER JOIN job_posting_visibility ... INNER JOIN employer_approvals ...",
+          "fixed_snippet": "CREATE INDEX idx_job_postings_tenant_id ON job_postings (tenant_id); CREATE INDEX idx_employer_profiles_id ON employer_profiles (id);"
+        },
+        {
+          "type": "error_handling",
+          "severity": "low",
+          "message": "The error handling is not robust and may not provide useful error messages. Consider logging more detailed error information.",
+          "line": 58,
+          "suggestion": "Log more detailed error information to help with debugging and error tracking.",
+          "code_snippet": "console.error('GET /api/college/internships', e);",
+          "fixed_snippet": "console.error('GET /api/college/internships', { error: e, requestId: req.id });"
+        },
+        {
+          "type": "security",
+          "severity": "medium",
+          "message": "The authentication check is not robust and may allow unauthorized access. Consider using a more secure authentication mechanism.",
+          "line": 15,
+          "suggestion": "Use a more secure authentication mechanism, such as OAuth or OpenID Connect, to protect against unauthorized access.",
+          "code_snippet": "if (!session || session.user.role !== 'college_admin') {",
+          "fixed_snippet": "if (!session || !session.user || session.user.role !== 'college_admin') {"
+        }
+      ]
+    },
+    {
+      "filename": "src/app/api/college/interviews/route.js",
+      "score": 93,
+      "summary": "The provided API route for college interviews is well-structured and handles authentication, authorization, and error handling properly. However, there are some potential issues with data validation, error handling, and database queries that need to be addressed. The code is generally well-organized, but there are some areas where it can be improved for better performance, security, and maintainability.",
+      "issues": [
+        {
+          "type": "validation",
+          "severity": "medium",
+          "message": "Input validation for company, round, date, startTime, endTime, and interviewer is missing",
+          "line": 125,
+          "suggestion": "Add input validation to ensure that all required fields are present and valid",
+          "code_snippet": "if (!company || !round || !date || !startTime || !endTime || !interviewer) {",
+          "fixed_snippet": "if (!company || !round || !date || !startTime || !endTime || !interviewer) {\n  return NextResponse.json({ error: 'company, round, date, startTime, endTime, and interviewer are required' }, { status: 400 });\n}"
+        },
+        {
+          "type": "database",
+          "severity": "medium",
+          "message": "Database query for inserting data into college_calendar table is vulnerable to SQL injection attacks",
+          "line": 132,
+          "suggestion": "Use parameterized queries or prepared statements to prevent SQL injection attacks",
+          "code_snippet": "const inserted = await query(`INSERT INTO college_calendar (tenant_id, title, event_type, start_date, end_date, is_blocking, description) VALUES ($1::uuid, $2, 'interview_slot', $3::date, $3::date, false, $4) RETURNING id, title, start_date, description`, [tenantId, title, date, desc]);",
+          "fixed_snippet": "const inserted = await query(`INSERT INTO college_calendar (tenant_id, title, event_type, start_date, end_date, is_blocking, description) VALUES ($1::uuid, $2, 'interview_slot', $3::date, $3::date, false, $4) RETURNING id, title, start_date, description`, [tenantId, title, date, desc]); // Use a library like pg to parameterize the query"
+        },
+        {
+          "type": "error_handling",
+          "severity": "low",
+          "message": "Error handling in parseMeta function can be improved",
+          "line": 15,
+          "suggestion": "Add more specific error handling to handle different types of errors",
+          "code_snippet": "try {\n  const parsed = JSON.parse(description);\n  return {\n    company: parsed.company || '',\n    round: parsed.round || '',\n    startTime: parsed.startTime || '',\n    endTime: parsed.endTime || '',\n    interviewer: parsed.interviewer || '',\n    panelNames: parsed.panelNames || '',\n    students: Array.isArray(parsed.students) ? parsed.students : [],\n    createdBy: parsed.createdBy || 'TPO',\n  };\n} catch {\n  return {\n    company: '',\n    round: '',\n    startTime: '',\n    endTime: '',\n    interviewer: '',\n    panelNames: '',\n    students: [],\n    createdBy: 'TPO',\n  };\n}",
+          "fixed_snippet": "try {\n  const parsed = JSON.parse(description);\n  return {\n    company: parsed.company || '',\n    round: parsed.round || '',\n    startTime: parsed.startTime || '',\n    endTime: parsed.endTime || '',\n    interviewer: parsed.interviewer || '',\n    panelNames: parsed.panelNames || '',\n    students: Array.isArray(parsed.students) ? parsed.students : [],\n    createdBy: parsed.createdBy || 'TPO',\n  };\n} catch (error) {\n  console.error('Error parsing description:', error);\n  return {\n    company: '',\n    round: '',\n    startTime: '',\n    endTime: '',\n    interviewer: '',\n    panelNames: '',\n    students: [],\n    createdBy: 'TPO',\n  };\n}"
+        }
+      ]
+    },
+    {
+      "filename": "src/app/api/college/settings/logo/presign/route.js",
+      "score": 96,
+      "summary": "The provided API route for presigning a college logo is well-structured and handles authentication, authorization, and error handling properly. However, there are some potential issues with input validation and error handling. The code checks for the file size and content type, but it does not validate the file name. Additionally, the error handling could be improved by providing more specific error messages and logging the errors with more context.",
+      "issues": [
+        {
+          "type": "input_validation",
+          "severity": "medium",
+          "message": "The file name is not validated, which could lead to security vulnerabilities.",
+          "line": 27,
+          "suggestion": "Validate the file name to prevent potential security issues.",
+          "code_snippet": "const fileName = String(body.fileName || 'logo');",
+          "fixed_snippet": "const fileName = String(body.fileName || 'logo'); if (!fileName.match(/^[a-zA-Z0-9._-]+$/)) { return NextResponse.json({ error: 'Invalid file name' }, { status: 400 }); }"
+        },
+        {
+          "type": "error_handling",
+          "severity": "low",
+          "message": "The error handling could be improved by providing more specific error messages and logging the errors with more context.",
+          "line": 45,
+          "suggestion": "Improve the error handling by providing more specific error messages and logging the errors with more context.",
+          "code_snippet": "console.error('POST /api/college/settings/logo/presign', e);",
+          "fixed_snippet": "console.error('POST /api/college/settings/logo/presign', { error: e, requestId: req.id, tenantId: tenantId });"
+        }
+      ]
+    },
+    {
+      "filename": "src/app/api/college/sponsorships/route.js",
+      "score": 92,
+      "summary": "The provided API route for college sponsorships is well-structured and handles authentication, authorization, and error handling properly. However, there are some potential issues with data formatting, error handling, and database queries. The code score is 85 due to some minor issues and suggestions for improvement.",
+      "issues": [
+        {
+          "type": "bug",
+          "severity": "medium",
+          "message": "Potential issue with tenantId property name inconsistency in session object",
+          "line": 17,
+          "suggestion": "Use a consistent property name for tenantId in the session object",
+          "code_snippet": "const tenantId = session.user.tenantId || session.user.tenant_id;",
+          "fixed_snippet": "const tenantId = session.user.tenantId;"
+        },
+        {
+          "type": "performance",
+          "severity": "low",
+          "message": "Database query for sponsorship opportunities could be optimized for better performance",
+          "line": 24,
+          "suggestion": "Consider adding an index on the tenant_id column in the sponsorship_opportunities table",
+          "code_snippet": "const rows = await query(`SELECT category, description, tier_name, price_inr, benefits, label FROM sponsorship_opportunities WHERE tenant_id = $1::uuid AND is_active = true ORDER BY category ASC, price_inr ASC`, [tenantId]);",
+          "fixed_snippet": "const rows = await query(`SELECT category, description, tier_name, price_inr, benefits, label FROM sponsorship_opportunities WHERE tenant_id = $1::uuid AND is_active = true ORDER BY category ASC, price_inr ASC`, [tenantId]); // Add an index on tenant_id column"
+        },
+        {
+          "type": "readability",
+          "severity": "low",
+          "message": "Code block for processing sponsorship opportunities rows could be refactored for better readability",
+          "line": 36,
+          "suggestion": "Consider breaking down the code block into smaller functions for better readability",
+          "code_snippet": "for (const row of rows.rows) { ... }",
+          "fixed_snippet": "const processRows = (rows) => { ... }; processRows(rows.rows);"
+        },
+        {
+          "type": "error_handling",
+          "severity": "medium",
+          "message": "Error handling for DB query could be improved to provide more informative error messages",
+          "line": 57,
+          "suggestion": "Consider logging more informative error messages for DB query errors",
+          "code_snippet": "console.error('GET /api/college/sponsorships', error);",
+          "fixed_snippet": "console.error(`Error loading sponsorship opportunities for tenant ${tenantId}: ${error.message}`);"
+        }
+      ]
+    },
+    {
+      "filename": "src/app/api/college/students/bulk-upload/route.js",
+      "score": 87,
+      "summary": "The provided API route for bulk uploading students is well-structured and handles authentication, authorization, and error handling properly. However, there are some potential issues with data validation, error handling, and database queries. The code does not check for potential SQL injection vulnerabilities and does not handle cases where the CSV file is empty or missing required headers. Additionally, the code does not validate user input data, which could lead to security vulnerabilities.",
+      "issues": [
+        {
+          "type": "security",
+          "severity": "high",
+          "message": "Potential SQL injection vulnerability in database query",
+          "line": 71,
+          "suggestion": "Use parameterized queries or prepared statements to prevent SQL injection",
+          "code_snippet": "const existingUser = await query(`SELECT id, tenant_id FROM users WHERE email = $1 LIMIT 1`, [normalizedEmail]);",
+          "fixed_snippet": "const existingUser = await query('SELECT id, tenant_id FROM users WHERE email = $1 LIMIT 1', [normalizedEmail]);"
+        },
+        {
+          "type": "error_handling",
+          "severity": "medium",
+          "message": "Error handling for file upload is not robust",
+          "line": 28,
+          "suggestion": "Add more robust error handling for file upload, including checking for file type and size",
+          "code_snippet": "const file = formData.get('file');",
+          "fixed_snippet": "const file = formData.get('file'); if (!file) { return NextResponse.json({ error: 'No file provided' }, { status: 400 }); }"
+        }
+      ]
+    },
+    {
+      "filename": "src/app/api/college/students/verify/route.js",
+      "score": 96,
+      "summary": "The provided API route for verifying college students is well-structured and handles authentication, authorization, and error handling properly. However, there are some potential issues with input validation, error handling, and database transactions. The code is generally well-organized, but some improvements can be made to enhance security, reliability, and performance.",
+      "issues": [
+        {
+          "type": "input_validation",
+          "severity": "medium",
+          "message": "Tenant ID is not validated properly, potential null pointer exception",
+          "line": 13,
+          "suggestion": "Add null check and validation for tenantId",
+          "code_snippet": "const tenantId = session.user.tenant_id ?? session.user.tenantId;",
+          "fixed_snippet": "const tenantId = session.user.tenant_id || session.user.tenantId; if (!tenantId) { return NextResponse.json({ error: 'Tenant ID is required' }, { status: 400 }); }"
+        },
+        {
+          "type": "error_handling",
+          "severity": "low",
+          "message": "Error handling is not properly implemented, potential information disclosure",
+          "line": 57,
+          "suggestion": "Use a more specific error message and log the error for debugging purposes",
+          "code_snippet": "console.error('POST /api/college/students/verify', e); return NextResponse.json({ error: 'Failed to update student' }, { status: 500 });",
+          "fixed_snippet": "console.error('POST /api/college/students/verify', e); return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });"
+        }
+      ]
+    }
+  ],
+  "total_issues": 67,
+  "overall_score": 91
+}

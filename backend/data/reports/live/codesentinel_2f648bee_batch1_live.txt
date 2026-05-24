@@ -1,0 +1,434 @@
+=================================================================
+  CODESENTINEL -- BATCH 1 REPORT
+  Files 1 - 22 of 229
+  Folder : C:\Users\sandeep\Downloads\Claudes\CampusPlacement\campus-placement
+  Saved  : 30/04/2026, 23:09:31
+=================================================================
+
+  Batch Score   : 90/100
+  Files Reviewed: 22
+  Total Issues  : 73
+
+=================================================================
+  FILE: fix_emojis.js
+  Score: 93/100   Issues: 3
+
+  The provided code is a Node.js script designed to replace emojis in a specific file with corresponding component names. It handles file existence checks, reads the file content, performs replacements, and writes the updated content back to the file while maintaining a backup. The code is generally well-structured but lacks input validation, error handling for specific scenarios, and follows a synchronous approach for file operations. Security and performance considerations are minimal due to the script's utility nature. The score is deducted primarily due to the lack of advanced error handling, potential issues with large files, and the use of synchronous file operations.
+
+  [MEDIUM] performance -- Line 12
+  Using fs.readFileSync can be inefficient for large files and may cause the process to run out of memory.
+  Fix: Consider using fs.readFile or a streaming approach for reading the file.
+
+  [MEDIUM] performance -- Line 55
+  Using fs.copyFileSync and fs.writeFileSync can block the event loop and impact performance.
+  Fix: Consider using asynchronous versions of these functions.
+
+  [LOW] readability -- Line 43
+  The loop that performs replacements could be more concise and readable.
+  Fix: Consider using Array.prototype.reduce or a similar method to simplify the loop.
+
+=================================================================
+  FILE: generate_docs.py
+  Score: 93/100   Issues: 3
+
+  The provided Python script generates a user documentation document for the Campus Placement System. It handles file existence checks and saves the document to a specified file path. However, there are some potential issues with error handling, file path validation, and dependency management. The script also lacks input validation and does not handle potential exceptions that may occur during file operations.
+
+  [MEDIUM] security -- Line 103
+  Potential security vulnerability due to lack of file path validation
+  Fix: Implement file path validation to prevent potential security vulnerabilities
+
+  [MEDIUM] error_handling -- Line 105
+  Potential error handling issue due to lack of exception handling during file operations
+  Fix: Implement exception handling to prevent crashes during file operations
+
+  [LOW] dependency -- Line 8
+  Potential dependency management issue due to lack of package installation check
+  Fix: Implement dependency management to ensure required packages are installed
+
+=================================================================
+  FILE: run-sql.js
+  Score: 64/100   Issues: 5
+
+  The provided Node.js script is designed to run SQL queries to reset the database schema. It handles file existence checks, reads environment variables, and establishes a PostgreSQL connection. However, there are several issues that need to be addressed, including potential SQL injection vulnerabilities, missing error handling, and insecure SSL options. The script also lacks input validation and does not handle concurrent connections properly.
+
+  [HIGH] security -- Line 90
+  Potential SQL injection vulnerability in the query 'DROP SCHEMA public CASCADE; CREATE SCHEMA public; GRANT ALL ON SCHEMA public TO postgres; GRANT ALL ON SCHEMA public TO public;'
+  Fix: Use parameterized queries or prepared statements to prevent SQL injection
+
+  [HIGH] security -- Line 94
+  Potential SQL injection vulnerability in the query 'schemaSql'
+  Fix: Use parameterized queries or prepared statements to prevent SQL injection
+
+  [HIGH] security -- Line 98
+  Potential SQL injection vulnerability in the query 'seedSql'
+  Fix: Use parameterized queries or prepared statements to prevent SQL injection
+
+  [MEDIUM] security -- Line 40
+  Insecure SSL option 'rejectUnauthorized' set to false
+  Fix: Set 'rejectUnauthorized' to true to enable SSL certificate validation
+
+  [MEDIUM] error_handling -- Line 104
+  Error handling can be improved by logging more detailed error information
+  Fix: Log more detailed error information, such as the error stack and details
+
+=================================================================
+  FILE: run_tests.js
+  Score: 93/100   Issues: 3
+
+  The provided Node.js script is designed to update HTML files with test results. It handles file existence checks, reads environment variables, and updates the HTML content accordingly. However, there are some potential issues with error handling, file system operations, and code organization. The script uses synchronous file system operations, which can be a performance bottleneck. Additionally, the script does not handle errors properly, which can lead to unexpected behavior. The code organization is mostly good, but some functions are doing too many things, which can make the code harder to understand and maintain.
+
+  [MEDIUM] error_handling -- Line 11
+  Error handling when reading file is not robust. It only logs the error and throws it, but does not provide any additional information.
+  Fix: Improve error handling by providing more context and handling the error in a more robust way.
+
+  [MEDIUM] performance -- Line 67
+  Synchronous file system operations can be a performance bottleneck. Consider using asynchronous operations instead.
+  Fix: Use asynchronous file system operations to improve performance.
+
+  [LOW] code_smell -- Line 85
+  The try-catch block is too broad and can catch unexpected errors. Consider narrowing down the try-catch block to only catch expected errors.
+  Fix: Narrow down the try-catch block to only catch expected errors.
+
+=================================================================
+  FILE: scripts/run-migration-002.js
+  Score: 92/100   Issues: 4
+
+  The provided Node.js script is designed to run a SQL migration. It handles file existence checks, reads environment variables, and updates the database schema. However, there are some potential issues with the script, including the lack of input validation, potential SQL injection vulnerabilities, and the use of synchronous file I/O. Additionally, the script does not handle errors well, and the use of `process.exit(1)` can lead to unexpected behavior. The script also uses a hardcoded list of allowed environments, which may not be suitable for all use cases.
+
+  [MEDIUM] bug -- Line 11
+  The script uses synchronous file I/O, which can lead to performance issues and unexpected behavior.
+  Fix: Use asynchronous file I/O instead.
+
+  [LOW] code_smell -- Line 23
+  The script uses a hardcoded list of allowed environments, which may not be suitable for all use cases.
+  Fix: Consider using a more flexible approach to environment validation.
+
+  [MEDIUM] bug -- Line 44
+  The script does not handle errors well, and the use of `process.exit(1)` can lead to unexpected behavior.
+  Fix: Consider using a more robust error handling approach.
+
+  [LOW] code_smell -- Line 73
+  The script uses a hardcoded SSL configuration, which may not be suitable for all use cases.
+  Fix: Consider using a more flexible approach to SSL configuration.
+
+=================================================================
+  FILE: scripts/seed_email_marketing_sqlite.py
+  Score: 94/100   Issues: 2
+
+  The provided Python script is designed to create/update a SQLite table for email-marketing website sources. It handles file existence checks, creates the necessary directory structure, and populates the database with predefined URLs. The script is well-structured and follows best practices. However, there are some potential issues that need to be addressed, such as error handling, input validation, and potential SQL injection vulnerabilities. The script also lacks logging and monitoring capabilities, which are essential for a production-ready application.
+
+  [MEDIUM] error_handling -- Line 55
+  The script does not handle potential database connection errors
+  Fix: Add try-except blocks to handle database connection errors
+
+  [MEDIUM] input_validation -- Line 75
+  The script does not validate input URLs, which could lead to potential SQL injection attacks
+  Fix: Validate input URLs using a whitelist or a URL validation library
+
+=================================================================
+  FILE: src/app/api/admin/colleges/route.js
+  Score: 93/100   Issues: 3
+
+  The provided code is generally well-structured and follows best practices. However, there are a few potential issues that need to be addressed, including input validation, error handling, and security concerns. The code score is 85 due to the identified issues.
+
+  [MEDIUM] input_validation -- Line 14
+  The page and limit query parameters are not validated and sanitized properly, which could lead to potential security issues.
+  Fix: Use a validation library to validate and sanitize the query parameters.
+
+  [LOW] sql_injection -- Line 18
+  The SQL query uses parameterized placeholders, which is good for preventing SQL injection attacks.
+  Fix: Continue using parameterized placeholders to prevent SQL injection attacks.
+
+  [MEDIUM] error_handling -- Line 53
+  The error handling is not robust and could potentially leak sensitive information.
+  Fix: Improve the error handling to provide more informative error messages and prevent sensitive information from being leaked.
+
+=================================================================
+  FILE: src/app/api/admin/dashboard/route.js
+  Score: 92/100   Issues: 4
+
+  The provided code is generally well-structured and follows best practices. However, there are a few potential issues that need to be addressed, including error handling, input validation, and potential SQL injection vulnerabilities. The code score is 85 due to the presence of some minor issues and areas for improvement.
+
+  [MEDIUM] security -- Line 10
+  The code does not validate the user's role before granting access to the admin dashboard
+  Fix: Add input validation to ensure the user's role is valid
+
+  [LOW] performance -- Line 14
+  The code uses multiple SQL queries to retrieve data, which can impact performance
+  Fix: Consider using a single SQL query to retrieve all necessary data
+
+  [LOW] error_handling -- Line 30
+  The code does not handle the case where the statsQuery result is null or undefined
+  Fix: Add null checks to handle this scenario
+
+  [MEDIUM] error_handling -- Line 41
+  The code logs the error message to the console, but does not provide any additional context or logging
+  Fix: Consider adding more detailed logging or error handling mechanisms
+
+=================================================================
+  FILE: src/app/api/admin/employers/route.js
+  Score: 93/100   Issues: 3
+
+  The provided code is generally well-structured and follows best practices. However, there are a few potential issues that need to be addressed, including input validation, error handling, and potential SQL injection vulnerabilities. The code score is 85 due to the presence of some minor issues.
+
+  [MEDIUM] input_validation -- Line 14
+  The page and limit query parameters are not validated and sanitized properly, which could lead to potential security vulnerabilities.
+  Fix: Use a validation library to validate and sanitize user input.
+
+  [LOW] sql_injection -- Line 18
+  The SQL query uses parameterized placeholders, which is good practice. However, it's still important to ensure that the query is properly sanitized and validated.
+  Fix: Use a SQL query builder library to generate safe and sanitized SQL queries.
+
+  [MEDIUM] error_handling -- Line 45
+  The error handling is not robust and could potentially leak sensitive information.
+  Fix: Use a error handling library to handle errors properly and log them for debugging purposes.
+
+=================================================================
+  FILE: src/app/api/admin/pending-registrations/route.js
+  Score: 89/100   Issues: 5
+
+  The provided code is generally well-structured and follows best practices. However, there are a few potential issues that need to be addressed, including missing error handling, potential SQL injection vulnerabilities, and inconsistent coding style. The code score is 85 due to the presence of some minor issues.
+
+  [MEDIUM] sql_injection -- Line 17
+  The SQL query is vulnerable to SQL injection attacks. Use parameterized queries or prepared statements to prevent this.
+  Fix: Use a parameterized query or prepared statement to prevent SQL injection.
+
+  [LOW] input_validation -- Line 67
+  The code does not validate the user input for the 'action' field. This could lead to unexpected behavior or errors.
+  Fix: Add input validation for the 'action' field to ensure it is one of the expected values.
+
+  [MEDIUM] sql_injection -- Line 93
+  The SQL query is vulnerable to SQL injection attacks. Use parameterized queries or prepared statements to prevent this.
+  Fix: Use a parameterized query or prepared statement to prevent SQL injection.
+
+  [MEDIUM] sql_injection -- Line 111
+  The SQL query is vulnerable to SQL injection attacks. Use parameterized queries or prepared statements to prevent this.
+  Fix: Use a parameterized query or prepared statement to prevent SQL injection.
+
+  [LOW] error_handling -- Line 129
+  The code does not handle errors that may occur when querying the database. This could lead to unexpected behavior or errors.
+  Fix: Add error handling to ensure that any errors that occur when querying the database are properly handled.
+
+=================================================================
+  FILE: src/app/api/admin/settings/route.js
+  Score: 96/100   Issues: 2
+
+  The provided code is generally well-structured and follows best practices. However, there are a few potential issues that need to be addressed, including input validation, error handling, and database query efficiency. The code score is 85 due to the presence of some minor issues, but overall, the code is well-organized and maintainable.
+
+  [MEDIUM] input_validation -- Line 75
+  Input validation for admin settings is incomplete
+  Fix: Add more comprehensive input validation for admin settings
+
+  [LOW] error_handling -- Line 93
+  Error handling for validation errors can be improved
+  Fix: Improve error handling for validation errors
+
+=================================================================
+  FILE: src/app/api/admin/users/route.js
+  Score: 93/100   Issues: 3
+
+  The provided code is generally well-structured and follows best practices. However, there are a few potential issues that need to be addressed, including error handling, input validation, and potential SQL injection vulnerabilities. The code score is 85 due to the lack of comprehensive error handling and potential security risks.
+
+  [MEDIUM] security -- Line 13
+  Potential SQL injection vulnerability in the query string
+  Fix: Use parameterized queries or prepared statements to prevent SQL injection
+
+  [MEDIUM] error_handling -- Line 29
+  Error handling is not comprehensive and may not catch all potential errors
+  Fix: Implement more comprehensive error handling to catch and handle all potential errors
+
+  [LOW] input_validation -- Line 8
+  User input is not validated to prevent unauthorized access
+  Fix: Validate user input to prevent unauthorized access
+
+=================================================================
+  FILE: src/app/api/audit/reports/export/route.js
+  Score: 96/100   Issues: 2
+
+  The provided code is generally well-structured and follows best practices. However, there are a few potential issues that need to be addressed, including input validation, error handling, and database query efficiency. The code score is 85 due to the presence of some minor issues, but overall, the code is well-organized and maintainable.
+
+  [MEDIUM] input_validation -- Line 27
+  The code does not validate the request body for invalid or missing fields
+  Fix: Add input validation for the request body to ensure that all required fields are present and valid
+
+  [LOW] error_handling -- Line 109
+  The code does not handle errors when sending emails or uploading files to S3
+  Fix: Add try-catch blocks to handle errors when sending emails or uploading files to S3
+
+=================================================================
+  FILE: src/app/api/audit/reports/route.js
+  Score: 93/100   Issues: 3
+
+  The provided code is generally well-structured and follows best practices. However, there are a few potential issues that need to be addressed, including input validation, error handling, and potential SQL injection vulnerabilities. The code score is 85 due to the presence of some minor issues.
+
+  [MEDIUM] input_validation -- Line 15
+  The requestedTenant variable is not validated for empty or null values
+  Fix: Add input validation for the requestedTenant variable
+
+  [MEDIUM] input_validation -- Line 25
+  The limit variable is not validated for invalid or out-of-range values
+  Fix: Add input validation for the limit variable
+
+  [LOW] error_handling -- Line 36
+  The error handling mechanism only logs the error and returns a generic error message
+  Fix: Improve error handling to provide more informative error messages and logging
+
+=================================================================
+  FILE: src/app/api/auth/[...nextauth]/route.js
+  Score: 96/100   Issues: 2
+
+  The provided code is a simple NextAuth handler and is generally well-structured. However, there are potential security and reliability issues that need to be addressed. The code lacks error handling and logging mechanisms, which could lead to silent failures and make debugging difficult. Additionally, the authOptions import is not validated, which could lead to authentication issues if the options are not properly configured.
+
+  [MEDIUM] error_handling -- Line 4
+  The NextAuth handler does not have a try-catch block to handle potential errors
+  Fix: Add a try-catch block to handle and log potential errors
+
+  [LOW] dependency -- Line 1
+  The authOptions import is not validated
+  Fix: Add validation for the authOptions import to ensure it is properly configured
+
+=================================================================
+  FILE: src/app/api/clarifications/route.js
+  Score: 90/100   Issues: 4
+
+  The provided code is generally well-structured and follows best practices. However, there are a few potential issues that need to be addressed, including input validation, error handling, and database query efficiency. The code uses parameterized queries, which is good for preventing SQL injection. The use of try-catch blocks for error handling is also a good practice. However, some error messages are generic and do not provide enough information for debugging. Additionally, the code does not handle cases where the database query returns no results or an empty array.
+
+  [MEDIUM] error_handling -- Line 76
+  Generic error message 'Failed to load clarifications' does not provide enough information for debugging
+  Fix: Provide a more specific error message that includes the actual error
+
+  [MEDIUM] error_handling -- Line 118
+  Generic error message 'Failed to publish clarification batch' does not provide enough information for debugging
+  Fix: Provide a more specific error message that includes the actual error
+
+  [MEDIUM] error_handling -- Line 167
+  Generic error message 'Failed to save clarification answer' does not provide enough information for debugging
+  Fix: Provide a more specific error message that includes the actual error
+
+  [LOW] code_smell -- Line 37
+  The function loadPayload does not handle cases where the database query returns no results or an empty array
+  Fix: Add a check to handle cases where the database query returns no results or an empty array
+
+=================================================================
+  FILE: src/app/api/college/applications/route.js
+  Score: 96/100   Issues: 2
+
+  The provided code is generally well-structured and follows best practices. However, there are a few potential issues that need to be addressed, including input validation, error handling, and database query optimization. The code is mostly secure, but there are some areas that can be improved for better reliability and performance.
+
+  [MEDIUM] input_validation -- Line 13
+  The tenantId is not validated for null or empty values before being used in the database query.
+  Fix: Add input validation for tenantId to ensure it is not null or empty.
+
+  [LOW] error_handling -- Line 40
+  The error handling for the database query is generic and does not provide detailed information about the error.
+  Fix: Consider adding more detailed error handling for the database query to provide better error messages.
+
+=================================================================
+  FILE: src/app/api/college/dashboard/route.js
+  Score: 67/100   Issues: 4
+
+  The provided code is generally well-structured and follows best practices. However, there are a few potential issues that need to be addressed, including missing error handling for database queries, potential SQL injection vulnerabilities, and missing input validation. The code also lacks logging and monitoring, which can make it difficult to debug and troubleshoot issues. Overall, the code is well-organized, but there are some security and reliability concerns that need to be addressed.
+
+  [HIGH] security -- Line 17
+  Potential SQL injection vulnerability in statsQuery
+  Fix: Use parameterized queries or prepared statements to prevent SQL injection
+
+  [HIGH] security -- Line 30
+  Potential SQL injection vulnerability in deptQuery
+  Fix: Use parameterized queries or prepared statements to prevent SQL injection
+
+  [HIGH] security -- Line 43
+  Potential SQL injection vulnerability in pendingQuery
+  Fix: Use parameterized queries or prepared statements to prevent SQL injection
+
+  [MEDIUM] error_handling -- Line 76
+  Missing error handling for database queries
+  Fix: Add try-catch blocks to handle database query errors
+
+=================================================================
+  FILE: src/app/api/college/drives/[id]/facebook-post/route.js
+  Score: 95/100   Issues: 3
+
+  The provided code is generally well-structured and follows best practices. However, there are a few potential issues that need to be addressed, including error handling, input validation, and potential SQL injection vulnerabilities. The code score is 85 due to the presence of some minor issues and the lack of comprehensive error handling.
+
+  [MEDIUM] sql_injection -- Line 45
+  The SQL query is using parameterized placeholders, but it's still important to ensure that the input values are properly validated and sanitized to prevent potential SQL injection attacks.
+  Fix: Add input validation and sanitization for the driveId and tenantId variables to prevent potential SQL injection attacks.
+
+  [LOW] error_handling -- Line 87
+  The postToFacebookPageFeed function is not properly handling potential errors that may occur during the Facebook API call.
+  Fix: Add try-catch blocks to handle potential errors that may occur during the Facebook API call and return a 500 error if an error occurs.
+
+  [LOW] error_handling -- Line 94
+  The catch block is not properly handling potential errors that may occur during the execution of the code.
+  Fix: Add more specific error handling to handle different types of errors that may occur during the execution of the code.
+
+=================================================================
+  FILE: src/app/api/college/drives/[id]/report/route.js
+  Score: 91/100   Issues: 5
+
+  The provided code is generally well-structured and follows best practices. However, there are a few potential issues that need to be addressed, including input validation, error handling, and potential SQL injection vulnerabilities. The code also lacks logging and monitoring, which can make it difficult to debug and identify issues in production. Overall, the code score is 80, with some improvements needed to ensure security, reliability, and performance.
+
+  [MEDIUM] input_validation -- Line 13
+  The drive ID is not validated, which can lead to potential SQL injection vulnerabilities.
+  Fix: Validate the drive ID using a whitelist or a regex pattern.
+
+  [LOW] sql_injection -- Line 20
+  The SQL query uses parameterized placeholders, which is good practice. However, the query can still be improved by using a more specific query or by validating the input parameters.
+  Fix: Use a more specific query or validate the input parameters to prevent potential SQL injection vulnerabilities.
+
+  [LOW] sql_injection -- Line 36
+  The SQL query uses parameterized placeholders, which is good practice. However, the query can still be improved by using a more specific query or by validating the input parameters.
+  Fix: Use a more specific query or validate the input parameters to prevent potential SQL injection vulnerabilities.
+
+  [LOW] sql_injection -- Line 60
+  The SQL query uses parameterized placeholders, which is good practice. However, the query can still be improved by using a more specific query or by validating the input parameters.
+  Fix: Use a more specific query or validate the input parameters to prevent potential SQL injection vulnerabilities.
+
+  [MEDIUM] error_handling -- Line 83
+  The error handling is not robust, which can lead to unexpected behavior in production. The error message is also not very informative, which can make it difficult to debug issues.
+  Fix: Improve the error handling by logging the error and providing a more informative error message.
+
+=================================================================
+  FILE: src/app/api/college/drives/[id]/route.js
+  Score: 90/100   Issues: 4
+
+  The provided code is generally well-structured and follows best practices. However, there are a few potential issues that need to be addressed, including input validation, error handling, and database query optimization. The code score is 85 due to some minor issues and suggestions for improvement.
+
+  [MEDIUM] input_validation -- Line 25
+  The driveId is not validated for UUID format
+  Fix: Use a UUID validation library to check the driveId format
+
+  [MEDIUM] input_validation -- Line 30
+  The request body is not validated for JSON format
+  Fix: Use a JSON validation library to check the request body format
+
+  [LOW] performance -- Line 39
+  The database query uses a subquery to update the social_shared field
+  Fix: Consider using a single query to update the social_shared field
+
+  [MEDIUM] error_handling -- Line 61
+  The error is logged to the console but not handled properly
+  Fix: Consider using a error handling library to handle errors properly
+
+=================================================================
+  FILE: src/app/api/college/drives/route.js
+  Score: 90/100   Issues: 4
+
+  The provided code is generally well-structured and follows best practices. However, there are a few potential issues that need to be addressed, including missing error handling, potential SQL injection vulnerabilities, and inconsistent coding styles. The code score is 85 due to the identified issues.
+
+  [MEDIUM] sql_injection -- Line 23
+  The SQL query is vulnerable to SQL injection attacks because it uses string concatenation to build the query. Use parameterized queries instead.
+  Fix: Use parameterized queries to prevent SQL injection attacks.
+
+  [MEDIUM] sql_injection -- Line 42
+  The SQL query is vulnerable to SQL injection attacks because it uses string concatenation to build the query. Use parameterized queries instead.
+  Fix: Use parameterized queries to prevent SQL injection attacks.
+
+  [MEDIUM] sql_injection -- Line 88
+  The SQL query is vulnerable to SQL injection attacks because it uses string concatenation to build the query. Use parameterized queries instead.
+  Fix: Use parameterized queries to prevent SQL injection attacks.
+
+  [LOW] error_handling -- Line 65
+  The error handling is not robust and does not provide enough information about the error.
+  Fix: Improve the error handling to provide more information about the error.

@@ -1,0 +1,162 @@
+=================================================================
+  CODESENTINEL -- BATCH 9 REPORT
+  Files 201 - 208 of 262
+  Folder : C:\Users\sandeep\Downloads\Claudes\CampusPlacement\campus-placement
+  Saved  : 04/05/2026, 12:56:24
+=================================================================
+
+  Batch Score   : 86/100
+  Files Reviewed: 8
+  Total Issues  : 26
+
+=================================================================
+  FILE: src/instrumentation.js
+  Score: 96/100   Issues: 2
+
+  The instrumentation.js file is minimal and functionally correct for its purpose of validating the NextAuth secret in production. The primary risk is that the assertNextAuthSecretIfProduction function is imported and called without error handling, meaning if the import fails or the function throws, it will crash the server during startup. Additionally, there is no validation that the function actually exists or is properly exported. The code is otherwise clean and follows Next.js instrumentation best practices.
+
+  [MEDIUM] error_handling -- Line 4
+  assertNextAuthSecretIfProduction() is called without try/catch. If the function throws (e.g., missing env var, import failure), the entire server startup will crash with an unhandled rejection. In production, this could cause deployment failures or unexpected restarts.
+  Fix: Wrap the call in a try/catch block and log a structured error instead of crashing the process.
+
+  [LOW] reliability -- Line 3
+  The dynamic import does not validate that the imported module exports the expected function. If the module path changes or the export is renamed, this will fail silently at runtime with a cryptic error.
+  Fix: Add a type guard or validation that the imported value is a function before calling it.
+
+=================================================================
+  FILE: src/components/ThemeProvider.js
+  Score: 51/100   Issues: 5
+
+  The ThemeProvider component is functionally incomplete and contains a critical bug: the useEffect unconditionally overwrites any persisted theme preference to 'light' on every mount, ignoring localStorage. The toggleTheme is a no-op with only a console.log, providing no user feedback. The component also lacks SSR safety (localStorage access without guard), missing error handling for localStorage quota/availability, and no theme persistence logic. While the code is small, these issues represent a poor user experience and potential runtime errors in edge cases.
+
+  [CRITICAL] bug -- Line 10
+  useEffect unconditionally sets localStorage and data-theme to 'light' on every mount, ignoring any previously saved user preference. This breaks theme persistence and forces light mode even if the user had dark mode selected.
+  Fix: Read the initial theme from localStorage first; only fall back to 'light' if no preference is saved.
+
+  [HIGH] uiux -- Line 14
+  toggleTheme is a no-op that only logs to console. Users clicking a theme toggle button will receive no visual feedback, creating a broken UX. The disabled functionality should either be removed or provide clear feedback (toast, tooltip) explaining why it's disabled.
+  Fix: Either implement the toggle properly or show a user-facing message explaining the restriction.
+
+  [HIGH] runtime -- Line 10
+  Direct access to localStorage and document without SSR guard will cause a ReferenceError in server-side rendering environments (Next.js SSR). This will crash the component during server render.
+  Fix: Wrap localStorage and document access in a typeof window !== 'undefined' check.
+
+  [MEDIUM] error_handling -- Line 10
+  localStorage access is not wrapped in try/catch. In private browsing modes or when storage quota is exceeded, localStorage.setItem can throw a DOMException (SecurityError, QuotaExceededError), crashing the app.
+  Fix: Wrap localStorage operations in try/catch and fall back gracefully.
+
+  [LOW] code_smell -- Line 7
+  Theme state is initialized to 'light' but never updated by toggleTheme. The state is effectively dead code since toggleTheme is a no-op. This misleads developers into thinking the theme can change.
+  Fix: Either implement the toggle or remove the state and toggleTheme entirely, keeping only the light mode enforcement.
+
+=================================================================
+  FILE: src/components/SessionAdBanner.jsx
+  Score: 87/100   Issues: 7
+
+  The component is functionally correct with proper cleanup, accessibility, and session-based dismissal. The primary risk is that the `showSessionAds` function uses `process.env.NODE_ENV` which is a build-time constant in Next.js, meaning the banner will always show in development and never in production unless `NEXT_PUBLIC_SHOW_SESSION_ADS` is set — this is likely intentional but could cause confusion. The hardcoded external links (vercel.com, nextjs.org, github.com) are placeholder values that must be replaced before production. No security, data integrity, or runtime crash issues are present.
+
+  [MEDIUM] configuration -- Line 22
+  Hardcoded placeholder URL 'https://vercel.com' in ADS[0].href. This is a development placeholder that must be replaced with the actual product landing page before production deployment.
+  Fix: Replace with the real URL for the mock interview feature page.
+
+  [MEDIUM] configuration -- Line 30
+  Hardcoded placeholder URL 'https://nextjs.org' in ADS[1].href. This is a development placeholder that must be replaced with the actual resume templates page.
+  Fix: Replace with the real URL for the resume templates feature.
+
+  [MEDIUM] configuration -- Line 38
+  Hardcoded placeholder URL 'https://github.com' in ADS[2].href. This is a development placeholder that must be replaced with the actual employer sales/contact page.
+  Fix: Replace with the real URL for the employer contact/sales page.
+
+  [LOW] best_practice -- Line 10
+  showSessionAds() uses process.env.NODE_ENV which is a build-time constant in Next.js. In development, the banner always shows; in production, it only shows if NEXT_PUBLIC_SHOW_SESSION_ADS is 'true'. This is likely intentional but the function name and logic could be clearer about the environment gating.
+  Fix: Consider renaming to isSessionAdEnabled() and adding a comment explaining the build-time behavior.
+
+  [LOW] edge_case -- Line 70
+  ADS[adIndex] assumes ADS is non-empty. If ADS is ever empty (e.g., misconfiguration), this will return undefined and cause a runtime error when accessing ad.accent, ad.title, etc.
+  Fix: Add a guard to return null if ADS.length === 0.
+
+  [LOW] edge_case -- Line 49
+  sessionStorage.getItem(DISMISS_KEY) can throw in some private browsing modes or when storage is full. This is not caught, which could prevent the banner from rendering.
+  Fix: Wrap sessionStorage access in a try/catch to gracefully degrade.
+
+  [LOW] edge_case -- Line 64
+  sessionStorage.setItem(DISMISS_KEY, '1') can throw in private browsing or when storage is full. The dismiss action would silently fail to persist.
+  Fix: Wrap sessionStorage.setItem in a try/catch.
+
+=================================================================
+  FILE: src/lib/auditLog.js
+  Score: 83/100   Issues: 4
+
+  The audit log module is well-structured with a best-effort pattern that prevents callers from crashing. The primary risk is the missing `audit_logs` table in the database schema, which will cause silent failures on every write. Additionally, the IP extraction trusts `x-forwarded-for` without validation, and the `$1::uuid` cast will throw if a non-UUID string is passed, though the try/catch swallows it. The code is otherwise clean and follows good practices for a non-critical logging path.
+
+  [HIGH] database -- Line 17
+  The query references table `audit_logs` which does not exist in the provided database schema. Every call to writeAuditLog will fail with a relation-not-found error, silently swallowed by the catch block. This means audit logging is completely non-functional in production.
+  Fix: Add the audit_logs table to the database schema, or verify it exists in the actual deployment.
+
+  [MEDIUM] runtime -- Line 19
+  The `$1::uuid`, `$2::uuid`, and `$5::uuid` casts will throw a PostgreSQL error if the provided value is not a valid UUID format (e.g., empty string, 'invalid', or a number). While the try/catch swallows this, it means the audit log is silently dropped for any non-UUID input, which could be common if callers pass malformed IDs.
+  Fix: Remove the ::uuid casts and let PostgreSQL handle implicit conversion, or validate UUID format before the query and skip logging if invalid.
+
+  [MEDIUM] security -- Line 50
+  The `x-forwarded-for` header is trusted without validation. An attacker can spoof their IP by sending a crafted header, which will be logged as the client IP. This undermines audit trail integrity for security investigations.
+  Fix: If behind a trusted proxy (e.g., Vercel, AWS ALB), this is acceptable. Otherwise, validate that the IP is a legitimate IPv4/IPv6 address before using it.
+
+  [LOW] observability -- Line 40
+  The error is logged with only `e.message`, losing the stack trace and full error context. In production, this makes debugging silent audit failures difficult.
+  Fix: Log the full error object or at least include the stack trace for better debugging.
+
+=================================================================
+  FILE: src/lib/assessmentRowsDedupe.js
+  Score: 96/100   Issues: 2
+
+  The code is minimal, well-structured, and functionally correct for its purpose. The primary risk is a potential edge case where two different students could share the same roll number (e.g., across different batches or tenants), causing one student's data to be silently dropped. Additionally, the function assumes rows are pre-sorted with newest first, which is a fragile contract that could break if the caller changes. No security, performance, or reliability issues are present.
+
+  [MEDIUM] edge_case -- Line 8
+  Roll number collision: Two different students (e.g., from different batches or tenants) could share the same roll_number. The function uses roll_number as a deduplication key, which would cause one student's data to be silently dropped. This is a data integrity risk.
+  Fix: Include tenant_id or batch_year in the roll_number key to reduce collision risk, or rely solely on student_profile_id when available.
+
+  [LOW] code_smell -- Line 13
+  Fragile ordering contract: pickRepresentativeAssessmentRows relies on the caller to provide rows sorted with newest first. If the caller changes the sort order or forgets to sort, the wrong row (oldest instead of newest) will be kept. This is a maintainability risk.
+  Fix: Add an explicit sort inside the function to guarantee the correct row is kept, or add a defensive comment and validation.
+
+=================================================================
+  FILE: src/lib/academicYear.js
+  Score: 76/100   Issues: 4
+
+  The academic year utility functions are concise and handle basic edge cases, but contain a critical Y2K-style bug in the year formatting logic. The modulo operation `(startYear + 1) % 100` will produce incorrect results for years ending in 99 (e.g., 2099 becomes '99-0' instead of '99-00'). Additionally, the `getAcademicYearOptions` function lacks input validation for non-numeric or negative center years, and the default parameter in `getCurrentAcademicYear` creates a hidden dependency on the caller's clock. The code is otherwise clean and well-structured.
+
+  [HIGH] bug -- Line 5
+  The modulo operation `(startYear + 1) % 100` produces incorrect two-digit year strings for years ending in 99. For example, 2099 becomes '99-0' instead of '99-00' because `100 % 100 = 0` and `String(0).padStart(2, '0')` returns '0' not '00'. This will cause data corruption in academic year labels starting from 2099.
+  Fix: Use `String(startYear + 1).slice(-2)` to safely extract the last two digits of the year, which correctly handles years ending in 99.
+
+  [HIGH] bug -- Line 16
+  Same modulo bug as line 5: `(i + 1) % 100` produces '0' instead of '00' for years ending in 99. This affects all generated academic year options in the range.
+  Fix: Use `String(i + 1).slice(-2)` to safely extract the last two digits.
+
+  [MEDIUM] input_validation -- Line 10
+  The `getAcademicYearOptions` function does not validate that `centerStart` is a positive integer. If `centerYear` is '0-01' or '-5-01', the function will generate options starting from negative years, which are meaningless in an academic context. The fallback `return [centerYear]` only triggers if `startStr` is not a finite number, not if it's negative or zero.
+  Fix: Add a check that `centerStart` is a positive integer (e.g., `centerStart > 0`) before generating options.
+
+  [LOW] best_practice -- Line 1
+  The default parameter `date = new Date()` creates a hidden dependency on the system clock. If this function is called in a server-side context (e.g., during SSR or API route), the date will be based on the server's timezone, which may differ from the user's expected academic year. This can cause inconsistent behavior between client and server renders.
+  Fix: Consider accepting an explicit date parameter or using a server-consistent time source (e.g., UTC date) to avoid timezone-dependent behavior.
+
+=================================================================
+  FILE: src/lib/assertAuthEnv.js
+  Score: 97/100   Issues: 1
+
+  The provided code snippet is a utility function to assert the presence and strength of the NEXTAUTH_SECRET environment variable in production environments. It correctly checks for the variable's length and throws an error if it's missing or too short. The code is well-structured and readable. However, there are a few potential issues to consider, such as the hardcoded minimum secret length and the lack of input validation for the secret value itself.
+
+  [MEDIUM] security -- Line 27
+  The secret value is not validated for potential security issues
+  Fix: Add input validation for the secret value to prevent potential security issues
+
+=================================================================
+  FILE: src/lib/clientDebugLog.js
+  Score: 99/100   Issues: 1
+
+  The file is a well-structured client-side debug logging utility with no security or crash risks. The only notable issue is a potential memory leak from unbounded log growth if MAX_ENTRIES is bypassed via concurrent writes, but the current implementation caps entries correctly. No critical or high-severity issues found.
+
+  [LOW] concurrency -- Line 27
+  Race condition in appendClientDebugLog: multiple rapid calls can read the same localStorage value, push, and overwrite each other, losing entries. This is low severity because the log is best-effort and not critical.
+  Fix: Use a synchronous lock or batch writes to avoid race conditions, or accept the best-effort nature as documented.

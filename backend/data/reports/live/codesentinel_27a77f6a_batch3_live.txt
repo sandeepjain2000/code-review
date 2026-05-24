@@ -1,0 +1,428 @@
+=================================================================
+  CODESENTINEL -- BATCH 3 REPORT
+  Files 51 - 69 of 229
+  Folder : C:\Users\sandeep\Downloads\Claudes\CampusPlacement\campus-placement
+  Saved  : 01/05/2026, 19:58:43
+=================================================================
+
+  Batch Score   : 86/100
+  Files Reviewed: 19
+  Total Issues  : 76
+
+=================================================================
+  FILE: src/app/api/employer/assessments/template/route.js
+  Score: 96/100   Issues: 2
+
+  The provided code snippet is a simple API endpoint that returns a CSV template for assessments. It is well-structured and follows best practices. However, there are a few potential issues that need to be addressed, such as the lack of input validation and error handling. The code also assumes that the `rowsToCsv` function is properly implemented and does not throw any errors. Overall, the code is straightforward and easy to understand, but it could benefit from additional checks and balances to ensure its reliability and security.
+
+  [MEDIUM] error_handling -- Line 4
+  The code does not handle potential errors thrown by the `rowsToCsv` function
+  Fix: Add try-catch blocks to handle errors and provide meaningful error messages
+
+  [LOW] security -- Line 15
+  The sample data is hardcoded and may not be suitable for all use cases
+  Fix: Consider making the sample data configurable or dynamic
+
+=================================================================
+  FILE: src/app/api/data-entry/options/route.js
+  Score: 86/100   Issues: 3
+
+  The provided code is generally well-structured with proper authentication and tenant isolation. However, there are some potential issues with error handling, database queries, and performance. The main risks are the lack of input validation, potential SQL injection vulnerabilities, and the use of LIMIT without pagination, which can cause memory pressure and performance issues. Additionally, the error handling can be improved to provide more informative error messages.
+
+  [HIGH] performance -- Line 15
+  The use of LIMIT without pagination can cause memory pressure and performance issues
+  Fix: Implement pagination to limit the number of results returned
+
+  [MEDIUM] error_handling -- Line 66
+  The error handling can be improved to provide more informative error messages
+  Fix: Provide more informative error messages to help with debugging and error handling
+
+  [LOW] input_validation -- Line 11
+  The input parameter tenantId is not validated
+  Fix: Validate the input parameter tenantId to prevent potential security vulnerabilities
+
+=================================================================
+  FILE: src/app/api/data-entry/placement-drives/route.js
+  Score: 91/100   Issues: 3
+
+  The code is generally well-structured with proper authentication, tenant isolation, and parameterized queries. However, there are some potential issues with error handling, database queries, and security. The biggest risk is the lack of input validation and sanitization, which could lead to SQL injection or cross-site scripting (XSS) attacks. Additionally, the code does not handle errors properly, which could lead to unexpected behavior or crashes.
+
+  [MEDIUM] security -- Line 23
+  The query is vulnerable to SQL injection if the tenantId is not properly sanitized
+  Fix: Use a parameterized query or sanitize the tenantId input
+
+  [MEDIUM] security -- Line 63
+  The query is vulnerable to SQL injection if the title, description, or status inputs are not properly sanitized
+  Fix: Use a parameterized query or sanitize the title, description, and status inputs
+
+  [MEDIUM] security -- Line 107
+  The query is vulnerable to SQL injection if the title, description, or status inputs are not properly sanitized
+  Fix: Use a parameterized query or sanitize the title, description, and status inputs
+
+=================================================================
+  FILE: src/app/api/employer/dashboard/route.js
+  Score: 57/100   Issues: 6
+
+  The employer dashboard API endpoint is generally well-structured with proper authentication, parameterized queries, and tenant isolation. However, there are several critical issues: the employer profile query can throw an unhandled error that crashes the process, the stats query uses multiple correlated subqueries causing performance problems, and there is no pagination on the recent applications query. The error handling is adequate but could be improved with structured logging. Overall, the code is functional but has reliability and scalability risks.
+
+  [CRITICAL] runtime -- Line 20
+  Line 20 throws a generic Error when employer profile is not found. This unhandled exception will crash the process in production if the error is not caught properly. The catch block will handle it, but throwing a generic Error is poor practice and could expose internal details if not caught.
+  Fix: Return a 404 response instead of throwing an error when employer profile is not found.
+
+  [HIGH] performance -- Line 22
+  The stats query uses 6 correlated subqueries, each scanning the same tables. This will cause significant performance degradation as data grows, leading to slow dashboard load times and potential database timeouts.
+  Fix: Rewrite as a single query with conditional aggregation (COUNT with CASE) to scan tables once.
+
+  [MEDIUM] scalability -- Line 32
+  The recent applications query has no pagination offset, only a LIMIT 5. As data grows, this query will still scan all matching rows before applying the limit, causing performance degradation. Additionally, there is no index hint or covering index for the join conditions.
+  Fix: Add an OFFSET parameter for pagination and ensure proper indexes exist on join columns (employer_id, tenant_id, applied_at).
+
+  [MEDIUM] observability -- Line 68
+  Error logging uses console.error with a generic message. In production, this lacks structured context (request ID, user ID, tenant ID) making debugging difficult. The error object is passed but may not be serialized properly in all environments.
+  Fix: Use a structured logger that includes request context (userId, campusId, correlation ID) and serializes the error properly.
+
+  [LOW] null_check -- Line 57
+  Accessing statsQuery.rows[0] assumes the query always returns at least one row. While the query structure guarantees a row (aggregate without GROUP BY), if the database connection returns an empty result set unexpectedly, this will throw a TypeError.
+  Fix: Add a guard check for statsQuery.rows.length before accessing rows[0].
+
+  [LOW] input_validation -- Line 14
+  The campusId parameter is not validated for format (e.g., UUID format). An invalid value will cause a database error that is caught, but it would be better to validate early.
+  Fix: Validate that campusId is a valid UUID before using it in queries.
+
+=================================================================
+  FILE: src/app/api/employer/drives/route.js
+  Score: 92/100   Issues: 4
+
+  The code is generally well-structured with proper authentication, parameterized queries, and a transaction for atomicity. The main risks are the lack of input validation for driveDate and venue, potential N+1 query pattern in notification sending, and missing tenant isolation verification for the campusId filter in GET. The error handling is adequate but could be more specific for 4xx errors.
+
+  [MEDIUM] input_validation -- Line 59
+  driveDate is accepted as-is from the request body without validation. If an invalid date string is passed, the PostgreSQL cast to DATE will fail, causing a 500 error.
+  Fix: Validate driveDate format before passing to the query, or wrap in a try-catch with a meaningful error message.
+
+  [MEDIUM] performance -- Line 115
+  notifyUsersOneAtATime sends notifications sequentially to each admin. For campuses with many admins, this could be slow and hold the database transaction open longer than necessary.
+  Fix: Batch the notification insert into a single query or use a background job queue to send notifications asynchronously after the transaction commits.
+
+  [LOW] multi_tenancy -- Line 31
+  The GET endpoint filters drives by employer_id but does not verify that the campusId parameter belongs to a tenant the employer is approved for. An employer could potentially enumerate drives across campuses by passing arbitrary campusIds.
+  Fix: Add a join or subquery to ensure the campusId is a tenant where the employer has an approved partnership.
+
+  [LOW] best_practice -- Line 117
+  toLocaleDateString with undefined locale uses the server's default locale, which may produce inconsistent date formats across deployments or regions.
+  Fix: Specify an explicit locale (e.g., 'en-IN') or use a library like date-fns for consistent formatting.
+
+=================================================================
+  FILE: src/app/api/employer/assessments/route.js
+  Score: 87/100   Issues: 2
+
+  The code is generally well-structured with proper authentication and tenant isolation. However, there are some potential issues with error handling, database queries, and security. The biggest risk is the lack of input validation for the 'limit' parameter, which could lead to a denial-of-service attack. Additionally, the error handling in the catch block is not robust and could lead to information disclosure.
+
+  [HIGH] security -- Line 23
+  Lack of input validation for 'limit' parameter
+  Fix: Add input validation to ensure 'limit' is a positive integer
+
+  [MEDIUM] error_handling -- Line 34
+  Error handling in catch block is not robust
+  Fix: Improve error handling to prevent information disclosure
+
+=================================================================
+  FILE: src/app/api/employer/calendar/route.js
+  Score: 93/100   Issues: 3
+
+  The provided code is generally well-structured with proper authentication and tenant isolation. However, there are some potential issues with error handling, database queries, and security. The main risks are the lack of input validation, potential SQL injection vulnerabilities, and inadequate error handling. Additionally, the code does not handle pagination properly, which could lead to performance issues.
+
+  [MEDIUM] security -- Line 14
+  Potential SQL injection vulnerability due to lack of input validation
+  Fix: Validate user input properly before using it in database queries
+
+  [MEDIUM] performance -- Line 18
+  Potential performance issue due to lack of pagination
+  Fix: Implement pagination to limit the number of results returned
+
+  [LOW] error_handling -- Line 40
+  Error handling could be improved to provide more informative error messages
+  Fix: Improve error handling to provide more informative error messages
+
+=================================================================
+  FILE: src/app/api/data-entry/users/route.js
+  Score: 88/100   Issues: 4
+
+  The code is generally well-structured with proper authentication, tenant isolation, and parameterized queries. However, there are some potential issues with error handling, database queries, and security. The biggest risk is the lack of input validation and potential SQL injection vulnerabilities. Additionally, the code does not handle errors properly, which could lead to information disclosure or other security issues.
+
+  [MEDIUM] security -- Line 20
+  Potential SQL injection vulnerability due to lack of input validation
+  Fix: Validate user input to prevent SQL injection
+
+  [MEDIUM] error_handling -- Line 31
+  Error handling is not proper, which could lead to information disclosure
+  Fix: Handle errors properly to prevent information disclosure
+
+  [MEDIUM] security -- Line 59
+  Potential SQL injection vulnerability due to lack of input validation
+  Fix: Validate user input to prevent SQL injection
+
+  [MEDIUM] security -- Line 93
+  Potential SQL injection vulnerability due to lack of input validation
+  Fix: Validate user input to prevent SQL injection
+
+=================================================================
+  FILE: src/app/api/employer/engagement-listings/route.js
+  Score: 96/100   Issues: 2
+
+  The provided code snippet is a simple API endpoint that returns a list of engagement listings for employers. It is well-structured and follows best practices. However, there are some potential issues with error handling and logging. The code does not handle specific error cases and logs errors to the console, which may not be suitable for a production environment. Additionally, the code does not validate or sanitize user input, which could lead to security vulnerabilities.
+
+  [MEDIUM] error_handling -- Line 49
+  Error handling is too generic and does not provide specific error messages
+  Fix: Handle specific error cases and provide more informative error messages
+
+  [LOW] security -- Line 9
+  User input is not validated or sanitized
+  Fix: Validate and sanitize user input to prevent security vulnerabilities
+
+=================================================================
+  FILE: src/app/api/employer/jobs/visibility/route.js
+  Score: 92/100   Issues: 4
+
+  The endpoint is well-structured with proper authentication, parameterized queries, and a transaction for atomicity. The main risks are the lack of input validation for UUID format, missing tenant existence checks, and the absence of a rate limit on this backfill endpoint which could be abused. The error handling is adequate but could be improved with structured logging.
+
+  [MEDIUM] input_validation -- Line 24
+  No validation that jobId and tenantIds are valid UUIDs. Invalid UUID strings will cause a PostgreSQL error (invalid input syntax for type uuid) and return a 500.
+  Fix: Validate UUID format before querying the database to return a clear 400 error.
+
+  [MEDIUM] data_integrity -- Line 49
+  No check that the provided tenantIds actually exist in the tenants table. Inserting into job_posting_visibility with a non-existent tenant_id will fail due to foreign key constraint, causing a 500 error.
+  Fix: Validate that all tenantIds exist in the tenants table before attempting inserts, or handle the FK violation gracefully.
+
+  [LOW] observability -- Line 75
+  Error logging uses console.error with the error object but lacks structured context (requestId, userId, jobId) making it hard to correlate failures in production.
+  Fix: Use structured logging with context fields for better observability.
+
+  [LOW] reliability -- Line 12
+  No rate limiting on this endpoint. Since it can be used to backfill visibility for many tenants, it could be abused to cause excessive database writes.
+  Fix: Add rate limiting middleware or a per-user rate limit to prevent abuse.
+
+=================================================================
+  FILE: src/app/api/employer/interviews/route.js
+  Score: 91/100   Issues: 3
+
+  The provided code snippet is generally well-structured with proper authentication, tenant isolation, and parameterized queries. However, there are some potential issues with error handling, input validation, and data integrity. The code lacks comprehensive validation for user input, which could lead to data corruption or security vulnerabilities. Additionally, the error handling mechanism could be improved to provide more informative error messages and to handle specific error cases more robustly.
+
+  [MEDIUM] input_validation -- Line 27
+  The code does not validate the input for campusId, which could lead to data corruption or security vulnerabilities.
+  Fix: Add input validation for campusId to ensure it is a valid UUID.
+
+  [MEDIUM] input_validation -- Line 49
+  The code does not validate the input for body.campusId, which could lead to data corruption or security vulnerabilities.
+  Fix: Add input validation for body.campusId to ensure it is a valid UUID.
+
+  [MEDIUM] error_handling -- Line 63
+  The code does not handle errors when saving interview plans, which could lead to data corruption or security vulnerabilities.
+  Fix: Add error handling for saving interview plans to ensure that errors are properly handled and logged.
+
+=================================================================
+  FILE: src/app/api/employer/profile/logo/complete/route.js
+  Score: 86/100   Issues: 3
+
+  The endpoint is simple and functional, but has a critical multi-tenancy issue: it updates the employer profile based solely on the session user ID without verifying that the profile belongs to the user's tenant. This could allow a user with an employer role to update another employer's logo if they somehow obtained a valid session with a different user ID. Additionally, there is no input validation on the file URL, which could lead to storing malicious or invalid URLs. The error handling is adequate but lacks differentiation between expected and unexpected errors.
+
+  [HIGH] multi_tenancy -- Line 18
+  The UPDATE query uses session.user.id to identify the employer profile but does not join or filter by tenant_id. If the session user ID is compromised or if a user somehow has a valid session with a different user ID, they could update another employer's logo. The query should also verify that the employer profile belongs to the same tenant as the session user.
+  Fix: Add a JOIN or subquery to ensure the employer profile's tenant_id matches the session user's tenant_id.
+
+  [MEDIUM] input_validation -- Line 13
+  The file_url is only trimmed and converted to string, but there is no validation that it is a valid URL (e.g., proper scheme, no malicious content like javascript:). Storing an invalid or malicious URL could cause issues when displayed in the UI or used in redirects.
+  Fix: Validate the file_url against a URL pattern or use a URL parser to ensure it is a safe, valid URL.
+
+  [LOW] null_check -- Line 9
+  The code checks `!session` but then accesses `session.user.role` without ensuring `session.user` exists. If the session object is malformed or incomplete, this could throw a TypeError and return a 500 instead of a proper 401.
+  Fix: Add a check for `session?.user?.role` to safely access the role.
+
+=================================================================
+  FILE: src/app/api/employer/offers/route.js
+  Score: 79/100   Issues: 6
+
+  The code is well-structured with proper authentication, tenant isolation via employer_id, and parameterized queries preventing SQL injection. The main risks are: (1) the GET endpoint silently returns an empty array when the employer profile is missing, which could mask configuration issues; (2) the POST endpoint lacks validation that the student belongs to a tenant associated with the employer, allowing offers to be created for arbitrary students; (3) no input sanitization for dates/locations beyond trimming; (4) the PATCH endpoint only allows 'revoked' status but does not validate that the offer is in a revocable state (e.g., already accepted). Overall, the code is production-ready with minor hardening opportunities.
+
+  [MEDIUM] business_logic -- Line 25
+  GET endpoint returns empty array when employer profile is missing, silently masking a configuration error. The employer has a valid session but no profile, which should be treated as an error condition.
+  Fix: Return a 404 error with a clear message when the employer profile is not found, so the client can surface the issue to the user.
+
+  [HIGH] data_integrity -- Line 82
+  POST endpoint does not validate that the studentId belongs to a tenant associated with the employer. An employer could create offers for students from any tenant, potentially causing data integrity issues and cross-tenant data leakage.
+  Fix: Add a check that the student's tenant_id is one the employer is allowed to interact with (e.g., via a placement drive or job posting association).
+
+  [MEDIUM] input_validation -- Line 70
+  POST endpoint does not validate date formats for joiningDate and deadlineAt. Invalid date strings will cause a database error (500) instead of a clear 400 response.
+  Fix: Validate date strings using a library like date-fns or a regex before inserting into the database.
+
+  [LOW] input_validation -- Line 73
+  Salary is coerced to Number with a fallback of 0. Negative salaries or extremely large values are not rejected, which could lead to data integrity issues.
+  Fix: Validate that salary is a non-negative number and within a reasonable range.
+
+  [MEDIUM] business_logic -- Line 109
+  PATCH endpoint only allows 'revoked' status but does not validate the current state of the offer. An offer that is already 'accepted' or 'rejected' should not be revocable without additional business logic.
+  Fix: Add a check that the offer is in a revocable state (e.g., 'pending' or 'expired') before allowing revocation.
+
+  [LOW] scalability -- Line 46
+  GET endpoint has a hard limit of 500 offers without pagination support. Employers with many offers will have an incomplete view and no way to navigate.
+  Fix: Add pagination parameters (page, limit) with a default limit and cursor-based or offset-based pagination.
+
+=================================================================
+  FILE: src/app/api/employer/profile/logo/presign/route.js
+  Score: 73/100   Issues: 5
+
+  The endpoint is simple and functional, but has a critical multi-tenancy issue: it updates the employer profile based solely on the session user ID without verifying that the user belongs to the correct tenant. Additionally, the file name is not sanitized, which could lead to path traversal or overwriting other users' files. The error handling is minimal and could leak internal details in production.
+
+  [HIGH] security -- Line 20
+  fileName is not sanitized or validated, allowing path traversal (e.g., '../../../etc/passwd') or overwriting other users' files if the S3 key is constructed naively.
+  Fix: Sanitize fileName by stripping path separators and restricting to alphanumeric characters, underscores, and hyphens.
+
+  [HIGH] multi_tenancy -- Line 30
+  The presigned URL is generated using only userId from the session, without verifying that the user belongs to the correct tenant. An employer from tenant A could potentially upload a logo for a profile in tenant B if the S3 key is derived from userId alone.
+  Fix: Fetch the employer profile using the session userId and tenantId, then pass the verified tenantId to createEmployerLogoPresign.
+
+  [MEDIUM] observability -- Line 37
+  Error is logged with console.error but lacks structured context (request ID, userId, fileName) making it hard to debug in production.
+  Fix: Use a structured logger that includes request ID, userId, and error stack trace.
+
+  [MEDIUM] error_handling -- Line 38
+  Generic error message 'Presign failed' is returned to the client, which is acceptable for 5xx but does not differentiate between S3 misconfiguration, network error, or internal logic failure.
+  Fix: Log the specific error server-side and return a generic message; consider adding an error code for client-side handling.
+
+  [LOW] error_handling -- Line 19
+  req.json() can throw a SyntaxError if the body is not valid JSON, which is caught by the outer try/catch but results in a 500 instead of a 400.
+  Fix: Wrap req.json() in a separate try/catch to return a 400 for malformed JSON.
+
+=================================================================
+  FILE: src/app/api/employer/profile/route.js
+  Score: 88/100   Issues: 6
+
+  The endpoint is generally well-structured with proper authentication, parameterized queries, and input validation. The main risks are the lack of input validation for several fields (contactEmail, website, logoUrl), missing tenant isolation check, and the absence of a transaction for the update operation. The error handling is adequate but could be improved with more specific error messages for validation failures.
+
+  [MEDIUM] input_validation -- Line 65
+  contactEmail is not validated for email format. An invalid email can be stored in the database, causing downstream failures in email notifications or contact features.
+  Fix: Add email format validation using a regex or a validation library before storing.
+
+  [MEDIUM] input_validation -- Line 68
+  website and logoUrl are not validated for URL format. Invalid URLs can be stored, causing broken links in the UI or integration failures.
+  Fix: Add URL format validation using a regex or URL constructor.
+
+  [LOW] input_validation -- Line 91
+  locations field when provided as a string is split by comma, but there is no length limit on the resulting array. An extremely long comma-separated string could cause memory issues or oversized database writes.
+  Fix: Add a maximum length limit for the locations array (e.g., 100 items) and/or a maximum total string length.
+
+  [MEDIUM] data_integrity -- Line 98
+  The UPDATE query is not wrapped in a transaction. If a concurrent request modifies the same profile, partial updates or lost updates can occur. Additionally, there is no tenant isolation check — the update uses profile.id from the session user, but if the employer profile is somehow associated with a different tenant, cross-tenant data could be modified.
+  Fix: Wrap the update in a transaction and add a tenant_id check in the WHERE clause to ensure the profile belongs to the user's tenant.
+
+  [LOW] error_handling -- Line 133
+  The catch block logs the error but returns a generic message. For validation errors (e.g., database constraint violations), the user receives no specific feedback, making debugging harder.
+  Fix: Differentiate between validation errors and server errors. Return specific error messages for known failure modes (e.g., duplicate contact email).
+
+  [LOW] multi_tenancy -- Line 43
+  The GET endpoint does not include a tenant_id filter. While the query uses user_id which is unique per user, if the same user is somehow associated with multiple tenants (unlikely given schema), this could return the wrong profile. This is a minor concern given the schema design.
+  Fix: Add a tenant_id check from the session to the query for defense in depth.
+
+=================================================================
+  FILE: src/app/api/feedback/route.js
+  Score: 91/100   Issues: 5
+
+  The feedback API endpoint is well-structured with proper authentication, parameterized queries, and input validation. The main risks are the lack of input length limits on title/description (potential abuse), missing pagination on the GET endpoint (scalability issue), and the absence of a tenant_id filter for super_admin queries (data isolation concern). The error handling is good with specific messages for missing tables.
+
+  [MEDIUM] scalability -- Line 20
+  GET endpoint returns all feedback rows without pagination, which will cause performance degradation and memory issues as the feedback table grows.
+  Fix: Add pagination with LIMIT/OFFSET or cursor-based pagination, and enforce a maximum page size.
+
+  [MEDIUM] input_validation -- Line 55
+  No maximum length validation on title and description fields, allowing excessively large inputs that could cause storage bloat or denial of service.
+  Fix: Add maximum length checks for title (e.g., 255 chars) and description (e.g., 5000 chars) before inserting into the database.
+
+  [LOW] multi_tenancy -- Line 17
+  Super admin GET returns all feedback across all tenants without a tenant_id filter, potentially leaking data across tenants if the system becomes multi-tenant.
+  Fix: Add a tenant_id column to platform_feedback and filter by tenant_id for non-super-admin users, or document that this is a single-tenant feedback system.
+
+  [LOW] observability -- Line 36
+  Error logging uses console.error without structured logging or correlation ID, making it hard to trace errors in production.
+  Fix: Use a structured logger that includes request ID, session user ID, and error context.
+
+  [LOW] observability -- Line 75
+  Error logging uses console.error without structured logging or correlation ID, making it hard to trace errors in production.
+  Fix: Use a structured logger that includes request ID, session user ID, and error context.
+
+=================================================================
+  FILE: src/app/api/employer/offers/options/route.js
+  Score: 88/100   Issues: 4
+
+  The provided code is generally well-structured with proper authentication and tenant isolation. However, there are some potential issues with error handling, database query efficiency, and data processing. The code uses parameterized queries, which is good for preventing SQL injection. The main risks are the lack of input validation, potential database query performance issues, and incomplete error handling.
+
+  [MEDIUM] security -- Line 19
+  The error message 'Unauthorized' is returned with a 401 status code, but it does not provide any additional information about the error. Consider adding more context to the error message.
+  Fix: Return a more informative error message with a 401 status code.
+
+  [MEDIUM] performance -- Line 29
+  The database query uses a LIMIT clause without an ORDER BY clause. This can lead to inconsistent results if the underlying data changes.
+  Fix: Add an ORDER BY clause to the database query to ensure consistent results.
+
+  [MEDIUM] performance -- Line 37
+  The database query uses a JOIN clause with multiple tables. This can lead to performance issues if the tables are large.
+  Fix: Consider optimizing the database query by using indexes or reordering the JOIN clauses.
+
+  [MEDIUM] error_handling -- Line 60
+  The error handling is incomplete. It only logs the error to the console and returns a generic error message.
+  Fix: Consider adding more robust error handling, such as logging the error to a file or sending an alert to the development team.
+
+=================================================================
+  FILE: src/app/api/feedback/[id]/route.js
+  Score: 80/100   Issues: 7
+
+  The code is generally well-structured with proper authentication, parameterized queries, and tenant isolation. The main risks are the lack of input validation on the PATCH body (allowing arbitrary fields), missing transaction in POST (partial write if status update fails), and the GET endpoint leaking all feedback replies to any super_admin without tenant scope. The error handling is reasonable but could be more specific for 4xx vs 5xx cases.
+
+  [MEDIUM] input_validation -- Line 73
+  PATCH handler accepts entire request body but only validates 'status'. Extra fields like 'title', 'description', 'user_id' are silently ignored, but could cause confusion or future misuse if body shape changes.
+  Fix: Explicitly destructure only the expected field(s) from the body to ignore extras.
+
+  [HIGH] data_integrity -- Line 115
+  POST handler inserts a reply and then updates the feedback status in two separate queries without a transaction. If the status UPDATE fails (e.g. DB connection issue), the reply is persisted but the status remains unchanged, leading to inconsistent state.
+  Fix: Wrap both operations in a database transaction so they succeed or fail atomically.
+
+  [MEDIUM] multi_tenancy -- Line 18
+  GET handler allows super_admin to fetch any feedback by ID without any tenant or scope restriction. While super_admin has elevated privileges, this could be abused if the role is compromised or misused. Consider adding an audit log or additional scope check.
+  Fix: Add an audit log entry when super_admin accesses feedback that does not belong to them, or restrict to feedback from their own tenant if applicable.
+
+  [LOW] observability -- Line 58
+  Error logging uses console.error with a generic message and the error object. In production, this may not include enough context (request ID, user ID, feedback ID) for debugging.
+  Fix: Use structured logging with context fields like requestId, userId, feedbackId.
+
+  [LOW] observability -- Line 91
+  PATCH error logging lacks context about which feedback ID caused the error.
+  Fix: Include the feedback ID in the error log.
+
+  [LOW] observability -- Line 143
+  POST error logging lacks context about which feedback ID caused the error.
+  Fix: Include the feedback ID in the error log.
+
+  [LOW] error_handling -- Line 52
+  The catch block for the replies query only re-throws if the error code is not '42P01'. If the table exists but another error occurs (e.g. column missing, permission denied), it will be re-thrown and caught by the outer catch, returning a generic 503. This is acceptable but could be more specific.
+  Fix: Consider logging the inner error with more context before re-throwing.
+
+=================================================================
+  FILE: src/app/api/employer/sponsorships/route.js
+  Score: 81/100   Issues: 4
+
+  The provided code snippet is generally well-structured with proper authentication and parameterized queries. However, there are some issues that need to be addressed, such as the lack of input validation, potential SQL injection vulnerabilities, and missing error handling. The code also has some performance issues, such as the use of a Map to store sponsorship opportunities, which could lead to memory issues if the number of opportunities is large. Overall, the code needs some improvements to make it more secure, efficient, and reliable.
+
+  [MEDIUM] performance -- Line 17
+  The query to retrieve colleges is not optimized and could lead to performance issues if the number of colleges is large.
+  Fix: Add pagination or limit the number of colleges retrieved.
+
+  [MEDIUM] performance -- Line 24
+  The query to retrieve sponsorship opportunities is not optimized and could lead to performance issues if the number of opportunities is large.
+  Fix: Add pagination or limit the number of opportunities retrieved.
+
+  [MEDIUM] performance -- Line 38
+  The use of a Map to store sponsorship opportunities could lead to memory issues if the number of opportunities is large.
+  Fix: Use a more efficient data structure, such as an array or a database table.
+
+  [HIGH] error_handling -- Line 77
+  The error handling is not proper and could lead to security issues.
+  Fix: Improve error handling by logging errors and returning a more informative error message.

@@ -1,0 +1,301 @@
+{
+  "review_id": "21541373d4324677",
+  "input_type": "folder_scan",
+  "status": "failed",
+  "files": [
+    {
+      "filename": "fix_emojis.js",
+      "language": "javascript",
+      "total_lines": 61,
+      "issues": [
+        {
+          "line": 12,
+          "line_end": 12,
+          "severity": "medium",
+          "type": "performance",
+          "message": "The code uses synchronous file operations, which could block the event loop.",
+          "suggestion": "Use asynchronous file operations instead.",
+          "code_snippet": "content = fs.readFileSync(filePath, 'utf8');",
+          "fixed_snippet": "fs.readFile(filePath, 'utf8', (err, data) => { content = data; });"
+        },
+        {
+          "line": 43,
+          "line_end": 48,
+          "severity": "low",
+          "type": "readability",
+          "message": "The code uses a for loop to iterate over the replacements object, which could be replaced with a more functional approach.",
+          "suggestion": "Use Object.keys() or Object.entries() to iterate over the object.",
+          "code_snippet": "for (const [emoji, comp] of Object.entries(replacements)) { ... }",
+          "fixed_snippet": "Object.entries(replacements).forEach(([emoji, comp]) => { ... });"
+        },
+        {
+          "line": 55,
+          "line_end": 57,
+          "severity": "medium",
+          "type": "performance",
+          "message": "The code uses synchronous file operations, which could block the event loop.",
+          "suggestion": "Use asynchronous file operations instead.",
+          "code_snippet": "fs.copyFileSync(filePath, `${filePath}.bak`); fs.writeFileSync(filePath, content, 'utf8');",
+          "fixed_snippet": "fs.copyFile(filePath, `${filePath}.bak`, (err) => { if (err) { ... } else { fs.writeFile(filePath, content, 'utf8', (err) => { ... }); } });"
+        }
+      ],
+      "summary": "The provided code is a JavaScript script that replaces emojis in a file with corresponding component names. The code is generally well-structured and readable. However, there are some potential issues and improvements that can be suggested. The code does not handle asynchronous operations, which could lead to performance issues. Additionally, the code does not validate the file path or the replacements object, which could lead to errors. The code also uses synchronous file operations, which could block the event loop. The biggest risk is the potential for data loss if the file cannot be written or if the replacements object is invalid. The code has a score of 80 due to these potential issues.",
+      "score": 93,
+      "was_chunked": false,
+      "chunks_processed": 1
+    },
+    {
+      "filename": "generate_docs.py",
+      "language": "python",
+      "total_lines": 112,
+      "issues": [
+        {
+          "line": 3,
+          "line_end": 9,
+          "severity": "medium",
+          "type": "error_handling",
+          "message": "The script does not handle the case where the python-docx package is not installed. While it does print an error message and exit, it would be better to provide more detailed instructions on how to install the package.",
+          "suggestion": "Add more detailed instructions on how to install the python-docx package.",
+          "code_snippet": "try:\n    from docx import Document\n    from docx.shared import Pt\n    from docx.enum.text import WD_ALIGN_PARAGRAPH\nexcept ImportError:\n    print(\"Error: python-docx package is required. Install it with: pip install python-docx\")\n    raise SystemExit(1)",
+          "fixed_snippet": "try:\n    from docx import Document\n    from docx.shared import Pt\n    from docx.enum.text import WD_ALIGN_PARAGRAPH\nexcept ImportError:\n    print(\"Error: python-docx package is required. Install it with: pip install python-docx. You can do this by running the command 'pip install python-docx' in your terminal.\")\n    raise SystemExit(1)"
+        },
+        {
+          "line": 103,
+          "line_end": 109,
+          "severity": "medium",
+          "type": "error_handling",
+          "message": "The script does not handle the case where the file path provided as an argument is invalid or the file cannot be saved. While it does print an error message and exit, it would be better to provide more detailed instructions on how to fix the issue.",
+          "suggestion": "Add more detailed instructions on how to fix the issue with the file path.",
+          "code_snippet": "try:\n    doc.save(file_path)\n    print(f\"Document saved successfully as {file_path}\")\nexcept OSError as e:\n    print(f\"Error saving document to {file_path}: {e}\")\n    raise SystemExit(1)",
+          "fixed_snippet": "try:\n    doc.save(file_path)\n    print(f\"Document saved successfully as {file_path}\")\nexcept OSError as e:\n    print(f\"Error saving document to {file_path}: {e}. Please make sure the file path is valid and you have permission to write to the location.\")\n    raise SystemExit(1)"
+        }
+      ],
+      "summary": "The provided Python script generates a user documentation document for the Campus Placement System. The code is generally well-structured and readable. However, there are some potential issues and improvements that can be made, such as error handling, input validation, and code organization. The script uses the python-docx library to create a Word document, which is a good choice for this task. Overall, the script is functional and produces the desired output, but it can be improved with some refinements.",
+      "score": 94,
+      "was_chunked": false,
+      "chunks_processed": 1
+    },
+    {
+      "filename": "generate_faqs.js",
+      "language": "javascript",
+      "total_lines": 176,
+      "issues": [
+        {
+          "line": 78,
+          "line_end": 80,
+          "severity": "medium",
+          "type": "bug",
+          "message": "Potential null pointer exception when accessing parts[parts.length - 1] or parts[1] if the routePath is empty or does not contain a '/' character.",
+          "suggestion": "Add null checks for parts[parts.length - 1] and parts[1] to prevent null pointer exceptions.",
+          "code_snippet": "const mainEntity = parts[parts.length - 1] || 'home';\nconst role = parts.length > 1 ? parts[1] : 'user';",
+          "fixed_snippet": "const mainEntity = parts && parts.length > 0 ? parts[parts.length - 1] : 'home';\nconst role = parts && parts.length > 1 ? parts[1] : 'user';"
+        },
+        {
+          "line": 135,
+          "line_end": 164,
+          "severity": "medium",
+          "type": "performance",
+          "message": "The buildHTML function is not optimized for performance. It uses string concatenation to build the HTML, which can be slow for large inputs.",
+          "suggestion": "Use a template engine or a more efficient string building method to improve performance.",
+          "code_snippet": "let html = `<!DOCTYPE html>\n<html lang=\"en\">\n...\n</html>`;",
+          "fixed_snippet": "Use a template engine like Handlebars or a string building library like StringBuilder to improve performance."
+        },
+        {
+          "line": 169,
+          "line_end": 176,
+          "severity": "high",
+          "type": "security",
+          "message": "The code uses process.argv[2] to get the output path, which can be a security vulnerability if the input is not validated.",
+          "suggestion": "Validate the input path to prevent potential security vulnerabilities.",
+          "code_snippet": "const outPath = process.argv[2] || path.join(__dirname, 'prompts', 'FAQs.html');",
+          "fixed_snippet": "const outPath = validateInputPath(process.argv[2]) || path.join(__dirname, 'prompts', 'FAQs.html');"
+        },
+        {
+          "line": 170,
+          "line_end": 171,
+          "severity": "medium",
+          "type": "error_handling",
+          "message": "The code does not handle errors properly when creating the output directory or writing to the file.",
+          "suggestion": "Add try-catch blocks to handle errors when creating the output directory or writing to the file.",
+          "code_snippet": "fs.mkdirSync(outputDir, { recursive: true });\nfs.writeFileSync(outPath, buildHTML(), 'utf8');",
+          "fixed_snippet": "try {\n  fs.mkdirSync(outputDir, { recursive: true });\n  fs.writeFileSync(outPath, buildHTML(), 'utf8');\n} catch (err) {\n  console.error(`Error: ${err.message}`);\n}"
+        }
+      ],
+      "summary": "The provided JavaScript code generates FAQs for various routes in the Campus Placement System. The code is generally well-structured, but there are some areas that need improvement, such as error handling, code organization, and potential security vulnerabilities. The score is 80 due to the lack of input validation, potential null pointer exceptions, and missing error handling in certain cases.",
+      "score": 81,
+      "was_chunked": false,
+      "chunks_processed": 1
+    },
+    {
+      "filename": "run-sql.js",
+      "language": "javascript",
+      "total_lines": 97,
+      "issues": [
+        {
+          "line": 23,
+          "line_end": 28,
+          "severity": "high",
+          "type": "security",
+          "message": "The script uses a hardcoded database connection string, which is a security risk. The connection string should be stored in an environment variable or a secure configuration file.",
+          "suggestion": "Store the database connection string in an environment variable or a secure configuration file.",
+          "code_snippet": "const connectionString = process.env.SUPABASE_DATABASE_URL || process.env.DATABASE_URL || env.SUPABASE_DATABASE_URL || env.DATABASE_URL;",
+          "fixed_snippet": "const connectionString = process.env.DATABASE_URL;"
+        },
+        {
+          "line": 36,
+          "line_end": 40,
+          "severity": "medium",
+          "type": "security",
+          "message": "The script sets the 'rejectUnauthorized' option to 'false', which can make the connection vulnerable to man-in-the-middle attacks. This option should be set to 'true' in production environments.",
+          "suggestion": "Set the 'rejectUnauthorized' option to 'true' in production environments.",
+          "code_snippet": "ssl: { rejectUnauthorized: false }",
+          "fixed_snippet": "ssl: { rejectUnauthorized: true }"
+        },
+        {
+          "line": 57,
+          "line_end": 57,
+          "severity": "medium",
+          "type": "error_handling",
+          "message": "The script does not check for the existence of the 'db/schema.sql' and 'db/seed.sql' files before attempting to read them. This could lead to errors if these files do not exist.",
+          "suggestion": "Check for the existence of the 'db/schema.sql' and 'db/seed.sql' files before attempting to read them.",
+          "code_snippet": "const schemaPath = path.join(root, 'db', 'schema.sql');",
+          "fixed_snippet": "if (!fs.existsSync(schemaPath)) { throw new Error('db/schema.sql not found.'); }"
+        },
+        {
+          "line": 64,
+          "line_end": 64,
+          "severity": "high",
+          "type": "security",
+          "message": "The script uses a raw SQL query to drop the public schema, which can be vulnerable to SQL injection attacks. This query should be parameterized or use a prepared statement.",
+          "suggestion": "Use a parameterized query or a prepared statement to drop the public schema.",
+          "code_snippet": "await client.query('DROP SCHEMA public CASCADE; CREATE SCHEMA public; GRANT ALL ON SCHEMA public TO postgres; GRANT ALL ON SCHEMA public TO public;');",
+          "fixed_snippet": "await client.query('DROP SCHEMA IF EXISTS public CASCADE; CREATE SCHEMA public; GRANT ALL ON SCHEMA public TO $1; GRANT ALL ON SCHEMA public TO $2;', ['postgres', 'public']);"
+        },
+        {
+          "line": 67,
+          "line_end": 67,
+          "severity": "medium",
+          "type": "error_handling",
+          "message": "The script does not handle errors that may occur when reading the 'db/schema.sql' file. This could lead to unexpected behavior if an error occurs.",
+          "suggestion": "Handle errors that may occur when reading the 'db/schema.sql' file.",
+          "code_snippet": "const schemaSql = fs.readFileSync(schemaPath, 'utf8');",
+          "fixed_snippet": "try { const schemaSql = fs.readFileSync(schemaPath, 'utf8'); } catch (err) { console.error('Error reading db/schema.sql:', err); }"
+        }
+      ],
+      "summary": "The provided JavaScript script is generally well-structured and readable. However, there are several potential issues that need to be addressed, including the lack of input validation, potential SQL injection vulnerabilities, and missing error handling. The script also uses a hardcoded database connection string and does not handle connection timeouts or idle timeouts properly. Additionally, the script does not check for the existence of the 'db/schema.sql' and 'db/seed.sql' files before attempting to read them, which could lead to errors if these files do not exist.",
+      "score": 71,
+      "was_chunked": false,
+      "chunks_processed": 1
+    },
+    {
+      "filename": "run_tests.js",
+      "language": "javascript",
+      "total_lines": 91,
+      "issues": [
+        {
+          "line": 11,
+          "line_end": 14,
+          "severity": "high",
+          "type": "error_handling",
+          "message": "The code does not handle errors properly, which can lead to unexpected behavior or crashes. The error is caught and logged, but the program continues to run, which can cause further issues.",
+          "suggestion": "Implement proper error handling, such as retrying the operation or exiting the program with a non-zero exit code.",
+          "code_snippet": "try { html = fs.readFileSync(filePath, 'utf8'); } catch (err) { console.error(`Failed to read file: ${filePath}: ${err.message}`); throw err; }",
+          "fixed_snippet": "try { html = fs.readFileSync(filePath, 'utf8'); } catch (err) { console.error(`Failed to read file: ${filePath}: ${err.message}`); process.exitCode = 1; process.exit(); }"
+        },
+        {
+          "line": 67,
+          "line_end": 68,
+          "severity": "medium",
+          "type": "performance",
+          "message": "The code uses synchronous file operations, which can block the event loop and cause performance issues.",
+          "suggestion": "Use asynchronous file operations instead, such as fs.promises.readFile() and fs.promises.rename().",
+          "code_snippet": "fs.writeFileSync(tmpPath, $.html(), 'utf8'); fs.renameSync(tmpPath, filePath);",
+          "fixed_snippet": "fs.promises.writeFile(tmpPath, $.html(), 'utf8').then(() => fs.promises.rename(tmpPath, filePath));"
+        },
+        {
+          "line": 19,
+          "line_end": 21,
+          "severity": "low",
+          "type": "security",
+          "message": "The code appends a new style element to the HTML document without proper sanitization, which can lead to cross-site scripting (XSS) attacks.",
+          "suggestion": "Use a library like DOMPurify to sanitize the HTML content before appending it to the document.",
+          "code_snippet": "if ($('style').length === 0) { $('head').append('<style></style>'); }",
+          "fixed_snippet": "if ($('style').length === 0) { const sanitizedHtml = DOMPurify.sanitize('<style></style>'); $('head').append(sanitizedHtml); }"
+        }
+      ],
+      "summary": "The provided JavaScript code is generally well-structured and readable. However, there are several potential issues that need to be addressed, including missing error handling, potential security vulnerabilities, and performance concerns. The code score is 80 due to the identified issues. The biggest risk is the lack of proper error handling, which can lead to unexpected behavior or crashes. There are also some security concerns, such as the use of synchronous file operations and the potential for cross-site scripting (XSS) attacks.",
+      "score": 86,
+      "was_chunked": false,
+      "chunks_processed": 1
+    },
+    {
+      "filename": "scripts/run-migration-002.js",
+      "language": null,
+      "total_lines": null,
+      "issues": [],
+      "summary": "Review failed: no such table: review_cache",
+      "score": null,
+      "was_chunked": false,
+      "chunks_processed": 1
+    },
+    {
+      "filename": "scripts/seed_email_marketing_sqlite.py",
+      "language": null,
+      "total_lines": null,
+      "issues": [],
+      "summary": "Review failed: no such table: review_cache",
+      "score": null,
+      "was_chunked": false,
+      "chunks_processed": 1
+    },
+    {
+      "filename": "src/app/api/admin/colleges/route.js",
+      "language": null,
+      "total_lines": null,
+      "issues": [],
+      "summary": "Review failed: no such table: review_cache",
+      "score": null,
+      "was_chunked": false,
+      "chunks_processed": 1
+    },
+    {
+      "filename": "src/app/api/admin/dashboard/route.js",
+      "language": null,
+      "total_lines": null,
+      "issues": [],
+      "summary": "Review failed: no such table: review_cache",
+      "score": null,
+      "was_chunked": false,
+      "chunks_processed": 1
+    },
+    {
+      "filename": "src/app/api/admin/employers/route.js",
+      "language": null,
+      "total_lines": null,
+      "issues": [],
+      "summary": "Review failed: no such table: review_cache",
+      "score": null,
+      "was_chunked": false,
+      "chunks_processed": 1
+    }
+  ],
+  "overall_summary": "=================================================================\n  PROJECT INTELLIGENCE REPORT \u2014 CodeSentinel\n=================================================================\n  Scope   : codebase\n  Files   : 10   Issues: 17   Avg Score: 85/100\n\n  PROJECT STATUS: \u26a0\ufe0f  Minor fixes needed \u2014 review high-severity issues before deploy\n  Security Risk Score: 66/100  (higher = safer)\n\n-----------------------------------------------------------------\n  ISSUE BREAKDOWN\n-----------------------------------------------------------------\n  \ud83d\udd34 Critical : 0\n  \ud83d\udfe0 High     : 4\n  \ud83d\udfe1 Medium   : 11\n  \ud83d\udd35 Low      : 2\n\n-----------------------------------------------------------------\n  TOP ISSUE CATEGORIES\n-----------------------------------------------------------------\n  Error Handling                   6 occurrences  in 4 file(s)\n  Security                         5 occurrences  in 3 file(s)\n  Performance                      4 occurrences  in 3 file(s)\n  Readability                      1 occurrences  in 1 file(s)\n  Bug                              1 occurrences  in 1 file(s)\n\n-----------------------------------------------------------------\n  REPEATED PATTERNS (architectural, not just file-level)\n-----------------------------------------------------------------\n  \u2022 Error Handling appears in 4 files (6 total occurrences)\n  \u2022 Performance appears in 3 files (4 total occurrences)\n  \u2022 Security appears in 3 files (5 total occurrences)\n\n  \u2192 These are architectural weaknesses \u2014 fix the root cause, not each instance.\n\n-----------------------------------------------------------------\n  TOP 5 FIXES (highest severity first)\n-----------------------------------------------------------------\n  1. [HIGH] generate_faqs.js (L169)\n     The code uses process.argv[2] to get the output path, which can be a security vulnerability if the input is not validate\n     Fix: Validate the input path to prevent potential security vulnerabilities.\n\n  2. [HIGH] run-sql.js (L23)\n     The script uses a hardcoded database connection string, which is a security risk. The connection string should be stored\n     Fix: Store the database connection string in an environment variable or a secure configuration file.\n\n  3. [HIGH] run-sql.js (L64)\n     The script uses a raw SQL query to drop the public schema, which can be vulnerable to SQL injection attacks. This query \n     Fix: Use a parameterized query or a prepared statement to drop the public schema.\n\n  4. [HIGH] run_tests.js (L11)\n     The code does not handle errors properly, which can lead to unexpected behavior or crashes. The error is caught and logg\n     Fix: Implement proper error handling, such as retrying the operation or exiting the program with a non-ze\n\n  5. [MEDIUM] fix_emojis.js (L12)\n     The code uses synchronous file operations, which could block the event loop.\n     Fix: Use asynchronous file operations instead.\n\n-----------------------------------------------------------------\n  HOTSPOT FILES (most issues)\n-----------------------------------------------------------------\n  \u2022 run-sql.js  \u2014  5 issue(s)  score 71/100\n  \u2022 generate_faqs.js  \u2014  4 issue(s)  score 81/100\n  \u2022 fix_emojis.js  \u2014  3 issue(s)  score 93/100\n  \u2022 run_tests.js  \u2014  3 issue(s)  score 86/100\n  \u2022 generate_docs.py  \u2014  2 issue(s)  score 94/100\n\n-----------------------------------------------------------------\n  ACTION PLAN\n-----------------------------------------------------------------\n  DAY 1 \u2014 Blockers:\n    - Resolve 5 security issue(s) across 3 files\n\n  DAY 2 \u2014 High Priority:\n    - Fix 3 high-severity security issue(s)\n    - Fix 1 high-severity error handling issue(s)\n\n  DAY 3 \u2014 Patterns & Medium:\n    - Refactor repeated error handling pattern (4 files) \u2192 extract shared helper\n    - Address 11 medium-severity issues (reliability/maintainability)\n\n=================================================================\n  END OF PROJECT SUMMARY\n=================================================================",
+  "total_issues": 17,
+  "issues_by_severity": {
+    "medium": 11,
+    "low": 2,
+    "high": 4
+  },
+  "issues_by_type": {
+    "performance": 4,
+    "readability": 1,
+    "error_handling": 6,
+    "bug": 1,
+    "security": 5
+  },
+  "overall_score": 85,
+  "model_used": "gpt-4o",
+  "tokens_used": 0,
+  "cached": false,
+  "error": "Scan aborted: 5 consecutive file failures. Last error: no such table: review_cache"
+}

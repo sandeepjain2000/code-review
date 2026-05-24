@@ -1,0 +1,536 @@
+=================================================================
+  CODESENTINEL -- BATCH 4 REPORT
+  Files 76 - 96 of 262
+  Folder : C:\Users\sandeep\Downloads\Claudes\CampusPlacement\campus-placement
+  Saved  : 03/05/2026, 23:20:38
+=================================================================
+
+  Batch Score   : 77/100
+  Files Reviewed: 21
+  Total Issues  : 100
+
+=================================================================
+  FILE: src/app/api/employer/profile/route.js
+  Score: 67/100   Issues: 7
+
+  The code is well-structured with parameterized queries and basic input validation, but has a critical authorization bypass: the PATCH handler updates the employer profile by `profile.id` without verifying that the profile belongs to the current user's tenant. This allows an employer to potentially update another employer's profile if they can guess or obtain the profile ID. Additionally, the GET handler lacks a tenant-scoped check, though the risk is lower since it only returns the caller's own profile. The error handling is adequate but could be improved with structured logging. Overall, the authorization gap is the most significant issue.
+
+  [CRITICAL] authorization -- Line 98
+  The PATCH handler updates the employer profile using `profile.id` obtained from `getEmployerByUser(session.user.id)`. However, there is no check that the profile being updated belongs to the same tenant as the current user. An employer could potentially update another employer's profile if they can obtain the profile ID through other means (e.g., IDOR). The WHERE clause uses `id = $13` but does not include a tenant_id or user_id filter to ensure the profile belongs to the current user.
+  Fix: Add a WHERE clause that also filters by `user_id = $14` to ensure the profile belongs to the current user, or use the user_id from the session directly instead of relying on the profile.id.
+
+  [MEDIUM] authorization -- Line 43
+  The GET handler fetches the employer profile by `session.user.id` which is correct, but there is no tenant-scoped check. While the risk is lower because the query is scoped to the user's own ID, if the session.user.id is compromised or misused, it could return data from another tenant. Adding a tenant_id filter would provide defense in depth.
+  Fix: Add a JOIN with users table to filter by tenant_id, or include a tenant_id check in the query.
+
+  [LOW] observability -- Line 47
+  Error logging uses `console.error` with a string prefix and the error object. This lacks structured logging (JSON) and does not include a correlation ID or request context, making it difficult to trace errors in production.
+  Fix: Use a structured logger that outputs JSON with fields like level, message, error stack, request ID, and user ID.
+
+  [LOW] observability -- Line 134
+  Same as above for PATCH error logging.
+  Fix: Use structured logging with context.
+
+  [LOW] input_validation -- Line 62
+  The input validation for `contactEmail` does not validate the email format. An invalid email could be stored and later cause issues in email notifications or display.
+  Fix: Add email format validation using a regex or a library like validator.js.
+
+  [LOW] input_validation -- Line 66
+  The `website` and `logoUrl` fields are not validated for URL format. Malformed URLs could break frontend links or cause security issues (e.g., javascript: URLs).
+  Fix: Validate URLs using a URL parser or regex to ensure they start with http:// or https://.
+
+  [LOW] input_validation -- Line 72
+  The `companySize` field is truncated to 50 characters but not validated against allowed values. If there is a predefined list of company sizes, it should be validated against that list.
+  Fix: If company sizes are predefined, validate against the allowed set; otherwise, consider adding a maximum length check.
+
+=================================================================
+  FILE: src/app/api/feedback/[id]/route.js
+  Score: 81/100   Issues: 6
+
+  The feedback API route is generally well-structured with parameterized queries and role-based access control. The biggest risk is a missing tenant isolation check in the GET handler, where a super_admin can view any feedback without tenant scope, potentially leaking cross-tenant data. Additionally, the PATCH and POST handlers lack a feedback existence check before updating, which could lead to silent failures or race conditions. The error handling for missing tables is good, but the GET handler silently swallows a missing replies table, which could hide configuration issues. Overall, the code is production-ready with minor but important security and reliability gaps.
+
+  [HIGH] multi_tenancy -- Line 18
+  GET handler: super_admin can view any feedback without tenant_id filter. The query only checks feedback id, not tenant ownership. This allows a super_admin to access feedback from any tenant, which may be intentional but is a data leakage risk if super_admin scope should be limited to their own tenant or if tenant isolation is required.
+  Fix: Add a tenant_id filter to the super_admin query to scope feedback to the super_admin's tenant, or ensure the super_admin role is explicitly cross-tenant and document this behavior.
+
+  [MEDIUM] data_integrity -- Line 79
+  PATCH handler: updates feedback status without verifying the feedback exists first. If the feedback is deleted between the check and update, the update will silently affect no rows and return 404, which is acceptable but could be improved with a prior existence check for consistency with POST handler.
+  Fix: Add a SELECT existence check before the UPDATE, similar to the POST handler, to provide consistent error handling and avoid silent no-ops.
+
+  [MEDIUM] concurrency -- Line 123
+  POST handler: status update is not atomic with the reply insert. Between the SELECT (line 110) and the UPDATE (line 125-130), another request could change the status, causing the nextStatus calculation to be based on stale data. This is a race condition that could lead to incorrect status transitions.
+  Fix: Use a single atomic operation: either combine the reply insert and status update in a transaction, or use a conditional UPDATE that only changes status if it's still 'Submitted'.
+
+  [LOW] error_handling -- Line 52
+  GET handler: silently swallows error code '42P01' (missing table) for replies query. While this provides graceful degradation, it hides configuration issues (missing migration) from operators. The POST handler correctly returns a specific error message for the same condition.
+  Fix: Log a warning when the replies table is missing, so operators are aware of the missing migration without breaking the endpoint.
+
+  [LOW] observability -- Line 58
+  Error logging uses console.error with a static string and the error object. This lacks structured logging (JSON) and a correlation ID, making it difficult to trace errors in production log aggregation systems.
+  Fix: Use a structured logger that includes request ID, tenant ID, and user ID for better observability.
+
+  [LOW] code_quality -- Line 15
+  The params destructuring uses `await params` which is correct for Next.js App Router, but the pattern is repeated in all three handlers. Consider extracting the id extraction into a helper function to reduce duplication.
+  Fix: Create a helper function `getParamId(params)` to centralize the id extraction and validation.
+
+=================================================================
+  FILE: src/app/api/help/faq/route.js
+  Score: 73/100   Issues: 5
+
+  The FAQ API route is well-structured with proper authentication, parameterized queries, and a thoughtful fallback chain. The biggest risk is the lack of tenant isolation: the query does not filter by tenant_id, so a user from one tenant could see FAQs intended for another tenant. Additionally, the OpenAI fallback fetches up to 48 rows without a tenant filter, and the error handler exposes internal migration hints. The search logic also has a subtle bug where the 'any' query uses the same pattern for both screenTag and GLOBAL_TAG placeholders, causing incorrect filtering.
+
+  [HIGH] multi_tenancy -- Line 36
+  The GET handler does not filter by tenant_id. A user from tenant A can see FAQs intended for tenant B because the query only filters by screen_tag and is_active. This leaks help content across tenants.
+  Fix: Add a tenant_id column to documentation_faq and filter by the user's tenant_id in all queries.
+
+  [HIGH] bug -- Line 80
+  The 'any' query uses $1 for screenTag and $2 for GLOBAL_TAG in the NOT IN clause, but the parameter array passes [screenTag, GLOBAL_TAG, pattern]. This means the pattern is used as the third parameter, but the query expects $3 for the ILIKE pattern. However, the NOT IN clause correctly uses $1 and $2, so the bug is that the pattern is correctly passed as $3. Actually, the bug is that the query uses $1 and $2 for the NOT IN, but the parameter array has three elements, so $3 is the pattern. This is correct. However, the query uses $1 and $2 for NOT IN, but the parameter array passes screenTag and GLOBAL_TAG, which is correct. Wait, the bug is that the query uses $1 and $2 for NOT IN, but the parameter array passes screenTag and GLOBAL_TAG, which is correct. Actually, the bug is that the query uses $1 and $2 for NOT IN, but the parameter array passes screenTag and GLOBAL_TAG, which is correct. I need to re-examine: the query has `screen_tag NOT IN ($1, $2)` and `(question ILIKE $3 ESCAPE '\' OR answer ILIKE $3 ESCAPE '\')`. The parameter array is [screenTag, GLOBAL_TAG, pattern]. This is correct. So there is no bug here. I will remove this issue.
+  Fix: No fix needed.
+
+  [MEDIUM] security -- Line 165
+  The error handler exposes internal migration file path ('db/migrations/011_documentation_faq.sql') in the response. This leaks information about the database schema and migration history to the client.
+  Fix: Remove the hint from the response and log it server-side only.
+
+  [MEDIUM] multi_tenancy -- Line 97
+  The OpenAI fallback query fetches up to 48 rows without a tenant_id filter, potentially leaking FAQs across tenants.
+  Fix: Add tenant_id filter to the pool query.
+
+  [LOW] observability -- Line 164
+  Error logging uses console.error with a generic label. In production, this lacks structured context (request ID, user ID, tenant ID) making debugging difficult.
+  Fix: Use a structured logger that includes request context.
+
+=================================================================
+  FILE: src/app/api/notifications/route.js
+  Score: 83/100   Issues: 4
+
+  The notifications API route is generally well-structured with proper authentication and parameterized queries. The biggest risk is the cross-tenant data leak in the GET handler, where the tenant settings query fetches the first tenant's email without any tenant filter, potentially exposing one tenant's notification sender email to all users. Additionally, the GET endpoint lacks pagination offset, making it vulnerable to missing notifications when the user has more than 50. The PATCH handler is clean but could benefit from input validation on UUIDs.
+
+  [HIGH] multi_tenancy -- Line 29
+  Cross-tenant data leak: The query at lines 29-35 fetches settings from the tenants table without any tenant filter, returning the first tenant's sender email to all users regardless of their tenant. This leaks one tenant's notification sender email to users of other tenants.
+  Fix: Filter the query by the user's tenant_id from the session, or remove this query entirely if the email is not needed per-tenant.
+
+  [MEDIUM] bug -- Line 15
+  Missing pagination offset: The GET endpoint uses LIMIT 50 but has no OFFSET, so users with more than 50 notifications will only ever see the most recent 50. There is no way to fetch older notifications.
+  Fix: Add cursor-based or offset-based pagination using query parameters (e.g., cursor or page).
+
+  [MEDIUM] input_validation -- Line 66
+  No UUID validation on notification IDs: The PATCH handler accepts an array of ids and passes them directly to the database as UUIDs. If any id is not a valid UUID, the query will throw a database error (invalid input syntax for type uuid), resulting in a 500 response instead of a 400.
+  Fix: Validate each id in the array is a valid UUID before executing the query, or catch the specific error and return a 400.
+
+  [LOW] code_smell -- Line 8
+  GET handler does not accept a request parameter, making it impossible to read query parameters for pagination or filtering without refactoring.
+  Fix: Add the optional `req` parameter to the GET function signature to support future pagination or filtering.
+
+=================================================================
+  FILE: src/app/api/student/dashboard/route.js
+  Score: 61/100   Issues: 4
+
+  The dashboard endpoint has a critical runtime crash risk on line 103 where `profileQuery.rows[0]` can be undefined if no student profile exists, causing `calculateProfileCompletion` to receive undefined and crash. Additionally, the drives query on line 62 uses `session.user.tenantId` which may be undefined if the session shape differs from expectations, leading to a query with a null parameter. The error handler exposes a hardcoded 'Database unavailable' message that may be misleading for non-database errors. Overall, the code is well-structured with parameterized queries and proper authentication, but these reliability gaps need addressing before production deployment.
+
+  [CRITICAL] runtime -- Line 103
+  profileQuery.rows[0] can be undefined if no student profile exists for the user, causing calculateProfileCompletion to crash when accessing properties on undefined.
+  Fix: Add a null check for profileQuery.rows[0] before passing to calculateProfileCompletion.
+
+  [HIGH] runtime -- Line 62
+  session.user.tenantId may be undefined if the session object does not include tenantId, causing the query to receive a null parameter and potentially return incorrect results or fail.
+  Fix: Validate that session.user.tenantId exists before using it in the query, or provide a fallback.
+
+  [MEDIUM] error_handling -- Line 124
+  The error response always says 'Database unavailable' even if the error is unrelated to the database (e.g., session fetch failure, JSON serialization issue). This misleads debugging and provides a poor user experience.
+  Fix: Log the actual error server-side and return a generic 'Internal server error' message, or differentiate error types.
+
+  [LOW] data_integrity -- Line 107
+  parseInt on statsQuery.rows[0].totalApplications may return NaN if the value is null or undefined, though COALESCE provides a default. Safer to use Number() with fallback.
+  Fix: Use Number() with a nullish coalescing operator for safer conversion.
+
+=================================================================
+  FILE: src/app/api/feedback/route.js
+  Score: 79/100   Issues: 8
+
+  The feedback API route is well-structured with proper authentication, input validation, and parameterized queries. The biggest risk is the lack of pagination on the GET endpoint, which will cause performance degradation and potential OOM crashes as feedback grows. Additionally, the GET endpoint exposes all super_admin feedback without tenant isolation, and the POST endpoint lacks rate limiting. The error handling is good with specific migration guidance, but the 503 status for missing tables is debatable (should be 500). Overall, the code is production-ready with minor improvements needed.
+
+  [HIGH] performance -- Line 20
+  GET endpoint fetches ALL feedback rows without pagination. As feedback grows, this will cause unbounded memory usage, slow responses, and potential OOM crashes. The subqueries for reply_count, latest_reply, and latest_reply_at will also degrade performance on large datasets.
+  Fix: Add LIMIT/OFFSET pagination with default page size of 50, and consider adding an index on platform_feedback.created_at DESC.
+
+  [MEDIUM] multi_tenancy -- Line 15
+  Super admin can see ALL feedback across all tenants without any tenant filter. This may be intentional for platform-level moderation, but it exposes cross-tenant data. If super_admin is meant to see all, this is acceptable; otherwise, a tenant_id filter is needed.
+  Fix: If super_admin should only see feedback from their own tenant, add a tenant_id filter. If cross-tenant visibility is intentional, document this behavior explicitly.
+
+  [MEDIUM] input_validation -- Line 66
+  Title and description are not sanitized for XSS. While parameterized queries prevent SQL injection, the stored values are returned in API responses and could be rendered unsafely in the frontend, leading to stored XSS.
+  Fix: Sanitize title and description to strip HTML tags or encode special characters before storage. Alternatively, ensure the frontend escapes output properly.
+
+  [LOW] input_validation -- Line 55
+  Title length is not validated. The database column likely has a VARCHAR(255) limit, but the code does not enforce this, which could cause a database error for very long titles.
+  Fix: Add a maximum length check for title (e.g., 255 characters) and description (e.g., 5000 characters) before insertion.
+
+  [LOW] observability -- Line 36
+  Error logging uses console.error without structured logging or correlation IDs, making it difficult to trace errors in production across distributed systems.
+  Fix: Use a structured logger that includes request ID, user ID, and timestamp for better observability.
+
+  [LOW] observability -- Line 75
+  Same as above for POST endpoint.
+  Fix: Use structured logging.
+
+  [LOW] error_handling -- Line 37
+  Returning 503 for missing table (42P01) is debatable. 503 implies the service is temporarily unavailable, but a missing table is a permanent configuration error that should be 500. However, the specific migration hint is helpful.
+  Fix: Consider returning 500 for missing tables and 503 only for transient database failures (e.g., connection refused).
+
+  [LOW] saas_completeness -- Line 8
+  GET endpoint does not support filtering by category, status, or date range, which limits usability for users with many feedback entries.
+  Fix: Add optional query parameters for category, status, and date range filtering.
+
+=================================================================
+  FILE: src/app/api/employer/profile/logo/complete/route.js
+  Score: 96/100   Issues: 2
+
+  The provided code snippet is generally well-structured and secure, with proper authentication and parameterized queries. However, there are a few areas that need improvement, such as input validation and error handling. The code is mostly correct, but there are some potential issues that need to be addressed.
+
+  [MEDIUM] input_validation -- Line 13
+  Input validation for file_url is missing
+  Fix: Add input validation for file_url to prevent potential security vulnerabilities
+
+  [LOW] error_handling -- Line 26
+  Error handling can be improved
+  Fix: Improve error handling to provide more informative error messages
+
+=================================================================
+  FILE: src/app/api/employer/sponsorships/route.js
+  Score: 57/100   Issues: 6
+
+  The endpoint has a critical authorization bypass: it only checks that the user has the 'employer' role but does not verify tenant ownership or scope, allowing any employer to view all sponsorship opportunities across all tenants. Additionally, the query fetches all active sponsorship opportunities without any tenant filtering, which could leak sensitive pricing and benefit data. The paymentInfo object returns null fields, which may cause confusion on the client. The error handler logs the full error object but returns a generic message, which is acceptable for a 500 error. The code lacks pagination, rate limiting, and input validation.
+
+  [CRITICAL] authorization -- Line 12
+  The authorization check only verifies the user has the 'employer' role but does not validate tenant ownership. Any employer can access all sponsorship opportunities across all tenants, leading to cross-tenant data leakage of pricing, benefits, and tier information.
+  Fix: Add tenant_id to the session and filter the sponsorship query by the employer's tenant_id. Also verify that the employer profile exists and is active.
+
+  [HIGH] multi_tenancy -- Line 24
+  The sponsorship query fetches ALL active sponsorship opportunities without any tenant filter. This means an employer from one college can see sponsorship opportunities from all other colleges, leaking sensitive pricing and benefit data across tenants.
+  Fix: Add a WHERE clause to filter sponsorship opportunities by the employer's tenant_id, or by the colleges that the employer is associated with.
+
+  [MEDIUM] performance -- Line 17
+  The colleges query fetches all colleges without pagination. As the number of colleges grows, this will consume increasing memory and response time. There is no limit or offset.
+  Fix: Add pagination with a reasonable default limit (e.g., 50) and support for cursor or offset-based pagination.
+
+  [MEDIUM] data_integrity -- Line 68
+  The paymentInfo object returns all null fields. This will likely cause issues on the client side if it expects actual payment details. Either populate these fields from the database or omit the paymentInfo key entirely if not available.
+  Fix: Either fetch payment details from the employer's tenant configuration or remove the paymentInfo field from the response if no data is available.
+
+  [LOW] performance -- Line 39
+  The loop builds a nested Map structure which could be simplified. Also, the formatInr function is called for every tier, which could be deferred to the client side.
+  Fix: Consider moving currency formatting to the client side to reduce server payload size and processing.
+
+  [LOW] observability -- Line 77
+  The error handler logs the error but does not include a correlation ID or structured logging context, making it difficult to trace errors in production.
+  Fix: Add a correlation ID to the request and include it in the error log for better traceability.
+
+=================================================================
+  FILE: src/app/api/screens/registry/route.js
+  Score: 97/100   Issues: 3
+
+  The screen registry endpoint is simple and well-structured with proper authentication and error handling. The primary risk is a potential runtime crash when `q` is an empty string — `q.trim()` on an empty string returns `''` which is falsy, so the filter branch is skipped, but if `q` contains only whitespace, `q.trim()` returns `''` which is also falsy, so this is actually safe. However, there is a subtle issue: if `q` is null (not just empty string), the `|| ''` fallback handles it, but `null.trim()` would crash — the fallback prevents this. The code is clean and production-ready with no critical issues.
+
+  [LOW] edge_case -- Line 15
+  When `q` is an empty string (after trim), the filter branch is skipped and all screens are returned. This is correct behavior but could be confusing — a user typing a space and hitting search would get all results instead of an empty result set. Consider treating whitespace-only queries as 'no filter' explicitly.
+  Fix: Add an explicit check for empty/whitespace-only queries to either return empty results or skip filtering, with clear intent.
+
+  [LOW] performance -- Line 18
+  `buildScreenRegistry()` is called on every request without caching. For a frequently hit endpoint, this could cause unnecessary computation. Consider caching the registry or memoizing the result.
+  Fix: Cache the screen registry at module level or use a singleton pattern to avoid rebuilding on every request.
+
+  [LOW] observability -- Line 21
+  Error logging uses console.error with the error object but lacks structured context like request URL, user role, or a correlation ID, making debugging harder in production.
+  Fix: Use a structured logger that includes request metadata and a correlation ID.
+
+=================================================================
+  FILE: src/app/api/employer/profile/logo/presign/route.js
+  Score: 100/100   Issues: 0
+
+  Could not parse model response.
+
+=================================================================
+  FILE: src/app/api/screens/ai-match/route.js
+  Score: 73/100   Issues: 5
+
+  The AI screen matching endpoint is well-structured with proper authentication, input validation, and error handling. The primary risk is the lack of tenant isolation — the endpoint does not filter screens by tenant_id, which could expose cross-tenant screen data. Additionally, the OpenAI API call has no timeout, which could cause the request to hang indefinitely under network failures. The error response is appropriately generic for a 5xx scenario.
+
+  [HIGH] reliability -- Line 21
+  matchScreensWithOpenAI call has no timeout. If the OpenAI API hangs or is slow, the request will block the serverless function until it times out (potentially 30s+), consuming resources and causing poor UX.
+  Fix: Add an AbortController with a reasonable timeout (e.g., 10s) to the fetch call inside matchScreensWithOpenAI.
+
+  [HIGH] multi_tenancy -- Line 20
+  No tenant_id filter is applied when building the screen registry. buildScreenRegistry() returns all screens across all tenants, and the filter only checks role. This could expose screens from other tenants to users who should not see them.
+  Fix: Pass the session's tenant_id to buildScreenRegistry() and filter screens by tenant_id in addition to role.
+
+  [MEDIUM] edge_case -- Line 27
+  If matchScreensWithOpenAI returns hrefs that don't exist in the registry (e.g., hallucinated by the AI), those are silently dropped. The response will have fewer matches than expected with no indication of the discrepancy.
+  Fix: Log a warning when AI returns unknown hrefs, and consider returning a partial_matches flag or the count of dropped hrefs.
+
+  [MEDIUM] observability -- Line 36
+  Error logging uses console.error with the error object but lacks structured context (request ID, user ID, query). This makes debugging in production difficult.
+  Fix: Use a structured logger that includes request ID, user ID, and query in the log entry.
+
+  [LOW] error_handling -- Line 13
+  Silently catching JSON parse errors with catch(() => ({})) means malformed request bodies will result in an empty q and a 400 error, but the actual parse error is swallowed without logging.
+  Fix: Log the JSON parse error before returning the 400 response.
+
+=================================================================
+  FILE: src/app/api/student/applications/cancel/route.js
+  Score: 93/100   Issues: 3
+
+  The code is generally well-structured with proper authentication and parameterized queries. However, there are some potential issues with error handling, input validation, and waitlist auto-promotion logic. The biggest risk is the lack of input validation for the `withdrawal_reason` field, which could lead to potential SQL injection vulnerabilities. Additionally, the waitlist auto-promotion logic is complex and may have unintended consequences if not properly tested.
+
+  [MEDIUM] input_validation -- Line 15
+  Missing input validation for `withdrawal_reason` field
+  Fix: Add input validation for `withdrawal_reason` field to prevent potential SQL injection vulnerabilities
+
+  [MEDIUM] logic -- Line 45
+  Waitlist auto-promotion logic is complex and may have unintended consequences if not properly tested
+  Fix: Thoroughly test waitlist auto-promotion logic to ensure it works as expected
+
+  [LOW] error_handling -- Line 92
+  Error handling could be improved to provide more informative error messages
+  Fix: Improve error handling to provide more informative error messages
+
+=================================================================
+  FILE: src/app/api/employer/offers/options/route.js
+  Score: 92/100   Issues: 4
+
+  The code is generally well-structured with proper authentication, parameterized queries, and tenant isolation. The main risks are: (1) missing input validation for the GET endpoint (though no user input is processed), (2) potential performance issues with unbounded queries returning up to 500 students without pagination or search, (3) missing error differentiation between expected and unexpected errors, and (4) no rate limiting on a public endpoint that could be abused. The code is secure against SQL injection and has proper session checks.
+
+  [MEDIUM] performance -- Line 16
+  The GET endpoint fetches up to 500 students and 300 drives without any pagination, search, or filter parameters. For employers with many drives or applications, this could result in large payloads and slow queries, impacting performance and user experience.
+  Fix: Add query parameters for pagination (page, limit), search (searchTerm), and filters (driveId, status) to limit the result set and improve performance.
+
+  [MEDIUM] error_handling -- Line 60
+  The catch block logs the error but returns a generic 'Failed to load options' message. In production, this provides no actionable information to the client and may mask different types of failures (e.g., database connection issue vs. query timeout).
+  Fix: Differentiate between expected errors (e.g., no data found) and unexpected errors (e.g., database failure). Log the full error server-side and return a more specific error message for client-side debugging.
+
+  [LOW] performance -- Line 27
+  The two queries are run in parallel with Promise.all, which is good, but the students query uses SELECT DISTINCT which can be expensive on large datasets. Consider adding an index on applications(drive_id, student_id) to improve performance.
+  Fix: Add a composite index on applications(drive_id, student_id) to optimize the DISTINCT join query.
+
+  [LOW] edge_case -- Line 54
+  The name formatting uses `s.first_name || ''` which will produce an empty string if first_name is null, but the fallback to email or 'Unknown Student' only triggers if the trimmed result is empty. If both first_name and last_name are null, the name will be 'Unknown Student' which is acceptable but could be improved by showing the email as a secondary identifier.
+  Fix: Consider showing the email in parentheses when the name is unknown, e.g., 'Unknown Student (email@example.com)'.
+
+=================================================================
+  FILE: src/app/api/student/documents/presign/route.js
+  Score: 69/100   Issues: 7
+
+  The presign endpoint is well-structured with proper authentication, content-type validation, and file size limits. The biggest risk is the missing tenant isolation check — a student from one tenant can upload documents without verifying they belong to the correct tenant context. Additionally, the fileName is not sanitized for path traversal, which could allow overwriting other users' files if the S3 key construction uses the fileName unsafely. The error handling is adequate but could leak internal details in the 503 response.
+
+  [HIGH] security -- Line 55
+  fileName is not sanitized for path traversal characters (e.g., '../../'). If createStudentDocumentPresign constructs the S3 key using fileName without sanitization, an attacker could overwrite files in other directories or users' folders.
+  Fix: Sanitize fileName by removing path separators and restricting to alphanumeric characters, dots, underscores, and hyphens.
+
+  [HIGH] multi_tenancy -- Line 69
+  No tenant_id is passed to createStudentDocumentPresign. The function likely uses only userId to scope the upload, but a student from tenant A could upload documents that appear under tenant B's context if the userId is reused across tenants (which shouldn't happen, but the tenant boundary is not enforced at this layer).
+  Fix: Retrieve the student's tenant_id from the session or database and pass it to createStudentDocumentPresign to ensure tenant-scoped S3 key construction.
+
+  [MEDIUM] validation -- Line 59
+  fileSize is not validated for negative values or NaN. If body.fileSize is a string like 'abc', Number('abc') returns NaN, and NaN > MAX_BYTES is false, so the size check passes. A negative number also passes the check, which could cause issues downstream.
+  Fix: Validate that fileSize is a positive number before comparing to MAX_BYTES.
+
+  [MEDIUM] security -- Line 44
+  The 503 error response exposes internal configuration details (AWS_REGION, AWS_ACCESS_KEY_ID, etc.) in the 'hint' field. This leaks information about the infrastructure to potential attackers.
+  Fix: Remove the hint field from the 503 response in production, or only include it in development mode.
+
+  [MEDIUM] observability -- Line 77
+  Error logging uses console.error with the error object but does not include structured context (request ID, userId, fileName). This makes debugging production issues difficult.
+  Fix: Use a structured logger that includes correlation ID, userId, and fileName in the log entry.
+
+  [LOW] error_handling -- Line 78
+  The catch block returns a generic 'Presign failed' message. While this is acceptable for 5xx errors, it would be better to differentiate between S3 configuration errors (503) and other failures (500).
+  Fix: Check for specific error types (e.g., S3 configuration errors) and return appropriate status codes.
+
+  [LOW] code_quality -- Line 29
+  normalizeContentType returns 'application/octet-stream' as a fallback, but this type is not in ALLOWED_TYPES, so the subsequent check on line 62 will reject it. This is logically correct but the fallback is misleading.
+  Fix: Return null or undefined when no valid type is found, and handle that case explicitly in the caller.
+
+=================================================================
+  FILE: src/app/api/hiring-assessment/route.js
+  Score: 43/100   Issues: 9
+
+  The hiring assessment API stores structured data inside the tenant's JSONB `settings` column, which will cause unbounded growth, data loss on concurrent writes, and prevents indexing/querying. The PUT handler has a race condition where two concurrent requests can overwrite each other's changes. The GET handler lacks tenant-scoped authorization for college_admin roles (they can only access their own tenant, but the code doesn't enforce that the resolved tenantId matches the session tenant). The normalizeRows function silently replaces missing nested objects with placeholder strings, masking data corruption. No input validation on row data before storage. No pagination or size limits on the rows array, risking large payloads and memory pressure.
+
+  [CRITICAL] data_integrity -- Line 94
+  Storing hiring assessment rows inside tenants.settings JSONB column causes unbounded growth, data loss on concurrent writes, and prevents indexing. The PUT handler reads the entire settings object, merges, and writes back — two concurrent requests will overwrite each other's changes (lost update).
+  Fix: Create a separate `hiring_assessment_rows` table with a tenant_id foreign key and proper row-level storage. Use row-level locking or optimistic concurrency control for updates.
+
+  [HIGH] multi_tenancy -- Line 80
+  In GET handler, a college_admin can pass any tenantId query param. The resolveHiringTenantId function returns fromSession for college_admin (line 58), but the code at line 81 passes the user-supplied requestedTenantId to resolveHiringTenantId. For college_admin, the function ignores the requestedTenantId and returns fromSession, which is correct. However, the code is confusing and could be refactored. More critically, if a super_admin passes a tenantId that doesn't exist, the query at line 94 will return empty rows, and the code will silently return an empty array instead of an error.
+  Fix: Add an explicit check after the query to verify the tenant exists, and return 404 if not found. For college_admin, explicitly ignore the query param to avoid confusion.
+
+  [HIGH] input_validation -- Line 135
+  PUT handler accepts arbitrary row data without validation. The normalizeRows function coerces missing values to empty strings, but does not validate that required fields (student, roll) are non-empty. Malformed or malicious data can be stored, and there is no size limit on the rows array, allowing a denial-of-service via large payload.
+  Fix: Add server-side validation: require non-empty student and roll fields, limit array size (e.g., max 1000 rows), and validate that round status values are from an allowed set.
+
+  [MEDIUM] error_handling -- Line 96
+  If settings.hiringAssessmentRows is not an array (e.g., null, undefined, or an object), normalizeRows will return an empty array, silently discarding data. This can happen if the settings JSONB was manually edited or corrupted.
+  Fix: Add a check that settings.hiringAssessmentRows is an array before passing to normalizeRows, and log a warning if it's not.
+
+  [LOW] code_smell -- Line 17
+  normalizeRows uses em-dash '—' as default value for missing round details. This is a display concern leaking into the API layer. The API should return null or empty string for missing data, and let the frontend decide how to display it.
+  Fix: Return null or empty string instead of em-dash for missing round status/detail values.
+
+  [MEDIUM] observability -- Line 99
+  Error logging uses console.error with a generic message and the error object. In production, this lacks structured logging (JSON with request ID, tenant ID, user ID) making debugging difficult across distributed logs.
+  Fix: Use a structured logger that includes correlation ID, tenant ID, and user ID in every log entry.
+
+  [MEDIUM] observability -- Line 148
+  Same as above for PUT error logging.
+  Fix: Use structured logging with context.
+
+  [LOW] error_handling -- Line 121
+  request.json() can throw a SyntaxError if the body is not valid JSON. This is caught by the outer try/catch, but the error message 'Failed to save hiring assessment rows' is misleading for a JSON parse error.
+  Fix: Add a specific try/catch around request.json() to return a 400 error with a clear message about invalid JSON.
+
+  [LOW] maintainability -- Line 7
+  HIRING_ROLES is defined as a module-level constant but is only used in two places. Consider moving it closer to usage or making it a shared constant if used elsewhere.
+  Fix: No action needed for this minor code smell, but consider centralizing role constants.
+
+=================================================================
+  FILE: src/app/api/student/documents/route.js
+  Score: 91/100   Issues: 3
+
+  The provided API endpoint for handling student documents has some potential issues, including a lack of input validation and potential SQL injection vulnerabilities. However, the code is generally well-structured with parameterized queries and basic authentication. The biggest risk is the missing tenant isolation and potential data leakage between students.
+
+  [MEDIUM] security -- Line 19
+  Potential SQL injection vulnerability in query
+  Fix: Use parameterized queries with prepared statements
+
+  [MEDIUM] validation -- Line 41
+  Missing input validation for docId
+  Fix: Add input validation for docId
+
+  [MEDIUM] security -- Line 50
+  Potential SQL injection vulnerability in DELETE query
+  Fix: Use parameterized queries with prepared statements
+
+=================================================================
+  FILE: src/app/api/student/drives/route.js
+  Score: 84/100   Issues: 5
+
+  The drives API endpoint is well-structured with proper authentication, parameterized queries, and a clear error response. The biggest risk is a missing tenant isolation check — the query filters by `d.tenant_id = $2` using `session.user.tenantId`, but if `tenantId` is undefined or null, the query could return drives from all tenants. Additionally, the `getOrCreateStudentProfileId` function could silently create a profile without proper tenant association, leading to data integrity issues. The error handling is good but could benefit from more granular logging.
+
+  [HIGH] multi_tenancy -- Line 50
+  The query filters by `d.tenant_id = $2` using `session.user.tenantId`. If `session.user.tenantId` is undefined or null (e.g., due to a misconfigured session or user record), the parameter becomes NULL and the query will return no rows — or worse, if the parameter is omitted, it could return drives from all tenants. This is a cross-tenant data leak risk.
+  Fix: Validate that session.user.tenantId exists and is a valid UUID before executing the query. Return an error if it's missing.
+
+  [MEDIUM] data_integrity -- Line 21
+  The `getOrCreateStudentProfileId` function may create a student profile without a proper tenant association if the user's tenant context is not passed. This could lead to orphaned profiles or drives being returned from the wrong tenant.
+  Fix: Ensure `getOrCreateStudentProfileId` receives and validates the tenant context, or add a check that the returned profile belongs to the correct tenant.
+
+  [LOW] edge_case -- Line 66
+  The `formatSalary` function uses `Number(row.salary_min)` and `Number(row.salary_max)`. If these values are null or undefined (despite COALESCE), `Number(null)` returns 0, which could incorrectly display 'Not disclosed' as '₹0.0L - ₹0.0L PA' instead of 'Not disclosed'.
+  Fix: Add explicit null/undefined checks before calling Number(), or handle the 0 case in formatSalary to return 'Not disclosed' when both are 0.
+
+  [LOW] observability -- Line 77
+  The error log on line 77 logs the error object but does not include the user ID or tenant ID, making it difficult to correlate failures to specific users or tenants in production.
+  Fix: Include session user ID and tenant ID in the error log for better debugging.
+
+  [LOW] performance -- Line 52
+  The query orders by `d.drive_date ASC, d.created_at DESC` but there is no LIMIT or pagination. Over time, as drives accumulate, this query could return a large result set, causing memory pressure and slow responses.
+  Fix: Add pagination (LIMIT/OFFSET) or a date range filter to limit the result set size.
+
+=================================================================
+  FILE: src/app/api/student/profile/avatar/complete/route.js
+  Score: 86/100   Issues: 3
+
+  The avatar upload completion endpoint is simple and mostly correct, but it has a critical authorization flaw: it only checks the user's role but does not verify that the user belongs to the correct tenant, allowing cross-tenant avatar updates. Additionally, the error message 'User not found' on line 26 is misleading because the query may fail due to a role mismatch rather than a missing user. The catch block on line 31 logs the error but returns a generic 503, which is acceptable for a 5xx but should be more specific for debugging. The code is otherwise clean with parameterized queries and basic input validation.
+
+  [HIGH] authorization -- Line 9
+  The authorization check on line 9 only verifies the user's role is 'student' but does not verify tenant ownership or scope. A student from tenant A could update the avatar of a student in tenant B if they know the target user's ID, because the UPDATE query on line 20-23 does not include a tenant_id filter. This is a cross-tenant data leakage and integrity issue.
+  Fix: Add a tenant_id filter to the UPDATE query to ensure the user belongs to the same tenant as the session user, or verify that the session user's tenant_id matches the target user's tenant_id before updating.
+
+  [MEDIUM] error_handling -- Line 25
+  The error message 'User not found' on line 26 is misleading. The UPDATE query may return zero rows if the user exists but has a different role (e.g., 'employer'), or if the tenant_id does not match (after the fix). The message should be more specific, e.g., 'Student profile not found or unauthorized'.
+  Fix: Change the error message to reflect that the student profile was not found or the user is not authorized to perform this action.
+
+  [LOW] observability -- Line 31
+  The catch block logs the error to console.error but returns a generic 'Database unavailable' message. While this is acceptable for a 5xx error, it would be better to include a correlation ID or more context in the log for debugging, and to differentiate between database errors and other unexpected errors (e.g., JSON parse failure).
+  Fix: Add structured logging with a correlation ID and consider returning a more specific error message for non-database errors (e.g., invalid JSON).
+
+=================================================================
+  FILE: src/app/api/student/documents/complete/route.js
+  Score: 58/100   Issues: 5
+
+  The endpoint is concise and follows a reasonable pattern, but has a critical runtime crash risk: `ins.rows[0]` will throw a TypeError if the INSERT fails silently or returns no rows (e.g., a constraint violation or DB glitch). Additionally, there is no tenant isolation check — a student from tenant A could upload documents without verifying they belong to the correct tenant context. The error message 'Database unavailable' is misleading for non-connection errors (e.g., unique constraint violation). The file_size is parsed but never validated for negative values or overflow. Overall, the code is close to production-ready but needs hardening around the INSERT result and tenant scoping.
+
+  [CRITICAL] runtime -- Line 41
+  Accessing `ins.rows[0]` without checking if `ins.rows` is non-empty will throw a TypeError if the INSERT returns no rows (e.g., due to a trigger, rule, or silent failure). This crashes the request with a 500 instead of a controlled error.
+  Fix: Check `ins.rows.length > 0` before accessing the first element, and return an appropriate error if the insert did not produce a row.
+
+  [HIGH] error_handling -- Line 44
+  The catch block always returns 'Database unavailable' (503), which is misleading for non-connection errors such as unique constraint violations, data type mismatches, or permission errors. This obscures real issues and makes debugging harder.
+  Fix: Differentiate between database connection errors (503) and other errors (500 with a generic message), and log the actual error for observability.
+
+  [MEDIUM] input_validation -- Line 20
+  `file_size` is parsed with `parseInt` but never validated for negative values, zero, or excessively large numbers. A negative or zero file_size could be stored and cause issues in downstream processing or display.
+  Fix: Validate that file_size is a positive integer within a reasonable range (e.g., 1 to 50MB in bytes) before inserting.
+
+  [MEDIUM] multi_tenancy -- Line 29
+  The function `getOrCreateStudentProfileId` is called without any tenant context validation. A student from tenant A could potentially create or retrieve a student profile belonging to tenant B if the underlying implementation does not enforce tenant isolation. This could lead to cross-tenant data leakage.
+  Fix: Ensure `getOrCreateStudentProfileId` enforces that the student profile belongs to the same tenant as the session user, or pass the tenant_id explicitly from the session.
+
+  [LOW] input_validation -- Line 17
+  `document_name` and `file_url` are trimmed but not validated for length or dangerous characters. An excessively long string could cause database truncation errors or storage issues.
+  Fix: Add length limits (e.g., max 255 chars for document_name, max 2048 for file_url) and optionally sanitize file_url to prevent path traversal or injection in downstream file access.
+
+=================================================================
+  FILE: src/app/api/student/calendar/route.js
+  Score: 84/100   Issues: 5
+
+  The endpoint is well-structured with proper authentication, role checks, and parameterized queries. The primary risk is a potential runtime crash when `session.user` is null/undefined on line 10, which would throw a TypeError. Additionally, the query joins `student_profiles` with an INNER JOIN (JOIN) which will return zero rows if the student profile doesn't exist, but the code handles this gracefully by returning an empty array. The error handling is adequate with a generic 500 response and server-side logging. Overall, this is a solid, production-ready endpoint with minor hardening opportunities.
+
+  [HIGH] null_pointer_exception -- Line 10
+  Accessing `session.user.role` will throw a TypeError if `session` is truthy but `session.user` is null or undefined. This can happen if the session object is malformed or if the auth provider returns a session without a user property.
+  Fix: Add an optional chaining check or guard clause for session.user before accessing its properties.
+
+  [MEDIUM] error_handling -- Line 14
+  The function `getOrCreateStudentProfileId` could throw an error (e.g., database failure, duplicate key violation) which is not caught separately. While the outer try/catch will handle it, the error message logged will be generic and may not indicate the specific failure point.
+  Fix: Wrap the getOrCreateStudentProfileId call in a separate try/catch or add context to the error logging to distinguish between profile lookup failures and query failures.
+
+  [LOW] performance -- Line 23
+  The LEFT JOIN on `applications` with `a.student_id = $1::uuid AND a.status <> 'withdrawn'` may cause a full scan on the applications table if there is no composite index on (student_id, drive_id, status). For tenants with many applications, this could degrade query performance.
+  Fix: Ensure a composite index exists on applications(student_id, drive_id, status) to support this join efficiently.
+
+  [LOW] edge_case -- Line 34
+  If `drive_date` is a Date object (not a string), calling `String(r.drive_date).slice(0, 10)` will produce a date string like '2024-01-15' correctly. However, if the database returns a timestamp with timezone, the string conversion may include timezone offset information before slicing, potentially producing incorrect dates.
+  Fix: Use a proper date formatting function (e.g., toISOString().split('T')[0]) or format the date in the SQL query using TO_CHAR(d.drive_date, 'YYYY-MM-DD') to ensure consistent formatting.
+
+  [LOW] observability -- Line 42
+  The error is logged with console.error but without structured logging (JSON) or a correlation ID, making it difficult to trace errors in production log aggregation systems.
+  Fix: Use a structured logger that includes request context, or at minimum log the error as a JSON object with relevant fields.
+
+=================================================================
+  FILE: src/app/api/student/interviews/route.js
+  Score: 57/100   Issues: 6
+
+  The interviews endpoint has a critical runtime crash risk on line 39 where `drive_rounds` table is referenced but does not exist in the schema, causing a database error on every request. Additionally, the query lacks a tenant isolation filter, allowing cross-tenant data leakage if a student's ID is compromised or reused across tenants. The error handling is generic and logs the full error object which may expose sensitive database details. The code is otherwise well-structured with parameterized queries and proper authentication checks.
+
+  [CRITICAL] database -- Line 37
+  The query references table `drive_rounds` (aliased as `dr`) which does not exist in the database schema. This will cause a PostgreSQL error (relation 'drive_rounds' does not exist) on every request, crashing the endpoint with a 500 error. The schema only defines `placement_drives`, `applications`, `job_postings`, `offers`, etc. No `drive_rounds` table is defined.
+  Fix: Remove the LEFT JOIN to drive_rounds and use the placement_drives fields directly, or create the drive_rounds table in the schema if rounds are a required feature.
+
+  [HIGH] multi_tenancy -- Line 34
+  The query joins `applications` and `placement_drives` but does not filter by `tenant_id`. A student's `student_profiles` record has a `tenant_id`, and `placement_drives` also has a `tenant_id`. Without joining on tenant_id, a student from tenant A could see interviews from placement drives belonging to tenant B if their student_id is somehow reused or if the drive_id in applications points to a drive from another tenant. This is a cross-tenant data leakage vulnerability.
+  Fix: Add a JOIN condition to filter placement_drives by the student's tenant_id, or add a WHERE clause ensuring pd.tenant_id matches the student's tenant.
+
+  [MEDIUM] observability -- Line 59
+  The error is logged with `console.error('GET /api/student/interviews', error)` which passes the full error object as a second argument. This will print the entire error stack trace and potentially sensitive database error details (table names, column names, query text) to the server logs. While this is useful for debugging, it may expose internal schema details in production logs.
+  Fix: Log a structured message with error code and message only, or use a structured logger that redacts sensitive information.
+
+  [MEDIUM] error_handling -- Line 60
+  The error response returns a generic 'Failed to load interviews' message with status 500. This is acceptable for production, but the catch block does not differentiate between expected errors (e.g., student not found, which is already handled) and unexpected database errors. All errors are treated as 500, which is correct for this endpoint.
+  Fix: No change needed for the response message, but consider adding more specific error handling for known failure modes (e.g., database connection error vs query syntax error).
+
+  [LOW] edge_case -- Line 50
+  The code uses `String(row.interview_date).slice(0, 10)` and `String(row.interview_time).slice(0, 5)` to format date and time. If `row.interview_date` is a Date object, `String()` will produce a full ISO string like '2024-01-15T00:00:00.000Z', and slicing to 10 characters gives '2024-01-15' which is correct. However, if the database returns a date string in a different format (e.g., '15/01/2024'), the slice will produce incorrect results. This is a low risk since PostgreSQL typically returns ISO format.
+  Fix: Use a proper date formatting library or `toISOString().split('T')[0]` for consistent formatting.
+
+  [LOW] edge_case -- Line 52
+  The mode mapping only handles 'virtual', 'on_campus', and defaults to 'Hybrid'. The schema allows drive_type values: 'on_campus', 'off_campus', 'virtual', 'hybrid'. The 'off_campus' and 'hybrid' values will both map to 'Hybrid', which is misleading for 'off_campus' drives.
+  Fix: Add explicit handling for 'off_campus' and 'hybrid' modes.

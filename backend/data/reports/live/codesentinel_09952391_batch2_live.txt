@@ -1,0 +1,432 @@
+=================================================================
+  CODESENTINEL -- BATCH 2 REPORT
+  Files 26 - 48 of 229
+  Folder : C:\Users\sandeep\Downloads\Claudes\CampusPlacement\campus-placement
+  Saved  : 01/05/2026, 10:32:27
+=================================================================
+
+  Batch Score   : 90/100
+  Files Reviewed: 23
+  Total Issues  : 71
+
+=================================================================
+  FILE: src/app/api/college/engagement-listings/route.js
+  Score: 96/100   Issues: 2
+
+  The provided API route for college engagement listings is well-structured and handles authentication, authorization, and error handling properly. However, there are some potential issues with input validation, error handling, and database query efficiency. The code score is 85 due to some minor issues and suggestions for improvement.
+
+  [MEDIUM] input_validation -- Line 47
+  Input validation for title, summary, requirements, and timeHint fields can be improved
+  Fix: Add more robust input validation for these fields
+
+  [LOW] error_handling -- Line 28
+  Error handling can be improved
+  Fix: Add more robust error handling
+
+=================================================================
+  FILE: src/app/api/college/employers/[employerId]/poc/route.js
+  Score: 90/100   Issues: 4
+
+  The provided API route for saving coordination POC staff for an employer tie-up is well-structured and handles authentication, authorization, and error handling properly. However, there are some areas that require improvement, such as input validation, error handling, and potential SQL injection vulnerabilities. The code score is 85 due to some minor issues and areas for improvement.
+
+  [MEDIUM] input_validation -- Line 23
+  The employerId parameter is not validated for null or empty values
+  Fix: Add input validation for employerId
+
+  [LOW] code_smell -- Line 30
+  The rawIds variable is not necessary and can be removed
+  Fix: Remove the rawIds variable
+
+  [MEDIUM] sql_injection -- Line 36
+  The query uses parameterized placeholders, but the input values are not validated
+  Fix: Add input validation for staffUserIds
+
+  [MEDIUM] sql_injection -- Line 51
+  The query uses parameterized placeholders, but the input values are not validated
+  Fix: Add input validation for staffUserIds
+
+=================================================================
+  FILE: src/app/api/college/enrollment-ledger/route.js
+  Score: 93/100   Issues: 3
+
+  The provided API route for college enrollment ledger is well-structured and handles authentication, authorization, and error handling properly. However, there are some potential issues that need to be addressed, such as missing input validation, potential SQL injection vulnerabilities, and inadequate error handling. The code score is 80 due to these issues.
+
+  [MEDIUM] input_validation -- Line 13
+  Missing input validation for tenantId
+  Fix: Add input validation to ensure tenantId is a valid UUID
+
+  [LOW] sql_injection -- Line 18
+  Potential SQL injection vulnerability
+  Fix: Use a parameterized query or an ORM to prevent SQL injection
+
+  [MEDIUM] error_handling -- Line 34
+  Inadequate error handling
+  Fix: Log the error with more context and return a more informative error message
+
+=================================================================
+  FILE: src/app/api/college/employers/route.js
+  Score: 95/100   Issues: 3
+
+  The provided API route for college employers is well-structured and handles authentication, authorization, and error handling properly. However, there are some areas that require improvement, such as input validation, potential SQL injection vulnerabilities, and error handling. The code score is 85 due to some minor issues and suggestions for improvement.
+
+  [MEDIUM] input_validation -- Line 16
+  The tenant ID is not validated before being used in the database query
+  Fix: Add input validation to ensure the tenant ID is a valid UUID
+
+  [LOW] sql_injection -- Line 18
+  The database query uses a parameterized query, but it's still important to ensure that the input is validated
+  Fix: Add input validation to ensure that the tenant ID is a valid UUID and does not contain any malicious characters
+
+  [LOW] error_handling -- Line 76
+  The error handling logs the error to the console, but it would be better to use a logging library
+  Fix: Use a logging library to handle errors and provide more context
+
+=================================================================
+  FILE: src/app/api/college/employers/revoke/route.js
+  Score: 95/100   Issues: 3
+
+  The provided API route for revoking employer access is well-structured and handles authentication, authorization, and error handling properly. However, there are some areas that require improvement, such as input validation, error handling, and potential SQL injection vulnerabilities. The code score is 85 due to the presence of some minor issues and the lack of comprehensive input validation.
+
+  [MEDIUM] input_validation -- Line 15
+  Input validation for body parameters is missing
+  Fix: Add input validation for body parameters using a library like Joi or Zod
+
+  [LOW] error_handling -- Line 26
+  Error handling for database query errors is not comprehensive
+  Fix: Add comprehensive error handling for database query errors
+
+  [LOW] sql_injection -- Line 35
+  Potential SQL injection vulnerability in UPDATE query
+  Fix: Use parameterized queries or prepared statements to prevent SQL injection
+
+=================================================================
+  FILE: src/app/api/college/employers/requests/route.js
+  Score: 93/100   Issues: 3
+
+  The provided API route for fetching employer requests is well-structured and handles authentication, authorization, and error handling properly. However, there are some areas that require improvement, such as input validation, error handling, and potential SQL injection vulnerabilities. The code score is 85 due to the presence of some minor issues.
+
+  [MEDIUM] input_validation -- Line 13
+  The tenantId variable is not validated properly, which could lead to errors or security vulnerabilities.
+  Fix: Add input validation for the tenantId variable.
+
+  [LOW] sql_injection -- Line 19
+  The SQL query uses a parameterized query, which is good practice, but it's still important to ensure that the input parameter is validated and sanitized.
+  Fix: Add input validation and sanitization for the tenantId parameter.
+
+  [MEDIUM] error_handling -- Line 30
+  The error handling mechanism logs the error to the console but returns a generic error message to the user. It would be better to provide a more informative error message.
+  Fix: Improve the error handling mechanism to provide more informative error messages.
+
+=================================================================
+  FILE: src/app/api/college/engagement-listings/[id]/route.js
+  Score: 100/100   Issues: 0
+
+  Could not parse model response.
+
+=================================================================
+  FILE: src/app/api/college/employers/approve/route.js
+  Score: 96/100   Issues: 2
+
+  The provided API route for approving employer approvals is well-structured and handles authentication, authorization, and error handling properly. However, there are some areas that require improvement, such as input validation and error handling. The code is generally secure, but there are some potential issues that need to be addressed. The score is 85 due to some minor issues and areas for improvement.
+
+  [MEDIUM] input_validation -- Line 14
+  The code does not validate the input JSON data. It assumes that the data will always be in the correct format, which can lead to errors if the data is malformed.
+  Fix: Add input validation to ensure that the data is in the correct format.
+
+  [LOW] error_handling -- Line 36
+  The code logs the error to the console, but it would be better to use a more robust error handling mechanism, such as an error logging library.
+  Fix: Consider using a more robust error handling mechanism, such as an error logging library.
+
+=================================================================
+  FILE: src/app/api/college/interviews/route.js
+  Score: 93/100   Issues: 3
+
+  The provided API route for college interviews is well-structured and handles authentication, authorization, and error handling properly. However, there are some potential issues with data validation, error handling, and database queries that need to be addressed. The code is generally well-organized, but there are some areas where it can be improved for better performance, security, and maintainability.
+
+  [MEDIUM] validation -- Line 125
+  Input validation for company, round, date, startTime, endTime, and interviewer is missing
+  Fix: Add input validation to ensure that all required fields are present and valid
+
+  [MEDIUM] database -- Line 132
+  Database query for inserting data into college_calendar table is vulnerable to SQL injection attacks
+  Fix: Use parameterized queries or prepared statements to prevent SQL injection attacks
+
+  [LOW] error_handling -- Line 15
+  Error handling in parseMeta function can be improved
+  Fix: Add more specific error handling to handle different types of errors
+
+=================================================================
+  FILE: src/app/api/college/internships/route.js
+  Score: 93/100   Issues: 3
+
+  The provided API route for college internships is well-structured and handles authentication, authorization, and error handling properly. However, there are some potential issues with database query efficiency and error handling. The code score is 85 due to some minor issues and suggestions for improvement.
+
+  [MEDIUM] performance -- Line 27
+  The database query is not optimized and may cause performance issues. Consider adding indexes to the columns used in the WHERE and JOIN clauses.
+  Fix: Add indexes to the columns used in the WHERE and JOIN clauses to improve query performance.
+
+  [LOW] error_handling -- Line 58
+  The error handling is not robust and may not provide useful error messages. Consider logging more detailed error information.
+  Fix: Log more detailed error information to help with debugging and error tracking.
+
+  [MEDIUM] security -- Line 15
+  The authentication check is not robust and may allow unauthorized access. Consider using a more secure authentication mechanism.
+  Fix: Use a more secure authentication mechanism, such as OAuth or OpenID Connect, to protect against unauthorized access.
+
+=================================================================
+  FILE: src/app/api/college/events/route.js
+  Score: 84/100   Issues: 3
+
+  The provided API route for college events is well-structured and handles authentication, authorization, and error handling properly. However, there are some areas that require improvement, such as input validation, error handling, and potential SQL injection vulnerabilities. The code score is 85 due to the identified issues.
+
+  [MEDIUM] input_validation -- Line 41
+  Input validation for event title, type, and dates is incomplete and may lead to errors or security vulnerabilities
+  Fix: Implement comprehensive input validation for all event fields
+
+  [HIGH] sql_injection -- Line 53
+  The INSERT query is vulnerable to SQL injection attacks due to the use of string concatenation
+  Fix: Use parameterized queries to prevent SQL injection attacks
+
+  [MEDIUM] error_handling -- Line 26
+  Error handling during database queries is incomplete and may lead to generic error messages
+  Fix: Implement comprehensive error handling for database queries and return meaningful error messages
+
+=================================================================
+  FILE: src/app/api/college/reports/route.js
+  Score: 95/100   Issues: 3
+
+  The provided API route for college reports is well-structured and handles authentication, authorization, and error handling properly. However, there are some potential issues with database queries, error handling, and data processing. The code uses parameterized queries to prevent SQL injection, which is a good practice. The API route returns a JSON response with various statistics, including total students, placed students, average package, and highest package. The code also handles errors properly by logging the error and returning a JSON response with a 500 status code.
+
+  [MEDIUM] bug -- Line 13
+  The tenant ID is not validated properly, which could lead to a null pointer exception
+  Fix: Add a null check for the tenant ID and return a JSON response with a 400 status code if it is missing
+
+  [LOW] code_smell -- Line 68
+  The placement rate calculation could be simplified
+  Fix: Use a more concise way to calculate the placement rate
+
+  [LOW] code_smell -- Line 82
+  The department placement data processing could be simplified
+  Fix: Use a more concise way to process the department placement data
+
+=================================================================
+  FILE: src/app/api/college/settings/logo/complete/route.js
+  Score: 86/100   Issues: 3
+
+  The provided API route for updating the college logo is well-structured and handles authentication, authorization, and error handling properly. However, there are some potential issues with input validation, error handling, and database query efficiency. The code score is 85 due to the lack of input validation for the file_url and potential SQL injection vulnerabilities.
+
+  [HIGH] security -- Line 27
+  Potential SQL injection vulnerability in the UPDATE query
+  Fix: Use a parameterized query or an ORM to prevent SQL injection
+
+  [MEDIUM] validation -- Line 22
+  Input validation for file_url is missing
+  Fix: Add input validation for file_url to prevent invalid data
+
+  [LOW] error_handling -- Line 30
+  Error handling can be improved by logging more details
+  Fix: Log more details about the error, such as the error stack
+
+=================================================================
+  FILE: src/app/api/college/settings/logo/presign/route.js
+  Score: 96/100   Issues: 2
+
+  The provided API route for presigning a college logo is well-structured and handles authentication, authorization, and error handling properly. However, there are some potential issues with input validation and error handling. The code checks for the file size and content type, but it does not validate the file name. Additionally, the error handling could be improved by providing more specific error messages and logging the errors with more context.
+
+  [MEDIUM] input_validation -- Line 27
+  The file name is not validated, which could lead to security vulnerabilities.
+  Fix: Validate the file name to prevent potential security issues.
+
+  [LOW] error_handling -- Line 45
+  The error handling could be improved by providing more specific error messages and logging the errors with more context.
+  Fix: Improve the error handling by providing more specific error messages and logging the errors with more context.
+
+=================================================================
+  FILE: src/app/api/college/sponsorships/route.js
+  Score: 92/100   Issues: 4
+
+  The provided API route for college sponsorships is well-structured and handles authentication, authorization, and error handling properly. However, there are some potential issues with data formatting, error handling, and database queries. The code score is 85 due to some minor issues and suggestions for improvement.
+
+  [MEDIUM] bug -- Line 17
+  Potential issue with tenantId property name inconsistency in session object
+  Fix: Use a consistent property name for tenantId in the session object
+
+  [LOW] performance -- Line 24
+  Database query for sponsorship opportunities could be optimized for better performance
+  Fix: Consider adding an index on the tenant_id column in the sponsorship_opportunities table
+
+  [LOW] readability -- Line 36
+  Code block for processing sponsorship opportunities rows could be refactored for better readability
+  Fix: Consider breaking down the code block into smaller functions for better readability
+
+  [MEDIUM] error_handling -- Line 57
+  Error handling for DB query could be improved to provide more informative error messages
+  Fix: Consider logging more informative error messages for DB query errors
+
+=================================================================
+  FILE: src/app/api/college/students/bulk-upload/route.js
+  Score: 87/100   Issues: 2
+
+  The provided API route for bulk uploading students is well-structured and handles authentication, authorization, and error handling properly. However, there are some potential issues with data validation, error handling, and database queries. The code does not check for potential SQL injection vulnerabilities and does not handle cases where the CSV file is empty or missing required headers. Additionally, the code does not validate user input data, which could lead to security vulnerabilities.
+
+  [HIGH] security -- Line 71
+  Potential SQL injection vulnerability in database query
+  Fix: Use parameterized queries or prepared statements to prevent SQL injection
+
+  [MEDIUM] error_handling -- Line 28
+  Error handling for file upload is not robust
+  Fix: Add more robust error handling for file upload, including checking for file type and size
+
+=================================================================
+  FILE: src/app/api/college/students/verify/route.js
+  Score: 96/100   Issues: 2
+
+  The provided API route for verifying college students is well-structured and handles authentication, authorization, and error handling properly. However, there are some potential issues with input validation, error handling, and database transactions. The code is generally well-organized, but some improvements can be made to enhance security, reliability, and performance.
+
+  [MEDIUM] input_validation -- Line 13
+  Tenant ID is not validated properly, potential null pointer exception
+  Fix: Add null check and validation for tenantId
+
+  [LOW] error_handling -- Line 57
+  Error handling is not properly implemented, potential information disclosure
+  Fix: Use a more specific error message and log the error for debugging purposes
+
+=================================================================
+  FILE: src/app/api/college/offers/route.js
+  Score: 93/100   Issues: 3
+
+  The provided API route for fetching college offers is well-structured and handles authentication, authorization, and error handling properly. However, there are some potential issues with data integrity, error handling, and performance. The code does not handle cases where the tenantId is null or undefined, and it does not validate the input data. Additionally, the error handling is not robust, and it does not provide detailed error messages. The performance of the code can be improved by optimizing the database query and reducing the amount of data transferred.
+
+  [MEDIUM] data_integrity -- Line 13
+  The code does not handle cases where the tenantId is null or undefined
+  Fix: Add null checks for tenantId
+
+  [MEDIUM] error_handling -- Line 16
+  The error handling is not robust
+  Fix: Provide detailed error messages
+
+  [LOW] performance -- Line 17
+  The database query can be optimized
+  Fix: Use indexing and limit the amount of data transferred
+
+=================================================================
+  FILE: src/app/api/college/overview/route.js
+  Score: 93/100   Issues: 3
+
+  This file is a thin re-export alias that delegates to the dashboard route. The primary risk is that any issues in the dashboard route (authentication, authorization, data leakage, error handling) are inherited without any additional safeguards. No new vulnerabilities are introduced by this file itself, but the delegation pattern means the overview endpoint has the same attack surface and failure modes as the dashboard endpoint. The code is clean and minimal, but the lack of any tenant-scoped validation or rate limiting at this layer is a concern if the overview endpoint is called more frequently or by different user roles.
+
+  [MEDIUM] multi_tenancy -- Line 5
+  The overview endpoint inherits the dashboard route's tenant isolation logic. If the dashboard route does not enforce tenant_id filtering on all queries, this endpoint will leak data across tenants. The re-export pattern obscures the actual security boundary.
+  Fix: Verify that the dashboard route explicitly filters all database queries by the authenticated user's tenant_id and that no global aggregations are performed without tenant context.
+
+  [MEDIUM] observability -- Line 5
+  The re-export pattern makes it impossible to add overview-specific logging, metrics, or rate limiting without modifying the dashboard route. If the overview endpoint has different usage patterns (e.g., higher traffic), it will be indistinguishable from dashboard traffic in monitoring.
+  Fix: Consider creating a dedicated handler for the overview endpoint that calls a shared service function, allowing independent middleware, logging, and rate limiting.
+
+  [LOW] maintainability -- Line 5
+  The re-export creates an implicit dependency that may not be obvious to future developers. If the dashboard route changes its export signature or adds required parameters, the overview endpoint may break silently.
+  Fix: Add a comment or test that explicitly validates the overview endpoint returns the same shape as the dashboard endpoint.
+
+=================================================================
+  FILE: src/app/api/college/students/route.js
+  Score: 92/100   Issues: 4
+
+  The provided API route for college students is well-structured and handles authentication, authorization, and error handling properly. However, there are some potential issues with data validation, error handling, and database query efficiency. The code score is 85 due to some minor issues and suggestions for improvement.
+
+  [MEDIUM] validation -- Line 13
+  Tenant ID is not validated or sanitized before being used in the database query
+  Fix: Validate and sanitize the tenant ID to prevent potential SQL injection or data corruption
+
+  [LOW] database -- Line 18
+  The database query is not optimized for performance and may cause issues with large datasets
+  Fix: Consider adding indexes to the relevant columns and optimizing the query for better performance
+
+  [LOW] code_smell -- Line 47
+  The code uses a lot of object property access and assignment, which can be simplified and improved for readability
+  Fix: Consider using a library like Lodash to simplify object property access and assignment
+
+  [MEDIUM] error_handling -- Line 67
+  The error handling is not informative and does not provide enough context for debugging
+  Fix: Consider adding more informative error messages and logging to improve debugging and error handling
+
+=================================================================
+  FILE: src/app/api/college/rules/route.js
+  Score: 91/100   Issues: 3
+
+  The provided API route for college rules is well-structured and handles authentication, authorization, and error handling properly. However, there are some potential issues with input validation, database query efficiency, and error handling. The code score is 85 due to some medium-severity issues.
+
+  [MEDIUM] input_validation -- Line 13
+  Input validation for tenantId is missing
+  Fix: Add input validation for tenantId
+
+  [MEDIUM] error_handling -- Line 42
+  Error handling for database query errors is not robust
+  Fix: Add more robust error handling for database query errors
+
+  [MEDIUM] input_validation -- Line 60
+  Input validation for data is missing
+  Fix: Add input validation for data
+
+=================================================================
+  FILE: src/app/api/college/settings/placement-season/route.js
+  Score: 48/100   Issues: 6
+
+  The route is concise and follows a reasonable pattern, but it has a critical security vulnerability: the `placementSeasonLabel` is stored directly into the tenant's JSONB settings without any sanitization or validation, allowing stored XSS if the value is later rendered unsafely. Additionally, the route lacks input validation (empty string allowed, no length limit), has a silent failure when the session role check throws (accessing `session.user.role` on null), and uses a generic error message that hinders debugging. The score is capped due to the XSS risk.
+
+  [CRITICAL] security -- Line 22
+  placementSeasonLabel is stored directly into JSONB settings without sanitization. If this value is later rendered in HTML (e.g., admin dashboard), it enables stored XSS attacks.
+  Fix: Sanitize the input by stripping HTML tags or escaping special characters before storing. Validate that the value is a plain string with no markup.
+
+  [HIGH] null_pointer_exception -- Line 14
+  If session is null, accessing session.user.role will throw a TypeError, causing an unhandled exception and a 500 error instead of a proper 401.
+  Fix: Check session exists before accessing its properties.
+
+  [HIGH] validation -- Line 22
+  No validation that placementSeasonLabel is non-empty or within a reasonable length. An empty string or extremely long string will be stored, potentially causing UI issues or database bloat.
+  Fix: Add validation for non-empty and max length before storing.
+
+  [MEDIUM] data_integrity -- Line 29
+  The merge operation uses a shallow copy of the previous settings object. If settings contains nested objects, they will be shared by reference, and concurrent PATCH requests could cause partial data loss (race condition).
+  Fix: Use deep merge (e.g., lodash.merge or JSON parse/stringify) or use PostgreSQL JSONB merge operator to atomically update the field.
+
+  [MEDIUM] observability -- Line 39
+  Error is logged with console.error but without structured logging (no request ID, tenant ID, or stack trace context). This makes debugging in production difficult.
+  Fix: Use a structured logger that includes tenant ID, request ID, and stack trace.
+
+  [LOW] ux_copy -- Line 40
+  Generic error message 'Failed to save placement season' does not help the user understand what went wrong or how to fix it.
+  Fix: Provide a more specific error message based on the error type, or log the details server-side and return a user-friendly message.
+
+=================================================================
+  FILE: src/app/api/college/settings/route.js
+  Score: 71/100   Issues: 7
+
+  The code is generally well-structured with proper authentication, parameterized queries, and error handling. The biggest risk is the lack of input validation on the POST endpoint, which could allow storing malformed or excessively large data in the database. Additionally, the GET endpoint silently falls back to empty strings for missing fields, which could mask configuration issues. The error messages are generic and not actionable for users. Overall, the code is production-ready with minor improvements needed.
+
+  [HIGH] input_validation -- Line 84
+  No input validation on POST body fields. Malformed, excessively large, or unexpected data types (e.g., array for name) can be stored in the database, potentially causing issues in other parts of the system or leading to data corruption.
+  Fix: Add server-side validation for each field: check types, lengths, and formats before updating the database.
+
+  [HIGH] data_integrity -- Line 145
+  nirfRank is converted to Number without validation. If accreditation.nirfRank is a non-numeric string (e.g., 'abc'), Number('abc') returns NaN, which will be stored as null. This could silently corrupt data or cause unexpected behavior in reporting.
+  Fix: Validate that nirfRank is a valid integer before converting, and return a 400 error if invalid.
+
+  [MEDIUM] error_handling -- Line 94
+  If the existing query returns no rows (tenant not found), the code proceeds to update with empty settings, which could silently update a non-existent tenant (though the WHERE clause would prevent that). However, the error is not surfaced to the user.
+  Fix: Check if existing.rows.length is 0 and return a 404 error before attempting the update.
+
+  [MEDIUM] ux_copy -- Line 69
+  Error messages 'Failed to load college settings' and 'Failed to save college settings' are generic and not actionable for the user. They don't indicate what went wrong or how to fix it.
+  Fix: Provide more specific error messages based on the error type, e.g., 'Database connection error. Please try again later.'
+
+  [LOW] code_smell -- Line 36
+  The GET response uses fallback empty strings for all fields, which could mask missing configuration. If a field is intentionally left blank, the UI might not distinguish between 'not set' and 'empty string'.
+  Fix: Consider returning null for fields that are not set, or use a separate 'isSet' flag, so the UI can differentiate.
+
+  [LOW] code_smell -- Line 99
+  placementSeasonLabel is trimmed but other string fields are not. Inconsistent handling may lead to unexpected whitespace in stored data.
+  Fix: Apply consistent trimming to all string fields before storage.
+
+  [LOW] performance -- Line 115
+  The UPDATE query updates all columns even if only a subset of fields changed. This could cause unnecessary write load and trigger unwanted side effects (e.g., updated_at changes even if nothing meaningful changed).
+  Fix: Consider building a dynamic UPDATE query that only includes changed fields, or use a more granular approach.

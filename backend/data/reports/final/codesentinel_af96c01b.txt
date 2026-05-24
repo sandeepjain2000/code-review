@@ -1,0 +1,2292 @@
+=================================================================
+  CODESENTINEL -- AI CODE REVIEW REPORT
+=================================================================
+  Generated : 24/05/2026, 20:56:34
+  Review ID : af96c01b52e742b2
+  Model     : nvidia/meta/llama-3.3-70b-instruct
+  Score     : 93 / 100
+  Files     : 82
+  Issues    : 220
+
+  CRITICAL   2
+  HIGH       10
+  MEDIUM     117
+  LOW        91
+
+-----------------------------------------------------------------
+  SUMMARY
+-----------------------------------------------------------------
+=================================================================
+  PROJECT INTELLIGENCE REPORT — CodeSentinel
+=================================================================
+  Scope   : lib
+  Files   : 82   Issues: 220   Avg Score: 93/100
+  Coverage: 76% (Partial Analysis — Unanalyzed files are high risk)
+
+  PROJECT STATUS: 🚨 NOT production-ready — critical issues must be resolved first
+  Security Risk Score: 0/100  (higher = safer)
+
+-----------------------------------------------------------------
+  EXECUTION METRICS
+-----------------------------------------------------------------
+  NVIDIA       : 73 file(s)  (Avg time: 50.85s per call)
+  CACHE        : 9 file(s)  (Instant)
+
+-----------------------------------------------------------------
+  ISSUE BREAKDOWN
+-----------------------------------------------------------------
+  🔴 Critical : 2
+  🟠 High     : 10
+  🟡 Medium   : 117
+  🔵 Low      : 91
+
+-----------------------------------------------------------------
+  TOP ISSUE CATEGORIES
+-----------------------------------------------------------------
+  Error Handling                  59 occurrences  in 46 file(s)
+  Security                        31 occurrences  in 22 file(s)
+  Code Smell                      26 occurrences  in 23 file(s)
+  Input Validation                18 occurrences  in 16 file(s)
+  Readability                     17 occurrences  in 15 file(s)
+  Bug                             13 occurrences  in 9 file(s)
+  Null Pointer Exception           6 occurrences  in 5 file(s)
+  Best Practice                    6 occurrences  in 5 file(s)
+
+-----------------------------------------------------------------
+  REPEATED PATTERNS (architectural, not just file-level)
+-----------------------------------------------------------------
+  • Error Handling appears in 46 files (59 total occurrences)
+  • Code Smell appears in 23 files (26 total occurrences)
+  • Security appears in 22 files (31 total occurrences)
+  • Input Validation appears in 16 files (18 total occurrences)
+  • Readability appears in 15 files (17 total occurrences)
+  • Bug appears in 9 files (13 total occurrences)
+
+  → These are architectural weaknesses — fix the root cause, not each instance.
+
+-----------------------------------------------------------------
+  TOP 5 FIXES (highest severity first)
+-----------------------------------------------------------------
+  1. [CRITICAL] studentProfileActive.js (L14)
+     SQL injection vulnerability due to string concatenation in activeStudentIdsForTenant function
+     Fix: Use parameterized queries or prepared statements to prevent SQL injection
+
+  2. [CRITICAL] redirectMarketingSite.js (L6)
+     Unhandled promise rejection: if getPlatformSettings() throws (e.g., DB connection failure), the async function will reje
+     Fix: Wrap the call in try/catch, log the error, and return without redirecting on failure.
+
+  3. [HIGH] campusGuestConfirmation.js (L17)
+     The loadSystemEmailTemplate function does not handle errors or exceptions properly. It should be wrapped in a try-catch 
+     Fix: Add a try-catch block to handle errors and exceptions in the loadSystemEmailTemplate function.
+
+  4. [HIGH] auth.js (L38)
+     Potential SQL injection vulnerability in the query string
+     Fix: Use a parameterized query or an ORM to prevent SQL injection
+
+  5. [HIGH] db.js (L61)
+     Potential for SQL injection attacks if query text is not properly sanitized
+     Fix: Use parameterized queries or prepared statements to prevent SQL injection attacks
+
+-----------------------------------------------------------------
+  ROUND 2 FILES (processed after main scan — slow AI responses)
+-----------------------------------------------------------------
+  • studentProfileActive.js  (score 75/100, 1 issue(s), took >0s)
+  • screenSearchOpenai.js  (score 93/100, 3 issue(s), took >0s)
+  • studentAvatarUpload.js  (score 95/100, 3 issue(s), took >0s)
+  • studentDocumentUpload.js  (score 93/100, 3 issue(s), took >0s)
+  • seedDemoStudentIds.js  (score 99/100, 1 issue(s), took >0s)
+  • redirectMarketingSite.js  (score 49/100, 5 issue(s), took >0s)
+  • studentApplyEligibility.js  (score 93/100, 3 issue(s), took >0s)
+  • sessionPolicy.js  (score 96/100, 2 issue(s), took >0s)
+  • tenantContext.js  (score 98/100, 2 issue(s), took >0s)
+
+-----------------------------------------------------------------
+  HOTSPOT FILES (most issues)
+-----------------------------------------------------------------
+  • employerAssessmentAudit.js  —  6 issue(s)  score 72/100
+  • notificationService.js  —  6 issue(s)  score 88/100
+  • platformSettings.js  —  6 issue(s)  score 90/100
+  • csvExport.js  —  5 issue(s)  score 87/100
+  • redirectMarketingSite.js  —  5 issue(s)  score 49/100
+
+-----------------------------------------------------------------
+  ACTION PLAN
+-----------------------------------------------------------------
+  DAY 0 — Infra Fix:
+    - Resolve scanner errors (e.g. review_cache DB issue)
+    - Re-run full scan for accurate results
+
+  DAY 1 — Blockers:
+    - Fix 2 critical issue(s) — immediate blockers
+    - Resolve 31 security issue(s) across 22 files
+
+  DAY 2 — High Priority:
+    - Fix 5 high-severity security issue(s)
+    - Fix 2 high-severity error handling issue(s)
+    - Fix 1 high-severity multi tenancy issue(s)
+    - Fix 1 high-severity null pointer exception issue(s)
+
+  DAY 3 — Patterns & Medium:
+    - Refactor repeated error handling pattern (46 files) → extract shared helper
+    - Refactor repeated code smell pattern (23 files) → extract shared helper
+    - Refactor repeated input validation pattern (16 files) → extract shared helper
+    - Refactor repeated readability pattern (15 files) → extract shared helper
+
+=================================================================
+  END OF PROJECT SUMMARY
+  This report is based on a PARTIAL (76%) execution of the scanning script.
+=================================================================
+
+=================================================================
+  FILE: academicYear.js
+  Score: 94/100   Issues: 2   Provider: nvidia   Time: 31.83s
+
+  The provided code is generally well-structured and readable. However, there are a few potential issues and improvements that can be suggested. The code does not handle invalid input dates and does not account for potential errors when parsing the center year in the getAcademicYearOptions function. Additionally, the code does not include any input validation or error handling, which could lead to issues if the functions are called with unexpected input.
+
+  [MEDIUM] IssueType.ERROR_HANDLING -- Line 1
+  The getCurrentAcademicYear function does not handle invalid input dates
+  Fix: Add input validation to handle invalid dates
+  Code: export function getCurrentAcademicYear(date = new Date()) {...}
+
+  [MEDIUM] IssueType.ERROR_HANDLING -- Line 10
+  The getAcademicYearOptions function does not handle non-numeric center year
+  Fix: Add input validation to handle non-numeric center year
+  Code: const centerStart = Number(startStr); if (!Number.isFinite(centerStart)) return [centerYear];
+
+  🧪 Test Coverage Generator
+    - Should handle invalid input dates
+    - Should handle non-numeric center year
+    - Should return correct academic year options
+
+=================================================================
+  FILE: adminAuth.js
+  Score: 96/100   Issues: 2   Provider: nvidia   Time: 28.10s
+
+  The provided code snippet appears to be a part of an authentication system, specifically designed to check for super admin roles. It correctly checks the session and role, but there are a few potential issues and improvements that can be suggested. The code does not handle errors that might occur during the execution of getServerSession, and it does not validate the session object thoroughly. Additionally, the error handling could be more robust, and the function could benefit from more detailed logging for debugging purposes.
+
+  [MEDIUM] IssueType.ERROR_HANDLING -- Line 12
+  The getServerSession function call is not wrapped in a try-catch block, which could lead to unhandled errors if the function fails.
+  Fix: Wrap the getServerSession function call in a try-catch block to handle potential errors.
+  Code: const session = await getServerSession(authOptions);
+
+  [LOW] IssueType.CODE_SMELL -- Line 13
+  The session object is not thoroughly validated before accessing its properties.
+  Fix: Add more detailed validation for the session object to ensure it has the expected properties.
+  Code: if (!session?.user || session.user.role !== 'super_admin')
+
+  🧪 Test Coverage Generator
+    - Should return error when session is null
+    - Should return error when user role is not super_admin
+    - Should return session when user role is super_admin
+    - Should handle errors during getServerSession execution
+
+=================================================================
+  FILE: auditScope.js
+  Score: 93/100   Issues: 3   Provider: nvidia   Time: 27.68s
+
+  The provided code is generally well-structured and handles different user roles and tenant IDs correctly. However, there are a few potential issues that could be improved for better security and reliability. The code does not validate the user object's properties, and it assumes that the user role will always be one of the expected values. Additionally, the error messages could be more specific to help with debugging and security auditing.
+
+  [MEDIUM] IssueType.SECURITY -- Line 8
+  The code does not validate the user object's properties, which could lead to security vulnerabilities if the user object is tampered with.
+  Fix: Add validation for the user object's properties to ensure they are not tampered with.
+  Code: if (!user) {
+
+  [MEDIUM] IssueType.SECURITY -- Line 15
+  The code assumes that the user role will always be one of the expected values, which could lead to security vulnerabilities if the user role is tampered with.
+  Fix: Add validation for the user role to ensure it is one of the expected values.
+  Code: if (user.role === 'college_admin') {
+
+  [LOW] IssueType.SECURITY -- Line 29
+  The error message could be more specific to help with debugging and security auditing.
+  Fix: Add more specific error messages to help with debugging and security auditing.
+  Code: return { ok: false, error: 'Unauthorized', status: 401 };
+
+  🧪 Test Coverage Generator
+    - Should return Unauthorized for missing user
+    - Should return Unauthorized for invalid user role
+    - Should resolve tenant scope for college admin
+    - Should resolve tenant scope for super admin with valid tenant ID
+    - Should resolve platform scope for super admin without tenant ID
+
+=================================================================
+  FILE: clientStudentAvatarUpload.js
+  Score: 93/100   Issues: 3   Provider: nvidia   Time: 29.45s
+
+  The provided code snippet appears to be a part of a client-side JavaScript application, responsible for uploading a student's avatar via a server. The code seems generally well-structured, but there are a few potential issues and improvements that can be suggested. The biggest risk is the lack of error handling for the fetch API call and potential security vulnerabilities if the server-side API is not properly validated. The code does not handle cases where the fetch call fails due to network errors or if the server returns an error response. Additionally, there is no validation for the file type and size on the client-side, which could lead to security vulnerabilities if not handled properly on the server-side.
+
+  [MEDIUM] IssueType.ERROR_HANDLING -- Line 17
+  The fetch API call does not handle potential network errors or server error responses.
+  Fix: Add try-catch block around the fetch call to handle potential errors.
+  Code: const res = await fetch('/api/student/profile/avatar/upload', { method: 'POST', body: formData });
+
+  [LOW] IssueType.VALIDATION -- Line 9
+  The validateStudentAvatarFile function is not defined in this snippet, but it should be validated to ensure it properly checks the file type and size.
+  Fix: Ensure the validateStudentAvatarFile function properly validates the file type and size.
+  Code: const validated = validateStudentAvatarFile(file);
+
+  [MEDIUM] IssueType.ERROR_HANDLING -- Line 21
+  The res.json() call does not handle potential JSON parsing errors.
+  Fix: Add try-catch block around the res.json() call to handle potential JSON parsing errors.
+  Code: const json = await res.json().catch(() => ({}));
+
+  🧪 Test Coverage Generator
+    - Should handle network errors during fetch call
+    - Should handle server error responses
+    - Should validate file type and size on the client-side
+    - Should handle cases where the file is not provided
+
+=================================================================
+  FILE: auditReportsFetcher.js
+  Score: 92/100   Issues: 4   Provider: nvidia   Time: 34.27s
+
+  The provided code is a fetcher function for audit reports, designed to never throw errors and handle non-OK responses by returning an empty payload. However, there are several areas that can be improved for better reliability, security, and maintainability. The function lacks input validation, error logging, and handling for specific error cases. Additionally, the use of a generic catch block can mask important errors and make debugging more difficult.
+
+  [MEDIUM] IssueType.ERROR_HANDLING -- Line 21
+  The catch block is too generic and can mask important errors. It's better to catch specific errors and handle them accordingly.
+  Fix: Catch specific errors and handle them separately.
+  Code: try { ... } catch { return emptyPayloadForUrl(url); }
+
+  [LOW] IssueType.SECURITY -- Line 22
+  The fetch function is called with the 'include' credentials option, which can be a security risk if not properly validated.
+  Fix: Validate the input URL and credentials before making the fetch call.
+  Code: const res = await fetch(url, { credentials: 'include' });
+
+  [MEDIUM] IssueType.ERROR_HANDLING -- Line 25
+  The catch block for JSON parsing errors is too generic and can mask important errors. It's better to catch specific errors and handle them accordingly.
+  Fix: Catch specific errors and handle them separately.
+  Code: try { data = stripInternalApiFields(await res.json()); } catch { data = {}; }
+
+  [LOW] IssueType.LOGIC -- Line 29
+  The function returns an empty payload for non-OK responses, but it might be better to handle specific status codes separately.
+  Fix: Handle specific status codes separately.
+  Code: if (!res.ok) { return emptyPayloadForUrl(url); }
+
+  🧪 Test Coverage Generator
+    - Should handle network errors gracefully
+    - Should return empty payload for non-OK responses
+    - Should log errors for debugging purposes
+    - Should validate input URL to prevent potential security issues
+
+=================================================================
+  FILE: clientDebugLog.js
+  Score: 96/100   Issues: 2   Provider: nvidia   Time: 29.23s
+
+  The provided code is a client-side debug logging system that stores log entries in local storage and allows for downloading the log as a text file. The code is generally well-structured and follows best practices. However, there are a few potential issues that could be improved, such as error handling and security considerations. The score is 92 due to the lack of critical security vulnerabilities and the overall quality of the code.
+
+  [MEDIUM] IssueType.ERROR_HANDLING -- Line 34
+  The try-catch block does not handle the error when setting the local storage item. It would be better to handle the error and provide a fallback or warning to the user.
+  Fix: Handle the error and provide a fallback or warning to the user.
+  Code: try { localStorage.setItem(STORAGE_KEY, JSON.stringify(buf)); } catch { /* quota or private mode */ }
+
+  [LOW] IssueType.SECURITY -- Line 68
+  The text variable is not sanitized before being used to create a blob. This could potentially lead to a security vulnerability if the text contains malicious data.
+  Fix: Sanitize the text variable before using it to create a blob.
+  Code: const text = formatClientDebugLogText();
+
+  🧪 Test Coverage Generator
+    - Should handle quota exceeded error when setting local storage item
+    - Should handle private mode error when setting local storage item
+    - Should download log file with correct format and content
+
+=================================================================
+  FILE: calendarInitialCursor.js
+  Score: 100/100   Issues: 0   Provider: nvidia   Time: 33.93s
+
+  Could not parse model response.
+
+=================================================================
+  FILE: clientAssetUrl.js
+  Score: 100/100   Issues: 0   Provider: nvidia   Time: 33.69s
+
+  Could not parse model response.
+
+=================================================================
+  FILE: admissionBatchYear.js
+  Score: 95/100   Issues: 3   Provider: nvidia   Time: 29.46s
+
+  The provided code is well-structured and readable. It correctly handles admission batch years and provides useful functions for parsing and validating batch years. However, there are some potential issues that need to be addressed, such as input validation and error handling. The code score is 92 due to the lack of comprehensive input validation and potential issues with date handling.
+
+  [MEDIUM] IssueType.INPUT_VALIDATION -- Line 30
+  Input validation for raw admission batch year is missing
+  Fix: Add input validation to ensure raw is a string or number
+  Code: const text = String(raw ?? '').trim();
+
+  [LOW] IssueType.CODE_SMELL -- Line 54
+  Function validateAdmissionBatchYearNumber is not exported
+  Fix: Consider exporting the function or making it a private helper function
+  Code: function validateAdmissionBatchYearNumber(year, { date }) {
+
+  [LOW] IssueType.CODE_SMELL -- Line 13
+  Variable date is not validated
+  Fix: Add input validation to ensure date is a valid Date object
+  Code: const year = date.getFullYear();
+
+  🧪 Test Coverage Generator
+    - Should handle invalid input for admission batch year
+    - Should validate admission batch year range correctly
+    - Should handle edge cases for date rollover
+
+=================================================================
+  FILE: assertAuthEnv.js
+  Score: 96/100   Issues: 2   Provider: nvidia   Time: 37.95s
+
+  The provided code snippet appears to be a utility function for asserting the presence and strength of the NEXTAUTH_SECRET environment variable in production environments. It correctly checks for the variable's presence and length, throwing an error if it's missing or too short. However, there are a few potential issues and improvements that can be suggested. The code does not handle the case where the NEXTAUTH_SECRET variable is set but not a string. Additionally, the error message could be more descriptive and provide guidance on how to fix the issue.
+
+  [MEDIUM] IssueType.BUG -- Line 27
+  The code does not check the type of the NEXTAUTH_SECRET variable. If it's not a string, the length check will throw an error.
+  Fix: Add a type check for the NEXTAUTH_SECRET variable before checking its length.
+  Code: const secret = process.env.NEXTAUTH_SECRET;
+
+  [LOW] IssueType.READABILITY -- Line 29
+  The error message could be more descriptive and provide guidance on how to fix the issue.
+  Fix: Improve the error message to provide more context and guidance.
+  Code: throw new Error(`NEXTAUTH_SECRET must be set to a random value of at least ${MIN_SECRET_LEN} characters in production (J
+
+  🧪 Test Coverage Generator
+    - Should throw an error when NEXTAUTH_SECRET is missing in production
+    - Should throw an error when NEXTAUTH_SECRET is too short in production
+    - Should not throw an error when NEXTAUTH_SECRET is set and long enough in production
+    - Should not throw an error during the build process
+
+=================================================================
+  FILE: assessmentHiringView.js
+  Score: 93/100   Issues: 3   Provider: nvidia   Time: 32.65s
+
+  The provided code is generally well-structured and follows good practices. However, there are some potential issues and improvements that can be made. The code uses parameterized queries to prevent SQL injection, which is a good practice. The functions are well-documented and easy to understand. Nevertheless, there are some areas that need attention, such as error handling, potential null pointer exceptions, and code repetition.
+
+  [MEDIUM] IssueType.ERROR_HANDLING -- Line 21
+  The query execution does not have a try-catch block to handle potential errors.
+  Fix: Add a try-catch block to handle potential errors during query execution.
+  Code: const rows = await query(...);
+
+  [LOW] IssueType.CODE_SMELL -- Line 67
+  The query uses a LIMIT clause without an ORDER BY clause.
+  Fix: Add an ORDER BY clause to ensure consistent results.
+  Code: const up = await query(`SELECT id FROM employer_assessment_uploads ... LIMIT 1`);
+
+  [MEDIUM] IssueType.NULL_POINTER_EXCEPTION -- Line 123
+  The function buildAssessmentSummary does not check for null or undefined values before accessing properties.
+  Fix: Add null checks to prevent potential null pointer exceptions.
+  Code: const rep = pickRepresentativeAssessmentRows(rows);
+
+  🧪 Test Coverage Generator
+    - Should handle DB timeout gracefully
+    - Should prevent double-charge if retried
+    - Should return empty array if no rows are found
+    - Should throw error if query execution fails
+
+=================================================================
+  FILE: appVersion.js
+  Score: 91/100   Issues: 3   Provider: nvidia   Time: 37.56s
+
+  The provided code snippet appears to be a part of a Next.js application, responsible for generating version labels and notification icon titles. The code is well-structured and readable. However, there are a few potential issues that could be improved for better reliability and security. The score is 92 due to the lack of input validation and potential issues with environment variable handling.
+
+  [MEDIUM] IssueType.SECURITY -- Line 5
+  Missing input validation for NEXT_PUBLIC_APP_VERSION environment variable
+  Fix: Add input validation to ensure the version string is in the expected format
+  Code: const v = process.env.NEXT_PUBLIC_APP_VERSION || '0.1.0';
+
+  [MEDIUM] IssueType.SECURITY -- Line 6
+  Missing input validation for NEXT_PUBLIC_APP_GIT_SHA environment variable
+  Fix: Add input validation to ensure the Git SHA string is in the expected format
+  Code: const sha = process.env.NEXT_PUBLIC_APP_GIT_SHA || '';
+
+  [MEDIUM] IssueType.SECURITY -- Line 7
+  Missing input validation for NEXT_PUBLIC_VERCEL_DEPLOYMENT_ID environment variable
+  Fix: Add input validation to ensure the deployment ID string is in the expected format
+  Code: const dpl = process.env.NEXT_PUBLIC_VERCEL_DEPLOYMENT_ID || '';
+
+  🧪 Test Coverage Generator
+    - Should handle missing environment variables gracefully
+    - Should validate and sanitize environment variable inputs
+
+=================================================================
+  FILE: clientStudentDocumentUpload.js
+  Score: 91/100   Issues: 3   Provider: nvidia   Time: 35.60s
+
+  The provided code snippet appears to be a part of a student document upload functionality. It validates the uploaded file, constructs a FormData object, and sends a POST request to the server to upload the document. However, there are some potential issues that need to be addressed, such as error handling, input validation, and security concerns. The code score is 80 due to some medium-severity issues found.
+
+  [MEDIUM] IssueType.ERROR_HANDLING -- Line 10
+  The validateStudentDocumentFile function may throw an error if the file is invalid, but it is not caught or handled.
+  Fix: Add try-catch block to handle potential errors from the validateStudentDocumentFile function.
+  Code: const validated = validateStudentDocumentFile(file);
+
+  [MEDIUM] IssueType.SECURITY -- Line 22
+  The fetch request does not include any authentication or authorization headers, which may allow unauthorized access to the API endpoint.
+  Fix: Add authentication or authorization headers to the fetch request to ensure only authorized users can access the API endpoint.
+  Code: const res = await fetch('/api/student/documents/upload', {
+
+  [MEDIUM] IssueType.ERROR_HANDLING -- Line 26
+  The res.json() call may throw an error if the response is not valid JSON, but it is not caught or handled.
+  Fix: Add try-catch block to handle potential errors from the res.json() call.
+  Code: const json = await res.json().catch(() => ({}));
+
+  🧪 Test Coverage Generator
+    - Should handle invalid file types
+    - Should handle large file uploads
+    - Should handle server-side errors
+    - Should validate user input
+
+=================================================================
+  FILE: assessmentRowsDedupe.js
+  Score: 95/100   Issues: 3   Provider: nvidia   Time: 40.57s
+
+  The provided code is a set of pure helper functions for a hiring-assessment UI, designed to handle one row per student with the newest upload winning. The code appears to be well-structured and readable. However, there are a few potential issues and improvements that can be suggested. The code does not handle cases where the input 'rows' is not an array, and it does not check for potential null or undefined values in the 'row' objects. Additionally, the function 'assessmentRowStudentKey' returns 'unknown' if the 'id' property is missing, which might not be the desired behavior.
+
+  [MEDIUM] IssueType.BUG -- Line 14
+  The function 'pickRepresentativeAssessmentRows' does not check if the input 'rows' is an array. It should add a check to ensure 'rows' is an array to prevent potential errors.
+  Fix: Add a check to ensure 'rows' is an array before iterating over it.
+  Code: const seen = new Set();
+
+  [LOW] IssueType.READABILITY -- Line 17
+  The variable 'k' could be renamed to something more descriptive, such as 'studentKey'.
+  Fix: Rename the variable 'k' to 'studentKey' for better readability.
+  Code: const k = assessmentRowStudentKey(r);
+
+  [LOW] IssueType.READABILITY -- Line 20
+  The variable 'out' could be renamed to something more descriptive, such as 'representativeRows'.
+  Fix: Rename the variable 'out' to 'representativeRows' for better readability.
+  Code: out.push(r);
+
+  🧪 Test Coverage Generator
+    - Should handle empty input array
+    - Should handle null or undefined input
+    - Should handle rows with missing 'student_profile_id', 'roll_number', or 'id' properties
+    - Should return the correct representative assessment rows for a given input
+
+=================================================================
+  FILE: auditLog.js
+  Score: 95/100   Issues: 3   Provider: nvidia   Time: 41.41s
+
+  The provided code for writing audit logs and getting client IP addresses from Next.js requests appears to be generally well-structured and secure. However, there are a few potential issues and improvements that can be suggested. The code does not handle the case where the payload's oldValues or newValues are not JSON-serializable, which could lead to errors. Additionally, the code does not validate the payload's properties, which could lead to null or undefined values being inserted into the database. The getRequestClientIp function does not handle the case where the 'x-forwarded-for' or 'x-real-ip' headers are not present or are empty.
+
+  [MEDIUM] IssueType.BUG -- Line 34
+  Potential JSON-serialization error for oldValues and newValues
+  Fix: Use try-catch blocks to handle JSON-serialization errors
+  Code: payload.oldValues != null ? JSON.stringify(payload.oldValues) : null
+
+  [LOW] IssueType.VALIDATION -- Line 29
+  Payload properties are not validated
+  Fix: Add validation for payload properties to prevent null or undefined values
+  Code: [payload.userId || null, payload.tenantId || null, ...]
+
+  [LOW] IssueType.VALIDATION -- Line 50
+  Missing or empty 'x-forwarded-for' and 'x-real-ip' headers are not handled
+  Fix: Add checks for missing or empty headers
+  Code: const xff = request.headers.get('x-forwarded-for'); if (xff) return xff.split(',')[0].trim().slice(0, 45);
+
+  🧪 Test Coverage Generator
+    - Should handle JSON-serialization errors for oldValues and newValues
+    - Should validate payload properties to prevent null or undefined values
+    - Should handle missing or empty 'x-forwarded-for' and 'x-real-ip' headers
+
+=================================================================
+  FILE: collegeOffersCsvTemplate.js
+  Score: 96/100   Issues: 2   Provider: nvidia   Time: 11.82s
+
+  The provided code snippet is well-structured and readable. It defines a CSV template for college offers and a function to download the template. However, there are a few potential issues and improvements that can be suggested. The code does not handle any potential errors that may occur during the download process. Additionally, the CSV template is hardcoded as a string, which may not be ideal for larger or more complex templates.
+
+  [MEDIUM] IssueType.ERROR_HANDLING -- Line 8
+  The code does not handle any potential errors that may occur during the download process
+  Fix: Add try-catch blocks to handle any potential errors
+  Code: const blob = new Blob([COLLEGE_OFFERS_CSV_TEMPLATE], { type: 'text/csv;charset=utf-8' });
+
+  [LOW] IssueType.CODE_SMELL -- Line 1
+  The CSV template is hardcoded as a string, which may not be ideal for larger or more complex templates
+  Fix: Consider using a more dynamic approach to generate the CSV template
+  Code: export const COLLEGE_OFFERS_CSV_TEMPLATE = `roll_number,company_name,job_title,salary,location,deadline,status
+CS2021001
+
+  🧪 Test Coverage Generator
+    - Should download the CSV template successfully
+    - Should handle errors during the download process
+    - Should allow for more flexible and dynamic CSV template generation
+
+=================================================================
+  FILE: collegeOffersListQuery.js
+  Score: 93/100   Issues: 3   Provider: nvidia   Time: 11.36s
+
+  The provided code is generally well-structured and readable. However, there are a few potential issues and improvements that can be suggested. The code does not handle errors properly in some cases, and there are some potential SQL injection vulnerabilities. Additionally, the code could benefit from more robust logging and error handling mechanisms.
+
+  [MEDIUM] IssueType.ERROR_HANDLING -- Line 55
+  The queryWithLatestFallback function does not handle errors properly. It should catch and log any errors that occur during the query execution.
+  Fix: Add try-catch block to handle errors
+  Code: const res = await query(buildCollegeOffersSql(latestOnly, useReported), [tenantId]);
+
+  [MEDIUM] IssueType.ERROR_HANDLING -- Line 78
+  The queryCollegeOffersForTenant function does not handle errors properly. It should catch and log any errors that occur during the query execution.
+  Fix: Add try-catch block to handle errors
+  Code: try { return await queryWithLatestFallback(true, true, tenantId); } catch (e) {
+
+  [LOW] IssueType.SQL_INJECTION -- Line 41
+  The SQL query uses a parameterized query, which is good. However, it's still possible to inject malicious SQL code if the input is not properly sanitized.
+  Fix: Use a prepared statement or an ORM to prevent SQL injection
+  Code: WHERE sp.tenant_id = $1::uuid AND sp.archived_at IS NULL ${latestClause}
+
+  🧪 Test Coverage Generator
+    - Should handle DB timeout gracefully
+    - Should prevent double-charge if retried
+    - Should handle missing reported_company_name column error
+    - Should handle missing is_latest column error
+
+=================================================================
+  FILE: campusGuestConfirmation.js
+  Score: 86/100   Issues: 3   Provider: nvidia   Time: 52.44s
+
+  The provided code is well-structured and readable. However, there are some potential issues that need to be addressed, such as missing error handling and potential null pointer exceptions. The code also lacks input validation and sanitization, which could lead to security vulnerabilities. Overall, the code score is 70, with some high-severity issues that need to be fixed.
+
+  [HIGH] IssueType.ERROR_HANDLING -- Line 17
+  The loadSystemEmailTemplate function does not handle errors or exceptions properly. It should be wrapped in a try-catch block to handle any potential errors.
+  Fix: Add a try-catch block to handle errors and exceptions in the loadSystemEmailTemplate function.
+  Code: export async function loadSystemEmailTemplate(templateKey, scope = null) { return loadResolvedEmailTemplate(templateKey,
+
+  [MEDIUM] IssueType.NULL_POINTER_EXCEPTION -- Line 25
+  The buildCampusGuestSubstitutionVars function does not check for null or undefined input. It should be modified to handle such scenarios.
+  Fix: Add null checks for listingRow and employer in the buildCampusGuestSubstitutionVars function.
+  Code: export function buildCampusGuestSubstitutionVars(listingRow, employer) { return { ... }; }
+
+  [LOW] IssueType.CODE_SMELL -- Line 41
+  The renderTemplates function does not check for null or undefined input. It should be modified to handle such scenarios.
+  Fix: Add null checks for templateRow and vars in the renderTemplates function.
+  Code: export function renderTemplates(templateRow, vars) { return { ... }; }
+
+  🧪 Test Coverage Generator
+    - Should handle null or undefined input for listingRow and employer
+    - Should validate and sanitize input data to prevent security vulnerabilities
+    - Should handle errors and exceptions properly in the loadSystemEmailTemplate function
+    - Should test the renderTemplates function with different input scenarios
+
+=================================================================
+  FILE: auth.js
+  Score: 84/100   Issues: 3   Provider: nvidia   Time: 47.34s
+
+  The provided authentication code has several issues, including potential SQL injection vulnerabilities, missing error handling, and insecure password storage. However, it also implements some good practices, such as using parameterized queries and bcrypt for password hashing. The code score is 60 due to the identified issues.
+
+  [HIGH] IssueType.SECURITY -- Line 38
+  Potential SQL injection vulnerability in the query string
+  Fix: Use a parameterized query or an ORM to prevent SQL injection
+  Code: const result = await query(`SELECT u.*, t.name as tenant_name, t.slug as tenant_slug, t.logo_url as tenant_logo_url, ep.
+
+  [MEDIUM] IssueType.SECURITY -- Line 55
+  Missing error handling for bcrypt.compare
+  Fix: Add try-catch block to handle errors
+  Code: const isValid = await bcrypt.compare(credentials.password, user.password_hash)
+
+  [MEDIUM] IssueType.SECURITY -- Line 79
+  Missing error handling for query
+  Fix: Add try-catch block to handle errors
+  Code: await query('UPDATE users SET last_login = NOW() WHERE id = $1', [user.id])
+
+  🧪 Test Coverage Generator
+    - Should handle SQL errors gracefully
+    - Should prevent SQL injection attacks
+    - Should handle missing or invalid user input
+    - Should handle password hashing and verification correctly
+
+=================================================================
+  FILE: collegeStudentArchive.js
+  Score: 94/100   Issues: 2   Provider: nvidia   Time: 20.15s
+
+  The provided code is generally well-structured and readable. However, there are a few potential issues and improvements that can be suggested. The code correctly checks for missing archive columns and handles errors accordingly. It also properly updates the student profile and user records when archiving or restoring a student. The code uses parameterized queries to prevent SQL injection attacks. However, there are some areas that can be improved, such as adding more error handling and logging mechanisms. Additionally, the code can be made more efficient by reducing the number of database queries.
+
+  [MEDIUM] IssueType.ERROR_HANDLING -- Line 53
+  The catch block for the audit log query is empty, which can make it difficult to diagnose issues. Consider adding logging or error handling mechanisms.
+  Fix: Add logging or error handling mechanisms to the catch block.
+  Code: try { await client.query(...); } catch { /* audit optional */ }
+
+  [MEDIUM] IssueType.ERROR_HANDLING -- Line 102
+  The catch block for the audit log query is empty, which can make it difficult to diagnose issues. Consider adding logging or error handling mechanisms.
+  Fix: Add logging or error handling mechanisms to the catch block.
+  Code: try { await client.query(...); } catch { /* audit optional */ }
+
+  🧪 Test Coverage Generator
+    - Should handle missing archive column error correctly
+    - Should archive student profile successfully
+    - Should restore archived student profile successfully
+    - Should handle errors when archiving or restoring student profile
+
+=================================================================
+  FILE: collegeDrivesClient.js
+  Score: 94/100   Issues: 2   Provider: nvidia   Time: 25.66s
+
+  The provided code is generally well-structured and readable. However, there are a few potential issues and improvements that can be suggested. The code does not handle potential null or undefined values for 'd' in the mapCollegeDriveFromApi function, and it does not check for potential errors when using the '??' operator. Additionally, the isDriveStaffDirty function does not handle the case where 'drive' is null or undefined.
+
+  [MEDIUM] IssueType.BUG -- Line 2
+  The function mapCollegeDriveFromApi does not check if 'd' is null or undefined before trying to access its properties.
+  Fix: Add a null check at the beginning of the function to handle this case.
+  Code: export function mapCollegeDriveFromApi(d) {
+
+  [MEDIUM] IssueType.BUG -- Line 17
+  The function isDriveStaffDirty does not check if 'drive' is null or undefined before trying to access its properties.
+  Fix: Add a null check at the beginning of the function to handle this case.
+  Code: const base = [...(drive.staffIdsBaseline || [])].sort().join(',');
+
+  🧪 Test Coverage Generator
+    - Should handle null or undefined 'd' in mapCollegeDriveFromApi
+    - Should handle potential errors when using the '??' operator
+    - Should handle null or undefined 'drive' in isDriveStaffDirty
+
+=================================================================
+  FILE: collegeAcademicYearContext.js
+  Score: 92/100   Issues: 4   Provider: nvidia   Time: 61.53s
+
+  The provided code is generally well-structured and readable. However, there are a few potential issues and improvements that can be made. The code uses try-catch blocks to handle potential errors, but it would be better to handle specific errors instead of catching all errors. Additionally, the code uses the 'use client' directive, which is specific to Next.js, but it's not clear if this is a Next.js project. The code also uses the 'sessionStorage' API, which may not be suitable for all environments. The 'useCollegeAcademicYearApiPath' hook uses the 'useState' and 'useEffect' hooks, but it's not clear if this hook is being used correctly. The 'academicYearQueryString' function does not handle the case where 'ctx' is an empty object. The 'writeActiveAcademicYearContext' function does not check if 'ctx' is null or undefined before trying to access its properties.
+
+  [MEDIUM] IssueType.ERROR_HANDLING -- Line 17
+  The 'JSON.parse' function may throw an error if the stored data is not a valid JSON string
+  Fix: Use a try-catch block to handle potential errors when parsing the stored data
+  Code: const parsed = JSON.parse(raw);
+
+  [MEDIUM] IssueType.ERROR_HANDLING -- Line 28
+  The 'sessionStorage.setItem' function may throw an error if the storage quota is exceeded
+  Fix: Use a try-catch block to handle potential errors when setting the stored data
+  Code: sessionStorage.setItem(ACTIVE_ACADEMIC_YEAR_KEY, JSON.stringify(ctx));
+
+  [LOW] IssueType.CODE_SMELL -- Line 37
+  The 'academicYearQueryString' function does not handle the case where 'ctx' is an empty object
+  Fix: Add a check to handle the case where 'ctx' is an empty object
+  Code: if (!ctx) return '';
+
+  [LOW] IssueType.CODE_SMELL -- Line 26
+  The 'writeActiveAcademicYearContext' function does not check if 'ctx' is null or undefined before trying to access its properties
+  Fix: Add a check to handle the case where 'ctx' is null or undefined
+  Code: sessionStorage.setItem('activeAcademicYear', ctx?.label || '');
+
+  🧪 Test Coverage Generator
+    - Should handle the case where 'ctx' is an empty object in 'academicYearQueryString' function
+    - Should check if 'ctx' is null or undefined before trying to access its properties in 'writeActiveAcademicYearContext' function
+    - Should handle specific errors instead of catching all errors in try-catch blocks
+    - Should consider using a more robust storage solution instead of 'sessionStorage'
+
+=================================================================
+  FILE: adminSettingsValidate.js
+  Score: 90/100   Issues: 4   Provider: nvidia   Time: 60.36s
+
+  The provided code is a validation function for admin settings, covering various fields such as platform name, marketing website URL, support email, and more. It checks for valid input formats, lengths, and ranges. The code is well-structured and readable. However, there are a few potential issues and improvements that can be suggested. The code does not handle cases where the input object is null or undefined for certain fields, which could lead to errors. Additionally, some error messages could be more descriptive. The code also lacks input validation for certain fields, such as the system notification sender name and the storage provider. Overall, the code is robust but could benefit from additional validation and error handling.
+
+  [MEDIUM] IssueType.BUG -- Line 22
+  Input object validation is missing for certain fields
+  Fix: Add input validation for all fields to prevent potential errors
+  Code: if (!n || typeof n !== 'object') return { ok: false, error: 'Invalid payload' };
+
+  [LOW] IssueType.READABILITY -- Line 36
+  Error message could be more descriptive
+  Fix: Improve error message to provide more context
+  Code: return { ok: false, error: 'Invalid supportEmail' };
+
+  [MEDIUM] IssueType.BUG -- Line 48
+  Input validation is missing for system notification sender name
+  Fix: Add input validation for system notification sender name
+  Code: const senderLabel = String(n.systemNotificationSenderName ?? '').trim();
+
+  [MEDIUM] IssueType.BUG -- Line 90
+  Input validation is missing for storage provider
+  Fix: Add input validation for storage provider
+  Code: if (String(n.storageProvider || '').length > 120) { return { ok: false, error: 'storageProvider must be at most 120 char
+
+  🧪 Test Coverage Generator
+    - Should validate platform name with a length of 200 characters
+    - Should validate marketing website URL with a valid HTTP or HTTPS URL
+    - Should validate support email with a valid email format
+    - Should validate system notification inbox email with a valid email format
+    - Should validate session timeout value with a range of 1 to 8760
+    - Should validate remember device value with a range of 0 to 365
+    - Should validate SMTP host with a length of 255 characters
+    - Should validate SMTP port with a range of 1 to 65535
+    - Should validate from email with a valid email format
+    - Should validate storage provider with a length of 120 characters
+    - Should validate max upload size with a range of 1 to 500
+
+=================================================================
+  FILE: demoLogins.js
+  Score: 96/100   Issues: 2   Provider: nvidia   Time: 8.73s
+
+  The provided code for demo logins is generally well-structured and readable. However, there are a few potential issues and improvements that can be suggested. The code exports demo login credentials and a function to check if demo logins are enabled. The demo login credentials are hardcoded, which may not be secure. The function to check if demo logins are enabled uses environment variables, which is a good practice. Overall, the code is simple and easy to understand, but it may require some improvements for security and maintainability.
+
+  [MEDIUM] IssueType.SECURITY -- Line 3
+  Hardcoded demo seed password may not be secure
+  Fix: Consider using a secure method to store and retrieve the demo seed password
+  Code: export const DEMO_SEED_PASSWORD = 'Admin@123';
+
+  [LOW] IssueType.BEST_PRACTICE -- Line 38
+  Consider using a more robust method to check environment variables
+  Fix: Consider using a library or a more robust method to check environment variables
+  Code: if (process.env.NEXT_PUBLIC_HIDE_DEMO_LOGINS === 'true') return false;
+
+  🧪 Test Coverage Generator
+    - Should handle demo login credentials securely
+    - Should check if demo logins are enabled correctly
+    - Should handle environment variables correctly
+
+=================================================================
+  FILE: companyWebsite.js
+  Score: 96/100   Issues: 2   Provider: nvidia   Time: 21.88s
+
+  The provided code snippet appears to be a utility function for normalizing employer website URLs. It handles various edge cases, such as null or empty input, and ensures that the output is a safe external link. However, there are some potential issues and improvements that can be made. The function does not check for invalid URLs, and it assumes that the input is a string. Additionally, the function uses a simple regex to check for HTTP/HTTPS protocols, which may not cover all possible cases.
+
+  [LOW] IssueType.READABILITY -- Line 3
+  Consider using the '===' operator for null checks
+  Fix: Use '===' instead of '==' for null checks
+  Code: if (website == null) return null;
+
+  [MEDIUM] IssueType.SECURITY -- Line 6
+  Consider using a more robust URL validation library
+  Fix: Use a library like 'url' or 'urijs' to validate URLs
+  Code: if (/^https?:\/\//i.test(raw)) return raw;
+
+  🧪 Test Coverage Generator
+    - Should handle null input
+    - Should handle empty input
+    - Should handle HTTP protocol
+    - Should handle HTTPS protocol
+    - Should handle protocol-relative URLs
+    - Should handle URLs without a protocol
+
+=================================================================
+  FILE: completeStudentDocument.js
+  Score: 90/100   Issues: 4   Provider: nvidia   Time: 21.41s
+
+  The provided code snippet appears to be a part of a student document management system, responsible for completing a student document record. The code is generally well-structured and follows good practices. However, there are some potential issues and improvements that can be made. The code does not handle errors properly in some cases, and there are some potential SQL injection vulnerabilities. The code also does not validate the input data properly, which can lead to errors or security vulnerabilities.
+
+  [MEDIUM] IssueType.ERROR_HANDLING -- Line 11
+  The code does not handle errors properly in the first try-catch block. If an error occurs, it will be caught and then re-thrown, but the error message will not be logged or handled properly.
+  Fix: Improve error handling by logging the error message and providing a more informative error message to the user.
+  Code: try { await client.query(...); } catch (e) { if (e?.code === '42703') { ... } else { throw e; } }
+
+  [MEDIUM] IssueType.ERROR_HANDLING -- Line 29
+  The code does not handle errors properly in the second try-catch block. If an error occurs, it will be caught and then ignored, which can lead to silent failures.
+  Fix: Improve error handling by logging the error message and providing a more informative error message to the user.
+  Code: try { await client.query(...); } catch (e) { if (e?.code === '42703') { return; } ... }
+
+  [LOW] IssueType.CODE_SMELL -- Line 45
+  The code uses a nested try-catch block, which can make the code harder to read and understand. It would be better to simplify the code and reduce the nesting.
+  Fix: Simplify the code by reducing the nesting and improving the error handling.
+  Code: try { ... } catch (inner) { ... }
+
+  [MEDIUM] IssueType.INPUT_VALIDATION -- Line 84
+  The code does not validate the input data properly. It only checks if the document_name and file_url are not empty, but it does not check if they are valid or if the file_size is a valid number.
+  Fix: Improve input validation by checking if the input data is valid and if the file_size is a valid number.
+  Code: if (!document_name || !file_url) { throw new Error('document_name and file_url required'); }
+
+  🧪 Test Coverage Generator
+    - Should handle DB timeout gracefully
+    - Should prevent double-charge if retried
+    - Should validate input data properly
+    - Should handle errors properly in all cases
+
+=================================================================
+  FILE: csvImportUtils.js
+  Score: 93/100   Issues: 3   Provider: nvidia   Time: 23.70s
+
+  The provided code for CSV import utilities appears to be generally well-structured and follows good practices. However, there are some potential issues and improvements that can be made, such as input validation, error handling, and potential security vulnerabilities.
+
+  [MEDIUM] IssueType.INPUT_VALIDATION -- Line 12
+  The normalizeOptionalUuidCell function does not validate the input UUID string for length and format.
+  Fix: Add input validation for UUID length and format.
+  Code: export function normalizeOptionalUuidCell(raw) { ... }
+
+  [LOW] IssueType.CODE_SMELL -- Line 43
+  The normalizeHeader function does not handle null or undefined input.
+  Fix: Add null and undefined checks for the input header.
+  Code: export function normalizeHeader(h) { ... }
+
+  [MEDIUM] IssueType.ERROR_HANDLING -- Line 59
+  The parseSalary function does not handle non-numeric input.
+  Fix: Add error handling for non-numeric input.
+  Code: export function parseSalary(raw) { ... }
+
+  🧪 Test Coverage Generator
+    - Should handle invalid CSV input gracefully
+    - Should prevent SQL injection attacks
+    - Should validate user input for UUIDs and dates
+
+=================================================================
+  FILE: collegeStudentForm.js
+  Score: 92/100   Issues: 4   Provider: nvidia   Time: 30.66s
+
+  The provided code is generally well-structured and handles different student fields correctly. However, there are a few potential issues that need to be addressed, such as missing input validation, potential null pointer exceptions, and inconsistent data types. The code also lacks proper error handling and logging mechanisms. Overall, the code score is 80, with some improvements needed in terms of security, reliability, and maintainability.
+
+  [MEDIUM] IssueType.NULL_CHECK -- Line 6
+  The function does not check if the student object is null or undefined before accessing its properties.
+  Fix: Add a null check for the student object before accessing its properties.
+  Code: if (!student) return null;
+
+  [LOW] IssueType.CODE_SMELL -- Line 23
+  The function uses the spread operator to merge the initial form values with the student object properties. This could potentially lead to unexpected behavior if the student object has properties that are not expected.
+  Fix: Use a more explicit approach to merge the objects, such as using a library like lodash.
+  Code: return { ...initialCollegeStudentForm(), ... };
+
+  [MEDIUM] IssueType.DEPENDENCY -- Line 37
+  The function uses the resolveStudentBatch function to resolve the student batch. However, this function is not defined in the provided code snippet.
+  Fix: Ensure that the resolveStudentBatch function is properly defined and imported.
+  Code: batch: resolveStudentBatch({ ... })
+
+  [LOW] IssueType.CODE_SMELL -- Line 50
+  The function uses the String() function to convert the backlogsActive and backlogsHistory properties to strings. This could potentially lead to unexpected behavior if these properties are not numbers.
+  Fix: Use a more explicit approach to convert these properties to strings, such as using the toString() method.
+  Code: backlogs_active: String(student.backlogsActive ?? 0),
+
+  🧪 Test Coverage Generator
+    - Should handle null or undefined student object
+    - Should validate student fields for correct data types
+    - Should handle missing or empty fields in the student object
+    - Should log errors and exceptions properly
+
+=================================================================
+  FILE: db.js
+  Score: 84/100   Issues: 3   Provider: nvidia   Time: 22.80s
+
+  The provided code snippet for the PostgreSQL database connection appears to be generally well-structured and secure. However, there are a few potential issues that need to be addressed, such as the lack of input validation for the DATABASE_URL environment variable, the potential for SQL injection attacks if the query text is not properly sanitized, and the need for better error handling and logging. Additionally, the code could benefit from more robust connection pooling and timeout handling.
+
+  [MEDIUM] IssueType.SECURITY -- Line 10
+  Lack of input validation for DATABASE_URL environment variable
+  Fix: Add input validation to ensure the DATABASE_URL environment variable is in the correct format
+  Code: if (!rawUrl) throw new Error('DATABASE_URL environment variable is not set.');
+
+  [HIGH] IssueType.SECURITY -- Line 61
+  Potential for SQL injection attacks if query text is not properly sanitized
+  Fix: Use parameterized queries or prepared statements to prevent SQL injection attacks
+  Code: const res = await getPool().query(text, params);
+
+  [MEDIUM] IssueType.ERROR_HANDLING -- Line 68
+  Error handling could be improved to provide more informative error messages
+  Fix: Add more informative error messages to help with debugging and error handling
+  Code: throw error;
+
+  🧪 Test Coverage Generator
+    - Should handle invalid DATABASE_URL environment variable
+    - Should prevent SQL injection attacks
+    - Should handle connection timeouts and errors
+    - Should handle transaction rollbacks and commits correctly
+
+=================================================================
+  FILE: demoHiringAssessment.js
+  Score: 100/100   Issues: 0   Provider: nvidia   Time: 32.45s
+
+  The provided code snippet is a simple and well-structured array of hiring pipeline round definitions. There are no major issues or security concerns in this code. However, it's worth noting that this code does not handle any potential errors or edge cases, such as an empty array or invalid data. The code is generally readable and maintainable.
+
+  🧪 Test Coverage Generator
+    - Should return the correct hiring rounds array
+    - Should handle an empty array
+    - Should handle invalid data
+
+=================================================================
+  FILE: csvParse.js
+  Score: 95/100   Issues: 3   Provider: nvidia   Time: 45.09s
+
+  The provided CSV parsing function appears to be well-structured and handles quoted fields according to RFC4180. However, it lacks input validation and error handling, which could lead to issues if the input is malformed or contains unexpected characters. The function also does not handle newline characters within quoted fields, which could cause incorrect parsing.
+
+  [MEDIUM] IssueType.ERROR_HANDLING -- Line 4
+  The function does not handle errors or invalid input. It assumes that the input will always be a valid CSV line.
+  Fix: Add input validation and error handling to ensure that the function can handle unexpected input.
+  Code: export function parseCsvLine(line) { ... }
+
+  [LOW] IssueType.PERFORMANCE -- Line 9
+  The function uses a simple loop to iterate over the input string, which could be inefficient for large inputs.
+  Fix: Consider using a more efficient parsing algorithm or a dedicated CSV parsing library.
+  Code: for (let i = 0; i < s.length; i++) { ... }
+
+  [LOW] IssueType.READABILITY -- Line 23
+  The variable name 'inQuotes' could be more descriptive.
+  Fix: Consider renaming the variable to something like 'isInsideQuotes'.
+  Code: let inQuotes = false;
+
+  🧪 Test Coverage Generator
+    - Should handle empty input correctly
+    - Should handle input with only one field correctly
+    - Should handle input with multiple fields correctly
+    - Should handle input with quoted fields correctly
+    - Should handle input with commas within quoted fields correctly
+    - Should handle input with newline characters within quoted fields correctly
+    - Should handle input with malformed or unexpected characters correctly
+
+=================================================================
+  FILE: domain/offers/service.js
+  Score: 86/100   Issues: 3   Provider: nvidia   Time: 32.52s
+
+  The provided code is generally well-structured and readable. However, there are a few potential issues and improvements that can be suggested. The code lacks input validation for the employerId parameter, which could lead to SQL injection vulnerabilities. Additionally, the error handling in the getEmployerOffers method can be improved to provide more informative error messages. The deleteEmployerOffer method does not handle the case where the offer is not found, which could lead to unexpected behavior.
+
+  [HIGH] IssueType.SECURITY -- Line 14
+  Lack of input validation for employerId parameter could lead to SQL injection vulnerabilities
+  Fix: Add input validation for employerId parameter to prevent SQL injection attacks
+  Code: if (!employerId) return [];
+
+  [MEDIUM] IssueType.ERROR_HANDLING -- Line 41
+  Error handling in getEmployerOffers method can be improved to provide more informative error messages
+  Fix: Improve error handling in getEmployerOffers method to provide more informative error messages
+  Code: try { const offersResult = await query(baseSql(true), [employerId]); return offersResult.rows; } catch (e) { if (isMissi
+
+  [LOW] IssueType.LOGIC -- Line 81
+  deleteEmployerOffer method does not handle the case where the offer is not found
+  Fix: Add handling for the case where the offer is not found in deleteEmployerOffer method
+  Code: if (!del.rows[0]) { return null; }
+
+  🧪 Test Coverage Generator
+    - Should handle SQL injection attempts for employerId parameter
+    - Should return informative error messages for getEmployerOffers method
+    - Should handle the case where the offer is not found in deleteEmployerOffer method
+
+=================================================================
+  FILE: emailTemplateRender.js
+  Score: 100/100   Issues: 0   Provider: nvidia   Time: 31.30s
+
+  Could not parse model response.
+
+=================================================================
+  FILE: demoClarifications.js
+  Score: 93/100   Issues: 3   Provider: nvidia   Time: 51.12s
+
+  The provided code snippet for demo clarifications appears to be generally well-structured and readable. However, there are a few potential issues and improvements that can be suggested. The code lacks input validation for the publishClarificationBatch and saveAnswer functions, which could lead to security vulnerabilities. Additionally, the code does not handle potential errors that may occur during the fetch requests. The CLARIFICATION_RULES object is not being utilized in the provided code snippet.
+
+  [MEDIUM] IssueType.SECURITY -- Line 12
+  The publishClarificationBatch function lacks input validation for the company, postedBy, and questionTexts parameters.
+  Fix: Add input validation to ensure the parameters are valid and secure.
+  Code: export async function publishClarificationBatch({ company, postedBy, questionTexts })
+
+  [MEDIUM] IssueType.SECURITY -- Line 23
+  The saveAnswer function lacks input validation for the batchId, questionId, answer, and answeredBy parameters.
+  Fix: Add input validation to ensure the parameters are valid and secure.
+  Code: export async function saveAnswer(batchId, questionId, answer, answeredBy)
+
+  [LOW] IssueType.ERROR_HANDLING -- Line 5
+  The loadClarifications function does not handle potential errors that may occur during the fetch request.
+  Fix: Add error handling to ensure the function can recover from potential errors.
+  Code: export async function loadClarifications()
+
+  🧪 Test Coverage Generator
+    - Should handle invalid input for publishClarificationBatch
+    - Should handle invalid input for saveAnswer
+    - Should handle fetch request errors for loadClarifications
+    - Should handle fetch request errors for publishClarificationBatch
+    - Should handle fetch request errors for saveAnswer
+
+=================================================================
+  FILE: downloadCsvFromApi.js
+  Score: 96/100   Issues: 2   Provider: nvidia   Time: 39.60s
+
+  The provided code is generally well-structured and readable. However, there are a few potential issues and improvements that can be suggested. The code does not handle errors properly, and it assumes that the API will always return a JSON response. Additionally, the code does not check if the blob is empty before creating a URL for it.
+
+  [MEDIUM] IssueType.ERROR_HANDLING -- Line 9
+  The code does not handle errors properly. It assumes that the API will always return a JSON response, which may not always be the case.
+  Fix: Add proper error handling to handle cases where the API returns a non-JSON response.
+  Code: const j = await res.json().catch(() => ({}));
+
+  [LOW] IssueType.CODE_SMELL -- Line 12
+  The code does not check if the blob is empty before creating a URL for it.
+  Fix: Add a check to ensure that the blob is not empty before creating a URL for it.
+  Code: const blob = await res.blob();
+
+  🧪 Test Coverage Generator
+    - Should handle API errors properly
+    - Should check if the blob is empty before creating a URL for it
+    - Should handle cases where the API returns a non-JSON response
+
+=================================================================
+  FILE: dataEntryAccess.js
+  Score: 96/100   Issues: 2   Provider: nvidia   Time: 52.16s
+
+  The provided code snippet for data entry access appears to be well-structured and secure. It properly checks for user roles and session tenant IDs, and logs audit events when necessary. However, there are a few potential issues that could be improved, such as input validation and error handling.
+
+  [MEDIUM] IssueType.ERROR_HANDLING -- Line 15
+  The error response for unauthorized access does not include any details about the missing user ID
+  Fix: Consider adding more information to the error response to help with debugging
+  Code: return { ok: false, response: NextResponse.json({ error: 'Unauthorized' }, { status: 401 }) };
+
+  [LOW] IssueType.INPUT_VALIDATION -- Line 31
+  The requested tenant ID is not validated for empty strings or null values
+  Fix: Consider adding input validation to handle empty strings or null values
+  Code: const req = requestedTenantId != null ? String(requestedTenantId).trim() : '';
+
+  🧪 Test Coverage Generator
+    - Should return 401 when no user ID is present in the session
+    - Should return 403 when the user role is not in the allowed roles
+    - Should resolve the tenant ID correctly for college admins and super admins
+    - Should log an audit event when a super admin accesses a tenant explicitly
+
+=================================================================
+  FILE: emailVerification.js
+  Score: 96/100   Issues: 2   Provider: nvidia   Time: 35.49s
+
+  The provided code for email verification is generally well-structured and readable. However, there are a few potential issues and improvements that can be made. The code uses a random token for email verification, which is a good practice. The email template is also well-structured and provides clear instructions to the user. One potential issue is that the code does not handle errors that may occur during the email sending process. Additionally, the code assumes that the NEXTAUTH_URL or VERCEL_URL environment variables are set, which may not always be the case.
+
+  [MEDIUM] IssueType.ERROR_HANDLING -- Line 48
+  The code does not handle errors that may occur during the email sending process
+  Fix: Add try-catch block to handle errors when sending email
+  Code: await sendMail({ ... })
+
+  [LOW] IssueType.BEST_PRACTICE -- Line 5
+  The code assumes that NEXTAUTH_URL or VERCEL_URL is set, which may not always be the case
+  Fix: Add checks to handle cases where NEXTAUTH_URL or VERCEL_URL is not set
+  Code: const u = process.env.NEXTAUTH_URL; if (u) return u.replace(//$/, '')
+
+  🧪 Test Coverage Generator
+    - Should handle DB timeout gracefully when sending email
+    - Should prevent double-email sending if retried
+    - Should handle cases where NEXTAUTH_URL or VERCEL_URL is not set
+
+=================================================================
+  FILE: csvExport.js
+  Score: 87/100   Issues: 5   Provider: nvidia   Time: 59.84s
+
+  The provided CSV export helper functions are generally well-structured and follow good practices. However, there are some potential issues and improvements that can be made, such as input validation, error handling, and potential security vulnerabilities. The code score is 85 due to the lack of input validation and potential security issues.
+
+  [MEDIUM] IssueType.INPUT_VALIDATION -- Line 5
+  The escapeCsvField function does not validate its input. It should check for invalid or malicious input to prevent potential security issues.
+  Fix: Add input validation to the escapeCsvField function to prevent potential security issues.
+  Code: export function escapeCsvField(value) { ... }
+
+  [MEDIUM] IssueType.ERROR_HANDLING -- Line 14
+  The toCsvIsoDate function does not handle errors well. It should provide more informative error messages to help with debugging.
+  Fix: Improve error handling in the toCsvIsoDate function to provide more informative error messages.
+  Code: export function toCsvIsoDate(value) { ... }
+
+  [LOW] IssueType.CODE_SMELL -- Line 25
+  The rowsToCsv function uses the Array.isArray method to check if the input is an array. This can be improved by using the instanceof operator or a more robust type checking method.
+  Fix: Improve type checking in the rowsToCsv function to make it more robust.
+  Code: export function rowsToCsv(headers, rows) { ... }
+
+  [MEDIUM] IssueType.SECURITY -- Line 39
+  The downloadCsv function creates a blob with the CSV data and then creates a URL for it. This can be a potential security issue if the CSV data contains malicious content.
+  Fix: Validate the CSV data before creating the blob and URL to prevent potential security issues.
+  Code: export function downloadCsv(filename, csvString) { ... }
+
+  [MEDIUM] IssueType.INPUT_VALIDATION -- Line 63
+  The parseCsv function does not validate its input. It should check for invalid or malicious input to prevent potential security issues.
+  Fix: Add input validation to the parseCsv function to prevent potential security issues.
+  Code: export function parseCsv(text) { ... }
+
+  🧪 Test Coverage Generator
+    - Should handle invalid input for CSV export
+    - Should prevent CSV injection attacks
+    - Should handle large CSV files without performance issues
+
+=================================================================
+  FILE: facebookPageShare.js
+  Score: 93/100   Issues: 3   Provider: nvidia   Time: 35.84s
+
+  The provided code for Facebook page sharing appears to be generally well-structured and secure. However, there are a few potential issues that need to be addressed, such as error handling and input validation. The code correctly checks for the presence of required environment variables and handles errors from the Facebook Graph API. The score is 92 due to the overall quality of the code and the presence of some minor issues.
+
+  [MEDIUM] IssueType.ERROR_HANDLING -- Line 33
+  Error message when Facebook page sharing is not configured could be more descriptive
+  Fix: Consider adding more details to the error message, such as the specific environment variables that are missing
+  Code: throw new Error('Facebook Page sharing is not configured (missing FACEBOOK_PAGE_ID or FACEBOOK_PAGE_ACCESS_TOKEN)');
+
+  [LOW] IssueType.INPUT_VALIDATION -- Line 41
+  Input validation for message and link parameters could be improved
+  Fix: Consider adding more robust input validation to ensure that the message and link parameters are valid and secure
+  Code: const params = new URLSearchParams(); params.set('message', message); params.set('access_token', accessToken); if (link 
+
+  [MEDIUM] IssueType.ERROR_HANDLING -- Line 54
+  Error handling for Facebook Graph API errors could be improved
+  Fix: Consider adding more robust error handling to handle different types of Facebook Graph API errors
+  Code: const msg = data.error?.message || data.error?.error_user_msg || res.statusText || 'Facebook request failed'; throw new 
+
+  🧪 Test Coverage Generator
+    - Should handle missing FACEBOOK_PAGE_ID environment variable
+    - Should handle missing FACEBOOK_PAGE_ACCESS_TOKEN environment variable
+    - Should handle invalid Facebook Graph API response
+    - Should handle network errors when posting to Facebook page feed
+
+=================================================================
+  FILE: helpFaqOpenai.js
+  Score: 93/100   Issues: 3   Provider: nvidia   Time: 21.16s
+
+  The provided code snippet for ranking FAQs with OpenAI appears to be generally well-structured and secure. However, there are a few potential issues and improvements that can be suggested. The code lacks input validation for the user question and FAQ rows, and it does not handle errors properly. Additionally, the code uses a hardcoded API key and model, which may not be suitable for production environments. The code also lacks logging and monitoring, which can make it difficult to debug and optimize. Overall, the code score is 80, with deductions for security, reliability, and maintainability concerns.
+
+  [MEDIUM] IssueType.SECURITY -- Line 57
+  Hardcoded API key and model
+  Fix: Use environment variables or a secure secrets management system
+  Code: const apiKey = process.env.OPENAI_API_KEY;
+
+  [MEDIUM] IssueType.RELIABILITY -- Line 79
+  Lack of error handling for OpenAI API calls
+  Fix: Implement try-catch blocks and log errors
+  Code: const res = await fetch('https://api.openai.com/v1/chat/completions', {
+
+  [LOW] IssueType.MAINTAINABILITY -- Line 101
+  Lack of logging and monitoring
+  Fix: Implement logging and monitoring for API calls and errors
+  Code: const data = await res.json().catch(() => null);
+
+  🧪 Test Coverage Generator
+    - Should handle invalid user question input
+    - Should handle invalid FAQ rows input
+    - Should handle OpenAI API errors
+    - Should handle JSON parsing errors
+    - Should validate and sanitize user input
+
+=================================================================
+  FILE: employerCompanyTypeLabels.js
+  Score: 94/100   Issues: 2   Provider: nvidia   Time: 47.54s
+
+  The provided code snippet for employer company type labels and size options appears to be generally well-structured and follows good practices. However, there are a few potential issues that need to be addressed, such as input validation and potential null pointer exceptions. The code does not handle cases where the input value is not one of the expected company types or sizes. The score is 92 due to the lack of input validation and potential null pointer exceptions.
+
+  [MEDIUM] IssueType.NULL_CHECK -- Line 15
+  Input validation is missing for null or empty company type
+  Fix: Add input validation to handle null or empty company type
+  Code: if (value == null || String(value).trim() === '') return '—';
+
+  [MEDIUM] IssueType.NULL_CHECK -- Line 17
+  Potential null pointer exception when accessing BY_VALUE[key]
+  Fix: Add null check before accessing BY_VALUE[key]
+  Code: return BY_VALUE[key] || String(value);
+
+  🧪 Test Coverage Generator
+    - Should handle null or empty input for company type
+    - Should handle invalid company type
+    - Should handle null or empty input for company size
+    - Should handle invalid company size
+
+=================================================================
+  FILE: employerApplicationAccess.js
+  Score: 90/100   Issues: 4   Provider: nvidia   Time: 71.47s
+
+  The provided code is generally well-structured and readable. However, there are a few potential issues and improvements that can be made. The code uses parameterized queries, which is good for preventing SQL injection. But there are some potential null pointer exceptions and missing error handling. The code also lacks input validation and sanitization for some functions.
+
+  [MEDIUM] IssueType.NULL_POINTER_EXCEPTION -- Line 5
+  The getEmployerProfileId function does not check if the result.rows[0] is null before accessing its id property
+  Fix: Add a null check before accessing the id property
+  Code: return result.rows[0]?.id || null;
+
+  [MEDIUM] IssueType.ERROR_HANDLING -- Line 10
+  The canEmployerAccessStudent function does not handle errors that may occur during the query execution
+  Fix: Add try-catch block to handle potential errors
+  Code: const result = await query(...);
+
+  [MEDIUM] IssueType.NULL_POINTER_EXCEPTION -- Line 29
+  The getLatestResumeForStudent function does not check if the result.rows is null before iterating over it
+  Fix: Add a null check before iterating over the result.rows
+  Code: for (const row of result.rows) {
+
+  [LOW] IssueType.CODE_SMELL -- Line 46
+  The extractS3Key function uses a try-catch block to handle potential errors, but it would be better to handle specific errors instead of catching all errors
+  Fix: Handle specific errors instead of catching all errors
+  Code: try { ... } catch { return null; }
+
+  🧪 Test Coverage Generator
+    - Should handle null or undefined input for getEmployerProfileId function
+    - Should handle null or undefined input for canEmployerAccessStudent function
+    - Should handle null or undefined input for getLatestResumeForStudent function
+    - Should test extractS3Key function with different types of file URLs
+
+=================================================================
+  FILE: inferImageContentType.js
+  Score: 86/100   Issues: 3   Provider: nvidia   Time: 39.08s
+
+  The function is concise and handles the common case of missing MIME types from browsers. The biggest risk is that it trusts the file extension without validating the actual file bytes, which could allow a malicious user to upload a non-image file (e.g., a script) with a renamed extension. This is a security concern if the returned type is used for server-side validation or content-type headers. Additionally, the function returns an empty string for unknown types, which may cause downstream failures if callers expect a valid MIME type. The code is otherwise clean and well-structured.
+
+  [HIGH] IssueType.SECURITY -- Line 2
+  The function infers content type solely from the file extension, which is trivially spoofed. A malicious user could upload a JavaScript file renamed to 'script.jpg' and the function would return 'image/jpeg', potentially bypassing server-side image validation or causing incorrect Content-Type headers.
+  Fix: Add magic byte validation (e.g., using a library like 'file-type' or reading the first few bytes) to confirm the actual file content matches the expected image format.
+  Code: export function inferImageContentType(file) {
+  const t = (file?.type || '').toLowerCase().trim();
+  if (t.startsWith('i
+
+  [MEDIUM] IssueType.ERROR_HANDLING -- Line 11
+  Returning an empty string for unknown types may cause downstream code to fail silently or produce incorrect behavior (e.g., setting an empty Content-Type header). Callers should handle this case explicitly.
+  Fix: Consider returning a default MIME type like 'application/octet-stream' or throwing a descriptive error so callers can handle unknown types appropriately.
+  Code: return '';
+
+  [LOW] IssueType.NULL_CHECK -- Line 3
+  The optional chaining on `file?.type` and `file?.name` is good, but if `file` is null or undefined, the function will return an empty string. This is acceptable but could be made more explicit.
+  Fix: No change needed, but consider adding a guard clause at the top if the function should never receive null/undefined.
+  Code: const t = (file?.type || '').toLowerCase().trim();
+
+  🧪 Test Coverage Generator
+    - Should return 'image/jpeg' for a file with .jpg extension and empty type
+    - Should return 'image/png' for a file with .png extension and empty type
+    - Should return the original type if it starts with 'image/'
+    - Should return empty string for a file with .txt extension
+    - Should handle null/undefined file object gracefully
+    - Should handle file.type with extra whitespace
+    - Should handle file.name with mixed case
+    - Should return empty string for a file with no name and no type
+    - Should not trust extension alone for security (e.g., .jpg.js file)
+    - Should handle HEIC/HEIF extensions correctly
+
+=================================================================
+  FILE: employerOffersCsvTemplate.js
+  Score: 93/100   Issues: 3   Provider: nvidia   Time: 66.90s
+
+  The code is a simple utility for downloading a CSV template for employer offers import. It is functionally correct and follows basic patterns. The primary issues are the lack of error handling for browser compatibility (e.g., Blob/URL.createObjectURL not supported in older browsers or non-browser environments), missing cleanup of the temporary anchor element, and a potential CSV injection risk in the template data (the sample row starts with 'CS2021001' which is safe, but the pattern could be copied elsewhere with dangerous prefixes). Additionally, the function does not handle cases where the download might be blocked by the browser's popup blocker. The code is clean and maintainable for its purpose.
+
+  [MEDIUM] IssueType.ERROR_HANDLING -- Line 7
+  The function `downloadEmployerOffersTemplate` does not handle cases where the Blob API or URL.createObjectURL is not supported (e.g., in Node.js, server-side rendering, or very old browsers). This will throw a runtime error and crash the calling code.
+  Fix: Wrap the download logic in a try-catch block and provide a fallback or user-friendly error message.
+  Code: export function downloadEmployerOffersTemplate() {
+  const blob = new Blob([EMPLOYER_OFFERS_CSV_TEMPLATE], { type: 'text
+
+  [MEDIUM] IssueType.UIUX -- Line 13
+  The temporary anchor element is created but never appended to the DOM. Some browsers (especially older ones) may not trigger the download if the element is not in the document. Additionally, the element is not removed after use, which could cause a minor memory leak if called repeatedly.
+  Fix: Append the anchor to the document body before clicking and remove it afterward.
+  Code:   const a = document.createElement('a');
+  a.href = url;
+  a.download = EMPLOYER_OFFERS_TEMPLATE_FILENAME;
+  a.click();
+
+  [LOW] IssueType.CSV_INJECTION -- Line 1
+  The CSV template contains a sample row with a roll_number starting with 'CS2021001'. While this specific value is safe, if the template is later modified or if users copy this pattern and replace values with user-supplied data, cells starting with '=', '+', '-', or '@' could execute formulas in Excel/Google Sheets, leading to CSV injection attacks.
+  Fix: Add a comment or documentation warning about CSV injection risks, or prefix all sample data with a single quote to prevent formula execution.
+  Code: export const EMPLOYER_OFFERS_CSV_TEMPLATE = `roll_number,tenant_id,job_title,salary,location,joining_date,deadline,drive
+
+  🧪 Test Coverage Generator
+    - Should download a CSV file with the correct filename when called in a modern browser
+    - Should handle Blob API not being available (e.g., in Node.js or older browsers) gracefully
+    - Should not trigger a popup blocker warning when called from a user-initiated event
+    - Should clean up the temporary anchor element from the DOM after download
+    - Should handle the case where URL.createObjectURL fails (e.g., memory limit)
+    - Should sanitize the template data to prevent CSV injection if the template is later modified with user input
+
+=================================================================
+  FILE: employerAssessmentAudit.js
+  Score: 72/100   Issues: 6   Provider: nvidia   Time: 76.45s
+
+  The function is well-structured with clear dual-write audit logging. The primary risk is the missing tenant_id filter on the employer_assessment_change_log table, which could allow cross-tenant data leakage if that table is queried without tenant context. Additionally, the function lacks error handling for database failures, which could cause silent data loss in the audit trail. The code is otherwise clean and follows good practices with parameterized queries.
+
+  [HIGH] IssueType.MULTI_TENANCY -- Line 34
+  The employer_assessment_change_log INSERT does not include a tenant_id column, making it impossible to isolate audit records per tenant. This is a cross-tenant data leakage risk if this table is queried without tenant context.
+  Fix: Add a tenant_id column to the employer_assessment_change_log table and include it in the INSERT statement.
+  Code: await client.query(
+  `INSERT INTO employer_assessment_change_log
+     (upload_id, row_id, actor_user_id, action, summar
+
+  [HIGH] IssueType.ERROR_HANDLING -- Line 29
+  The function has no try/catch block. If either INSERT query fails (e.g., database connection issue, constraint violation), the error propagates unhandled, potentially crashing the caller and leaving the audit trail in an inconsistent state (one insert succeeds, the other fails).
+  Fix: Wrap both queries in a try/catch block, log the error, and either rethrow or handle gracefully based on the caller's needs.
+  Code: export async function writeEmployerAssessmentAudit(client, p) {
+  const { tenantId, userId, uploadId, rowId, kind, summa
+
+  [MEDIUM] IssueType.DATA_INTEGRITY -- Line 54
+  The old_values field is passed as a raw object (details.old_values) without JSON.stringify(), but the column expects jsonb. If old_values is an object, PostgreSQL may reject it or coerce it incorrectly.
+  Fix: Use JSON.stringify() for old_values to ensure proper jsonb formatting, consistent with the newValuesPayload handling.
+  Code: details.old_values != null ? details.old_values : null,
+
+  [MEDIUM] IssueType.DATA_INTEGRITY -- Line 55
+  newValuesPayload is passed as a plain JavaScript object to a jsonb column. PostgreSQL may accept it via the driver, but explicit JSON.stringify() ensures consistent behavior across all drivers and avoids potential serialization issues.
+  Fix: Wrap newValuesPayload with JSON.stringify() for consistency with the old_values handling.
+  Code: newValuesPayload,
+
+  [LOW] IssueType.INPUT_VALIDATION -- Line 30
+  No validation that tenantId and uploadId are non-empty strings or valid UUIDs before database insertion. Invalid values will cause a PostgreSQL error that could have been caught earlier with a clearer error message.
+  Fix: Add input validation at the start of the function to check that required fields are present and valid.
+  Code: const { tenantId, userId, uploadId, rowId, kind, summary, details = {} } = p;
+
+  [LOW] IssueType.CODE_SMELL -- Line 41
+  The destructuring of old_values uses an underscore prefix (_oldForLog) to indicate it's unused, but this is a convention that could be confusing. The variable is never used, which is intentional but could be clearer.
+  Fix: Use a simple destructuring without assignment to make the intent clearer, or add a comment explaining why old_values is excluded.
+  Code: const { old_values: _oldForLog, ...detailsForNew } = details;
+
+  🧪 Test Coverage Generator
+    - Should handle database connection failure gracefully without crashing the caller
+    - Should prevent cross-tenant data leakage when querying employer_assessment_change_log
+    - Should handle null userId correctly for system-generated actions
+    - Should handle null rowId for CSV upload actions
+    - Should handle very large details JSON payload without truncation
+    - Should handle concurrent writes without deadlock or data corruption
+    - Should handle missing old_values in details object gracefully
+    - Should handle invalid kind value with proper error message
+    - Should handle tenantId being null or undefined
+    - Should handle uploadId being an invalid UUID format
+
+=================================================================
+  FILE: offerReportedColumn.js
+  Score: 96/100   Issues: 2   Provider: nvidia   Time: 18.25s
+
+  The provided code snippet for checking if the 'reported_company_name' column is missing in the 'offers' table appears to be generally well-structured and readable. However, there are a few potential issues and improvements that can be suggested. The function 'isMissingReportedCompanyColumnError' checks if the error code is '42703' and if the error message includes 'reported_company_name'. This approach may not be foolproof as error messages can change. A more robust approach would be to check the error code and the specific column name in the error message. Additionally, the function does not handle cases where the error object is null or undefined.
+
+  [MEDIUM] IssueType.READABILITY -- Line 4
+  The error message check is case-sensitive and may not work if the column name is mentioned in a different case in the error message
+  Fix: Use a case-insensitive check for the column name in the error message
+  Code: return e?.code === '42703' && msg.includes('reported_company_name');
+
+  [LOW] IssueType.NULL_CHECK -- Line 3
+  The function does not handle cases where the error object is null or undefined
+  Fix: Add a null check for the error object
+  Code: const msg = String(e?.message || '');
+
+  🧪 Test Coverage Generator
+    - Should return true when Postgres rejects SQL because 'reported_company_name' column is missing
+    - Should return false when Postgres rejects SQL for other reasons
+    - Should handle cases where the error object is null or undefined
+
+=================================================================
+  FILE: notificationService.js
+  Score: 88/100   Issues: 6   Provider: nvidia   Time: 36.43s
+
+  The notification service is clean, well-structured, and uses parameterized queries throughout, preventing SQL injection. The main risks are: (1) unbounded batch inserts that could cause memory/performance issues for tenants with thousands of users, (2) no input validation on message length which could lead to oversized rows, and (3) missing error handling that could silently fail in production. The code is otherwise solid with good use of optional transaction clients and consistent patterns.
+
+  [MEDIUM] IssueType.PERFORMANCE -- Line 15
+  notifyCollegeAdminsOfTenant performs an unbounded INSERT...SELECT that could insert millions of rows in a single query for large tenants, potentially causing memory pressure and long-running transactions.
+  Fix: Add pagination or batch limits to the INSERT...SELECT to process users in chunks of 1000-5000.
+  Code: export async function notifyCollegeAdminsOfTenant(tenantId, { title, message, type = 'info', link = null }, client = nul
+
+  [MEDIUM] IssueType.PERFORMANCE -- Line 27
+  notifyStudentsOfTenant has the same unbounded batch insert issue as notifyCollegeAdminsOfTenant, which could be catastrophic for large universities with 50k+ students.
+  Fix: Apply the same batching pattern as suggested for notifyCollegeAdminsOfTenant.
+  Code: export async function notifyStudentsOfTenant(tenantId, { title, message, type = 'info', link = null }, client = null) {
+
+
+  [MEDIUM] IssueType.PERFORMANCE -- Line 42
+  notifyUsersOneAtATime performs N sequential INSERT queries for N users, which will be extremely slow for large batches (e.g., 10k users = 10k round trips).
+  Fix: Use a single multi-row INSERT or batch the inserts into groups of 100-500 using UNNEST or multiple VALUES clauses.
+  Code: export async function notifyUsersOneAtATime(userIds, { title, message, type = 'info', link = null }, client = null) {
+  
+
+  [LOW] IssueType.ERROR_HANDLING -- Line 15
+  No error handling or logging around the database insert — if the query fails (e.g., constraint violation, connection drop), the error propagates unhandled and could crash the caller without context.
+  Fix: Wrap the query in a try-catch with structured logging of the notification details and re-throw or handle gracefully.
+  Code: export async function notifyCollegeAdminsOfTenant(tenantId, { title, message, type = 'info', link = null }, client = nul
+
+  [LOW] IssueType.INPUT_VALIDATION -- Line 15
+  No validation that message is a non-empty string — if message is null/undefined/empty, the notification will be stored with an empty message, which is likely a bug in the caller.
+  Fix: Add validation at the top of each function to ensure title and message are non-empty strings, throwing a descriptive error if not.
+  Code: export async function notifyCollegeAdminsOfTenant(tenantId, { title, message, type = 'info', link = null }, client = nul
+
+  [LOW] IssueType.PERFORMANCE -- Line 53
+  fetchCollegeAdminUserIds loads all admin user IDs into memory — for tenants with thousands of admins this could be a large array that is never paginated.
+  Fix: Add pagination or a LIMIT clause if the caller only needs a subset, or use a cursor-based approach.
+  Code: export async function fetchCollegeAdminUserIds(tenantId, client = null) {
+  const q = client ? client.query.bind(client)
+
+  🧪 Test Coverage Generator
+    - Should handle tenant with 50,000 active students without timing out or OOM
+    - Should rollback all notifications when called within a transaction that fails
+    - Should clip title at 250 chars and handle null/undefined title gracefully
+    - Should handle empty userIds array in notifyUsersOneAtATime without error
+    - Should handle database connection failure with proper error propagation
+    - Should verify that only active college_admin users receive notifications
+    - Should handle very long message strings (>10KB) without truncation or error
+    - Should handle concurrent calls for the same tenant without deadlocks
+    - Should handle UUID format validation for tenantId parameter
+    - Should handle null client parameter by using default query function
+
+=================================================================
+  FILE: offerStatusNormalize.js
+  Score: 94/100   Issues: 4   Provider: nvidia   Time: 16.83s
+
+  The code is generally well-structured with clear normalization logic and helper functions. The primary risk is a potential logic error in `canStudentRespondToOffer` where an expired status is checked before the deadline check, but the function still returns `false` for expired offers regardless of deadline. Additionally, the `OFFER_PENDING_STATUS_SQL` fragment includes statuses like 'offered', 'sent', 'awaiting_response', 'awaiting' that are normalized to 'pending' in the JS function, but the SQL fragment is used directly in queries and may not match the normalized values if the database stores different raw values. The code lacks input validation for the `application` object in `findPendingOfferForApplication`, which could lead to accessing properties on undefined. Overall, the code is reliable for typical use cases but has minor edge-case and maintainability concerns.
+
+  [MEDIUM] IssueType.DATA_INTEGRITY -- Line 6
+  OFFER_PENDING_STATUS_SQL includes statuses like 'offered', 'sent', 'awaiting_response', 'awaiting' that are normalized to 'pending' in normalizeOfferStatus. If the database stores these raw values, the SQL fragment will match them, but if the database already stores normalized values (e.g., 'pending'), the SQL may miss records or include duplicates. This creates a mismatch between the SQL filter and the JS normalization logic.
+  Fix: Ensure the database stores only normalized statuses (pending, accepted, rejected, expired, revoked) and update the SQL fragment to only check for 'pending', or keep the SQL fragment in sync with the normalization mapping.
+  Code: export const OFFER_PENDING_STATUS_SQL = `LOWER(TRIM(o.status)) IN ('pending', 'offered', 'sent', 'awaiting_response', 'a
+
+  [LOW] IssueType.LOGIC -- Line 62
+  In canStudentRespondToOffer, the check for 'expired' status on line 65 is redundant because line 66 already returns false if status is 'pending' and deadline is passed. However, if the status is 'expired' but the deadline is not passed (unlikely but possible with manual status changes), the function returns false correctly. The logic is correct but the early return for 'expired' is unnecessary and could be simplified.
+  Fix: Remove the early return for 'expired' status and rely on the deadline check and final status check, or keep it for clarity but add a comment explaining the intent.
+  Code:   if (status === 'expired') return false;
+  if (status === 'pending' && isOfferDeadlinePassed(offer.deadline, now)) retu
+
+  [LOW] IssueType.EDGE_CASE -- Line 22
+  findPendingOfferForApplication does not validate that the application object has the expected shape. If application is an object but missing all relevant properties (drive_id, id, company, role), the function will return null, which is safe. However, if application has unexpected types (e.g., drive_id is a number but offers have string driveId), the comparison on line 28 may fail silently.
+  Fix: Add a type check or coerce all comparison values to strings to avoid type mismatches, which is already partially done with String() on line 28.
+  Code:   const driveId = application.drive_id || application.driveId;
+  if (driveId) {
+    const byDrive = pending.find((o) => 
+
+  [LOW] IssueType.CODE_SMELL -- Line 13
+  The default value for raw is 'pending' when raw is null or undefined. This means that if a caller passes null or undefined, the function returns 'pending' instead of the original null/undefined. This may mask bugs where the caller expects to handle null/undefined separately.
+  Fix: Consider returning null or undefined for null/undefined input, or document this behavior clearly in the JSDoc.
+  Code:   const s = String(raw || 'pending').trim().toLowerCase();
+
+  🧪 Test Coverage Generator
+    - Should return 'pending' for null/undefined/empty input
+    - Should return 'rejected' for 'declined', 'decline', 'reject'
+    - Should return 'pending' for 'offered', 'sent', 'awaiting_response', 'awaiting'
+    - Should return the original status if it is in the VALID set
+    - Should return the original status if it is not recognized (e.g., 'unknown')
+    - Should return null if offers is not an array or application is null/undefined
+    - Should match by drive_id when application has drive_id and offer has matching driveId
+    - Should match by application id when drive_id is missing
+    - Should match by company and role when both drive_id and application id are missing
+    - Should return null if no pending offers exist
+    - Should return false for canStudentRespondToOffer when offer is null
+    - Should return false for expired status regardless of deadline
+    - Should return false for pending status when deadline is passed
+    - Should return true for pending status when deadline is not passed
+    - Should handle case where application object has missing properties (e.g., no drive_id, no id, no company)
+    - Should handle offers with mixed camelCase and snake_case property names
+    - Should handle empty string company or role in findPendingOfferForApplication
+    - Should verify OFFER_PENDING_STATUS_SQL matches the normalization logic for all statuses
+
+=================================================================
+  FILE: pgSsl.js
+  Score: 95/100   Issues: 3   Provider: nvidia   Time: 14.82s
+
+  The function is well-structured with clear documentation and handles the common TLS scenarios for PostgreSQL connections. The primary risk is the synchronous fs.readFileSync call on the main thread, which could block the event loop during startup if the CA file path is invalid or the filesystem is slow. Additionally, the warning for insecure TLS is only logged once per process lifetime, which may hide repeated configuration issues in long-running environments. The code is otherwise correct and follows security best practices by defaulting to rejectUnauthorized: true for remote hosts.
+
+  [MEDIUM] IssueType.PERFORMANCE -- Line 44
+  fs.readFileSync on line 44 blocks the event loop during startup. If the CA file is large or the filesystem is slow (e.g., network mount), this could delay server startup and block other initialization tasks.
+  Fix: Use fs.promises.readFile with await in an async startup function, or read the file lazily when the first connection is created.
+  Code: ssl.ca = fs.readFileSync(caPath, 'utf8');
+
+  [LOW] IssueType.OBSERVABILITY -- Line 30
+  The insecure TLS warning is only logged once per process lifetime via the warnedInsecureTls flag. In long-running environments where configuration changes dynamically (e.g., Kubernetes configmap reload), repeated warnings would be suppressed, hiding potential misconfiguration.
+  Fix: Remove the once-per-process guard or log at a higher severity (e.g., console.error) so it appears in every invocation, or add a rate-limited logger.
+  Code: if (!devLike && !warnedInsecureTls) {
+      warnedInsecureTls = true;
+      console.warn(
+        '[pgSsl] TLS verificat
+
+  [LOW] IssueType.ERROR_HANDLING -- Line 46
+  The error message includes e.message which may contain filesystem path details. In production, this could leak internal filesystem structure in error logs or responses if the error propagates uncaught.
+  Fix: Log the full error server-side but throw a sanitized message without the path details, or include the path only in a structured log field.
+  Code: throw new Error(`DATABASE_SSL_CA: cannot read ${caPath}: ${e.message}`);
+
+  🧪 Test Coverage Generator
+    - Should return false for localhost, 127.0.0.1, and ::1 hostnames
+    - Should return { rejectUnauthorized: false } when DATABASE_SSL_REJECT_UNAUTHORIZED is false in production and log a warning
+    - Should not log warning on subsequent calls when insecure TLS is already warned
+    - Should return { rejectUnauthorized: true } with CA cert when DATABASE_SSL_CA is set and file exists
+    - Should throw an error with descriptive message when DATABASE_SSL_CA path is invalid or unreadable
+    - Should handle empty or undefined hostname gracefully by treating it as non-local
+    - Should handle DATABASE_SSL_CA with leading/trailing whitespace via .trim()
+    - Should handle NODE_ENV being undefined or empty string without crashing
+    - Should handle very large CA certificate file without memory issues
+    - Should handle symlink or special files in DATABASE_SSL_CA path
+
+=================================================================
+  FILE: offerDeadline.js
+  Score: 96/100   Issues: 2   Provider: nvidia   Time: 40.90s
+
+  The provided code for parsing and checking offer deadlines is generally well-structured and readable. However, there are a few potential issues and improvements that can be made. The code correctly handles date-only values and treats them as valid through the end of the calendar day. It also properly checks for invalid or null deadlines. One potential issue is that the code does not account for timezone differences when comparing deadlines. Additionally, the code could benefit from more robust error handling and input validation.
+
+  [MEDIUM] IssueType.BUG -- Line 21
+  Potential issue with timezone differences when comparing deadlines
+  Fix: Consider using a library like moment-timezone to handle timezone differences
+  Code: const end = new Date(`${dateOnly[1]}T23:59:59.999Z`);
+
+  [LOW] IssueType.READABILITY -- Line 12
+  Consider adding more robust error handling and input validation
+  Fix: Add try-catch blocks and input validation to handle potential errors
+  Code: if (deadline == null || deadline === '') return null;
+
+  🧪 Test Coverage Generator
+    - Should handle date-only values correctly
+    - Should treat date-only values as valid through end of calendar day
+    - Should return null for invalid or null deadlines
+    - Should correctly compare deadlines with different timezones
+
+=================================================================
+  FILE: marketingWebsiteUrl.js
+  Score: 95/100   Issues: 3   Provider: nvidia   Time: 64.69s
+
+  The provided code snippet for normalizing marketing website URLs is generally well-structured and readable. However, there are a few potential issues and improvements that can be suggested. The code properly trims and checks the protocol of the input URL, but it does not handle cases where the URL is too long or contains invalid characters. Additionally, the code does not provide any feedback to the user if the input URL is invalid.
+
+  [MEDIUM] IssueType.SECURITY -- Line 12
+  Potential security issue: the code assumes that the input URL is safe and does not contain any malicious characters. However, it does not perform any validation or sanitization on the input URL.
+  Fix: Consider using a library like url-parse to parse and validate the input URL.
+  Code: let u = s; if (!/^https?:\/\//i.test(u)) u = `https://${u}`;
+
+  [LOW] IssueType.READABILITY -- Line 14
+  The variable name 'u' is not very descriptive. Consider renaming it to something more meaningful.
+  Fix: Rename the variable 'u' to something like 'url' or 'parsedUrl'.
+  Code: let u = s;
+
+  [LOW] IssueType.ERROR_HANDLING -- Line 19
+  The catch block is too broad and does not provide any information about the error that occurred. Consider logging the error or providing more feedback to the user.
+  Fix: Consider logging the error or providing more feedback to the user.
+  Code: catch { return ''; }
+
+  🧪 Test Coverage Generator
+    - Should return empty string for empty input
+    - Should return empty string for invalid protocol
+    - Should return empty string for URL longer than MAX_LEN
+    - Should return trimmed https URL for valid input
+
+=================================================================
+  FILE: messageTemplateUtils.js
+  Score: 96/100   Issues: 2   Provider: nvidia   Time: 58.71s
+
+  The provided code snippet for message template utilities appears to be well-structured and readable. However, there are a few potential issues and improvements that can be suggested. The code does not handle potential errors that may occur during the parsing of variables. Additionally, the code does not validate the input variables to ensure they are in the expected format.
+
+  [MEDIUM] IssueType.ERROR_HANDLING -- Line 3
+  The code does not handle potential errors that may occur during the parsing of variables.
+  Fix: Add try-catch blocks to handle potential errors.
+  Code: if (Array.isArray(variables)) { return variables.map((v) => String(v || '').trim()).filter(Boolean); }
+
+  [LOW] IssueType.CODE_SMELL -- Line 7
+  The code uses the 'trim' method to remove whitespace from the variables. However, this may not be sufficient to handle all cases.
+  Fix: Consider using a more robust method to remove whitespace, such as a regular expression.
+  Code: const trimmed = variables.trim();
+
+  🧪 Test Coverage Generator
+    - Should handle empty input variables
+    - Should handle variables as an array
+    - Should handle variables as a string
+    - Should handle variables with leading and trailing whitespace
+    - Should handle variables with commas and newlines
+    - Should handle variables with quotes
+    - Should handle variables with empty values
+
+=================================================================
+  FILE: fetchJson.js
+  Score: 93/100   Issues: 3   Provider: nvidia   Time: 78.92s
+
+  The provided code is generally well-structured and handles JSON parsing from fetch responses correctly. However, there are a few potential issues that need to be addressed, such as error handling and input validation. The code does not check for potential security vulnerabilities like CORS or timing attacks. The score is 85 due to the lack of comprehensive error handling and security considerations.
+
+  [MEDIUM] IssueType.ERROR_HANDLING -- Line 7
+  The fetch call does not handle potential network errors or timeouts
+  Fix: Add a try-catch block around the fetch call to handle potential network errors or timeouts
+  Code: const res = await fetch(url, init);
+
+  [LOW] IssueType.INPUT_VALIDATION -- Line 11
+  The errorData object is not validated before accessing its properties
+  Fix: Add input validation to ensure the errorData object is not null or undefined before accessing its properties
+  Code: const errorData = await res.json();
+
+  [MEDIUM] IssueType.SECURITY -- Line 23
+  The swrFetcher function does not validate the input URL to prevent potential security vulnerabilities like CORS or timing attacks
+  Fix: Add input validation to ensure the URL is same-origin and does not contain any malicious characters
+  Code: return fetchJson(url, { credentials: 'same-origin' });
+
+  🧪 Test Coverage Generator
+    - Should handle JSON parsing from fetch responses correctly
+    - Should throw an error when the response is not OK
+    - Should handle non-JSON error bodies correctly
+    - Should validate input to prevent potential security vulnerabilities
+
+=================================================================
+  FILE: loginSupportDelivery.js
+  Score: 86/100   Issues: 3   Provider: nvidia   Time: 70.88s
+
+  The provided code is generally well-structured and readable. However, there are a few potential issues and improvements that can be suggested. The code does not handle errors properly in some cases, and there are some potential security vulnerabilities. The code also lacks input validation and sanitization in some areas.
+
+  [HIGH] IssueType.SECURITY -- Line 29
+  The code does not validate user input before inserting it into the database, which could lead to SQL injection attacks.
+  Fix: Validate user input using a whitelist approach and use parameterized queries to prevent SQL injection.
+  Code: await query(`INSERT INTO login_support_messages (reply_email, subject, message, inbox_email, delivery_mode) VALUES ($1, 
+
+  [MEDIUM] IssueType.SECURITY -- Line 52
+  The code does not validate user input before sending it as an email, which could lead to XSS attacks.
+  Fix: Sanitize user input using a whitelist approach to prevent XSS attacks.
+  Code: mailResult = await sendMail({ to: inbox, replyTo: replyEmail, subject: mailSubject, text, html, context: 'login_support'
+
+  [LOW] IssueType.ERROR_HANDLING -- Line 63
+  The code does not handle errors properly in some cases, which could lead to unexpected behavior.
+  Fix: Improve error handling by logging errors and providing user-friendly error messages.
+  Code: console.error('[login_support] SMTP error:', err?.message || err)
+
+  🧪 Test Coverage Generator
+    - Should handle DB timeout gracefully
+    - Should prevent double-charge if retried
+    - Should validate user input to prevent SQL injection
+    - Should sanitize user input to prevent XSS
+
+=================================================================
+  FILE: platformSettings.js
+  Score: 90/100   Issues: 6   Provider: nvidia   Time: 32.61s
+
+  The platform settings module is clean and well-structured with a sensible caching strategy and graceful fallback to defaults. The primary risk is the hardcoded `id = 1` assumption for the platform settings row, which will silently return defaults if the row doesn't exist or has a different ID. The in-memory cache is not tenant-scoped, which is acceptable for global platform settings but should be documented. The empty catch block swallows all errors without logging, making production debugging difficult. Overall, the code is production-ready with minor improvements needed for observability and robustness.
+
+  [MEDIUM] IssueType.BUG -- Line 41
+  Hardcoded `id = 1` assumes the platform settings row always has ID 1. If the row is deleted, has a different ID, or the table is empty, the query returns no rows and defaults are used silently with no indication to the admin.
+  Fix: Use a unique constraint on a known column (e.g., `key = 'global'`) or fetch the first row without assuming ID. Alternatively, ensure the row is created on first access.
+  Code: const r = await query('SELECT settings FROM platform_settings WHERE id = 1');
+
+  [MEDIUM] IssueType.OBSERVABILITY -- Line 47
+  Empty catch block swallows all database errors silently. In production, a transient DB failure or schema change will silently return defaults with no log entry, making debugging extremely difficult.
+  Fix: Log the error with a structured logger before falling back to defaults. Include correlation ID if available.
+  Code:   } catch {
+    cache.data = { ...PLATFORM_SETTINGS_DEFAULTS };
+  }
+
+  [LOW] IssueType.RELIABILITY -- Line 30
+  In-memory cache is not invalidated when settings are updated via admin API unless `invalidatePlatformSettingsCache()` is explicitly called. If the admin updates settings and forgets to invalidate, stale settings will be served for up to 30 seconds.
+  Fix: Ensure the admin settings update endpoint always calls `invalidatePlatformSettingsCache()` after a successful update. Consider adding a comment or hook to enforce this.
+  Code: let cache = { at: 0, data: null };
+const TTL_MS = 30_000;
+
+  [LOW] IssueType.CONCURRENCY -- Line 37
+  Race condition: if two concurrent calls find the cache expired, both will execute the query simultaneously. This is a minor issue for a low-traffic settings endpoint but could cause a brief spike in DB connections under high concurrency.
+  Fix: Use a simple mutex or deduplication pattern to ensure only one query runs when cache is stale.
+  Code: if (Date.now() - cache.at < TTL_MS && cache.data) {
+    return cache.data;
+  }
+
+  [LOW] IssueType.EDGE_CASE -- Line 45
+  If `canonicalizeTimezoneId` throws an error (e.g., invalid timezone string), the entire function will throw and fall back to defaults, losing the merged settings. This is unlikely but possible with malformed stored data.
+  Fix: Wrap the timezone canonicalization in a try-catch and fall back to the original value or a safe default.
+  Code: merged.timezone = canonicalizeTimezoneId(merged.timezone);
+
+  [LOW] IssueType.CODE_SMELL -- Line 54
+  `invalidatePlatformSettingsCache` sets `cache.at = 0` which is a magic number. While functionally correct, using `null` or a negative sentinel would be clearer.
+  Fix: Use `cache.at = null` or a negative timestamp for clarity.
+  Code: cache.at = 0;
+  cache.data = null;
+
+  🧪 Test Coverage Generator
+    - Should return merged defaults when platform_settings table is empty or row id=1 does not exist
+    - Should return cached data within TTL without hitting the database
+    - Should invalidate cache and re-fetch when invalidatePlatformSettingsCache is called
+    - Should handle database connection failure gracefully by returning defaults
+    - Should canonicalize timezone ID from stored settings
+    - Should merge stored settings over defaults, with stored values taking precedence
+    - Should handle stored settings that are null, empty object, or non-object types gracefully
+    - Should handle concurrent calls during cache refresh without race conditions
+    - Should log database errors when query fails (currently silent)
+    - Should handle extremely large settings JSONB payload without performance degradation
+
+=================================================================
+  FILE: registrationJobAid.js
+  Score: 96/100   Issues: 2   Provider: nvidia   Time: 19.66s
+
+  The code is generally well-structured and readable. However, there are a few potential issues and improvements that can be made. The primary risk is the potential for incorrect or missing environment variables, which could lead to unexpected behavior. Additionally, the code could benefit from more robust error handling and input validation.
+
+  [MEDIUM] IssueType.CONFIGURATION -- Line 30
+  The NEXT_PUBLIC_HIDE_REGISTRATION_JOB_AID environment variable is not validated or checked for existence before being used.
+  Fix: Add validation and error handling for environment variables.
+  Code: if (process.env.NEXT_PUBLIC_HIDE_REGISTRATION_JOB_AID === 'true') return false;
+
+  [LOW] IssueType.READABILITY -- Line 37
+  The sampleForCollegeSlug function does not validate its input.
+  Fix: Add input validation to the sampleForCollegeSlug function.
+  Code: return REGISTRATION_JOB_AID_SAMPLES.find((s) => s.slug === slug) || null;
+
+  🧪 Test Coverage Generator
+    - Should handle missing or incorrect environment variables
+    - Should validate input to the sampleForCollegeSlug function
+    - Should handle errors when accessing the REGISTRATION_JOB_AID_SAMPLES array
+
+=================================================================
+  FILE: offersAssessmentStarterCsv.js
+  Score: 93/100   Issues: 3   Provider: nvidia   Time: 73.57s
+
+  The provided code for generating CSV files for college and employer offers is generally well-structured and readable. However, there are a few potential issues and improvements that can be made. The code does not handle errors well and does not validate the input data. Additionally, the code uses the `??` operator which may not be supported in all environments. The code also uses the `Map` data structure which may not be the best choice for this use case. The code does not handle the case where the `assessmentByProfileId` map is empty or null. The code also does not handle the case where the `flatRows` array is empty or null.
+
+  [MEDIUM] IssueType.ERROR_HANDLING -- Line 21
+  The code does not handle the case where the `assessmentByProfileId` map is empty or null.
+  Fix: Add a check to handle the case where the `assessmentByProfileId` map is empty or null.
+  Code: const a = assessmentByProfileId.get(s.student_profile_id);
+
+  [MEDIUM] IssueType.ERROR_HANDLING -- Line 45
+  The code does not handle the case where the `flatRows` array is empty or null.
+  Fix: Add a check to handle the case where the `flatRows` array is empty or null.
+  Code: for (const r of flatRows) {
+
+  [LOW] IssueType.CODE_SMELL -- Line 8
+  The code uses the `??` operator which may not be supported in all environments.
+  Fix: Use a more compatible way to handle null or undefined values.
+  Code: const s = String(v ?? '');
+
+  🧪 Test Coverage Generator
+    - Should handle empty input data
+    - Should handle invalid input data
+    - Should handle errors when generating CSV files
+    - Should validate input data before generating CSV files
+
+=================================================================
+  FILE: phoneDialCodes.js
+  Score: 98/100   Issues: 2   Provider: nvidia   Time: 57.33s
+
+  The provided code is a simple and well-structured list of common ITU-T E.164 calling codes for signup and profile purposes. The code does not contain any major security vulnerabilities or performance issues. However, it could benefit from additional error handling and input validation. The score is 95 due to the lack of potential issues and the simplicity of the code.
+
+  [LOW] IssueType.READABILITY -- Line 6
+  The list of phone dial codes is quite long and could be maintained in a separate file or database for easier management and updates.
+  Fix: Consider moving the list of phone dial codes to a separate file or database.
+  Code: export const PHONE_DIAL_CODES = [...];
+
+  [LOW] IssueType.BEST_PRACTICE -- Line 35
+  The '__full__' code is used as a fallback for other regions, but it could be more descriptive or follow a specific standard.
+  Fix: Consider using a more descriptive or standardized code for the '__full__' fallback.
+  Code: { code: '__full__', label: 'Other — enter full number with +' }
+
+  🧪 Test Coverage Generator
+    - Should handle invalid input for phone dial codes
+    - Should validate user input for phone numbers
+
+=================================================================
+  FILE: offerStatusTimestamps.js
+  Score: 96/100   Issues: 2   Provider: nvidia   Time: 69.38s
+
+  The provided code snippet for offer decision timestamps appears to be generally well-structured and secure. However, there are a few potential issues and improvements that can be made. The function does not handle cases where the status is not one of the expected terminal statuses. Additionally, the function does not validate the input status to prevent potential errors.
+
+  [MEDIUM] IssueType.VALIDATION -- Line 6
+  The function does not validate the input status to prevent potential errors.
+  Fix: Add input validation to ensure the status is one of the expected values.
+  Code: const s = String(status || 'pending').toLowerCase();
+
+  [LOW] IssueType.READABILITY -- Line 9
+  The function uses a ternary operator to set the timestamps, which may be less readable than using an if-else statement.
+  Fix: Consider using an if-else statement to improve readability.
+  Code: acceptedAt: s === 'accepted' ? t : null, rejectedAt: s === 'rejected' ? t : null
+
+  🧪 Test Coverage Generator
+    - Should handle valid terminal statuses (accepted, rejected) correctly
+    - Should handle non-terminal statuses (pending) correctly
+    - Should handle invalid or missing status input correctly
+
+=================================================================
+  FILE: offersLatestFlag.js
+  Score: 95/100   Issues: 3   Provider: nvidia   Time: 71.88s
+
+  The provided code for refreshing offer latest flags for a student appears to be generally well-structured and secure. However, there are a few potential issues that need to be addressed, such as error handling and potential SQL injection vulnerabilities. The code uses parameterized queries, which is good for preventing SQL injection. The error handling is also robust, with checks for specific error codes and messages. Overall, the code seems to be reliable and maintainable, but some improvements can be made to enhance its security and performance.
+
+  [LOW] IssueType.BUG -- Line 52
+  The function does not check if the studentId is a valid UUID
+  Fix: Add a check to ensure the studentId is a valid UUID
+  Code: if (!studentId) return;
+
+  [MEDIUM] IssueType.ERROR_HANDLING -- Line 54
+  The function does not handle errors that may occur during the SQL query execution
+  Fix: Add a try-catch block to handle potential errors
+  Code: await query(RANK_UNIFIED_SQL, [studentId]);
+
+  [LOW] IssueType.CODE_SMELL -- Line 57
+  The function uses a nested try-catch block, which can make the code harder to read
+  Fix: Consider flattening the try-catch blocks
+  Code: try { await query(RANK_LEGACY_NO_REPORTED_SQL, [studentId]); } catch (e2) {
+
+  🧪 Test Coverage Generator
+    - Should handle missing studentId input
+    - Should handle SQL query errors
+    - Should handle missing reported_company_name column
+    - Should handle missing is_latest column
+
+=================================================================
+  FILE: postRegistrationRedirect.js
+  Score: 96/100   Issues: 2   Provider: nvidia   Time: 57.72s
+
+  The provided code snippet for post-registration redirect logic appears to be generally well-structured and clear in its purpose. However, there are a few potential issues and improvements that can be suggested. The primary risk is the lack of input validation for the 'nextUrl' parameter, which could potentially lead to security vulnerabilities if not properly sanitized. Additionally, the use of 'window.location.replace' may not be the best approach for navigation, as it can cause issues with browser history and may not be suitable for all types of applications.
+
+  [MEDIUM] IssueType.SECURITY -- Line 17
+  Missing input validation for 'nextUrl' parameter
+  Fix: Add input validation to ensure 'nextUrl' is a valid and sanitized URL
+  Code: nextUrl
+
+  [LOW] IssueType.BEST_PRACTICE -- Line 24
+  Use of 'window.location.replace' may not be suitable for all types of applications
+  Fix: Consider using a more modern navigation approach, such as the 'history' API
+  Code: window.location.replace(path);
+
+  🧪 Test Coverage Generator
+    - Should handle invalid 'nextUrl' parameter
+    - Should handle 'pendingPlatformApproval' flag correctly
+    - Should navigate to correct login path after registration
+
+=================================================================
+  FILE: feedbackNotify.js
+  Score: 95/100   Issues: 3   Provider: nvidia   Time: 127.46s
+
+  The provided code for notifying feedback submitters about super-admin replies appears to be generally well-structured and secure. However, there are a few potential issues that need to be addressed, such as input validation, error handling, and potential security vulnerabilities. The code score is 85 due to the lack of input validation and potential security vulnerabilities.
+
+  [MEDIUM] IssueType.INPUT_VALIDATION -- Line 8
+  The function does not validate or sanitize the submitterUserId, submitterEmail, submitterName, feedbackTitle, and replyMessage inputs. This could lead to potential security vulnerabilities.
+  Fix: Add input validation and sanitization to prevent potential security vulnerabilities.
+  Code: export async function notifyFeedbackReply({ submitterUserId, submitterEmail, submitterName, feedbackTitle, replyMessage 
+
+  [LOW] IssueType.ERROR_HANDLING -- Line 22
+  The try-catch block only logs the error and does not rethrow it. This could lead to silent failures.
+  Fix: Rethrow the error or handle it in a way that makes sense for the application.
+  Code: try {
+  await notifyUsersOneAtATime([submitterUserId], {
+    title,
+    message: preview,
+    type: 'info',
+    link: '/
+
+  [LOW] IssueType.ERROR_HANDLING -- Line 35
+  The try-catch block only logs the error and does not rethrow it. This could lead to silent failures.
+  Fix: Rethrow the error or handle it in a way that makes sense for the application.
+  Code: try {
+  const greeting = submitterName ? `Hi ${submitterName},` : 'Hi,';
+  await sendMail({
+    to: submitterEmail,
+    
+
+  🧪 Test Coverage Generator
+    - Should handle invalid submitterUserId and submitterEmail inputs
+    - Should handle failures in notifyUsersOneAtATime and sendMail functions
+    - Should validate and sanitize user input to prevent potential security vulnerabilities
+
+=================================================================
+  FILE: resolveAcademicYearFromRequest.js
+  Score: 95/100   Issues: 3   Provider: nvidia   Time: 49.34s
+
+  The provided code for resolving academic years from requests is generally well-structured and readable. However, there are a few potential issues and improvements that can be suggested. The code does not handle potential SQL query errors and does not validate the input parameters. Additionally, the code assumes that the `findAcademicYearForDate` function will always return a valid academic year, which may not be the case. The code also does not handle the case where the `academicYearId` or `academicYearLabel` parameters are not provided.
+
+  [MEDIUM] IssueType.ERROR_HANDLING -- Line 12
+  The code does not handle potential SQL query errors
+  Fix: Add try-catch block to handle SQL query errors
+  Code: const yearsRes = await query(...);
+
+  [LOW] IssueType.INPUT_VALIDATION -- Line 9
+  The code does not validate the input parameters
+  Fix: Add input validation to ensure that the parameters are valid
+  Code: const id = searchParams?.get('academicYearId')?.trim();
+
+  [LOW] IssueType.NULL_CHECK -- Line 23
+  The code assumes that the findAcademicYearForDate function will always return a valid academic year
+  Fix: Add null check to handle the case where the findAcademicYearForDate function returns null
+  Code: if (!year) year = findAcademicYearForDate(new Date(), rows);
+
+  🧪 Test Coverage Generator
+    - Should handle SQL query errors
+    - Should validate input parameters
+    - Should handle case where academicYearId or academicYearLabel parameters are not provided
+    - Should handle case where findAcademicYearForDate function returns null
+
+=================================================================
+  FILE: sandboxBanner.js
+  Score: 93/100   Issues: 3   Provider: nvidia   Time: 71.05s
+
+  The provided code snippet for showing the sandbox login banner is straightforward and readable. However, there are potential issues with environment variable handling and missing input validation. The code does not handle cases where the environment variables are not set or have unexpected values. Additionally, the function name could be more descriptive, and the return values could be more explicit.
+
+  [MEDIUM] IssueType.BEST_PRACTICE -- Line 6
+  The function does not handle cases where NEXT_PUBLIC_HIDE_SANDBOX_BANNER is not set or has an unexpected value
+  Fix: Add input validation to handle unexpected environment variable values
+  Code: if (process.env.NEXT_PUBLIC_HIDE_SANDBOX_BANNER === 'true') return false;
+
+  [MEDIUM] IssueType.BEST_PRACTICE -- Line 7
+  The function does not handle cases where NEXT_PUBLIC_SANDBOX_BANNER is not set or has an unexpected value
+  Fix: Add input validation to handle unexpected environment variable values
+  Code: if (process.env.NEXT_PUBLIC_SANDBOX_BANNER === 'false') return false;
+
+  [LOW] IssueType.READABILITY -- Line 5
+  The function name could be more descriptive
+  Fix: Rename the function to something more descriptive, such as 'shouldShowSandboxLoginBanner'
+  Code: export function showSandboxLoginBanner() {
+
+  🧪 Test Coverage Generator
+    - Should return false when NEXT_PUBLIC_HIDE_SANDBOX_BANNER is 'true'
+    - Should return false when NEXT_PUBLIC_SANDBOX_BANNER is 'false'
+    - Should return true when neither environment variable is set
+    - Should handle cases where environment variables are not set or have unexpected values
+
+=================================================================
+  FILE: publicApiError.js
+  Score: 95/100   Issues: 3   Provider: nvidia   Time: 100.04s
+
+  The file is a well-structured utility module for safe API error handling. The main risks are: (1) `isDev()` reads `process.env.NODE_ENV` at call time, which could be overridden or undefined in some environments, leading to accidental leakage of internal details in production. (2) `clientSafeMessageFromBody` exposes `hint` in dev mode, which is acceptable but should be noted. (3) No structured logging or correlation IDs are included, limiting observability. Overall, the code is clean and follows good practices for separating public vs internal error details.
+
+  [MEDIUM] IssueType.ENVIRONMENT_DRIFT -- Line 6
+  `isDev()` reads `process.env.NODE_ENV` at call time. If the environment variable is unset or overridden, the function may return false in development or true in production, causing internal details to leak or be hidden incorrectly.
+  Fix: Cache the environment check at module load time to avoid runtime variability, or validate NODE_ENV at startup.
+  Code: const isDev = () => process.env.NODE_ENV === 'development';
+
+  [LOW] IssueType.OBSERVABILITY -- Line 25
+  `console.error` is used for logging. In production, this may not be captured by structured logging systems, making it hard to search, filter, or correlate logs.
+  Fix: Replace with a structured logger that includes a correlation ID, timestamp, and log level.
+  Code: console.error(logLabel, err);
+
+  [LOW] IssueType.CODE_SMELL -- Line 34
+  `clientSafeMessageFromBody` exposes `hint` in dev mode. While intentional, this could leak internal guidance if a developer accidentally runs a production-like environment with NODE_ENV=development.
+  Fix: Consider making hint exposure conditional on an explicit debug flag rather than NODE_ENV alone.
+  Code: if (isDev() && (err || hint)) {
+    return [err, hint].filter(Boolean).join(' ') || fallback;
+  }
+
+  🧪 Test Coverage Generator
+    - Should return GENERIC_API_ERROR when NODE_ENV is production and body has error/hint
+    - Should return concatenated error and hint when NODE_ENV is development
+    - Should return fallback when body is null or undefined
+    - Should return fallback when body.error is not a string
+    - Should correctly identify Postgres relation missing error by code 42P01
+    - Should correctly identify Postgres relation missing error by message text
+    - Should strip internal fields (hint, stack, helpAi, detail, internal) in production
+    - Should preserve hint and detail in dev mode when stripping internal fields
+    - Should return the same primitive value when stripInternalApiFields receives non-object
+    - Should log full error details server-side without exposing them to the client
+
+=================================================================
+  FILE: smtpErrors.js
+  Score: 100/100   Issues: 0   Provider: nvidia   Time: 100.38s
+
+  Could not parse model response.
+
+=================================================================
+  FILE: studentBatch.js
+  Score: 98/100   Issues: 2   Provider: nvidia   Time: 128.11s
+
+  The provided code snippet for student batch handling appears to be generally well-structured and secure. However, there are a few potential issues, such as the use of deprecated functions and the lack of input validation in some cases. The code also has some redundant logic and could be improved for better readability and maintainability. Overall, the code seems to be functioning as intended, but some improvements are needed to ensure its reliability and security.
+
+  [LOW] IssueType.READABILITY -- Line 51
+  The function resolveStudentBatch has some redundant logic and could be improved for better readability
+  Fix: Simplify the logic and improve the readability of the function
+  Code: const joiningRaw = String(joining_academic_year || joiningAcademicYear || batchLabel || '').trim();
+
+  [LOW] IssueType.INPUT_VALIDATION -- Line 10
+  The function normalizeAdmissionYear does not validate the input type
+  Fix: Add input type validation to ensure the function receives a string or number
+  Code: if (value == null || value === '') return null;
+
+  🧪 Test Coverage Generator
+    - Should handle invalid input for batch year and graduation year
+    - Should return null for invalid input in normalizeAdmissionYear function
+    - Should return the correct batch label and joining academic year in resolveStudentBatch function
+    - Should handle deprecated function formatBatchLabel and replace it with admission batch year helpers
+
+=================================================================
+  FILE: simpleCaptcha.js
+  Score: 93/100   Issues: 3   Provider: nvidia   Time: 151.68s
+
+  The provided code for simple captcha generation and verification appears to be generally well-structured and secure. However, there are a few potential issues that need to be addressed, such as error handling and input validation. The code uses a secret key for HMAC signing, which is good for security. The captcha expiration time is set to 10 minutes, which is a reasonable value. Overall, the code seems to be doing its job correctly, but some improvements can be made to make it more robust and secure.
+
+  [MEDIUM] IssueType.ERROR_HANDLING -- Line 7
+  The error message for missing NEXTAUTH_SECRET in production environment could be more descriptive
+  Fix: Consider adding more context to the error message
+  Code: throw new Error('NEXTAUTH_SECRET is required for login captcha');
+
+  [MEDIUM] IssueType.ERROR_HANDLING -- Line 41
+  The try-catch block for parsing the token body could be more specific
+  Fix: Consider catching a specific error type instead of a general catch
+  Code: try { data = JSON.parse(Buffer.from(body, 'base64url').toString('utf8')); } catch { return false; }
+
+  [LOW] IssueType.INPUT_VALIDATION -- Line 52
+  The answer parameter could be validated more strictly
+  Fix: Consider adding more checks for the answer parameter
+  Code: const ans = parseInt(String(answer ?? '').trim(), 10);
+
+  🧪 Test Coverage Generator
+    - Should generate a new captcha with a valid question and token
+    - Should verify a correct answer for a generated captcha
+    - Should return false for an expired captcha
+    - Should return false for an invalid or tampered token
+    - Should handle errors when parsing the token or verifying the answer
+
+=================================================================
+  FILE: sessionUser.js
+  Score: 94/100   Issues: 2   Provider: nvidia   Time: 158.35s
+
+  The provided code snippet for session user management appears to be generally well-structured and secure. However, there are a few potential issues that need to be addressed, such as input validation and error handling. The code correctly checks for the existence of the user id and role in the session object, but it does not handle cases where the session object is null or undefined. Additionally, the code does not validate the type of the user id and role, which could lead to potential security vulnerabilities.
+
+  [MEDIUM] IssueType.INPUT_VALIDATION -- Line 3
+  The code does not validate the type of the user id, which could lead to potential security vulnerabilities.
+  Fix: Add type validation for the user id
+  Code: const id = session?.user?.id || session?.user?.sub;
+
+  [MEDIUM] IssueType.INPUT_VALIDATION -- Line 8
+  The code does not validate the type of the user role, which could lead to potential security vulnerabilities.
+  Fix: Add type validation for the user role
+  Code: return session?.user?.role === 'super_admin';
+
+  🧪 Test Coverage Generator
+    - Should handle null or undefined session object
+    - Should validate the type of user id and role
+    - Should handle cases where user id or role is missing from the session object
+
+=================================================================
+  FILE: shardBinding.js
+  Score: 96/100   Issues: 2   Provider: nvidia   Time: 168.64s
+
+  The provided code snippet for shard binding appears to be generally well-structured and secure. However, there are a few potential issues that need to be addressed. The generateSurfaceToken function uses a cryptographically secure pseudo-random number generator, which is good for security. The normalizeSurfaceTokenInput function properly sanitizes the input, but it does not check for the expected format of the surface token. The code does not handle errors well, and there are no tests to verify its correctness.
+
+  [LOW] IssueType.READABILITY -- Line 5
+  The variable name 'bytes' could be more descriptive
+  Fix: Consider renaming 'bytes' to 'randomBytes'
+  Code: const bytes = crypto.randomBytes(4).toString('hex').toUpperCase();
+
+  [MEDIUM] IssueType.ERROR_HANDLING -- Line 10
+  The function does not check for the expected format of the surface token
+  Fix: Consider adding a check for the expected format of the surface token
+  Code: if (raw == null || typeof raw !== 'string') return '';
+
+  🧪 Test Coverage Generator
+    - Should generate a surface token with the correct format
+    - Should normalize a surface token input with leading and trailing whitespace
+    - Should normalize a surface token input with multiple whitespace characters
+    - Should return an empty string for null or non-string input
+    - Should throw an error for invalid input
+
+=================================================================
+  FILE: studentProfileResolve.js
+  Score: 96/100   Issues: 2   Provider: nvidia   Time: 85.09s
+
+  The provided code for resolving student profiles by user ID is generally well-structured and secure. However, there are a few potential issues and improvements that can be made. The code correctly handles the case where the user ID is null or undefined, and it uses a parameterized query to prevent SQL injection. The error handling is also robust, catching and re-throwing any errors that occur during the query execution. One potential issue is that the code does not check if the user ID is a valid UUID before passing it to the query. Additionally, the code does not handle the case where the student profile is not found, it simply returns null. The code also has a potential issue with the error handling in the catch block, where it checks for a specific error code and message, but it does not handle other potential errors that may occur.
+
+  [LOW] IssueType.VALIDATION -- Line 8
+  The code does not validate the user ID before passing it to the query
+  Fix: Add a validation check to ensure the user ID is a valid UUID
+  Code: if (!userId) return null;
+
+  [MEDIUM] IssueType.ERROR_HANDLING -- Line 16
+  The error handling in the catch block is specific to a certain error code and message, but it does not handle other potential errors
+  Fix: Add a more robust error handling mechanism to handle other potential errors
+  Code: if (e?.code === '42703' && String(e?.message || '').includes('archived_at')) {
+
+  🧪 Test Coverage Generator
+    - Should return null when user ID is null or undefined
+    - Should return the student profile when the user ID is valid and the profile exists
+    - Should handle the case where the student profile is not found
+    - Should handle errors that occur during query execution
+    - Should validate the user ID before passing it to the query
+
+=================================================================
+  FILE: studentResumeUrl.js
+  Score: 96/100   Issues: 2   Provider: nvidia   Time: 65.93s
+
+  The provided code for handling student resume URLs is generally well-structured and readable. However, there are a few potential issues and improvements that can be made. The code correctly checks for placeholder and demo resume URLs, and it prioritizes the profile CV URL over extra resume rows in student documents. The code also correctly filters out non-resume documents and stale seed CV file names. The main risks are related to potential null pointer exceptions, missing input validation, and the use of deprecated functions. The score is 92 due to the overall quality of the code and the minor issues found.
+
+  [MEDIUM] IssueType.NULL_POINTER_EXCEPTION -- Line 21
+  Potential null pointer exception when accessing the 'url' property of the 'doc' object
+  Fix: Add null checks for the 'doc' object and its properties
+  Code: const value = String(url || '').trim();
+
+  [LOW] IssueType.INPUT_VALIDATION -- Line 69
+  Missing input validation for the 'documents' array
+  Fix: Add input validation to ensure the 'documents' array is not null or empty
+  Code: const docs = Array.isArray(documents) ? documents : [];
+
+  🧪 Test Coverage Generator
+    - Should handle null or undefined input for resume URL and documents
+    - Should correctly identify placeholder and demo resume URLs
+    - Should prioritize profile CV URL over extra resume rows in student documents
+    - Should filter out non-resume documents
+    - Should correctly handle stale seed CV file names
+
+=================================================================
+  FILE: userEmail.js
+  Score: 93/100   Issues: 3   Provider: nvidia   Time: 62.40s
+
+  The provided code snippet for user email management appears to be generally well-structured and secure. However, there are a few potential issues that need to be addressed, such as input validation, error handling, and potential SQL injection vulnerabilities. The code score is 85 due to the presence of these issues.
+
+  [MEDIUM] IssueType.SECURITY -- Line 21
+  Potential SQL injection vulnerability in the findUserByEmail function. Although the query uses parameterized queries, it's essential to ensure that the input is properly sanitized.
+  Fix: Validate and sanitize the input email address to prevent potential SQL injection attacks.
+  Code: const result = await client.query(`SELECT u.id, u.email, u.role, u.tenant_id, sp.roll_number FROM users u LEFT JOIN stud
+
+  [LOW] IssueType.ERROR_HANDLING -- Line 37
+  The assertEmailAvailable function does not handle errors when querying the database. It's essential to add proper error handling to ensure the function behaves correctly in case of errors.
+  Fix: Add try-catch blocks to handle potential errors when querying the database.
+  Code: const existing = await findUserByEmail(client, email)
+
+  [MEDIUM] IssueType.LOGIC -- Line 46
+  The assertEmailAvailable function checks if the tenantId is not null and the existing tenantId is not null, but it does not check if the tenantId is undefined. This could lead to unexpected behavior if the tenantId is undefined.
+  Fix: Add a check for undefined tenantId to ensure the function behaves correctly in all scenarios.
+  Code: if (tenantId != null && existing.tenant_id != null && String(existing.tenant_id) !== String(tenantId))
+
+  🧪 Test Coverage Generator
+    - Should handle case-insensitive email search correctly
+    - Should prevent SQL injection attacks through parameterized queries
+    - Should handle errors when querying the database
+    - Should validate user input for email addresses
+
+=================================================================
+  FILE: studentProfileActive.js
+  Score: 75/100   Issues: 1   Provider: cache   Time: 0.00s
+
+  The provided code snippet for SQL helpers related to soft-archived student profiles has a significant security issue due to the use of string concatenation for SQL queries, making it vulnerable to SQL injection attacks. The code is generally well-structured but lacks proper input sanitization and parameterization. The score is heavily deducted due to this critical security vulnerability.
+
+  [CRITICAL] IssueType.SECURITY -- Line 14
+  SQL injection vulnerability due to string concatenation in activeStudentIdsForTenant function
+  Fix: Use parameterized queries or prepared statements to prevent SQL injection
+  Code: return `(SELECT id FROM student_profiles WHERE tenant_id = ${tenantParam}::uuid AND archived_at IS NULL)`;
+
+  🧪 Test Coverage Generator
+    - Should prevent SQL injection when tenantParam is user-controlled input
+    - Should handle cases where tenantParam is null or undefined
+
+=================================================================
+  FILE: screenSearchOpenai.js
+  Score: 93/100   Issues: 3   Provider: cache   Time: 0.00s
+
+  The provided code snippet for screen search using OpenAI is generally well-structured and readable. However, there are a few potential issues and improvements that can be suggested. The primary risk is the lack of error handling for the OpenAI API request and the potential for the API key to be exposed. The code also assumes that the API response will always be in the correct format, which may not always be the case.
+
+  [MEDIUM] IssueType.ERROR_HANDLING -- Line 30
+  The API request to OpenAI is not properly handled for errors. If the request fails, the error should be caught and handled.
+  Fix: Add try-catch block to handle API request errors
+  Code: const res = await fetch('https://api.openai.com/v1/chat/completions', {...
+
+  [LOW] IssueType.CODE_SMELL -- Line 56
+  The API response is not validated for the correct format. If the response is not in the expected format, the code may fail.
+  Fix: Add validation for API response format
+  Code: const data = await res.json();
+
+  [MEDIUM] IssueType.SECURITY -- Line 15
+  The API key is not properly checked for validity. If the API key is not provided or is invalid, the code should handle this case.
+  Fix: Add check for API key validity
+  Code: if (!apiKey || !screens.length || !String(userQuery || '').trim()) {
+
+  🧪 Test Coverage Generator
+    - Should handle API request errors gracefully
+    - Should validate API response format
+    - Should handle cases where API key is not provided or is invalid
+    - Should limit the number of hrefs returned to 8
+
+=================================================================
+  FILE: studentAvatarUpload.js
+  Score: 95/100   Issues: 3   Provider: cache   Time: 0.00s
+
+  The provided code snippet for student avatar upload validation appears to be generally well-structured and secure. However, there are a few potential issues that need to be addressed, such as input validation and error handling. The code correctly checks for the file type and size, but it does not handle cases where the file is not an object or is null. Additionally, the error messages could be more descriptive and user-friendly. The code also uses a Set to store the allowed content types, which is a good practice for efficient lookups.
+
+  [MEDIUM] IssueType.INPUT_VALIDATION -- Line 22
+  The code does not check if the file is null before checking its type and size.
+  Fix: Add a null check for the file before validating its type and size.
+  Code: if (!file || typeof file !== 'object')
+
+  [LOW] IssueType.CODE_SMELL -- Line 25
+  The variable name 'contentType' could be more descriptive.
+  Fix: Rename the variable to something more descriptive, such as 'normalizedContentType'.
+  Code: const contentType = normalizeStudentAvatarContentType(file.type);
+
+  [LOW] IssueType.ERROR_HANDLING -- Line 38
+  The error messages could be more descriptive and user-friendly.
+  Fix: Improve the error messages to provide more context and be more user-friendly.
+  Code: return { ok: false, error: 'No file selected.' };
+
+  🧪 Test Coverage Generator
+    - Should validate student avatar file with valid JPEG image
+    - Should validate student avatar file with valid PNG image
+    - Should validate student avatar file with valid WebP image
+    - Should validate student avatar file with valid GIF image
+    - Should return error for student avatar file with invalid content type
+    - Should return error for student avatar file with size larger than 2MB
+    - Should return error for student avatar file with size less than or equal to 0
+    - Should return error for student avatar file that is not an object
+
+=================================================================
+  FILE: studentDocumentUpload.js
+  Score: 93/100   Issues: 3   Provider: cache   Time: 0.00s
+
+  The provided code snippet for student document upload validation is generally well-structured and secure. However, there are a few potential issues and improvements that can be made. The code correctly checks for allowed file types, size, and content type. It also handles cases where the file type is not provided or is unknown. The main risks are related to potential issues with file type detection and size validation. The code does not handle cases where the file name or type is null or undefined, which could lead to errors. Additionally, the code uses a fixed maximum file size, which may not be suitable for all use cases.
+
+  [MEDIUM] IssueType.BUG -- Line 44
+  File name is not checked for null or undefined
+  Fix: Add a check for null or undefined file name
+  Code: const fileName = String(file?.name || 'document').trim() || 'document';
+
+  [MEDIUM] IssueType.BUG -- Line 45
+  File size is not checked for null or undefined
+  Fix: Add a check for null or undefined file size
+  Code: const size = Number(file?.size || 0);
+
+  [LOW] IssueType.CODE_SMELL -- Line 49
+  Error message for empty file could be more descriptive
+  Fix: Improve error message for empty file
+  Code: return { ok: false, error: 'The file is empty. Choose a PDF or Word document.' };
+
+  🧪 Test Coverage Generator
+    - Should handle empty file
+    - Should handle file with unknown type
+    - Should handle file with size larger than maximum allowed
+    - Should handle file with type not in allowed types
+
+=================================================================
+  FILE: seedDemoStudentIds.js
+  Score: 99/100   Issues: 1   Provider: cache   Time: 0.00s
+
+  The provided code is a simple and well-structured list of fixed user UUIDs for students. The code does not contain any major security vulnerabilities or performance issues. However, it is worth noting that the use of hardcoded UUIDs may not be scalable or maintainable in the long run. A more dynamic approach to generating or retrieving these IDs may be necessary in the future.
+
+  [LOW] IssueType.MAINTAINABILITY -- Line 5
+  The use of hardcoded UUIDs may not be scalable or maintainable in the long run
+  Fix: Consider using a more dynamic approach to generating or retrieving these IDs
+  Code: export const SEED_DEMO_STUDENT_USER_IDS = new Set([...])
+
+  🧪 Test Coverage Generator
+    - Should handle cases where the UUID is not in the set
+    - Should handle cases where the UUID is null or undefined
+
+=================================================================
+  FILE: redirectMarketingSite.js
+  Score: 49/100   Issues: 5   Provider: cache   Time: 0.00s
+
+  The function is concise and follows a clear pattern, but it has a critical reliability issue: it calls `redirect()` inside an async function without a try/catch, which will cause an unhandled promise rejection if `getPlatformSettings()` throws (e.g., database connection failure). Additionally, there is no fallback or error handling for missing or invalid platform settings, and the redirect is unconditional — it will always redirect if a URL is returned, even on API routes or background jobs where redirects are inappropriate. The code also lacks observability (no logging) and assumes `getPlatformSettings` always returns a valid object with a `marketingWebsiteUrl` property.
+
+  [CRITICAL] IssueType.ERROR_HANDLING -- Line 6
+  Unhandled promise rejection: if getPlatformSettings() throws (e.g., DB connection failure), the async function will reject with no catch, crashing the process or causing a 500 error with no logging.
+  Fix: Wrap the call in try/catch, log the error, and return without redirecting on failure.
+  Code: export async function redirectIfMarketingSiteConfigured() {
+  const s = await getPlatformSettings();
+  const url = norma
+
+  [HIGH] IssueType.NULL_POINTER_EXCEPTION -- Line 8
+  If getPlatformSettings() returns null or undefined, accessing s.marketingWebsiteUrl will throw a TypeError, crashing the request.
+  Fix: Add optional chaining or a default empty object fallback.
+  Code: const url = normalizeMarketingWebsiteUrl(s.marketingWebsiteUrl);
+
+  [HIGH] IssueType.LOGIC -- Line 9
+  redirect() throws a NEXT_REDIRECT error intentionally, but this function has no guard against being called on API routes or server actions where redirects are invalid — it will cause a runtime error.
+  Fix: Check if the current environment is a page route (e.g., check headers or use a flag) before calling redirect, or document that this must only be used in page/layout components.
+  Code: if (url) redirect(url);
+
+  [MEDIUM] IssueType.OBSERVABILITY -- Line 7
+  No logging when a redirect occurs — operators cannot audit or debug unexpected redirects in production.
+  Fix: Add a structured log entry before redirecting.
+  Code: const s = await getPlatformSettings();
+
+  [MEDIUM] IssueType.RELIABILITY -- Line 6
+  No timeout on getPlatformSettings() — if the database is slow, this function could block the request indefinitely.
+  Fix: Use Promise.race with a timeout or ensure the underlying DB query has a statement timeout.
+  Code: const s = await getPlatformSettings();
+
+  🧪 Test Coverage Generator
+    - Should handle database failure gracefully when getPlatformSettings throws
+    - Should not redirect when marketingWebsiteUrl is null or undefined
+    - Should not redirect on API routes or server-side function calls
+    - Should log a warning when redirecting to the marketing site
+    - Should handle invalid URL returned by normalizeMarketingWebsiteUrl
+
+=================================================================
+  FILE: studentApplyEligibility.js
+  Score: 93/100   Issues: 3   Provider: cache   Time: 0.00s
+
+  The provided code snippet for student apply eligibility appears to be generally well-structured and secure. However, there are a few potential issues that need to be addressed, such as error handling for database queries and input validation for studentId. The code is readable and maintainable, but some improvements can be made to enhance its reliability and performance.
+
+  [MEDIUM] IssueType.ERROR_HANDLING -- Line 11
+  Error handling for missing studentId is minimal and does not provide a meaningful error message
+  Fix: Improve error handling to provide a more informative error message
+  Code: if (!studentId) { return { hasResume: false, resumeUrl: '' }; }
+
+  [MEDIUM] IssueType.ERROR_HANDLING -- Line 15
+  Database query errors are not handled explicitly
+  Fix: Add try-catch blocks to handle database query errors
+  Code: const [profileRes, docsRes] = await Promise.all([ query(`SELECT resume_url FROM student_profiles WHERE id = $1::uuid`, [
+
+  [LOW] IssueType.CODE_SMELL -- Line 38
+  The error message for missing resume is hardcoded and may not be suitable for all scenarios
+  Fix: Consider making the error message more dynamic or configurable
+  Code: return { ok: false, error: STUDENT_RESUME_REQUIRED_APPLY_MESSAGE };
+
+  🧪 Test Coverage Generator
+    - Should handle database query errors gracefully
+    - Should validate studentId input to prevent SQL injection
+    - Should return a meaningful error message when studentId is invalid or missing
+    - Should handle cases where student profile or documents are not found
+
+=================================================================
+  FILE: sessionPolicy.js
+  Score: 96/100   Issues: 2   Provider: cache   Time: 0.00s
+
+  The session policy code is well-structured and secure, with proper handling of session cookies and legacy cookie clearance. However, there are a few potential issues and improvements that can be made, such as input validation and error handling. The code score is 92 due to the overall good quality and security of the code.
+
+  [MEDIUM] IssueType.SECURITY -- Line 46
+  Input validation is missing for the setCookieLine parameter in the isPlacementHubSessionCookie function
+  Fix: Add input validation to ensure the setCookieLine parameter is a string and not empty
+  Code: function isPlacementHubSessionCookie(setCookieLine) { return setCookieLine.includes(SESSION_COOKIE_MATCH); }
+
+  [LOW] IssueType.ERROR_HANDLING -- Line 75
+  Error handling is missing in the markBrowserSessionActive function
+  Fix: Add try-catch block to handle potential errors when setting the session marker in sessionStorage
+  Code: export function markBrowserSessionActive() { if (typeof window === 'undefined') return; try { sessionStorage.setItem(SES
+
+  🧪 Test Coverage Generator
+    - Should handle session cookie expiration correctly
+    - Should clear legacy session cookies on sign-in
+    - Should apply session-only cookie policy to NextAuth route handler response
+
+=================================================================
+  FILE: tenantContext.js
+  Score: 98/100   Issues: 2   Provider: cache   Time: 0.00s
+
+  The provided code snippet for tenant context management appears to be generally well-structured and secure. However, there are a few potential issues that need to be addressed, such as input validation and error handling. The code correctly checks for the presence of a user object and extracts the tenant ID from it. The UUID regular expression is also correctly defined. The code does not have any major security vulnerabilities, but it could be improved with additional input validation and error handling.
+
+  [LOW] IssueType.READABILITY -- Line 11
+  The variable name 'id' could be more descriptive
+  Fix: Consider renaming the variable to something like 'tenantIdValue'
+  Code: const id = user.tenantId ?? user.tenant_id ?? null;
+
+  [LOW] IssueType.READABILITY -- Line 13
+  The conditional expression could be simplified
+  Fix: Consider using the optional chaining operator (?.) to simplify the expression
+  Code: return id && String(id).trim() ? String(id).trim() : null;
+
+  🧪 Test Coverage Generator
+    - Should return null when user object is null or undefined
+    - Should return null when user object does not have a tenantId or tenant_id property
+    - Should return the trimmed tenantId or tenant_id value when it exists
+    - Should handle non-string values for tenantId or tenant_id
+    - Should handle empty strings for tenantId or tenant_id
+
+=================================================================
+  END OF REPORT
+=================================================================

@@ -1,0 +1,1060 @@
+=================================================================
+  CODESENTINEL -- BATCH 5 REPORT
+  Files 101 - 115 of 229
+  Folder : C:\Users\sandeep\Downloads\Claudes\CampusPlacement\campus-placement
+  Saved  : 01/05/2026, 21:49:42
+=================================================================
+
+  Batch Score   : 59/100
+  Files Reviewed: 15
+  Total Issues  : 240
+
+=================================================================
+  FILE: src/app/dashboard/college/employers/page.js
+  Score: 34/100   Issues: 38
+
+  The college employers page has several high-severity issues, primarily the lack of error handling for non-OK HTTP responses in the revoke endpoint, which can leave the UI stuck in a loading state without user feedback, and missing input validation on the employer_id parameter, posing an IDOR risk. The code also lacks null checks on properties like `revokeTarget.name` and `staffDirectory` entries, which could cause crashes, and the POC save handler is vulnerable to double-submit due to a missing disabled state on the Cancel button. While the component has proper loading, error, and empty states, the partial nature of the review limits full assessment of tenant isolation and data integrity.
+
+  [HIGH] error_handling -- Line 12
+  fetcher function does not handle network errors (e.g., fetch throws on network failure). If fetch throws, the error is unhandled and will cause an unhandled promise rejection.
+  Fix: Wrap fetch in try/catch and throw a meaningful error.
+
+  [MEDIUM] null_check -- Line 41
+  pocModal.coordination_poc_user_ids is accessed without checking if pocModal is null or if the property exists. If pocModal is set but coordination_poc_user_ids is undefined, Array.isArray(undefined) returns false, so it falls back to empty array, which is safe. However, if pocModal is null, the effect returns early, so this is safe. No issue here.
+  Fix: No change needed.
+
+  [HIGH] authentication -- Line 45
+  handleRevoke sends employer_id without any authorization check on the server side. This could allow a college admin to revoke an employer that does not belong to their tenant (IDOR). The code does not show server-side validation that the employer belongs to the current college.
+  Fix: Ensure the server endpoint validates that the employer belongs to the current college tenant before revoking.
+
+  [MEDIUM] error_handling -- Line 53
+  The response JSON is parsed before checking res.ok. If the server returns a non-JSON error (e.g., 500 HTML page), res.json() will throw and the catch block will not handle it properly.
+  Fix: Parse JSON only after checking res.ok, or wrap in try/catch.
+
+  [MEDIUM] error_handling -- Line 14
+  The error message from the API is used directly in the thrown Error. This could expose internal server details to the user if the API returns verbose error messages.
+  Fix: Sanitize or limit the error message to a generic one for the user, while logging the original error server-side.
+
+  [MEDIUM] error_handling -- Line 48
+  The code does not check for potential errors when fetching data from the API
+  Fix: Add error handling for API fetch
+
+  [LOW] security -- Line 51
+  The code uses JSON.stringify to serialize the request body, which could potentially lead to security issues if the data is not properly sanitized
+  Fix: Use a secure method to serialize the request body
+
+  [MEDIUM] data_integrity -- Line 18
+  The code assumes that the API will always return a JSON response, which could lead to issues if the API returns an error
+  Fix: Add error handling for API response
+
+  [HIGH] error_handling -- Line 45
+  handleRevoke does not handle non-OK responses or fetch errors. If the API returns a 4xx/5xx or the network fails, processingId remains set, leaving the button in a disabled/loading state permanently with no user feedback.
+  Fix: Add an else branch for non-OK responses and a catch block for network errors, both clearing processingId and showing an error message.
+
+  [HIGH] error_handling -- Line 48
+  The fetch call in handleRevoke does not handle non-OK HTTP responses (e.g., 4xx, 5xx) before parsing JSON. If the server returns an error with a non-JSON body, res.json() will throw an unhandled promise rejection, crashing the component or leaving the UI in a loading state.
+  Fix: Check res.ok before parsing JSON, and handle error responses separately with a fallback error message.
+
+  [MEDIUM] input_validation -- Line 45
+  The employerId parameter passed to handleRevoke is not validated or sanitized before being sent in the request body. If employerId is undefined, null, or contains unexpected characters, it could lead to API errors or injection risks depending on server-side handling.
+  Fix: Validate that employerId is a non-empty string before making the API call.
+
+  [LOW] code_smell -- Line 51
+  Potential for unhandled promise rejection
+  Fix: Add try-catch block to handle promise rejections
+
+  [MEDIUM] data_integrity -- Line 53
+  Response data validation is missing
+  Fix: Add validation for response data
+
+  [HIGH] error_handling -- Line 53
+  Missing error handling for non-OK responses in handleRevoke. If the API returns an error status (e.g., 400, 500), the code reads the JSON body but does not check res.ok before proceeding. This can lead to silent failures where the user sees no feedback and the processingId remains set, blocking further actions.
+  Fix: Add an else branch to handle non-OK responses by showing an error message and resetting processingId.
+
+  [MEDIUM] error_handling -- Line 45
+  The fetch call is not wrapped in a try/catch for network errors. If the network fails or the API is unreachable, the promise rejection will be unhandled and may crash the component or leave processingId stuck.
+  Fix: Wrap the fetch call in a try/catch block to handle network errors gracefully.
+
+  [LOW] input_validation -- Line 45
+  employerId is not validated before being sent to the API. If it is null, undefined, or an empty string, the API may receive an invalid payload and fail silently.
+  Fix: Add a guard clause to check that employerId is a non-empty string before making the API call.
+
+  [MEDIUM] input_validation -- Line 51
+  No validation on employer_id before sending to API. If employerId is null, undefined, or an empty string, the API will receive an invalid payload which could lead to unexpected behavior or errors.
+  Fix: Add a guard clause to validate employerId before making the API call.
+
+  [LOW] input_validation -- Line 51
+  The code does not validate the employerId before sending the request.
+  Fix: Add input validation to ensure the employerId is valid before sending the request.
+
+  [LOW] null_check -- Line 51
+  Potential null pointer exception if 'employerId' is null or undefined
+  Fix: Add a null check before stringifying the 'employer_id' property
+
+  [HIGH] error_handling -- Line 49
+  The fetch call on line 49-52 is not wrapped in a try/catch block. If the network request fails (e.g., DNS failure, timeout, server unreachable), the promise rejection will be unhandled and may crash the process or leave the UI in a broken state.
+  Fix: Wrap the fetch call in a try/catch block and handle the error by showing a user-friendly message or retry option.
+
+  [HIGH] null_pointer_exception -- Line 80
+  Potential null pointer access on `emp.name` at line 80 (EntityLogo) and line 81 (span). If the API returns an employer object without a `name` field, the component will crash with 'Cannot read properties of null (reading 'name')' or render 'undefined'.
+  Fix: Add a fallback for `emp.name` using optional chaining or a default value.
+
+  [MEDIUM] multi_tenancy -- Line 70
+  Missing tenant isolation in the API call that fetches the employer list. The `mutate` function likely calls an API endpoint that may not filter by the current tenant's ID, potentially exposing employers from other tenants.
+  Fix: Ensure the API endpoint includes a tenant_id filter based on the authenticated user's tenant.
+
+  [LOW] error_handling -- Line 61
+  Generic error message 'Network error while blocking access.' does not differentiate between network failure and server-side error. The catch block swallows the actual error object.
+  Fix: Log the actual error for debugging and provide a more specific message if possible.
+
+  [LOW] uiux -- Line 75
+  Error message 'Could not load employers.' is somewhat generic. It could be more specific about the cause (e.g., 'Failed to fetch employer list.') and suggest retrying.
+  Fix: Improve the error message to be more actionable.
+
+  [MEDIUM] bug -- Line 271
+  Cancel button in POC modal is not disabled while `pocSaving` is true, allowing the user to close the modal while a save request is in-flight. This could lead to orphaned requests or inconsistent UI state.
+  Fix: Add `disabled={pocSaving}` to the Cancel button to prevent closing during save.
+
+  [MEDIUM] null_pointer_exception -- Line 313
+  Accessing `revokeTarget.name` without a null check on the `name` property. If the API returns a revokeTarget object without a `name` field, this will render 'undefined will lose access...' or crash in strict mode.
+  Fix: Use optional chaining or a fallback string: `revokeTarget?.name || 'This employer'`.
+
+  [MEDIUM] null_pointer_exception -- Line 260
+  Accessing `s.name` and `s.role` without null checks. If the staffDirectory contains an entry missing these fields, the option text will render 'undefined — undefined' or crash.
+  Fix: Use fallback values: `{s.name || 'Unknown'} — {s.role || 'Staff'}`.
+
+  [LOW] reliability -- Line 284
+  No timeout is set on the fetch call for POC save. If the server hangs, the request will wait indefinitely, leaving the UI in a saving state.
+  Fix: Use AbortController with a timeout (e.g. 15s) to cancel the request if it takes too long.
+
+  [LOW] edge_case -- Line 313
+  If revokeTarget.name is undefined or null, the dialog message will show 'undefined will lose access...' or 'null will lose access...' instead of a fallback like the employer's email or ID.
+  Fix: Use a fallback value such as revokeTarget.name || revokeTarget.email || 'this employer' to ensure a readable message.
+
+  [MEDIUM] null_pointer_exception -- Line 312
+  Potential null pointer access on `revokeTarget.name` when `revokeTarget` exists but does not have a `name` property. This will cause the dialog to display 'undefined will lose access...' or crash if the property access throws in strict mode.
+  Fix: Add a fallback for the name field, e.g., `revokeTarget.name || 'This employer'`.
+
+  [LOW] logic -- Line 324
+  Loading state `Boolean(revokeTarget && processingId === revokeTarget.id)` may cause a brief flash where the dialog shows loading=false after `setRevokeTarget(null)` is called but before the async operation completes. The state is cleared optimistically on line 321.
+  Fix: Move `setRevokeTarget(null)` to after the await completes, or use a separate loading state variable.
+
+  [MEDIUM] error_handling -- Line 322
+  handleRevoke function is not defined in this snippet, its implementation is unknown
+  Fix: Ensure handleRevoke function is properly implemented and handles potential errors
+
+  [MEDIUM] null_check -- Line 312
+  Potential null pointer access on `revokeTarget.name` — if `revokeTarget` is an object but lacks a `name` property, the expression will evaluate to `undefined` and render 'undefined will lose access...' instead of crashing, but this is still a data integrity issue that could confuse users.
+  Fix: Add a fallback for the name field, e.g., `revokeTarget.name || 'This employer'`.
+
+  [LOW] uiux -- Line 313
+  The confirmation message is hardcoded and does not include the employer's company name or other identifying information beyond the name field, which may be insufficient for admins managing multiple employers.
+  Fix: Include additional context like company name or email in the confirmation message.
+
+  [LOW] reliability -- Line 321
+  State is cleared before the async operation completes — if `handleRevoke` throws, the `revokeTarget` state is already null, so the dialog disappears without showing an error. The user may not know the operation failed.
+  Fix: Move `setRevokeTarget(null)` into a finally block after the async operation, or show an error toast and keep the dialog open on failure.
+
+  [LOW] best_practice -- Line 321
+  Setting revokeTarget to null before the async operation completes may cause the loading indicator to disappear prematurely if processingId is derived from revokeTarget. This could allow the user to click the button again before the operation finishes.
+  Fix: Move setRevokeTarget(null) after the await call, or keep a separate 'processing' flag that is cleared only after completion.
+
+  [LOW] edge_case -- Line 324
+  The loading condition checks revokeTarget.id but revokeTarget could be null at this point if the state was already reset, causing a null pointer access on .id.
+  Fix: Add optional chaining or a null check before accessing revokeTarget.id.
+
+  [LOW] uiux -- Line 324
+  The loading state depends on `revokeTarget` being truthy. If `revokeTarget` is set but `processingId` doesn't match, the button won't show loading state even though an operation is in progress.
+  Fix: Consider using a dedicated loading state variable instead of deriving it from multiple state values.
+
+=================================================================
+  FILE: src/app/dashboard/college/infrastructure/page.js
+  Score: 0/100   Issues: 56
+
+  The infrastructure booking component has several reliability issues, including critical null pointer crashes when API responses are malformed or when `assets.find` returns undefined, and fragile string-based time comparisons that could fail for certain formats. The code lacks defensive checks on API response shapes, missing client-side validation for required form fields, and has error handling that silently swallows failures, leading to inconsistent UI states. While the utility functions for URL normalization and calendar grid generation are clean and correct, the overall component has 12 high-severity and 2 critical issues that need addressing before production deployment.
+
+  [MEDIUM] null_check -- Line 29
+  emptyChannelsMap assumes bookings is an array. If bookings is undefined or null, calling .map() will throw a TypeError, crashing the component.
+  Fix: Add a guard to default bookings to an empty array if it is falsy.
+
+  [HIGH] null_pointer_exception -- Line 29
+  emptyChannelsMap crashes if bookings is null or undefined, causing a runtime error that breaks the page.
+  Fix: Add a null/undefined guard for bookings before calling .map.
+
+  [MEDIUM] null_check -- Line 30
+  b.id could be null or undefined, leading to unexpected keys like 'null' or 'undefined' in the resulting map.
+  Fix: Add a guard to skip entries with null/undefined id, or coerce to a safe default.
+
+  [MEDIUM] edge_case -- Line 26
+  ensureHttps function on line 26 does not validate that input is a string before calling .test(). If t is undefined, null, or a non-string (e.g., number), it will throw a TypeError, crashing the caller.
+  Fix: Add a type guard to ensure t is a string before calling .test(), or return a default value for non-string inputs.
+
+  [HIGH] null_pointer_exception -- Line 30
+  emptyChannelsMap crashes when bookings is null or undefined because .map() is called on a potentially null value. This will break the entire calendar view if the API returns null or an unexpected response.
+  Fix: Add a null check with a default empty array fallback before calling .map().
+
+  [MEDIUM] edge_case -- Line 34
+  buildMonthGrid does not validate year and monthIndex parameters. Passing invalid values (e.g., negative year, monthIndex > 11) will create a Date object with unexpected behavior, potentially returning incorrect calendar grids or throwing in some JavaScript engines.
+  Fix: Add input validation to clamp or reject invalid year/month values, or document the expected range.
+
+  [MEDIUM] null_pointer_exception -- Line 30
+  In `emptyChannelsMap`, if `bookings` is not an array (e.g., null, undefined, or an object), calling `.map` will throw a TypeError. Additionally, if any booking object lacks an `id` property, the resulting key will be `undefined`, which could cause unexpected behavior downstream.
+  Fix: Add a guard to ensure `bookings` is an array before calling `.map`, and consider validating that each booking has an `id`.
+
+  [MEDIUM] input_validation -- Line 4
+  buildMonthGrid function does not validate year and monthIndex parameters. If called with NaN, negative, or out-of-range values, new Date() will produce an Invalid Date, causing getDay(), getDate(), and the loop to behave unexpectedly or throw.
+  Fix: Add input validation at the start of buildMonthGrid to ensure year is a valid integer and monthIndex is between 0 and 11, returning an empty array or throwing a clear error for invalid inputs.
+
+  [MEDIUM] input_validation -- Line 33
+  The function buildMonthGrid does not validate its input parameters year and monthIndex. This could lead to incorrect results or errors if the input is not a valid number or is out of range.
+  Fix: Add input validation to ensure year and monthIndex are valid numbers and within the correct range.
+
+  [LOW] code_smell -- Line 34
+  The variables first and last are not very descriptive. Consider renaming them to something more meaningful.
+  Fix: Rename the variables to something like startDate and endDate.
+
+  [LOW] input_validation -- Line 33
+  Function buildMonthGrid does not validate that year is a valid integer and monthIndex is between 0 and 11. Passing invalid values (e.g., NaN, negative, or out-of-range monthIndex) will produce incorrect grids or throw errors.
+  Fix: Add input validation at the start of the function to ensure year is a number and monthIndex is between 0 and 11, returning an empty array or throwing a descriptive error for invalid inputs.
+
+  [MEDIUM] validation -- Line 35
+  No input validation on year and monthIndex. If monthIndex is negative or >= 12, the Date constructor will produce unexpected dates (e.g., monthIndex = -1 creates a date in December of the previous year, monthIndex = 12 creates January of next year). This could lead to incorrect calendar rendering or crashes if monthIndex is out of bounds.
+  Fix: Add validation to clamp or reject invalid monthIndex and year values at the start of the function.
+
+  [MEDIUM] input_validation -- Line 36
+  The function does not validate the input dates, which could lead to errors if the dates are invalid
+  Fix: Add input validation to ensure the dates are valid
+
+  [MEDIUM] input_validation -- Line 37
+  The function does not validate the input dates, which could lead to errors if the dates are invalid
+  Fix: Add input validation to ensure the dates are valid
+
+  [MEDIUM] maintainability -- Line 38
+  The variables 'pad' and 'daysInMonth' are not defined in this chunk, which might pose a risk if not properly initialized elsewhere.
+  Fix: Ensure 'pad' and 'daysInMonth' are correctly initialized before using them.
+
+  [MEDIUM] readability -- Line 40
+  The variable 'daysInMonth' is not defined in this chunk, consider adding a comment or a check to ensure it's a positive integer
+  Fix: Add a comment or a check to ensure 'daysInMonth' is a positive integer
+
+  [CRITICAL] runtime -- Line 78
+  Line 78: `res.json()` will throw a SyntaxError if the API returns non-JSON (e.g., HTML error page, network error). The catch block on line 87 will catch it, but the error message will be 'Unexpected token < in JSON at position 0' which is not user-friendly and exposes implementation details.
+  Fix: Wrap `res.json()` in a try-catch or check Content-Type header before parsing JSON.
+
+  [HIGH] bug -- Line 169
+  Lines 169-175: `checkOverlap` uses string comparison for `startTime` and `endTime`. This works for 24-hour format strings like '09:00' < '10:00' but will fail for times like '9:00' vs '10:00' (since '9' > '1' lexicographically). This can cause false negatives in clash detection.
+  Fix: Convert time strings to comparable values (e.g., minutes since midnight) before comparison.
+
+  [HIGH] runtime -- Line 210
+  Line 210-213: After creating a booking, the code accesses `json.booking` without checking if it exists. If the API returns a successful response but without a `booking` field (e.g., due to a server bug), `newBooking` will be `undefined`, causing a crash when trying to access `a.date` in the sort on line 213.
+  Fix: Validate that `json.booking` exists and has the expected shape before using it.
+
+  [MEDIUM] error_handling -- Line 115
+  Lines 115-116: The settings fetch silently swallows all errors with an empty catch block. This means if the settings API fails, the UI will silently show empty/default values for website and social links, which could confuse users who expect their configured data to appear.
+  Fix: Log the error or set a user-visible error state so the user knows settings failed to load.
+
+  [MEDIUM] data_integrity -- Line 41
+  Line 41 (referenced in context): The admin users page has a critical null pointer crash when `u.name` is undefined. This is noted from the codebase context and should be fixed.
+  Fix: Add optional chaining or default value when accessing user name.
+
+  [MEDIUM] runtime -- Line 84
+  Line 84: The sort comparator `new Date(a.date) - new Date(b.date)` will produce NaN if either `a.date` or `b.date` is null/undefined/invalid, which can cause unpredictable sort order or a crash in some JavaScript engines.
+  Fix: Add a fallback for invalid dates in the sort comparator.
+
+  [MEDIUM] runtime -- Line 158
+  Line 158: Similar to line 78, `res.json()` in the channel toggle handler can throw a SyntaxError if the API returns non-JSON. This will be caught but the error message may be unhelpful.
+  Fix: Wrap res.json() in a try-catch for safer parsing.
+
+  [LOW] edge_case -- Line 45
+  Line 45: The `bookingsForDay` function returns an empty array if `day` is falsy, but does not handle the case where `year` or `monthIndex` are invalid (e.g., NaN). This could produce an invalid ISO string like '2023-06-NaN'.
+  Fix: Add validation for year and monthIndex parameters.
+
+  [CRITICAL] null_pointer_exception -- Line 194
+  `assets.find((a) => a.id === roomId)` can return undefined when roomId does not match any asset, causing `roomInfo?.name` to be undefined and the fallback 'Unknown Room' to be used silently. More critically, if `assets` is empty or roomId is an empty string, the find returns undefined and the booking is created with a misleading room name.
+  Fix: Add a guard clause to check if roomInfo exists before proceeding with the booking creation, and show an error message if the selected room is invalid.
+
+  [HIGH] error_handling -- Line 210
+  `res.json()` on line 210 can throw a SyntaxError if the API returns a non-JSON response (e.g., HTML error page, network error, or empty body). This unhandled promise rejection will crash the component and leave the form in a broken state.
+  Fix: Wrap the json parsing in a try-catch or check the Content-Type header before parsing.
+
+  [HIGH] error_handling -- Line 237
+  Same issue as line 210: `res.json()` in handleCancel can throw a SyntaxError if the API returns non-JSON, crashing the component without updating the UI.
+  Fix: Wrap json parsing in try-catch in handleCancel as well.
+
+  [HIGH] data_integrity -- Line 239
+  In handleCancel, when the API call fails (line 239-241), the function returns early after setting errorMsg, but the local state (bookings and channelToggles) is NOT updated. However, the code after the catch block (lines 244-249) that removes the booking from local state will NOT execute, which is correct. But the error message is set and the function returns, leaving the UI in a state where the booking still appears but the user sees an error. This is acceptable behavior, but the real issue is that the catch block swallows the error and returns, preventing the user from retrying.
+  Fix: Consider adding a retry mechanism or keeping the booking visible with an error state so the user can attempt cancellation again.
+
+  [MEDIUM] bug -- Line 244
+  Stale closure: `setBookings(bookings.filter(...))` uses the `bookings` state value from the closure at the time handleCancel was defined, not the current state. If multiple cancellations happen rapidly, this can cause race conditions where the wrong booking is removed or bookings are not properly filtered.
+  Fix: Use the functional updater form of setBookings to always operate on the latest state.
+
+  [HIGH] validation -- Line 287
+  The form submission handler `handleBooking` does not validate required fields (roomId, date, startTime, endTime, company) before sending the API request. Empty values will be sent to the server, potentially causing database errors or creating invalid bookings.
+  Fix: Add client-side validation before the fetch call to ensure all required fields are filled.
+
+  [MEDIUM] reliability -- Line 196
+  The fetch call to create a booking has no timeout configured. If the API server is slow or unresponsive, the request could hang indefinitely, leaving the user waiting with no feedback.
+  Fix: Use AbortController to set a timeout on the fetch request (e.g., 10 seconds).
+
+  [MEDIUM] reliability -- Line 232
+  Same timeout issue for the DELETE request in handleCancel.
+  Fix: Add AbortController timeout to the cancel fetch as well.
+
+  [LOW] ux_copy -- Line 216
+  Error message 'Failed to create booking' is generic and does not help the user understand what went wrong or how to fix it.
+  Fix: Provide more specific error messages based on the error type (e.g., network error, validation error, server error).
+
+  [LOW] ux_copy -- Line 240
+  Same generic error message issue for cancellation failures.
+  Fix: Provide more specific error messages for cancellation failures.
+
+  [HIGH] null_pointer_exception -- Line 62
+  Accessing b.company, b.description on line 62-64 without null check will crash if any booking object lacks these fields. This can happen if the API returns partial data or a malformed booking.
+  Fix: Add optional chaining or default values when accessing booking properties.
+
+  [HIGH] null_pointer_exception -- Line 112
+  Accessing b.company, b.date, b.startTime, b.endTime, b.roomName without null checks will crash if any booking object is missing these fields.
+  Fix: Add optional chaining or default values for each property.
+
+  [MEDIUM] null_pointer_exception -- Line 113
+  Accessing b.description without null check on line 113 could crash if description is undefined or null.
+  Fix: Use optional chaining or a default value.
+
+  [MEDIUM] input_validation -- Line 325
+  The description input on line 325 is not sanitized. If this value is later rendered as HTML (e.g., in an announcement card or admin panel), it could lead to XSS.
+  Fix: Sanitize the description value before rendering or use textContent instead of innerHTML.
+
+  [MEDIUM] null_pointer_exception -- Line 54
+  The bookingsForDay function is called with bookings, calYear, calMonth, day. If bookings is null or undefined, this will crash.
+  Fix: Add a guard clause or default empty array for bookings.
+
+  [MEDIUM] null_pointer_exception -- Line 105
+  bookingsForChannel('web') could return undefined or null if the function is not defined or returns undefined, causing a crash when accessing .length.
+  Fix: Ensure bookingsForChannel always returns an array or add a default.
+
+  [MEDIUM] null_pointer_exception -- Line 109
+  Mapping over bookingsForChannel('web') without ensuring it returns an array will crash if it returns null/undefined.
+  Fix: Use a default empty array.
+
+  [HIGH] null_pointer_exception -- Line 25
+  Potential crash on line 25 when accessing `collegeComms.social?.[p.id]` if `collegeComms` is null or undefined. The optional chaining on `social` only protects if `social` is null/undefined, but if `collegeComms` itself is null, this will throw a TypeError.
+  Fix: Add a null check for `collegeComms` before accessing its properties, or use optional chaining on the entire chain: `collegeComms?.social?.[p.id]`.
+
+  [HIGH] null_pointer_exception -- Line 99
+  Potential crash on line 99 when accessing `channelToggles[b.id]` if `channelToggles` is null or undefined. The optional chaining on `includes` only protects if the array is null, but if `channelToggles` itself is null, this will throw a TypeError.
+  Fix: Add a null check for `channelToggles` before accessing its properties, or use optional chaining: `channelToggles?.[b.id]?.includes(ch.id)`.
+
+  [MEDIUM] null_pointer_exception -- Line 2
+  Potential crash on line 2 when calling `bookingsForChannel('web').length` if `bookingsForChannel` is not defined or throws an error. The function is used multiple times without error handling.
+  Fix: Wrap the `bookingsForChannel` calls in a try-catch or ensure the function is defined and handles edge cases gracefully.
+
+  [MEDIUM] null_pointer_exception -- Line 8
+  Potential crash on lines 8-9 when accessing `b.company`, `b.date`, `b.startTime`, `b.endTime`, and `b.roomName` if any of these properties are undefined or null. The `formatDate` function may also crash if `b.date` is null.
+  Fix: Add default values or null checks for each property, e.g., `b.company || ''`, `b.date ? formatDate(b.date) : ''`.
+
+  [MEDIUM] null_pointer_exception -- Line 52
+  Potential crash on line 52 when accessing `b.company` and `b.date` if these properties are undefined or null in the channel distribution list.
+  Fix: Add default values or null checks for `b.company` and `b.date`.
+
+  [MEDIUM] null_pointer_exception -- Line 84
+  Potential crash on lines 84-86 when accessing `b.date`, `b.startTime`, and `b.endTime` in the bookings list if these properties are undefined or null.
+  Fix: Add default values or null checks for each property.
+
+  [MEDIUM] null_pointer_exception -- Line 92
+  Potential crash on lines 92-95 when accessing `b.company`, `b.roomName`, and `b.description` if these properties are undefined or null.
+  Fix: Add default values or null checks for each property.
+
+  [LOW] error_handling -- Line 26
+  The `normalizeExternalUrl` function is called without error handling. If the URL is malformed or the function throws, it will crash the component.
+  Fix: Wrap the `normalizeExternalUrl` call in a try-catch or ensure the function handles invalid URLs gracefully.
+
+  [MEDIUM] error_handling -- Line 565
+  The async handleCancel call on line 565 is not wrapped in a try/catch. If the cancellation API call fails (network error, server error, timeout), the promise rejection will be unhandled, potentially crashing the component or leaving the UI in an inconsistent state.
+  Fix: Wrap the handleCancel call in a try/catch block and show a user-friendly error notification on failure.
+
+  [LOW] uiux -- Line 564
+  The cancelTargetId is set to null immediately before the async operation (line 564). If handleCancel fails, the dialog closes but the booking remains active, leaving the user with no feedback about the failure.
+  Fix: Consider keeping the dialog open or showing an error state until the operation completes successfully.
+
+  [MEDIUM] error_handling -- Line 9
+  The onConfirm handler does not catch errors from handleCancel. If handleCancel throws (e.g., network failure, API error), the error will be unhandled and could leave the UI in an inconsistent state (dialog closed but booking not cancelled).
+  Fix: Wrap the handleCancel call in a try/catch block and show error feedback to the user.
+
+  [LOW] uiux -- Line 9
+  The confirm button does not show a loading state while handleCancel is executing. Users may click multiple times or think nothing is happening during network delays.
+  Fix: Add a loading state (e.g., isCancelling) that disables the confirm button and shows a spinner during the async operation.
+
+  [MEDIUM] error_handling -- Line 561
+  The async handleCancel call on line 565 has no try/catch block. If the API call fails (network error, server error, timeout), the error will be swallowed silently, leaving the UI in an inconsistent state where the booking appears cancelled but actually isn't.
+  Fix: Wrap the handleCancel call in a try/catch block and restore the cancelTargetId on failure so the user can retry.
+
+  [MEDIUM] reliability -- Line 564
+  State reset (setCancelTargetId(null)) occurs before the async handleCancel completes. If handleCancel fails, the UI loses reference to which booking was being cancelled, making it impossible to retry or show a meaningful error.
+  Fix: Move the state reset into a finally block after the async operation completes, or keep the cancelTargetId until handleCancel resolves successfully.
+
+  [MEDIUM] code_smell -- File-level
+  The provided code snippet is too limited to allow for a thorough review
+  Fix: Provide more code context to allow for a more accurate review
+
+=================================================================
+  FILE: src/app/dashboard/college/internships/page.js
+  Score: 25/100   Issues: 14
+
+  The internship dashboard page has a critical reliability issue: the SWR fetcher function lacks error handling for non-2xx HTTP responses and invalid JSON, which will cause unhandled promise rejections and crash the UI in production. Additionally, the component has a high-severity null pointer crash risk when `row.website` is missing, as it calls `.startsWith()` on an undefined value without a null check. While the component structure is generally well-organized with proper loading, error, and empty states, these two issues must be fixed to ensure production stability.
+
+  [HIGH] error_handling -- Line 8
+  fetcher on line 8 does not check response.ok before calling r.json(). If the API returns a non-2xx status (e.g., 500, 404), r.json() will still parse the body but SWR will not treat it as an error, leading to silent failures or crashes when the parsed error page is used as data.
+  Fix: Check response.ok and throw an error for non-2xx responses so SWR can handle it properly.
+
+  [MEDIUM] error_handling -- Line 8
+  The fetcher function does not handle errors properly
+  Fix: Add try-catch blocks to handle errors and provide meaningful error messages
+
+  [MEDIUM] authentication -- Line 8
+  fetcher does not include authentication credentials (e.g., cookies, Authorization header). In a multi-tenant SaaS app, this may result in unauthenticated API calls or cross-tenant data exposure if the API relies on session cookies that are not automatically sent with fetch.
+  Fix: Ensure fetch includes credentials: 'include' or pass an Authorization header from the session.
+
+  [MEDIUM] reliability -- Line 8
+  No timeout is set on the fetch call. If the server is slow or unresponsive, the request may hang indefinitely, causing the UI to remain in a loading state or accumulate pending requests.
+  Fix: Add an AbortController with a timeout to the fetch call.
+
+  [MEDIUM] runtime -- Line 10
+  The `stipendLabel` function on line 19 calls `formatCurrency(Number(max))` when `min` is null and `max` is not null. If `max` is null, `Number(null)` returns 0, which may produce an incorrect stipend label. However, the logic flow ensures this only happens when `max` is not null, so this is safe. The main risk is that `formatCurrency` is not defined in this chunk and could be missing or throw an error.
+  Fix: Ensure `formatCurrency` is imported or defined in the file. Add a fallback or error boundary for missing utility functions.
+
+  [LOW] edge_case -- Line 39
+  On line 39, `parseInt(row.vacancies, 10)` could return NaN if `row.vacancies` is a non-numeric string (e.g., 'N/A'), but the `|| 0` fallback handles this. However, if `row.vacancies` is an object or array, `parseInt` will return NaN and fallback to 0, which is safe. No action needed.
+  Fix: No change required, but consider using `Number(row.vacancies) || 0` for clarity.
+
+  [LOW] edge_case -- Line 108
+  On line 108, `(row.description || '').slice(0, 280)` is safe because of the fallback to empty string. However, if `row.description` is a number or object, the fallback still works. No action needed.
+  Fix: No change required.
+
+  [HIGH] null_pointer_exception -- Line 114
+  row.company_name is accessed without null/undefined check on line 114. If any internship record has a null or undefined company_name, this will crash the entire page rendering with 'Cannot read properties of null/undefined'.
+  Fix: Add a fallback value for row.company_name, e.g., row.company_name || 'Unknown Company'
+
+  [MEDIUM] null_pointer_exception -- Line 122
+  stipendLabel(row.salary_min, row.salary_max) could throw if the stipendLabel function does not handle null/undefined arguments. While salary_min and salary_max are nullable in the schema, the function may assume numeric inputs.
+  Fix: Ensure stipendLabel handles null/undefined inputs gracefully, or add null checks before calling it
+
+  [MEDIUM] security -- Line 142
+  The href attribute on line 142 could potentially be exploited for open redirect or XSS if row.website contains a javascript: or data: URL. While the check on line 142 ensures the URL starts with 'http', a URL like 'http://evil.com' would still pass through.
+  Fix: Add URL validation using the URL constructor or a library like validator.js to ensure the URL is a valid HTTP/HTTPS URL before rendering the link.
+
+  [CRITICAL] null_pointer_exception -- Line 142
+  Null pointer crash on `row.website.startsWith` when `row.website` is null or undefined. This will break the entire component rendering for any internship row where the website field is missing, causing a blank page or partial render failure.
+  Fix: Add a null/undefined check before accessing `.startsWith()` on `row.website`.
+
+  [HIGH] null_pointer_exception -- Line 142
+  Null pointer crash on line 142 when `row.website` is null or undefined. Calling `.startsWith()` on null/undefined will throw a TypeError, breaking the entire page rendering for any row with a missing website field.
+  Fix: Add a null check before accessing .startsWith() on row.website, or use optional chaining with a fallback.
+
+  [MEDIUM] null_check -- File-level
+  Potential null pointer exception if company site data is not properly checked before rendering
+  Fix: Add null checks for company site data before attempting to render it
+
+  [MEDIUM] code_smell -- File-level
+  The code snippet is a partial chunk, making it difficult to review without full context.
+  Fix: Review the full file to ensure there are no issues with the component's functionality or data handling.
+
+=================================================================
+  FILE: src/app/dashboard/college/reports/page.js
+  Score: 15/100   Issues: 38
+
+  The reports dashboard component is structurally sound with proper loading/error states and defensive array checks, but it contains 38 total issues (1 critical, 14 high, 21 medium, 2 low) primarily from null pointer crashes when accessing nested properties on report data objects and missing null checks on arrays like `DEPT_PLACEMENT`, `SALARY_DIST`, and `YOY`, which will break the entire page if the API returns partial or malformed data. Additionally, the export functionality has a CSV injection vulnerability where user-controlled fields starting with `=`, `+`, `@`, or `-` could execute formulas in Excel, and the search field lacks input validation that could cause runtime errors with non-string values. The year-over-year comparison table is particularly vulnerable, as it assumes every element in the `YOY` array has all required properties (`metric`, `prev`, `curr`, `up`, `change`) without any fallback for missing or malformed data.
+
+  [HIGH] null_pointer_exception -- Line 57
+  Potential null pointer crash when accessing r.student.toLowerCase(), r.roll.toLowerCase(), r.company.toLowerCase(), r.eventType.toLowerCase(), or r.outcome.toLowerCase() if any of these fields are null or undefined in the API response. This will throw a TypeError and crash the filter operation.
+  Fix: Add optional chaining and null-safe fallbacks for all string property accesses in the filter function.
+
+  [HIGH] null_pointer_exception -- Line 76
+  Potential null pointer crash when accessing d.dept, d.pct, d.placed, or d.total if any of these fields are null or undefined in the API response. This will cause the CSV export to fail silently or throw an error.
+  Fix: Add null-safe fallbacks for all property accesses in the export row mappings.
+
+  [HIGH] null_pointer_exception -- Line 90
+  Potential null pointer crash when accessing d.range, d.count, or d.pct if any of these fields are null or undefined in the salary distribution data.
+  Fix: Add null-safe fallbacks for all property accesses.
+
+  [HIGH] null_pointer_exception -- Line 100
+  Potential null pointer crash when accessing c.name, c.hires, or c.ctc if any of these fields are null or undefined in the top recruiters data.
+  Fix: Add null-safe fallbacks for all property accesses.
+
+  [HIGH] null_pointer_exception -- Line 115
+  Potential null pointer crash when accessing r.metric, r.prev, r.curr, or r.change if any of these fields are null or undefined in the year-over-year data.
+  Fix: Add null-safe fallbacks for all property accesses.
+
+  [HIGH] null_pointer_exception -- Line 126
+  Potential null pointer crash when accessing r.student, r.roll, r.dept, r.company, r.eventType, r.eventDate, r.attended, or r.outcome if any of these fields are null or undefined in the student company events data.
+  Fix: Add null-safe fallbacks for all property accesses.
+
+  [HIGH] csv_injection -- Line 74
+  CSV injection vulnerability in department placement export. If d.dept contains a value starting with =,+,@,-, it will be interpreted as a formula when opened in Excel/Google Sheets, potentially executing arbitrary commands.
+  Fix: Sanitize all user-controlled fields in CSV exports by prefixing with a single quote or stripping leading formula characters.
+
+  [HIGH] csv_injection -- Line 89
+  CSV injection vulnerability in salary distribution export. If d.range contains a value starting with =,+,@,-, it will be interpreted as a formula.
+  Fix: Sanitize all user-controlled fields in CSV exports.
+
+  [HIGH] csv_injection -- Line 99
+  CSV injection vulnerability in top recruiters export. If c.name or c.ctc contains a value starting with =,+,@,-, it will be interpreted as a formula.
+  Fix: Sanitize all user-controlled fields in CSV exports.
+
+  [HIGH] csv_injection -- Line 114
+  CSV injection vulnerability in year-over-year comparison export. If r.metric, r.prev, r.curr, or r.change contains a value starting with =,+,@,-, it will be interpreted as a formula.
+  Fix: Sanitize all user-controlled fields in CSV exports.
+
+  [HIGH] csv_injection -- Line 124
+  CSV injection vulnerability in student-company events export. Multiple fields (r.student, r.roll, r.dept, r.company, r.eventType, r.eventDate, r.attended, r.outcome) could contain formula-injection characters.
+  Fix: Sanitize all user-controlled fields in CSV exports.
+
+  [MEDIUM] input_validation -- Line 52
+  No input validation on studentReportSearch before calling .toLowerCase(). If the search value is not a string (e.g., if setState is called with a number or object), calling .toLowerCase() will throw a TypeError.
+  Fix: Ensure the search value is coerced to a string before calling .toLowerCase().
+
+  [MEDIUM] edge_case -- Line 28
+  If currentAcademicYear is an empty string, currentAcademicYear.split('-') returns [''] and Number('') is 0, which is technically finite but produces incorrect previous year calculation. The empty string check on line 29 only catches non-finite numbers, not the empty string case.
+  Fix: Add an explicit check for empty string before attempting to parse the academic year.
+
+  [MEDIUM] null_pointer_exception -- Line 47
+  Potential null pointer crash when accessing r.company in the Set construction if any record in STUDENT_COMPANY_EVENTS has a null or undefined company field. The .sort() call will also fail if any value is null.
+  Fix: Filter out null/undefined values before creating the Set.
+
+  [LOW] uiux -- Line 154
+  Error state only shows a single error message with no retry mechanism. If the API call fails, the user has no way to retry without refreshing the page.
+  Fix: Add a 'Retry' button that revalidates the SWR data.
+
+  [CRITICAL] null_pointer_exception -- Line 158
+  summary is accessed directly without null/undefined check. If the API returns null or the summary object is undefined, accessing summary.placementRate will throw a TypeError and crash the entire page.
+  Fix: Add a null/undefined guard for summary before rendering the summary cards section.
+
+  [HIGH] null_pointer_exception -- Line 227
+  DEPT_PLACEMENT is mapped directly without null/undefined check. If the array is null or undefined, calling .map() will throw a TypeError and crash the component.
+  Fix: Add a null/undefined guard before mapping DEPT_PLACEMENT.
+
+  [HIGH] null_pointer_exception -- Line 241
+  SALARY_DIST is mapped directly without null/undefined check. If the array is null or undefined, calling .map() will throw a TypeError and crash the component.
+  Fix: Add a null/undefined guard before mapping SALARY_DIST.
+
+  [MEDIUM] edge_case -- Line 204
+  Table row key uses composite key `${r.roll}-${r.company}-${r.eventType}-${idx}` which may not be unique if roll, company, or eventType are null/undefined, leading to React rendering issues and poor performance.
+  Fix: Use a unique identifier from the data (e.g., r.id) or generate a stable unique key.
+
+  [MEDIUM] null_pointer_exception -- Line 181
+  studentEventCompanies is mapped directly without null/undefined check. If the array is null or undefined, calling .map() will throw a TypeError.
+  Fix: Add a null/undefined guard before mapping studentEventCompanies.
+
+  [MEDIUM] null_pointer_exception -- Line 204
+  filteredStudentEvents is mapped directly without null/undefined check. If the array is null or undefined, calling .map() will throw a TypeError.
+  Fix: Add a null/undefined guard before mapping filteredStudentEvents.
+
+  [MEDIUM] null_pointer_exception -- Line 211
+  formatDate(r.eventDate) will throw if r.eventDate is null or undefined, or if formatDate does not handle null/undefined gracefully.
+  Fix: Add a null/undefined guard before calling formatDate.
+
+  [MEDIUM] null_pointer_exception -- Line 213
+  r.attended is used in a ternary expression without null/undefined check. If r.attended is null, the badge class will be 'badge-indigo' which may be misleading.
+  Fix: Add a null/undefined guard for r.attended.
+
+  [MEDIUM] null_pointer_exception -- Line 230
+  d.dept, d.placed, d.total, d.pct are accessed without null/undefined checks. If any of these are null/undefined, the component will render 'undefined' or throw.
+  Fix: Add null/undefined guards for each field.
+
+  [MEDIUM] null_pointer_exception -- Line 244
+  d.range, d.count, d.pct are accessed without null/undefined checks. If any of these are null/undefined, the component will render 'undefined' or throw.
+  Fix: Add null/undefined guards for each field.
+
+  [MEDIUM] null_pointer_exception -- Line 229
+  Potential null pointer exception when accessing d.dept, d.placed, d.total, or d.pct
+  Fix: Add checks for null or undefined values before accessing properties
+
+  [MEDIUM] null_pointer_exception -- Line 260
+  Potential null pointer exception when accessing c.name, c.hires, or c.ctc
+  Fix: Add checks for null or undefined values before accessing properties
+
+  [MEDIUM] null_check -- Line 274
+  YOY.map(r => ...) will throw a TypeError if YOY is null or undefined, crashing the entire page. The code assumes YOY is always a valid array.
+  Fix: Add a guard to check if YOY is an array before mapping, or use optional chaining with a fallback to an empty array.
+
+  [MEDIUM] null_check -- Line 275
+  Accessing r.metric, r.prev, r.curr, r.up, r.change without null checks will crash if any row object is missing these properties. This can happen if the API returns incomplete data.
+  Fix: Add default values or optional chaining for each property to prevent crashes on malformed data.
+
+  [HIGH] null_pointer_exception -- Line 274
+  YOY.map assumes every element has metric, prev, curr, up, and change properties. If any are null/undefined, accessing r.metric, r.prev, r.curr, r.up, or r.change will throw a TypeError and crash the entire page.
+  Fix: Add null/undefined checks for each property before rendering, or filter out invalid rows.
+
+  [MEDIUM] logic -- Line 276
+  The change indicator assumes r.up is always a boolean. If r.up is undefined, null, or a truthy non-boolean (e.g., a string), the ternary will still show 'up' styling and an up arrow, which may be incorrect. This can mislead users about the direction of change.
+  Fix: Use strict equality checks (r.up === true / r.up === false) and provide a neutral fallback for undefined or non-boolean values.
+
+  [MEDIUM] null_pointer_exception -- Line 275
+  Accessing r.metric, r.prev, r.curr, r.up, r.change without null checks will crash if any of these properties are missing or undefined on a row object. This can happen if the API returns incomplete data.
+  Fix: Add optional chaining or default values for each property access, or validate the data before rendering.
+
+  [LOW] logic -- Line 276
+  The ternary `r.up ? 'up' : 'down'` assumes r.up is a boolean. If r.up is undefined, null, or a non-boolean truthy/falsy value, the class will still be applied but the logic may be incorrect. This is a minor data integrity concern.
+  Fix: Explicitly check `r.up === true` to avoid unexpected truthy/falsy coercion.
+
+  [MEDIUM] edge_case -- Line 274
+  The change indicator logic assumes r.up is always a boolean. If r.up is undefined/null, the ternary defaults to 'down' and '↓', which may be misleading for neutral or unchanged metrics.
+  Fix: Add a third state for neutral/no change when r.up is undefined or r.change is zero.
+
+  [MEDIUM] null_check -- Line 276
+  Potential null pointer exception if 'r.prev' is undefined or null
+  Fix: Add null checks for 'r.prev' property
+
+  [MEDIUM] null_check -- Line 277
+  Potential null pointer exception if 'r.curr' is undefined or null
+  Fix: Add null checks for 'r.curr' property
+
+  [MEDIUM] null_check -- Line 278
+  Potential null pointer exception if 'r.up' or 'r.change' is undefined or null
+  Fix: Add null checks for 'r.up' and 'r.change' properties
+
+  [MEDIUM] code_smell -- File-level
+  The code snippet is too partial to assess fully, which might hide potential issues such as null pointer exceptions, unhandled promises, or missing error handling.
+  Fix: Review the full component code to ensure all potential issues are addressed.
+
+=================================================================
+  FILE: src/app/dashboard/college/settings/page.js
+  Score: 39/100   Issues: 47
+
+  The reviewed file, `src/app/dashboard/college/settings/page.js`, contains a total of 47 issues, with 27 high-severity, 17 medium-severity, and 3 low-severity issues. The initial chunks of the file show only imports and the 'use client' directive, with no executable logic, API calls, or state management visible, making it difficult to identify runtime failures, security issues, or data integrity problems. However, as the review progresses, potential issues emerge, including null pointer crashes, missing input validation, and lack of error handling, particularly in the logo upload flow and settings form rendering. The code appears to be well-structured, following standard Next.js patterns, but the lack of defensive checks and input sanitization poses significant risks, including data integrity issues and runtime failures. Overall, the file requires a thorough review to assess error handling, data validation, and API integration completeness to ensure production readiness.
+
+  [HIGH] error_handling -- Line 34
+  fetch('/api/college/settings') on line 47 has no timeout. If the server hangs, the UI will remain in loading state indefinitely.
+  Fix: Add a timeout to the fetch call using AbortController or a wrapper like fetchWithTimeout.
+
+  [HIGH] error_handling -- Line 70
+  fetch('/api/college/settings') on line 83 has no timeout. If the server hangs, the save button will remain disabled and the UI will be stuck.
+  Fix: Add a timeout to the save fetch call using AbortController.
+
+  [HIGH] error_handling -- Line 117
+  fetch('/api/college/settings/logo/presign') on line 130 has no timeout. If the presign endpoint hangs, the logo upload will be stuck.
+  Fix: Add a timeout to the presign fetch call.
+
+  [HIGH] error_handling -- Line 148
+  fetch(presign.uploadUrl) on line 161 has no timeout. If the S3 upload hangs, the UI will be stuck.
+  Fix: Add a timeout to the S3 PUT fetch call.
+
+  [HIGH] error_handling -- Line 167
+  fetch('/api/college/settings/logo/complete') on line 180 has no timeout. If the complete endpoint hangs, the UI will be stuck.
+  Fix: Add a timeout to the complete fetch call.
+
+  [MEDIUM] validation -- Line 79
+  onSave does not validate form fields before sending to the API. If required fields are empty, the server may return a 400 error, but the user will see a generic error message.
+  Fix: Add client-side validation for required fields (e.g., college name, email) before making the API call.
+
+  [MEDIUM] error_handling -- Line 47
+  If the API returns a non-JSON response (e.g., HTML error page), res.json() will throw a SyntaxError that is caught by the catch block, but the error message will be unhelpful (e.g., 'Unexpected token < in JSON at position 0').
+  Fix: Check the Content-Type header before parsing JSON, or use a try-catch around res.json() and provide a fallback message.
+
+  [MEDIUM] error_handling -- Line 83
+  If the save API returns a non-JSON response, res.json() will throw a SyntaxError that is caught, but the error message will be unhelpful.
+  Fix: Add a try-catch around res.json() in the save handler.
+
+  [MEDIUM] multi_tenancy -- Line 79
+  The onSave function sends the entire form object to the API without any tenant context. If the API does not enforce tenant isolation, one college admin could overwrite another college's settings.
+  Fix: Ensure the API endpoint uses the authenticated user's tenant_id to scope the save operation. This is a server-side concern, but the client should not send tenant_id explicitly.
+
+  [LOW] best_practice -- Line 98
+  The logo upload function does not validate the file name for path traversal characters (e.g., '../'). This could be a security risk if the server uses the file name directly in S3 key generation.
+  Fix: Sanitize the file name on the client side before sending to the presign endpoint, or rely on server-side sanitization.
+
+  [HIGH] null_pointer_exception -- Line 163
+  Variable `presign` is used at line 164 (`presign.fileUrl`) and line 183 (`presign.fileUrl`) without a null/undefined check. If the `/api/college/settings/logo/presign` API returns non-JSON (e.g., network error, 500 HTML page), the `.json()` call will throw, the catch block returns `{}`, and `presign.fileUrl` will be undefined, causing a crash when passed to the PUT request or the complete API.
+  Fix: Add a null/undefined check on `presign` and `presign.fileUrl` before using it, and throw a descriptive error if the presign response is invalid.
+
+  [HIGH] null_pointer_exception -- Line 108
+  Accessing `form.social.twitter` at line 108 (and similarly `form.social.facebook`, `form.social.instagram`, `form.social.linkedin` at lines 112, 116, 120) will throw a TypeError if `form.social` is undefined or null. This will crash the entire settings page rendering for any user whose form state does not have a `social` object initialized.
+  Fix: Use optional chaining (`form.social?.twitter`) or provide a default empty object for `form.social` in the initial state.
+
+  [HIGH] null_pointer_exception -- Line 79
+  Accessing `form.institution.collegeName` at line 79 will throw a TypeError if `form.institution` is undefined or null. This will crash the entire settings page rendering for any user whose form state does not have an `institution` object.
+  Fix: Use optional chaining (`form.institution?.collegeName`) or provide a default empty object for `form.institution` in the initial state.
+
+  [MEDIUM] error_handling -- Line 163
+  The catch block at line 165 swallows the error silently when reading the PUT response text. If the PUT response body is unreadable (e.g., connection reset), the error is lost and `putDetail` becomes an empty string, which may hide debugging information.
+  Fix: Log the error when reading the PUT response body fails, so that debugging information is not lost.
+
+  [MEDIUM] error_handling -- Line 183
+  The `completeRes.json()` call at line 185 uses `.catch(() => ({}))` which silently swallows JSON parse errors. If the complete API returns a non-JSON response (e.g., 500 HTML), the error is hidden and `complete` becomes an empty object, potentially masking the real failure.
+  Fix: Log the JSON parse error so that non-JSON responses from the complete API are not silently ignored.
+
+  [LOW] ux_copy -- Line 199
+  The error message at line 199 uses `e2.message || 'Logo upload failed'`. If `e2` is not an Error object (e.g., a string thrown), accessing `.message` will be undefined, and the fallback will be used. This is acceptable but could be improved for robustness.
+  Fix: Use a more robust extraction: `const msg = (e2 instanceof Error ? e2.message : String(e2)) || 'Logo upload failed';`
+
+  [HIGH] null_pointer_exception -- Line 13
+  form.social.twitter will throw TypeError: Cannot read properties of undefined (reading 'twitter') if form.social is undefined. This crashes the entire settings page on initial render or if the API returns partial data without the social field.
+  Fix: Add optional chaining or a default empty object for form.social in the state initialization.
+
+  [HIGH] null_pointer_exception -- Line 17
+  form.social.facebook will throw TypeError if form.social is undefined. Same crash risk as line 13.
+  Fix: Use optional chaining on form.social for all social fields.
+
+  [HIGH] null_pointer_exception -- Line 21
+  form.social.instagram will throw TypeError if form.social is undefined.
+  Fix: Use optional chaining on form.social for all social fields.
+
+  [HIGH] null_pointer_exception -- Line 25
+  form.social.linkedin will throw TypeError if form.social is undefined.
+  Fix: Use optional chaining on form.social for all social fields.
+
+  [HIGH] null_pointer_exception -- Line 48
+  form.institution.collegeName will throw TypeError if form.institution is undefined. Crashes the Institution Details card.
+  Fix: Use optional chaining on form.institution for all institution fields.
+
+  [HIGH] null_pointer_exception -- Line 52
+  form.institution.email will throw TypeError if form.institution is undefined.
+  Fix: Use optional chaining on form.institution.
+
+  [HIGH] null_pointer_exception -- Line 56
+  form.institution.phone will throw TypeError if form.institution is undefined.
+  Fix: Use optional chaining on form.institution.
+
+  [HIGH] null_pointer_exception -- Line 66
+  form.address.address will throw TypeError if form.address is undefined. Crashes the Address card.
+  Fix: Use optional chaining on form.address for all address fields.
+
+  [HIGH] null_pointer_exception -- Line 70
+  form.address.city will throw TypeError if form.address is undefined.
+  Fix: Use optional chaining on form.address.
+
+  [HIGH] null_pointer_exception -- Line 74
+  form.address.state will throw TypeError if form.address is undefined.
+  Fix: Use optional chaining on form.address.
+
+  [HIGH] null_pointer_exception -- Line 78
+  form.address.pincode will throw TypeError if form.address is undefined.
+  Fix: Use optional chaining on form.address.
+
+  [HIGH] null_pointer_exception -- Line 88
+  form.accreditation.body will throw TypeError if form.accreditation is undefined. Crashes the Accreditation card.
+  Fix: Use optional chaining on form.accreditation for all accreditation fields.
+
+  [HIGH] null_pointer_exception -- Line 92
+  form.accreditation.naacGrade will throw TypeError if form.accreditation is undefined.
+  Fix: Use optional chaining on form.accreditation.
+
+  [HIGH] null_pointer_exception -- Line 104
+  form.accreditation.nirfRank will throw TypeError if form.accreditation is undefined.
+  Fix: Use optional chaining on form.accreditation.
+
+  [MEDIUM] bug -- Line 94
+  NAAC grade <option> elements lack value attributes. When selected, the displayed text (e.g., 'A++') will be submitted as the value instead of the expected short code. This causes data inconsistency in the database.
+  Fix: Add value attributes to each <option> matching the displayed text (e.g., value="A++").
+
+  [HIGH] null_pointer_exception -- Line 3
+  Accessing `form.accreditation.naacGrade` will throw a TypeError if `form.accreditation` is undefined or null, crashing the entire form rendering.
+  Fix: Use optional chaining or a default empty object when accessing nested properties.
+
+  [HIGH] null_pointer_exception -- Line 15
+  Accessing `form.accreditation.nirfRank` will throw a TypeError if `form.accreditation` is undefined or null, crashing the entire form rendering.
+  Fix: Use optional chaining or a default empty object when accessing nested properties.
+
+  [HIGH] null_pointer_exception -- Line 29
+  Accessing `form.placementOfficer.email` will throw a TypeError if `form.placementOfficer` is undefined or null, crashing the entire form rendering.
+  Fix: Use optional chaining or a default empty object when accessing nested properties.
+
+  [HIGH] null_pointer_exception -- Line 36
+  Accessing `form.placementOfficer.designation` will throw a TypeError if `form.placementOfficer` is undefined or null, crashing the entire form rendering.
+  Fix: Use optional chaining or a default empty object when accessing nested properties.
+
+  [MEDIUM] input_validation -- Line 15
+  NIRF rank input accepts negative numbers and non-integer values (e.g., 1.5, -100). NIRF rank should be a positive integer.
+  Fix: Add min="0" and step="1" attributes to the number input, or validate on change.
+
+  [MEDIUM] bug -- Line 3
+  NAAC grade select options lack explicit value attributes. The selected value will be the option's text content (e.g., 'A++') rather than a controlled value, which may cause issues if the backend expects a specific format.
+  Fix: Add value attributes to each option matching the expected backend format.
+
+  [MEDIUM] validation -- Line 29
+  Placement officer email input lacks type="email", which disables basic client-side email format validation and mobile-friendly keyboard.
+  Fix: Add type="email" to the email input for better UX and basic validation.
+
+  [HIGH] null_pointer_exception -- Line 371
+  Accessing `form.placementOfficer.name`, `form.placementOfficer.email`, and `form.placementOfficer.designation` will throw a TypeError if `form.placementOfficer` is null or undefined. This will crash the entire component when the API response is malformed or during initial render before data loads.
+  Fix: Use optional chaining or a fallback empty object when accessing nested properties to prevent null pointer crashes.
+
+  [MEDIUM] null_pointer_exception -- Line 375
+  Accessing form.placementOfficer.email without optional chaining will throw a TypeError if form.placementOfficer is null or undefined. This can crash the entire settings page if the API response is malformed or the state is not initialized.
+  Fix: Use optional chaining (form.placementOfficer?.email) or ensure form.placementOfficer is always initialized with default values before rendering.
+
+  [MEDIUM] null_pointer_exception -- Line 382
+  Accessing form.placementOfficer.designation without optional chaining will throw a TypeError if form.placementOfficer is null or undefined.
+  Fix: Use optional chaining (form.placementOfficer?.designation) or ensure form.placementOfficer is always initialized.
+
+  [MEDIUM] null_check -- Line 375
+  Potential null pointer crash: accessing `form.placementOfficer.email` without optional chaining or null check. If `form.placementOfficer` is undefined, this will throw a TypeError and break the component.
+  Fix: Use optional chaining or provide a fallback empty string to prevent crashes when placementOfficer is not yet initialized.
+
+  [LOW] uiux -- Line 381
+  HTML entity `&amp;` in placeholder text may render as literal '&amp;' in some environments instead of '&'. This is a minor display issue.
+  Fix: Use the actual '&' character directly in JSX instead of the HTML entity.
+
+  [MEDIUM] null_pointer_exception -- Line 374
+  Accessing `form.placementOfficer.email` and `form.placementOfficer.designation` will throw a TypeError if `form.placementOfficer` is undefined or null. This will crash the component and prevent rendering of the entire settings page.
+  Fix: Add optional chaining or a fallback empty object when accessing nested properties in the value prop.
+
+  [MEDIUM] input_validation -- Line 383
+  Input validation is missing for the designation field
+  Fix: Add input validation to ensure the designation field only accepts valid input
+
+  [MEDIUM] security -- Line 383
+  Input sanitization is missing to prevent XSS attacks
+  Fix: Add input sanitization to prevent XSS attacks
+
+  [MEDIUM] input_validation -- Line 382
+  The designation field value is used directly without sanitization. If this value is later rendered as HTML or used in API calls, it could lead to XSS or injection vulnerabilities.
+  Fix: Add input sanitization or validation before setting state, or ensure the value is properly escaped when rendered.
+
+=================================================================
+  FILE: src/app/dashboard/college/audit-reports/page.js
+  Score: 94/100   Issues: 2
+
+  This is a thin wrapper page that delegates entirely to a shared AuditReportsPage component. The code itself is minimal and contains no logic, data fetching, or user interaction. The primary risk is that the shared component may not enforce tenant-scoped filtering for college-level audit reports, potentially exposing cross-tenant data. Additionally, there is no authentication or authorization check at this page level, relying entirely on the shared component or layout to enforce access control. The code is clean and follows the delegation pattern correctly.
+
+  [MEDIUM] multi_tenancy -- Line 6
+  The page delegates to AuditReportsPage with a scopeLabel prop but does not pass any tenant_id or college_id context. If AuditReportsPage does not derive the tenant from the session or URL, it may fetch audit data for the wrong tenant or all tenants, causing cross-tenant data leakage.
+  Fix: Ensure AuditReportsPage receives the current tenant_id from the session or URL, or derive it from the authenticated user's context within the component.
+
+  [MEDIUM] authentication -- Line 6
+  No authentication or authorization check is present on this page. If the shared layout does not enforce authentication, unauthenticated users could access this page and potentially view audit reports.
+  Fix: Add a session check or use a middleware/layout that redirects unauthenticated users to the login page.
+
+=================================================================
+  FILE: src/app/dashboard/admin/users/page.js
+  Score: 80/100   Issues: 5
+
+  The component is a straightforward admin user list page with proper loading and error states. The main risks are: (1) a potential crash when `u.name` is null/undefined on line 41, (2) no pagination or search/filter for large user lists, and (3) the error message on line 50 may display raw server errors to the user. Overall, the code is clean but lacks production hardening for edge cases and scalability.
+
+  [HIGH] null_pointer_exception -- Line 41
+  Accessing `u.name.split(' ')` will throw a TypeError if `u.name` is null or undefined, crashing the component and showing a blank page to the admin.
+  Fix: Add a fallback for null/undefined name before calling .split().
+
+  [MEDIUM] ux_copy -- Line 50
+  The error message from the server (`e.message`) is displayed directly to the user, which may expose internal details or be unhelpful. It also shows the error in the empty state row, which is confusing when there are users but an error occurred.
+  Fix: Show a generic error message in a dedicated error banner, not in the empty table row.
+
+  [MEDIUM] scalability -- Line 15
+  Fetching all users without pagination, search, or filter will cause performance issues and poor UX as the user base grows. The API endpoint likely returns all users, which could be thousands.
+  Fix: Implement server-side pagination, search, and filtering with query parameters.
+
+  [MEDIUM] security -- Line 41
+  User name is rendered directly into the DOM via JSX without sanitization, which could lead to XSS if a user's name contains malicious HTML/JS (e.g., <img onerror=alert(1)>).
+  Fix: Use React's built-in escaping (JSX does escape by default for text content, but the avatar initials are safe; the name in the span is safe). However, the avatar initials are derived from the name and rendered as text, so this is low risk. Marking as medium for awareness.
+
+  [LOW] code_smell -- Line 44
+  The status badge uses `u.active` which may be undefined or null, causing the badge to render incorrectly (no class applied).
+  Fix: Add a fallback for the active field.
+
+=================================================================
+  FILE: src/app/dashboard/college/enrollment-key/page.js
+  Score: 83/100   Issues: 4
+
+  The component is simple and mostly correct, but has a critical security issue: the enrollment key is fetched and displayed in plaintext, making it visible in the DOM and susceptible to XSS exfiltration. Additionally, the copy-to-clipboard fallback is missing for non-secure contexts, and the loading skeleton has a hardcoded height that may cause layout shift. The biggest risk is the enrollment key being stolen via XSS or shoulder surfing.
+
+  [HIGH] security -- Line 73
+  Enrollment key is displayed in plaintext in the DOM, making it vulnerable to XSS exfiltration and shoulder surfing. The key should be masked by default with a reveal toggle.
+  Fix: Mask the enrollment key (e.g., show only last 4 characters) and provide a toggle button to reveal it.
+
+  [MEDIUM] bug -- Line 34
+  navigator.clipboard.writeText may fail in non-HTTPS contexts or if permission is denied. The catch block shows a generic error but does not provide a fallback (e.g., selecting the text for manual copy).
+  Fix: Add a fallback that selects the key text so the user can manually copy it.
+
+  [LOW] uiux -- Line 58
+  Loading skeleton has a hardcoded height of 24px, which may not match the actual key display height, causing layout shift when content loads.
+  Fix: Use a skeleton that matches the approximate height of the key display area, or wrap in a container with a fixed height.
+
+  [MEDIUM] security -- Line 73
+  The enrollment key is rendered directly into the DOM without sanitization. If the key contains HTML special characters (e.g., <, >, &), it could be interpreted as HTML, leading to XSS if the key is user-controlled.
+  Fix: Use textContent or React's default escaping (which it does), but ensure the key is never rendered as innerHTML. Current usage is safe with JSX, but add a comment to prevent future regressions.
+
+=================================================================
+  FILE: src/app/dashboard/college/employers/requests/page.js
+  Score: 93/100   Issues: 5
+
+  The component is well-structured with proper loading, empty, and error states. The main risks are: (1) the error state displays the raw error message which could leak sensitive information, (2) the success toast uses a template literal with the action variable that could be manipulated, (3) the pagination is stubbed out with a toast message that is not actionable, and (4) the fetcher throws an error for non-array responses but the error message may be misleading.
+
+  [MEDIUM] error_handling -- Line 47
+  Error message from API is displayed directly to the user via `error.message`. This could leak internal error details (e.g., database errors, stack traces) if the API returns them.
+  Fix: Display a generic error message to the user and log the actual error server-side.
+
+  [LOW] ux_copy -- Line 31
+  Success toast uses a template literal with the `action` variable directly. While the action is controlled ('approve' or 'reject'), the resulting message 'Request approved successfully.' or 'Request rejected successfully.' is grammatically awkward.
+  Fix: Use a mapping object to display user-friendly action verbs.
+
+  [LOW] uiux -- Line 130
+  Pagination is stubbed out with a toast message 'Pagination is not available yet in this build.' This is not actionable for the user and indicates incomplete functionality.
+  Fix: Either implement pagination or remove the pagination UI entirely until it is ready.
+
+  [LOW] error_handling -- Line 12
+  The fetcher throws an error with `data.error || 'Invalid response'` when the response is not an array. If `data.error` is undefined, the user sees 'Invalid response' which is not helpful.
+  Fix: Provide a more descriptive fallback error message.
+
+  [LOW] security -- Line 88
+  The website URL is used directly in an anchor tag's href attribute. While the URL is likely validated server-side, if a malicious URL (e.g., javascript:alert(1)) is stored, it could be executed when clicked.
+  Fix: Validate the URL starts with http:// or https:// before rendering the link, or use a safe URL parser.
+
+=================================================================
+  FILE: src/app/dashboard/college/offers/page.js
+  Score: 86/100   Issues: 3
+
+  The component is clean and well-structured with proper error handling, loading states, and null-safe rendering. The main risks are the fetcher lacking HTTP error status handling for non-OK responses (e.g., 403, 500) which can cause unhelpful error messages, and the absence of a loading skeleton or spinner for better UX. No critical security or data integrity issues found.
+
+  [HIGH] error_handling -- Line 6
+  The fetcher function does not handle non-2xx HTTP responses properly. If the API returns a 403, 500, or other error status, res.json() may fail or return an unexpected shape, and the error message may be unhelpful. This can lead to a generic 'Failed to load offers' message even for auth or server errors.
+  Fix: Check res.ok before parsing JSON, and parse error body safely with a fallback.
+
+  [MEDIUM] uiux -- Line 14
+  No loading indicator is shown while data is being fetched. Users see a blank page or stale content until the request completes, which is poor UX for a data-heavy dashboard.
+  Fix: Add a loading skeleton or spinner when isLoading is true and data is not yet available.
+
+  [LOW] uiux -- Line 63
+  The empty state message shows error?.message when there is an error, but the error message may be generic or technical. Consider showing a user-friendly fallback for different error types (e.g., network error vs no data).
+  Fix: Differentiate between error states and empty data states with distinct messages.
+
+=================================================================
+  FILE: src/app/dashboard/college/applications/page.js
+  Score: 75/100   Issues: 8
+
+  The component is a straightforward client-side page that fetches and displays a list of applications. The main risks are the lack of authentication/authorization enforcement on the client side (relying entirely on the API), missing error boundary for unhandled exceptions, no pagination or search/filter controls for potentially large datasets, and the use of inline styles instead of consistent design tokens. The code is clean and handles loading/error/empty states, but lacks production hardening for a multi-tenant SaaS application.
+
+  [HIGH] authentication -- Line 15
+  No client-side authentication or authorization check before fetching data. The component relies entirely on the API to reject unauthorized requests, but a brief flash of an error state or redirect delay could occur. In a multi-tenant SaaS app, the client should verify the user's role and tenant context before rendering or fetching.
+  Fix: Add a session/role check at the top of the component (e.g., using useSession from next-auth) and redirect or show an unauthorized message if the user is not a college admin.
+
+  [MEDIUM] performance -- Line 15
+  No pagination, search, or filter controls on the applications list. As the number of applications grows, fetching all records at once will degrade performance and user experience. The API endpoint may also lack pagination support.
+  Fix: Implement server-side pagination with page/limit query parameters and add search/filter UI controls. Use SWR's pagination pattern or a dedicated data table library.
+
+  [MEDIUM] error_handling -- Line 32
+  Error message is displayed directly from error.message, which may expose internal server error details to the user. The fallback text 'Could not load applications.' is safe, but the primary path uses the server-provided message.
+  Fix: Always use a generic user-facing message and log the actual error server-side. Only show specific error details for validation errors (4xx), not for server errors (5xx).
+
+  [MEDIUM] null_check -- Line 56
+  a.status could be null or undefined, which would cause getStatusColor(null) and formatStatus(null) to potentially throw or return unexpected values. The fallback dash is not applied here.
+  Fix: Add a fallback for a.status before passing to helper functions, e.g., a.status || 'unknown'.
+
+  [MEDIUM] null_check -- Line 57
+  a.applied_at could be null or undefined, and formatDate may not handle null gracefully, potentially throwing an error or displaying 'Invalid Date'.
+  Fix: Add a null check before calling formatDate, or ensure formatDate handles null/undefined by returning a fallback.
+
+  [LOW] error_handling -- Line 7
+  The fetcher function does not handle non-JSON responses (e.g., HTML error pages). If the API returns a 500 with an HTML body, res.json() will throw a parse error that is not caught, resulting in an unhandled promise rejection.
+  Fix: Check Content-Type header before parsing JSON, or wrap res.json() in a try/catch and throw a generic error.
+
+  [LOW] multi_tenancy -- Line 15
+  The API endpoint '/api/college/applications' does not include a tenant identifier in the URL. The component assumes the API will infer the tenant from the session, but if the API is misconfigured, it could leak data across tenants. The client should explicitly pass the tenant context.
+  Fix: Include the tenant slug or ID in the API request (e.g., from session or URL params) to enforce tenant isolation at the API level.
+
+  [LOW] uiux -- Line 19
+  The page uses inline styles (style={{...}}) instead of Tailwind utility classes or CSS modules, which makes it harder to maintain consistent theming and responsive design across the application.
+  Fix: Replace inline styles with Tailwind classes or a consistent design system to improve maintainability and visual consistency.
+
+=================================================================
+  FILE: src/app/dashboard/college/discussions/page.js
+  Score: 21/100   Issues: 13
+
+  The component has several critical issues: no authentication check, no tenant isolation, and a silent catch block that swallows errors. The activeThread fallback logic can cause a crash when threads is empty, and the addReply function silently fails without user feedback. The search filter assumes company and topic are always strings, which will crash if they are null or undefined. Overall, the code needs auth, error handling, and defensive checks before production use.
+
+  [CRITICAL] authentication -- Line 1
+  No authentication check. The page does not verify the user is logged in or has the 'college_admin' role. An unauthenticated user can access this page and potentially view or modify discussions.
+  Fix: Add a session check using useSession from next-auth/react and redirect unauthenticated users to login.
+
+  [HIGH] null_pointer_exception -- Line 39
+  activeThread fallback can crash when visibleThreads is empty. If visibleThreads[0] is undefined, activeThread becomes undefined, causing a crash when accessing activeThread.company on line 102.
+  Fix: Check if visibleThreads is non-empty before accessing index 0, or use a safe fallback.
+
+  [HIGH] null_pointer_exception -- Line 36
+  Search filter assumes t.company and t.topic are always strings. If either is null or undefined, calling .toLowerCase() will throw a TypeError and crash the page.
+  Fix: Add optional chaining or default to empty string before calling .toLowerCase().
+
+  [HIGH] error_handling -- Line 22
+  Silent catch block on initial load. If the API call fails, the error is swallowed and the user sees an empty list with no feedback. This makes debugging impossible and hides failures from users.
+  Fix: Add a user-facing error state and log the error for observability.
+
+  [HIGH] error_handling -- Line 54
+  Silent catch block on addReply. If the reply fails to save, the user is not notified and the reply text remains in the input, giving the impression it was sent. This leads to data loss and confusion.
+  Fix: Show an error toast or message to the user when the reply fails.
+
+  [HIGH] multi_tenancy -- Line 15
+  No tenant_id filter in the API call. The endpoint /api/discussions may return discussions from all tenants, leaking data across colleges. The page does not send any tenant identifier.
+  Fix: Include the tenant_id from the session in the API request, and ensure the backend filters by tenant.
+
+  [HIGH] multi_tenancy -- Line 44
+  No tenant_id in PATCH request. The reply is sent without tenant context, potentially allowing cross-tenant reply injection if the backend does not validate ownership.
+  Fix: Include tenant_id in the request body or query, and validate server-side.
+
+  [MEDIUM] security -- Line 113
+  Potential XSS vulnerability. The reply text (r.text) is rendered directly as children of ConvBubble without sanitization. If the text contains HTML/script tags, it could execute in the browser.
+  Fix: Sanitize the text before rendering, or use a library like DOMPurify.
+
+  [MEDIUM] security -- Line 89
+  Potential XSS vulnerability. t.topic is rendered directly without sanitization. If an attacker can control the topic, they can inject malicious scripts.
+  Fix: Sanitize t.topic before rendering.
+
+  [MEDIUM] security -- Line 87
+  Potential XSS vulnerability. t.company is rendered directly without sanitization.
+  Fix: Sanitize t.company before rendering.
+
+  [MEDIUM] edge_case -- Line 21
+  If the API returns an empty threads array, setActiveId(null) is called, but the fallback on line 39 may still crash if visibleThreads is empty. This is partially mitigated by the fix for line 39, but the null activeId is not handled in the UI.
+  Fix: Handle null activeId explicitly in the render logic.
+
+  [LOW] uiux -- Line 74
+  No empty state when visibleThreads is empty. The user sees a blank list with no message indicating no threads match the search or no threads exist.
+  Fix: Show a message like 'No discussions found' when visibleThreads is empty.
+
+  [LOW] uiux -- Line 124
+  No loading state on the Send button. If the network is slow, the user may click Send multiple times, causing duplicate replies.
+  Fix: Disable the button and show a spinner while the request is in flight.
+
+=================================================================
+  FILE: src/app/dashboard/college/page.js
+  Score: 100/100   Issues: 0
+
+  The code is minimal and well-structured, with proper session handling and a skeleton loading state. No critical or high-severity issues found. The only minor concern is the lack of error handling for a failed session fetch, but this is mitigated by the skeleton UI and the fact that NextAuth handles session errors internally.
+
+=================================================================
+  FILE: src/app/dashboard/college/events/page.js
+  Score: 87/100   Issues: 2
+
+  The component is well-structured with proper loading, empty, and error states. The main risks are: (1) the fetcher does not handle non-JSON responses, which can cause an unhandled runtime error; (2) the error message is displayed but the error state is not cleared when data loads successfully; (3) the table lacks accessibility features like a caption or scope attributes. Overall, the code is clean and functional for a simple events listing page.
+
+  [HIGH] error_handling -- Line 9
+  The fetcher assumes the response is always valid JSON. If the API returns a non-JSON response (e.g., HTML error page, 500 with plain text), res.json() will throw a SyntaxError that is not caught, causing an unhandled promise rejection.
+  Fix: Wrap res.json() in a try-catch or check Content-Type before parsing to handle non-JSON responses gracefully.
+
+  [MEDIUM] uiux -- Line 36
+  The error message is displayed but there is no retry mechanism or way to dismiss the error. If the API fails transiently, the user is stuck with an error until they manually refresh the page.
+  Fix: Add a retry button or use SWR's built-in revalidation (e.g., errorRetryCount) to automatically retry on failure.
+
+=================================================================
+  FILE: src/app/dashboard/college/hiring-assessment/page.js
+  Score: 58/100   Issues: 5
+
+  The component has a critical null-pointer crash risk when `row.rounds` is undefined or `r.id` is missing from `row.rounds`, which will throw at runtime and break the entire page. The CSV export function also lacks null-safe access to nested round properties, potentially producing malformed exports. Additionally, the error handling silently swallows fetch failures and sets an empty array, providing no user feedback. The empty state row uses a fragile colSpan calculation that could break if HIRING_ROUNDS is empty. Overall, the code is clean and well-structured but needs defensive null checks and better error feedback.
+
+  [CRITICAL] null_pointer_exception -- Line 103
+  Accessing `row.rounds[r.id]` on line 103 will throw a TypeError if `row.rounds` is undefined or null, crashing the entire page. This can happen if the API returns rows without the `rounds` property or if the data shape changes.
+  Fix: Add a null check before accessing `row.rounds[r.id]` and provide a fallback (e.g., default status/detail).
+
+  [HIGH] null_pointer_exception -- Line 37
+  CSV export accesses `r.rounds.aptitude.status`, `r.rounds.aptitude.detail`, etc. without null checks. If `r.rounds` or any nested property is undefined, the export will throw and fail silently.
+  Fix: Use optional chaining and provide fallback empty strings for CSV export rows.
+
+  [MEDIUM] error_handling -- Line 20
+  The catch block silently swallows errors and sets rows to empty array without showing any user feedback. Users will see an empty table with no indication that data failed to load.
+  Fix: Add a user-visible error state (e.g., a banner or toast) when the fetch fails, and optionally log the error for debugging.
+
+  [MEDIUM] edge_case -- Line 115
+  The colSpan is calculated as `3 + HIRING_ROUNDS.length`. If HIRING_ROUNDS is empty (length 0), colSpan becomes 3, but the table has 3 fixed columns (Student, Roll, Campus) plus 0 dynamic columns = 3, which is correct. However, if HIRING_ROUNDS is undefined or not an array, this will throw. The import is from a local module so it's likely safe, but defensive coding is recommended.
+  Fix: Add a fallback for HIRING_ROUNDS length to avoid potential crash if the import is undefined.
+
+  [LOW] null_check -- Line 52
+  The summary computation accesses `row.rounds[r.id]?.status` with optional chaining, which is safe. However, the filter condition `row.rounds[r.id]?.status && row.rounds[r.id].status !== '—'` will treat falsy statuses (empty string, null, undefined) as not counted, which is likely intended. No change needed, but noted for awareness.
+  Fix: No action required; the optional chaining is correctly used here.

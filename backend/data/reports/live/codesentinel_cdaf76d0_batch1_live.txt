@@ -1,0 +1,487 @@
+=================================================================
+  CODESENTINEL -- BATCH 1 REPORT
+  Files 1 - 20 of 63
+  Folder : C:\Users\sandeep\Downloads\Claudes\iso\system
+  Saved  : 05/05/2026, 01:20:57
+=================================================================
+
+  Batch Score   : 91/100
+  Files Reviewed: 20
+  Total Issues  : 56
+
+=================================================================
+  FILE: middleware.ts
+  Score: 82/100   Issues: 5   Provider: nvidia   Time: 34.91s
+
+  The middleware implements a reasonable auth-gating strategy but has a critical security gap: the `/api/tenants` prefix is whitelisted as public, exposing all tenant CRUD endpoints without authentication. Additionally, the session verification silently swallows errors (e.g., malformed tokens, JWT library failures), returning `null` and treating them as unauthenticated — this is acceptable for auth but should be logged for observability. The protected API list is manually maintained and will inevitably miss new endpoints, creating a maintenance risk. Overall, the code is clean and performant, but the missing auth on `/api/tenants` is a high-severity data exposure vulnerability.
+
+  [HIGH] security -- Line 6
+  The `/api/tenants` prefix is whitelisted as public, meaning ALL endpoints under `/api/tenants` (including POST, PUT, DELETE for creating/updating/deleting tenants) are accessible without authentication. This exposes tenant management to unauthenticated users, potentially allowing data leakage, modification, or deletion of tenant records.
+  Fix: Remove `/api/tenants` from PUBLIC_API_PREFIXES and add specific public sub-paths (e.g., `/api/tenants/register`) if needed, or implement per-route auth within the tenant API handlers.
+
+  [MEDIUM] observability -- Line 52
+  The `verifySessionToken` function is called without a try/catch. If the JWT library throws an unexpected error (e.g., malformed token, key rotation issue, network error if verifying remotely), the middleware will crash with an unhandled promise rejection, potentially returning a 500 error or crashing the process.
+  Fix: Wrap the session verification in a try/catch block. On error, log the error details server-side and return 401 (for API) or redirect (for pages) as if the session is invalid.
+
+  [MEDIUM] maintainability -- Line 22
+  The `isProtectedApi` function uses a hardcoded list of API prefixes. This is fragile and will inevitably become out of sync as new API routes are added, potentially leaving new endpoints unprotected. There is no automated enforcement or fallback to protect unknown API routes.
+  Fix: Adopt a convention-based approach (e.g., all non-public API routes live under `/api/protected/`) or invert the logic: protect all `/api/*` routes by default and explicitly whitelist public ones.
+
+  [LOW] ux_copy -- Line 55
+  The 401 error message 'Unauthorized' is generic and not actionable. For API consumers, a more descriptive message like 'Authentication required. Please provide a valid session token.' would be more helpful for debugging.
+  Fix: Provide a slightly more descriptive error message that guides the client to fix the issue.
+
+  [LOW] error_handling -- Line 51
+  If `sessionCookieName()` throws an error (e.g., missing environment variable), the middleware will crash with an unhandled exception. This should be caught at startup or have a fallback.
+  Fix: Ensure `sessionCookieName()` has a safe default or validate the environment at startup. Alternatively, wrap in try/catch.
+
+  🧪 Test Coverage Generator
+    - Should return 401 for unauthenticated requests to /api/tenants (currently incorrectly allowed)
+    - Should return 401 for unauthenticated requests to any /api/ endpoint not in PUBLIC_API_PREFIXES
+    - Should redirect unauthenticated page requests to '/' with 'next' query param
+    - Should allow public paths (/, /favicon.ico) without auth
+    - Should allow public API prefixes (/api/auth/*) without auth
+    - Should allow _next static assets without auth
+    - Should return 401 for API requests with expired/invalid session token
+    - Should return 401 for API requests with missing session cookie
+    - Should allow authenticated requests to protected pages and APIs
+    - Should handle malformed JWT tokens gracefully (return 401, not crash)
+    - Should log a warning when session verification fails due to an unexpected error (not just invalid token)
+    - Should not expose internal error details in the 401 response body
+    - Should handle missing sessionCookieName() gracefully (e.g., env var not set)
+
+=================================================================
+  FILE: src/app/api/evidence/[id]/route.ts
+  Score: 84/100   Issues: 5   Provider: nvidia   Time: 29.19s
+
+  The code is generally well-structured with proper input validation, tenant isolation, and error handling. The biggest risk is the lack of authorization checks beyond tenant membership — any user within the same tenant can modify or delete evidence records regardless of their role. Additionally, the PATCH handler silently ignores unknown fields, which could lead to silent failures if clients send misspelled field names. The DELETE handler does not verify the record exists before returning success, which is a minor correctness issue.
+
+  [HIGH] authorization -- Line 29
+  The evidenceBelongsToTenant check only verifies tenant membership, not user role or ownership. Any authenticated user within the same tenant (including students) can modify or delete any evidence record. This violates least-privilege and could allow data tampering.
+  Fix: Add a role check (e.g., require college_admin or super_admin) or an ownership check (evidence.created_by matches session.userId) before allowing mutation.
+
+  [MEDIUM] validation -- Line 37
+  The PATCH handler silently ignores unknown fields in the request body. If a client sends a misspelled field (e.g., 'descr' instead of 'desc'), the update succeeds but the intended change is not applied, leading to silent data inconsistency.
+  Fix: Validate that only known fields are present in the body and return a 400 error for unknown fields, or at minimum log a warning.
+
+  [LOW] logic -- Line 104
+  DELETE returns { ok: true } even if no record was actually deleted (e.g., the record didn't exist or was already deleted). This could mislead clients into thinking a deletion occurred when it didn't.
+  Fix: Check the number of affected rows from the delete operation and return 404 if no rows were deleted.
+
+  [LOW] validation -- Line 55
+  The 'include' field is coerced to Boolean using Boolean(body.include), which will convert any truthy value (including strings like 'false', objects, etc.) to true. This could lead to unexpected behavior if clients send non-boolean values.
+  Fix: Validate that 'include' is a boolean before coercing, or use a more explicit check like body.include === true.
+
+  [LOW] observability -- Line 69
+  The serverError function likely logs the error, but the catch blocks in both PATCH and DELETE do not differentiate between error types. A database constraint violation (e.g., foreign key) and a connection timeout are both returned as 500, making debugging harder.
+  Fix: Add error type differentiation in the catch blocks, logging the error context (operation, id, tenantId) and returning more specific error codes where safe.
+
+  🧪 Test Coverage Generator
+    - Should return 403 when a student tries to PATCH evidence belonging to another user in the same tenant
+    - Should return 404 when PATCH/DELETE is called with a non-existent evidence ID
+    - Should return 400 when PATCH body contains invalid field types (e.g., name as number)
+    - Should return 400 when id parameter is not a finite number (NaN, Infinity, string)
+    - Should return 401 when no session is present
+    - Should return 404 when evidence belongs to a different tenant
+    - Should return 200 and update only the provided fields in PATCH
+    - Should return 200 and delete the record in DELETE
+    - Should handle database connection failure gracefully with a 500 error
+    - Should ignore unknown fields in PATCH body without error
+    - Should handle concurrent PATCH requests without data corruption
+    - Should verify that the evidence record is actually deleted after DELETE returns ok:true
+
+=================================================================
+  FILE: next.config.ts
+  Score: 99/100   Issues: 1   Provider: nvidia   Time: 31.43s
+
+  The provided Next.js configuration file is minimal and only specifies the serverExternalPackages option. It does not contain any critical issues but lacks other essential configurations for a production-ready setup. The score is high due to the absence of major security or reliability concerns, but it's crucial to expand this configuration for a real-world application.
+
+  [LOW] configuration -- File-level
+  The Next.js configuration is very basic and might need additional settings for a production environment, such as internationalized routing, optimized images, or security headers.
+  Fix: Review and expand the Next.js configuration to include necessary settings for production.
+
+  🧪 Test Coverage Generator
+    - Should handle serverExternalPackages correctly for better-sqlite3
+    - Should not throw errors when Next.js server starts
+
+=================================================================
+  FILE: drizzle.config.ts
+  Score: 96/100   Issues: 2   Provider: nvidia   Time: 37.70s
+
+  The provided Drizzle configuration file has some potential issues. It uses synchronous file system operations and does not handle potential errors. The database URL is constructed from an environment variable, which could lead to security issues if not properly sanitized. However, the code is generally well-structured and readable.
+
+  [MEDIUM] bug -- Line 8
+  Synchronous file system operation can block the main thread
+  Fix: Use asynchronous file system operations instead
+
+  [LOW] security -- Line 15
+  Database URL is constructed from an environment variable, which could lead to security issues if not properly sanitized
+  Fix: Sanitize the environment variable before using it to construct the database URL
+
+  🧪 Test Coverage Generator
+    - Should handle database URL construction with invalid environment variable
+    - Should handle file system operations with insufficient permissions
+    - Should handle database connection with invalid credentials
+
+=================================================================
+  FILE: src/app/compliance/page.tsx
+  Score: 97/100   Issues: 1   Provider: nvidia   Time: 53.16s
+
+  The provided code snippet appears to be a React functional component for a compliance page. It renders a header, a paragraph of text, and a DocumentWorkspace component in compliance mode. There are no critical issues found in this snippet, but some potential improvements could be made for better error handling and code organization. The score is high due to the lack of complex logic and potential error sources.
+
+  [MEDIUM] error_handling -- Line 17
+  The DocumentWorkspace component is not wrapped in a try-catch block or error boundary, which could lead to unhandled errors being thrown if the component fails to render.
+  Fix: Wrap the DocumentWorkspace component in a try-catch block or error boundary to handle any potential errors.
+
+  🧪 Test Coverage Generator
+    - Should render the compliance page with the correct header and text
+    - Should render the DocumentWorkspace component in compliance mode
+    - Should handle errors when rendering the DocumentWorkspace component
+
+=================================================================
+  FILE: src/app/compliance/scope/page.tsx
+  Score: 99/100   Issues: 1   Provider: nvidia   Time: 43.30s
+
+  The provided code snippet is a simple React functional component that renders a ScopeHierarchyWorkspace component. There are no apparent security vulnerabilities, performance issues, or runtime failures in this code. However, it lacks input validation, error handling, and logging. The component assumes that the ScopeHierarchyWorkspace component is properly implemented and handles any potential errors or edge cases. The code score is high due to the simplicity and lack of potential issues in the provided snippet.
+
+  [LOW] error_handling -- Line 5
+  The component does not handle any potential errors or exceptions that may occur during rendering
+  Fix: Add try-catch blocks to handle and log any errors that may occur
+
+  🧪 Test Coverage Generator
+    - Should render the ScopeHierarchyWorkspace component with the correct title and description
+    - Should handle any errors thrown by the ScopeHierarchyWorkspace component
+    - Should log any errors or exceptions that occur during rendering
+
+=================================================================
+  FILE: src/app/api/auth/logout/route.ts
+  Score: 97/100   Issues: 1   Provider: nvidia   Time: 59.23s
+
+  The provided logout route appears to be generally correct in terms of clearing the session cookie. However, there are a few potential issues and improvements that can be suggested. The route does not check if the session cookie exists before attempting to clear it, which could potentially lead to issues if the cookie does not exist. Additionally, the route does not handle any potential errors that may occur when attempting to clear the cookie. The score is deducted due to these potential issues and the lack of error handling.
+
+  [MEDIUM] error_handling -- Line 8
+  The code does not check if the session cookie exists before attempting to clear it
+  Fix: Add a check to ensure the session cookie exists before attempting to clear it
+
+  🧪 Test Coverage Generator
+    - Should clear session cookie when user logs out
+    - Should handle case where session cookie does not exist
+    - Should handle errors when attempting to clear session cookie
+
+=================================================================
+  FILE: next-env.d.ts
+  Score: 100/100   Issues: 0   Provider: nvidia   Time: 50.90s
+
+  The provided code snippet is a TypeScript definition file for Next.js environment types. It appears to be a generated file and should not be edited manually. The file is properly configured with references to Next.js and next/image-types/global types. No issues were found in this file.
+
+=================================================================
+  FILE: scripts/ensure-demo-users.ts
+  Score: 94/100   Issues: 2   Provider: nvidia   Time: 63.56s
+
+  The provided code is a script to ensure demo users and tenants in a database. It checks for the existence of the database file and exits if it's not found. The script uses the `better-sqlite3` and `drizzle-orm` libraries to interact with the database. The code is generally well-structured, but there are some potential issues. The biggest risk is the lack of error handling in the `ensureDemoUsers` function, which could lead to unexpected behavior if an error occurs. Additionally, the script uses `process.exit(1)` to exit the process in case of an error, which could potentially lead to resource leaks. The score is 80 due to these potential issues.
+
+  [MEDIUM] error_handling -- Line 21
+  The script exits the process using `process.exit(1)` without closing the database connection, which could lead to resource leaks.
+  Fix: Use a try-finally block to ensure the database connection is closed even in case of an error.
+
+  [MEDIUM] error_handling -- Line 29
+  The `ensureDemoUsers` function is not wrapped in a try-catch block, which could lead to unexpected behavior if an error occurs.
+  Fix: Wrap the `ensureDemoUsers` function in a try-catch block to handle any potential errors.
+
+  🧪 Test Coverage Generator
+    - Should handle database file not found error
+    - Should handle error in ensureDemoUsers function
+    - Should close database connection in case of error
+
+=================================================================
+  FILE: src/app/api/evidence/route.ts
+  Score: 74/100   Issues: 4   Provider: nvidia   Time: 65.94s
+
+  The provided code has several issues, including potential SQL injection vulnerabilities, missing error handling, and inconsistent coding practices. The biggest risk is the lack of input validation and sanitization, which could lead to security breaches. The code also has some performance issues, such as the use of synchronous database queries. Overall, the code score is 60, with several high-severity issues that need to be addressed.
+
+  [HIGH] security -- Line 19
+  Potential SQL injection vulnerability due to lack of input validation and sanitization
+  Fix: Use parameterized queries and validate user input
+
+  [MEDIUM] performance -- Line 28
+  Synchronous database query
+  Fix: Use asynchronous database queries
+
+  [MEDIUM] error_handling -- Line 55
+  Missing error handling for JSON parsing
+  Fix: Add try-catch block for JSON parsing
+
+  [HIGH] security -- Line 76
+  Potential SQL injection vulnerability due to lack of input validation and sanitization
+  Fix: Use parameterized queries and validate user input
+
+  🧪 Test Coverage Generator
+    - Should handle invalid JSON body
+    - Should handle missing level2Id parameter
+    - Should handle unauthorized access
+    - Should handle database errors
+    - Should validate and sanitize user input
+
+=================================================================
+  FILE: src/app/api/documents/route.ts
+  Score: 93/100   Issues: 3   Provider: nvidia   Time: 64.06s
+
+  The provided code snippet appears to be a part of a serverless function handling GET requests for documents. It checks for a valid session, fetches documents from the database based on the tenant ID, and returns them in a JSON response. However, there are a few potential issues and improvements that can be suggested. The code does not handle the case where the 'auditor' query parameter is not a valid boolean value. Additionally, the error handling could be more specific and informative. The database query does not seem to have any pagination or limit, which could lead to performance issues if the number of documents is large.
+
+  [MEDIUM] input_validation -- Line 9
+  The 'auditor' query parameter is not validated. It should be checked to ensure it's a valid boolean value.
+  Fix: Add input validation for the 'auditor' query parameter.
+
+  [MEDIUM] performance -- Line 17
+  The database query does not have any pagination or limit. This could lead to performance issues if the number of documents is large.
+  Fix: Add pagination or limit to the database query.
+
+  [LOW] error_handling -- Line 23
+  The error handling could be more specific and informative.
+  Fix: Improve error handling to provide more specific and informative error messages.
+
+  🧪 Test Coverage Generator
+    - Should return 401 if no session is found
+    - Should return documents for the current tenant
+    - Should filter documents based on the 'auditor' query parameter
+    - Should handle database query errors
+    - Should handle invalid 'auditor' query parameter values
+
+=================================================================
+  FILE: src/app/api/tenants/route.ts
+  Score: 94/100   Issues: 2   Provider: nvidia   Time: 83.86s
+
+  The provided code snippet appears to be a simple API route that returns a list of demo tenants in JSON format. However, there are a few potential issues to consider. The code assumes that DEMO_TENANTS is always defined and has the expected properties, but it does not include any error handling or validation. Additionally, the code does not check if the request is authenticated or authorized to access this information. The score is deducted due to the lack of error handling and potential security concerns.
+
+  [MEDIUM] error_handling -- Line 8
+  The code does not include any error handling or validation for the DEMO_TENANTS data
+  Fix: Add try-catch blocks and validate the data before returning it
+
+  [MEDIUM] security -- Line 6
+  The code does not check if the request is authenticated or authorized to access this information
+  Fix: Add authentication and authorization checks before returning the data
+
+  🧪 Test Coverage Generator
+    - Should return a 500 error if DEMO_TENANTS is undefined
+    - Should return a 401 error if the request is not authenticated
+    - Should return a 403 error if the request is not authorized to access this information
+
+=================================================================
+  FILE: src/app/api/auth/me/route.ts
+  Score: 95/100   Issues: 3   Provider: nvidia   Time: 89.30s
+
+  The provided code snippet appears to be a route handler for retrieving the current user's information. It uses Drizzle ORM for database interactions and has proper error handling. However, there are a few potential issues and improvements that can be suggested. The code does not handle the case where the tenant or user is not found in the database, which could lead to null pointer exceptions. Additionally, the code does not validate the session object before using it to retrieve the user's information.
+
+  [MEDIUM] bug -- Line 11
+  The code does not validate the session object before using it to retrieve the user's information
+  Fix: Add validation for the session object to ensure it is not null or undefined
+
+  [LOW] performance -- Line 19
+  The code uses the eq function from Drizzle ORM to compare the tenant id, but it does not handle the case where the tenant id is null or undefined
+  Fix: Add a null check for the tenant id before using it in the database query
+
+  [LOW] performance -- Line 30
+  The code uses the eq function from Drizzle ORM to compare the user id, but it does not handle the case where the user id is null or undefined
+  Fix: Add a null check for the user id before using it in the database query
+
+  🧪 Test Coverage Generator
+    - Should return 200 with user information when session is valid
+    - Should return 200 with null user when session is invalid
+    - Should return 500 when database query fails
+    - Should handle the case where tenant or user is not found in the database
+
+=================================================================
+  FILE: src/app/api/tree/[documentId]/route.ts
+  Score: 93/100   Issues: 3   Provider: nvidia   Time: 81.74s
+
+  The provided code snippet appears to be a well-structured API endpoint for retrieving a document tree. However, there are a few potential issues that could be improved for better reliability and security. The code does not handle the case where the 'documentId' parameter is missing or null, and it does not validate the 'auditor' and 'omitExcluded' query parameters. Additionally, the error handling could be more robust, and the code could benefit from more specific error messages.
+
+  [MEDIUM] bug -- Line 16
+  The code does not handle the case where the 'documentId' parameter is missing or null.
+  Fix: Add a null check for the 'documentId' parameter.
+
+  [LOW] validation -- Line 21
+  The code does not validate the 'auditor' and 'omitExcluded' query parameters.
+  Fix: Add validation for the 'auditor' and 'omitExcluded' query parameters.
+
+  [MEDIUM] error_handling -- Line 35
+  The error handling could be more robust, and the code could benefit from more specific error messages.
+  Fix: Improve error handling and provide more specific error messages.
+
+  🧪 Test Coverage Generator
+    - Should return 401 when no session is present
+    - Should return 400 when documentId is not a finite number
+    - Should return 404 when document tree is not found
+    - Should handle missing or null documentId parameter
+    - Should validate auditor and omitExcluded query parameters
+
+=================================================================
+  FILE: scripts/db-reset.ts
+  Score: 93/100   Issues: 3   Provider: nvidia   Time: 74.05s
+
+  The provided code snippet is a database reset script. It attempts to remove database files, but it does so synchronously and without proper error handling for all potential issues. The script also lacks input validation and does not account for potential security risks. However, given its purpose as a development tool, the risks are somewhat mitigated. The score is deducted primarily due to the lack of robust error handling and potential for data loss if not used carefully.
+
+  [MEDIUM] error_handling -- Line 15
+  The script uses synchronous I/O for file deletion, which can be blocking. Consider using asynchronous methods for better performance.
+  Fix: Replace fs.unlinkSync with fs.promises.unlink and handle the promise appropriately.
+
+  [MEDIUM] error_handling -- Line 18
+  The error handling only checks for ENOENT (file not found) and exits the process for other errors. It should handle other potential errors more gracefully.
+  Fix: Implement more comprehensive error handling to address different types of errors that may occur during file deletion.
+
+  [LOW] security -- Line 5
+  The script assumes the DATABASE_URL environment variable is set and properly formatted. However, it does not validate the input thoroughly.
+  Fix: Add input validation to ensure the DATABASE_URL is correctly formatted and does not pose a security risk.
+
+  🧪 Test Coverage Generator
+    - Should handle permission errors when attempting to delete files
+    - Should handle cases where the database file does not exist
+    - Should provide clear instructions on how to resolve issues when the script fails
+
+=================================================================
+  FILE: src/app/api/assets/[id]/route.ts
+  Score: 85/100   Issues: 5   Provider: nvidia   Time: 80.60s
+
+  The provided code is a Next.js API route for handling DELETE and PATCH requests for assets. It has proper error handling, authentication, and authorization checks. However, there are some potential issues with data validation, database queries, and error handling. The code is well-structured, but some improvements can be made to enhance security, performance, and maintainability.
+
+  [MEDIUM] bug -- Line 17
+  The id parameter is not validated for potential SQL injection attacks.
+  Fix: Use a parameterized query or validate the id parameter to prevent SQL injection attacks.
+
+  [MEDIUM] bug -- Line 31
+  The database query is not wrapped in a transaction, which can lead to partial updates in case of errors.
+  Fix: Wrap the database query in a transaction to ensure atomicity.
+
+  [MEDIUM] bug -- Line 54
+  The JSON body is not validated for potential security vulnerabilities.
+  Fix: Use a JSON validation library to validate the JSON body.
+
+  [MEDIUM] bug -- Line 127
+  The asset_cost field is not validated for potential security vulnerabilities.
+  Fix: Use a validation library to validate the asset_cost field.
+
+  [MEDIUM] bug -- Line 180
+  The error handling is not robust and can lead to information disclosure.
+  Fix: Use a more robust error handling mechanism to prevent information disclosure.
+
+  🧪 Test Coverage Generator
+    - Should handle invalid id in DELETE request
+    - Should handle unauthorized access in DELETE request
+    - Should handle asset not found in DELETE request
+    - Should handle invalid JSON body in PATCH request
+    - Should handle unauthorized access in PATCH request
+    - Should handle asset not found in PATCH request
+    - Should handle invalid asset type in PATCH request
+    - Should handle invalid asset subtype in PATCH request
+    - Should handle unique constraint failure in PATCH request
+    - Should handle not null constraint failure in PATCH request
+
+=================================================================
+  FILE: scripts/run-migrations.ts
+  Score: 92/100   Issues: 4   Provider: nvidia   Time: 91.19s
+
+  The provided code is a TypeScript script for running database migrations using Drizzle ORM and Better SQLite3. It handles the creation of the database directory, applies migrations, and ensures demo users are present in the database. However, there are some potential issues and improvements that can be suggested. The script lacks error handling for specific operations like database connection and migration application. Additionally, the use of synchronous file system operations and hardcoded database paths could be improved for better reliability and maintainability.
+
+  [MEDIUM] performance -- Line 16
+  Synchronous file system operation fs.mkdirSync can block the main thread
+  Fix: Use asynchronous fs.mkdir instead
+
+  [LOW] readability -- Line 20
+  Database connection and Drizzle ORM initialization can be extracted into separate functions for better readability
+  Fix: Extract database connection and Drizzle ORM initialization into separate functions
+
+  [MEDIUM] error_handling -- Line 22
+  Migration application lacks specific error handling
+  Fix: Add try-catch block around migrate function call to handle specific errors
+
+  [LOW] code_smell -- Line 31
+  Global error handling can be improved for better error messages and handling
+  Fix: Improve global error handling with more informative error messages and handling
+
+  🧪 Test Coverage Generator
+    - Should handle database connection errors gracefully
+    - Should apply migrations without errors
+    - Should ensure demo users are created successfully
+    - Should handle migration folder path errors
+
+=================================================================
+  FILE: src/app/api/auth/login/route.ts
+  Score: 93/100   Issues: 3   Provider: nvidia   Time: 99.60s
+
+  The provided code snippet appears to be a login route for a Next.js application, handling user authentication and session creation. However, there are several potential issues and improvements that can be suggested. The code lacks input validation and sanitization, which could lead to security vulnerabilities. Additionally, the error handling mechanism can be improved to provide more informative error messages. The code also uses synchronous bcrypt comparison, which may not be suitable for production environments. Overall, the code requires further review and refinement to ensure security, reliability, and performance.
+
+  [MEDIUM] security -- Line 21
+  Lack of input validation and sanitization for email and password
+  Fix: Add input validation and sanitization to prevent potential security vulnerabilities
+
+  [MEDIUM] security -- Line 43
+  Generic error message for invalid email or password
+  Fix: Provide more informative error messages to prevent information disclosure
+
+  [LOW] performance -- Line 13
+  Synchronous bcrypt comparison
+  Fix: Use asynchronous bcrypt comparison for better performance
+
+  🧪 Test Coverage Generator
+    - Should handle invalid JSON body
+    - Should handle missing email or password
+    - Should handle invalid email or password
+    - Should create a new session token upon successful login
+    - Should set the session cookie with the correct options
+
+=================================================================
+  FILE: src/app/api/assets/route.ts
+  Score: 74/100   Issues: 4   Provider: nvidia   Time: 100.45s
+
+  The provided code has several issues, including potential SQL injection vulnerabilities, missing input validation, and inadequate error handling. The code also lacks proper logging and monitoring, which can make it difficult to diagnose and fix issues in production. However, the code does use parameterized queries and has some basic validation in place.
+
+  [MEDIUM] performance -- Line 20
+  The code uses multiple database queries to fetch assets, types, and subtypes. This can lead to performance issues and should be optimized using a single query or caching.
+  Fix: Use a single query to fetch all required data or implement caching to reduce database load.
+
+  [HIGH] security -- Line 42
+  The code does not validate the JSON body of the request. This can lead to security vulnerabilities if the body contains malicious data.
+  Fix: Validate the JSON body using a library like Joi or Zod to ensure it conforms to the expected schema.
+
+  [MEDIUM] validation -- Line 66
+  The code does not validate the asset_type_id field. This can lead to errors if the field is missing or invalid.
+  Fix: Validate the asset_type_id field using a library like Joi or Zod to ensure it conforms to the expected schema.
+
+  [HIGH] error_handling -- Line 159
+  The code does not handle errors properly. It catches all errors and returns a generic error message, which can make it difficult to diagnose and fix issues in production.
+  Fix: Handle errors more specifically and log them for later analysis and debugging.
+
+  🧪 Test Coverage Generator
+    - Should handle DB timeout gracefully and return a meaningful error message
+    - Should prevent double-charge if retried with the same asset_id
+    - Should validate all input fields and return an error if any are missing or invalid
+    - Should log all errors and exceptions for later analysis and debugging
+
+=================================================================
+  FILE: src/app/api/level1/[id]/route.ts
+  Score: 90/100   Issues: 4   Provider: nvidia   Time: 106.70s
+
+  The provided code is a PATCH endpoint for updating level 1 risks. It has proper validation and error handling for most cases, but there are some potential issues that need to be addressed. The code does not handle the case where the session or tenant ID is null or undefined. Additionally, the code does not validate the length of the risk description field properly. The code also does not handle the case where the database update fails due to a constraint violation.
+
+  [MEDIUM] bug -- Line 51
+  The code does not handle the case where the session is null or undefined.
+  Fix: Add a null check for the session object.
+
+  [MEDIUM] bug -- Line 55
+  The code does not handle the case where the tenant ID is null or undefined.
+  Fix: Add a null check for the tenant ID.
+
+  [LOW] bug -- Line 73
+  The code does not validate the length of the risk description field properly.
+  Fix: Add a more robust validation for the risk description field length.
+
+  [MEDIUM] bug -- Line 105
+  The code does not handle the case where the database update fails due to a constraint violation.
+  Fix: Add a try-catch block to handle the database update failure.
+
+  🧪 Test Coverage Generator
+    - Should handle invalid JSON body
+    - Should handle invalid risk field values
+    - Should handle database update failures
+    - Should handle session or tenant ID being null or undefined
+    - Should validate risk description field length properly

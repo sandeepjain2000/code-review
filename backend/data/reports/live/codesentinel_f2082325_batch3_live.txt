@@ -1,0 +1,341 @@
+=================================================================
+  CODESENTINEL -- BATCH 3 REPORT
+  Files 51 - 64 of 108
+  Folder : C:\Users\sandeep\Downloads\Claudes\CampusPlacement\campus-placement\src\lib
+  Saved  : 24/05/2026, 23:42:32
+=================================================================
+
+  Batch Score   : 95/100
+  Files Reviewed: 14
+  Total Issues  : 38
+
+=================================================================
+  FILE: notificationService.js
+  Score: 93/100   Issues: 3   Provider: nvidia   Time: 52.82s
+
+  The provided code snippet for notificationService.js appears to be well-structured and readable. However, there are some potential issues and improvements that can be made. The code does not handle errors that may occur during database queries, and it does not validate user input. Additionally, the code uses a magic number for the maximum title length, which could be replaced with a named constant. The code also does not check for null or undefined values before using them, which could lead to runtime errors.
+
+  [MEDIUM] error_handling -- Line 18
+  The code does not handle errors that may occur during database queries
+  Fix: Add try-catch blocks to handle errors that may occur during database queries
+
+  [LOW] code_smell -- Line 6
+  The code uses a magic number for the maximum title length
+  Fix: Replace the magic number with a named constant
+
+  [MEDIUM] error_handling -- Line 46
+  The code does not check for null or undefined values before using them
+  Fix: Add null checks before using values
+
+  🧪 Test Coverage Generator
+    - Should handle DB timeout gracefully
+    - Should prevent double-charge if retried
+    - Should validate user input before inserting into database
+    - Should handle errors that occur during database queries
+
+=================================================================
+  FILE: messageTemplateUtils.js
+  Score: 96/100   Issues: 2   Provider: nvidia   Time: 56.46s
+
+  The provided code snippet for message template utilities appears to be well-structured and readable. It handles different input types and edge cases, and it provides a clear and consistent output. However, there are some potential issues and improvements that can be made, such as adding more robust error handling and input validation.
+
+  [MEDIUM] error_handling -- Line 3
+  The function does not check if the input array is null or undefined before calling the map method.
+  Fix: Add a null check before calling the map method.
+
+  [LOW] code_smell -- Line 14
+  The function uses a regular expression to split the input string, which may not be the most efficient approach.
+  Fix: Consider using a simpler approach, such as using the split method with a comma separator.
+
+  🧪 Test Coverage Generator
+    - Should handle empty input
+    - Should handle array input
+    - Should handle string input with comma separation
+    - Should handle string input with newline separation
+    - Should handle string input with curly braces and comma separation
+    - Should handle invalid input types
+
+=================================================================
+  FILE: offerDeadline.js
+  Score: 93/100   Issues: 3   Provider: nvidia   Time: 65.31s
+
+  The provided code snippet for offer deadline parsing and checking appears to be well-structured and readable. It handles various input formats and edge cases. However, there are some potential issues and improvements, such as input validation and error handling. The code does not have any critical security vulnerabilities or major performance issues. The score is 92 due to some minor issues and suggestions for improvement.
+
+  [MEDIUM] input_validation -- Line 12
+  Input validation for deadline parameter could be improved to check for specific formats or ranges
+  Fix: Add more specific input validation to ensure deadline is in a valid format
+
+  [LOW] code_smell -- Line 20
+  Magic number 10 used in length check, consider defining a constant
+  Fix: Define a constant for the length check
+
+  [MEDIUM] error_handling -- Line 25
+  Error handling for Date parsing could be improved to provide more informative error messages
+  Fix: Add more informative error handling for Date parsing
+
+  🧪 Test Coverage Generator
+    - Should handle date-only strings as valid through end of that calendar day (UTC)
+    - Should return null for invalid or empty deadline strings
+    - Should return null for invalid Date objects
+    - Should correctly parse deadlines in different formats
+    - Should correctly check if a deadline has passed
+
+=================================================================
+  FILE: offerReportedColumn.js
+  Score: 96/100   Issues: 2   Provider: nvidia   Time: 68.46s
+
+  The provided code snippet for offerReportedColumn.js appears to be well-structured and readable. It correctly checks for a specific Postgres error code and message to determine if the reported_company_name column is missing. However, there are some potential issues and improvements that can be suggested. The function does not handle cases where the error object or its properties are null or undefined. Additionally, the function assumes that the error message will always contain the string 'reported_company_name' if the column is missing, which might not always be the case.
+
+  [LOW] readability -- Line 3
+  The variable 'msg' can be declared as a const since it's not being reassigned.
+  Fix: Declare 'msg' as a const.
+
+  [MEDIUM] error_handling -- Line 4
+  The function does not handle cases where the error object or its properties are null or undefined.
+  Fix: Add null checks for the error object and its properties.
+
+  🧪 Test Coverage Generator
+    - Should return true when Postgres error code is 42703 and message includes 'reported_company_name'
+    - Should return false when Postgres error code is not 42703
+    - Should return false when Postgres error message does not include 'reported_company_name'
+    - Should handle cases where error object or its properties are null or undefined
+
+=================================================================
+  FILE: marketingWebsiteUrl.js
+  Score: 95/100   Issues: 3   Provider: nvidia   Time: 90.27s
+
+  The provided code snippet for normalizing a marketing website URL appears to be well-structured and readable. It handles errors and edge cases, and it provides a clear and concise way to normalize the URL. However, there are some potential issues and improvements that can be made, such as input validation and error handling. The code score is 92 due to some minor issues and suggestions for improvement.
+
+  [LOW] readability -- Line 6
+  The type of the 'raw' parameter is unknown, consider adding a type annotation
+  Fix: Add a type annotation for the 'raw' parameter
+
+  [LOW] performance -- Line 12
+  The 'u' variable is reassigned, consider using a const instead
+  Fix: Use a const instead of a let for the 'u' variable
+
+  [MEDIUM] error_handling -- Line 15
+  The try-catch block is too broad, consider catching a specific error instead
+  Fix: Catch a specific error instead of a general error
+
+  🧪 Test Coverage Generator
+    - Should return an empty string for an empty input
+    - Should return a trimmed and normalized URL for a valid input
+    - Should return an empty string for an invalid input
+    - Should handle URLs with and without the protocol prefix
+    - Should handle URLs with and without a trailing slash
+
+=================================================================
+  FILE: loginSupportDelivery.js
+  Score: 93/100   Issues: 3   Provider: nvidia   Time: 117.58s
+
+  The provided code snippet for login support delivery appears to be well-structured and readable. However, there are some potential issues and improvements that can be made. The code handles errors and edge cases, but some improvements can be made to the error handling and logging mechanisms. Additionally, some potential security vulnerabilities were identified, such as the lack of input validation and sanitization. The code also lacks some important features, such as rate limiting and retry mechanisms for email delivery.
+
+  [MEDIUM] error_handling -- Line 27
+  The persistLoginSupportMessage function does not handle database connection errors properly. It only logs the error and returns false, but it does not retry the operation or provide any feedback to the user.
+  Fix: Implement retry mechanisms and provide feedback to the user in case of database connection errors.
+
+  [MEDIUM] error_handling -- Line 52
+  The sendMail function does not handle SMTP errors properly. It only logs the error and returns an error message, but it does not retry the operation or provide any feedback to the user.
+  Fix: Implement retry mechanisms and provide feedback to the user in case of SMTP errors.
+
+  [LOW] security -- Line 6
+  The buildBodies function does not validate or sanitize user input. This could lead to potential security vulnerabilities, such as email injection attacks.
+  Fix: Validate and sanitize user input to prevent potential security vulnerabilities.
+
+  🧪 Test Coverage Generator
+    - Should handle email delivery failures and retries
+    - Should validate and sanitize user input
+    - Should implement rate limiting for email delivery
+    - Should handle database connection errors and retries
+
+=================================================================
+  FILE: inferImageContentType.js
+  Score: 95/100   Issues: 3   Provider: nvidia   Time: 124.38s
+
+  The provided code snippet for inferring image content type appears to be well-structured and readable. It handles various image file extensions and types. However, there are some potential issues and improvements that can be made. The function does not handle cases where the file type or name is null or undefined, and it does not account for other image file extensions such as .bmp, .tiff, or .svg. Additionally, the function returns an empty string if the file type or name does not match any of the specified conditions, which may not be the desired behavior in all cases.
+
+  [LOW] readability -- Line 3
+  The variable 't' could be renamed to something more descriptive, such as 'fileType'
+  Fix: Rename the variable 't' to 'fileType'
+
+  [LOW] readability -- Line 5
+  The variable 'n' could be renamed to something more descriptive, such as 'fileName'
+  Fix: Rename the variable 'n' to 'fileName'
+
+  [MEDIUM] logic -- Line 11
+  The function returns an empty string if the file type or name does not match any of the specified conditions, which may not be the desired behavior in all cases
+  Fix: Consider throwing an error or returning a default value instead of an empty string
+
+  🧪 Test Coverage Generator
+    - Should return 'image/jpeg' for a file with type 'image/jpeg' and name 'image.jpg'
+    - Should return 'image/png' for a file with type 'image/png' and name 'image.png'
+    - Should return 'image/webp' for a file with type 'image/webp' and name 'image.webp'
+    - Should return 'image/gif' for a file with type 'image/gif' and name 'image.gif'
+    - Should return 'image/heic' for a file with type 'image/heic' and name 'image.heic'
+    - Should return an empty string for a file with type 'application/pdf' and name 'document.pdf'
+    - Should handle cases where the file type or name is null or undefined
+
+=================================================================
+  FILE: offerStatusNormalize.js
+  Score: 96/100   Issues: 4   Provider: nvidia   Time: 133.74s
+
+  The provided code snippet for offer status normalization appears to be well-structured and readable. However, there are some potential issues and improvements that can be made to enhance the code's reliability and performance. The code handles different offer statuses and provides functions to normalize and check the status of an offer. The code also includes a function to find a pending offer for an application and to check if a student can still respond to an offer. The biggest risk in this code is the potential for incorrect offer status normalization, which could lead to incorrect decisions being made based on the status of an offer. The code has a score of 85 due to some minor issues and improvements that can be made.
+
+  [LOW] code_smell -- Line 13
+  The variable 's' is not descriptive and could be renamed to something more meaningful
+  Fix: Rename the variable 's' to something more descriptive
+
+  [LOW] code_smell -- Line 17
+  The function normalizeOfferStatus returns the input string if it is not in the VALID set, which could lead to incorrect offer status normalization
+  Fix: Consider throwing an error or returning a default value if the input string is not in the VALID set
+
+  [LOW] code_smell -- Line 24
+  The variable 'pending' is not descriptive and could be renamed to something more meaningful
+  Fix: Rename the variable 'pending' to something more descriptive
+
+  [LOW] code_smell -- Line 48
+  The function findPendingOfferForApplication has a complex condition to find a pending offer, which could be simplified
+  Fix: Consider simplifying the condition to find a pending offer
+
+  🧪 Test Coverage Generator
+    - Should handle different offer statuses correctly
+    - Should return null for invalid input in findPendingOfferForApplication function
+    - Should return the correct pending offer for an application in findPendingOfferForApplication function
+    - Should return true if a student can still respond to an offer in canStudentRespondToOffer function
+    - Should return false if an offer is expired in canStudentRespondToOffer function
+
+=================================================================
+  FILE: platformSettings.js
+  Score: 93/100   Issues: 3   Provider: nvidia   Time: 77.98s
+
+  The provided code for platform settings management is generally well-structured and readable. However, there are some potential issues and improvements that can be made, such as handling errors more robustly, adding input validation, and considering concurrency issues. The code uses a cache to store platform settings, which can improve performance but also introduces potential issues like stale data. The score is 85 due to the lack of error handling and potential concurrency issues.
+
+  [MEDIUM] error_handling -- Line 18
+  The database query error is not handled properly, it should be logged and a meaningful error message should be returned
+  Fix: Add try-catch block to handle database query errors
+
+  [LOW] code_smell -- Line 24
+  The cache data is not validated before being returned, it should be checked for null or undefined
+  Fix: Add null check for cache.data before returning it
+
+  [MEDIUM] concurrency -- Line 27
+  The cache.at and cache.data are not updated atomically, it can cause concurrency issues
+  Fix: Use a lock or a transaction to update cache.at and cache.data atomically
+
+  🧪 Test Coverage Generator
+    - Should handle database query errors gracefully
+    - Should return default platform settings when cache is invalid
+    - Should update cache when platform settings are changed
+    - Should handle concurrent requests to getPlatformSettings
+
+=================================================================
+  FILE: registrationJobAid.js
+  Score: 98/100   Issues: 2   Provider: nvidia   Time: 45.12s
+
+  The provided code snippet for registration job aid appears to be well-structured and readable. It handles different input types and edge cases. However, there are some potential issues and improvements that can be made. The code uses environment variables to control the visibility of the registration job aid, which is a good practice. The function `isRegistrationJobAidEnabled` checks the environment variables and the demo logins status to determine whether the job aid should be shown. The function `sampleForCollegeSlug` finds a sample student row for a given college slug. The code does not have any critical issues, but there are some minor improvements that can be made, such as adding more comments to explain the purpose of the code and the environment variables.
+
+  [LOW] readability -- Line 30
+  The environment variable NEXT_PUBLIC_HIDE_REGISTRATION_JOB_AID is not checked for a default value. It would be better to check for a default value to avoid unexpected behavior.
+  Fix: Add a default value check for the environment variable NEXT_PUBLIC_HIDE_REGISTRATION_JOB_AID
+
+  [LOW] readability -- Line 37
+  The function sampleForCollegeSlug does not check if the input slug is null or undefined. It would be better to add a null check to avoid unexpected behavior.
+  Fix: Add a null check for the input slug in the function sampleForCollegeSlug
+
+  🧪 Test Coverage Generator
+    - Test that the registration job aid is shown when demo logins are enabled
+    - Test that the registration job aid is hidden when demo logins are disabled
+    - Test that the registration job aid is shown when the environment variable NEXT_PUBLIC_SHOW_REGISTRATION_JOB_AID is set to true
+    - Test that the registration job aid is hidden when the environment variable NEXT_PUBLIC_HIDE_REGISTRATION_JOB_AID is set to true
+    - Test that the function sampleForCollegeSlug returns the correct sample student row for a given college slug
+
+=================================================================
+  FILE: redirectMarketingSite.js
+  Score: 93/100   Issues: 3   Provider: nvidia   Time: 46.75s
+
+  The provided code snippet for redirecting to a marketing site appears to be well-structured and readable. However, there are some potential issues and improvements that can be made. The function does not handle errors that may occur when fetching platform settings or normalizing the marketing website URL. Additionally, the function does not check if the marketing website URL is valid before redirecting to it.
+
+  [MEDIUM] error_handling -- Line 7
+  The function does not handle errors that may occur when fetching platform settings
+  Fix: Add try-catch block to handle errors when fetching platform settings
+
+  [MEDIUM] error_handling -- Line 8
+  The function does not handle errors that may occur when normalizing marketing website URL
+  Fix: Add try-catch block to handle errors when normalizing marketing website URL
+
+  [LOW] validation -- Line 9
+  The function does not check if the marketing website URL is valid before redirecting to it
+  Fix: Add URL validation to ensure the marketing website URL is valid before redirecting to it
+
+  🧪 Test Coverage Generator
+    - Should redirect to marketing website URL if it is set in platform settings
+    - Should not redirect if marketing website URL is not set in platform settings
+    - Should handle errors when fetching platform settings
+    - Should handle errors when normalizing marketing website URL
+
+=================================================================
+  FILE: postRegistrationRedirect.js
+  Score: 96/100   Issues: 2   Provider: nvidia   Time: 96.34s
+
+  The provided code snippet for postRegistrationRedirect.js appears to be well-structured and readable. It handles different scenarios for redirecting users after registration, including pending platform approval. However, there are some potential issues and improvements that can be suggested. The code does not handle cases where the nextUrl is not a string or does not start with '/login'. Additionally, the code does not check if the window object is defined before trying to access its properties. The code also does not handle any potential errors that may occur during the redirect process.
+
+  [MEDIUM] bug -- Line 20
+  The code does not handle cases where the nextUrl is not a string or does not start with '/login'. This could potentially lead to incorrect redirects.
+  Fix: Add a check to ensure that nextUrl is a string and starts with '/login' before using it.
+
+  [LOW] bug -- Line 19
+  The code does not check if the window object is defined before trying to access its properties. This could potentially lead to errors in non-browser environments.
+  Fix: Add a check to ensure that the window object is defined before trying to access its properties.
+
+  🧪 Test Coverage Generator
+    - Should redirect to '/login?registered=true' when pendingPlatformApproval is false
+    - Should redirect to '/login?registered=pending-platform' when pendingPlatformApproval is true
+    - Should use nextUrl if it is a string and starts with '/login'
+    - Should handle cases where nextUrl is not a string or does not start with '/login'
+    - Should handle cases where the window object is not defined
+
+=================================================================
+  FILE: resolveAcademicYearFromRequest.js
+  Score: 93/100   Issues: 3   Provider: nvidia   Time: 77.77s
+
+  The provided code snippet for resolving academic year from request parameters appears to be well-structured and readable. It handles various input formats and edge cases, and it correctly falls back to the year containing today's date. However, there are some potential issues and improvements that can be made, such as adding error handling for database queries and improving the performance of the findAcademicYearForDate function.
+
+  [MEDIUM] performance -- Line 12
+  The database query to retrieve academic years for the tenant can be optimized by adding an index on the tenant_id column
+  Fix: Add an index on the tenant_id column to improve query performance
+
+  [MEDIUM] performance -- Line 29
+  The database query to retrieve semesters for the academic year can be optimized by adding an index on the academic_year_id column
+  Fix: Add an index on the academic_year_id column to improve query performance
+
+  [LOW] readability -- Line 23
+  The variable name 'year' can be more descriptive
+  Fix: Rename the variable to 'academicYear'
+
+  🧪 Test Coverage Generator
+    - Should handle empty search parameters
+    - Should handle invalid academic year id
+    - Should handle invalid academic year label
+    - Should fall back to year containing today's date
+    - Should return null if no academic years are found for the tenant
+
+=================================================================
+  FILE: publicApiError.js
+  Score: 96/100   Issues: 2   Provider: nvidia   Time: 156.31s
+
+  The provided code snippet for public API error handling appears to be well-structured and readable. It handles various error scenarios, logs detailed server-side errors, and returns safe user-facing messages. However, there are some potential issues and improvements that can be made, such as adding more specific error messages and handling edge cases. The code score is 92 due to the overall good quality and adherence to best practices.
+
+  [LOW] best_practice -- Line 4
+  The generic API error message could be more specific and informative
+  Fix: Consider adding more specific error messages for different scenarios
+
+  [MEDIUM] error_handling -- Line 35
+  The clientSafeMessageFromBody function does not handle null or undefined body
+  Fix: Consider adding a null check for the body parameter
+
+  🧪 Test Coverage Generator
+    - Should handle generic API error with a safe user-facing message
+    - Should log full detail server-side and return a safe body to the browser
+    - Should pick a message from a failed fetch body for UI
+    - Should strip internal/debug keys before passing API JSON to UI state or debug buffers

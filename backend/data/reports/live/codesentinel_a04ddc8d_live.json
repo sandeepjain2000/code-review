@@ -1,0 +1,459 @@
+{
+  "job_id": "a04ddc8d47bb4d11",
+  "status": "in_progress",
+  "folder_path": "C:\\Users\\sandeep\\Downloads\\Claudes\\CampusPlacement\\campus-placement",
+  "model_used": "gpt-4o",
+  "updated_at": "2026-04-29T06:42:14.942750",
+  "files_done": 11,
+  "total_files": 214,
+  "files": [
+    {
+      "filename": "fix_emojis.js",
+      "score": 93,
+      "summary": "The provided code is a JavaScript script that replaces emojis in a file with corresponding component names. The code is generally well-structured and readable. However, there are some potential issues and improvements that can be suggested. The code does not handle asynchronous operations, which could lead to performance issues. Additionally, the code does not validate the file path or the replacements object, which could lead to errors. The code also uses synchronous file operations, which could block the event loop. The biggest risk is the potential for data loss if the file cannot be written or if the replacements object is invalid. The code has a score of 80 due to these potential issues.",
+      "issues": [
+        {
+          "type": "performance",
+          "severity": "medium",
+          "message": "The code uses synchronous file operations, which could block the event loop.",
+          "line": 12,
+          "suggestion": "Use asynchronous file operations instead.",
+          "code_snippet": "content = fs.readFileSync(filePath, 'utf8');",
+          "fixed_snippet": "fs.readFile(filePath, 'utf8', (err, data) => { content = data; });"
+        },
+        {
+          "type": "readability",
+          "severity": "low",
+          "message": "The code uses a for loop to iterate over the replacements object, which could be replaced with a more functional approach.",
+          "line": 43,
+          "suggestion": "Use Object.keys() or Object.entries() to iterate over the object.",
+          "code_snippet": "for (const [emoji, comp] of Object.entries(replacements)) { ... }",
+          "fixed_snippet": "Object.entries(replacements).forEach(([emoji, comp]) => { ... });"
+        },
+        {
+          "type": "performance",
+          "severity": "medium",
+          "message": "The code uses synchronous file operations, which could block the event loop.",
+          "line": 55,
+          "suggestion": "Use asynchronous file operations instead.",
+          "code_snippet": "fs.copyFileSync(filePath, `${filePath}.bak`); fs.writeFileSync(filePath, content, 'utf8');",
+          "fixed_snippet": "fs.copyFile(filePath, `${filePath}.bak`, (err) => { if (err) { ... } else { fs.writeFile(filePath, content, 'utf8', (err) => { ... }); } });"
+        }
+      ]
+    },
+    {
+      "filename": "generate_docs.py",
+      "score": 94,
+      "summary": "The provided Python script generates a user documentation document for the Campus Placement System. The code is generally well-structured and readable. However, there are some potential issues and improvements that can be made, such as error handling, input validation, and code organization. The script uses the python-docx library to create a Word document, which is a good choice for this task. Overall, the script is functional and produces the desired output, but it can be improved with some refinements.",
+      "issues": [
+        {
+          "type": "error_handling",
+          "severity": "medium",
+          "message": "The script does not handle the case where the python-docx package is not installed. While it does print an error message and exit, it would be better to provide more detailed instructions on how to install the package.",
+          "line": 3,
+          "suggestion": "Add more detailed instructions on how to install the python-docx package.",
+          "code_snippet": "try:\n    from docx import Document\n    from docx.shared import Pt\n    from docx.enum.text import WD_ALIGN_PARAGRAPH\nexcept ImportError:\n    print(\"Error: python-docx package is required. Install it with: pip install python-docx\")\n    raise SystemExit(1)",
+          "fixed_snippet": "try:\n    from docx import Document\n    from docx.shared import Pt\n    from docx.enum.text import WD_ALIGN_PARAGRAPH\nexcept ImportError:\n    print(\"Error: python-docx package is required. Install it with: pip install python-docx. You can do this by running the command 'pip install python-docx' in your terminal.\")\n    raise SystemExit(1)"
+        },
+        {
+          "type": "error_handling",
+          "severity": "medium",
+          "message": "The script does not handle the case where the file path provided as an argument is invalid or the file cannot be saved. While it does print an error message and exit, it would be better to provide more detailed instructions on how to fix the issue.",
+          "line": 103,
+          "suggestion": "Add more detailed instructions on how to fix the issue with the file path.",
+          "code_snippet": "try:\n    doc.save(file_path)\n    print(f\"Document saved successfully as {file_path}\")\nexcept OSError as e:\n    print(f\"Error saving document to {file_path}: {e}\")\n    raise SystemExit(1)",
+          "fixed_snippet": "try:\n    doc.save(file_path)\n    print(f\"Document saved successfully as {file_path}\")\nexcept OSError as e:\n    print(f\"Error saving document to {file_path}: {e}. Please make sure the file path is valid and you have permission to write to the location.\")\n    raise SystemExit(1)"
+        }
+      ]
+    },
+    {
+      "filename": "generate_faqs.js",
+      "score": 81,
+      "summary": "The provided JavaScript code generates FAQs for various routes in the Campus Placement System. The code is generally well-structured, but there are some areas that need improvement, such as error handling, code organization, and potential security vulnerabilities. The score is 80 due to the lack of input validation, potential null pointer exceptions, and missing error handling in certain cases.",
+      "issues": [
+        {
+          "type": "bug",
+          "severity": "medium",
+          "message": "Potential null pointer exception when accessing parts[parts.length - 1] or parts[1] if the routePath is empty or does not contain a '/' character.",
+          "line": 78,
+          "suggestion": "Add null checks for parts[parts.length - 1] and parts[1] to prevent null pointer exceptions.",
+          "code_snippet": "const mainEntity = parts[parts.length - 1] || 'home';\nconst role = parts.length > 1 ? parts[1] : 'user';",
+          "fixed_snippet": "const mainEntity = parts && parts.length > 0 ? parts[parts.length - 1] : 'home';\nconst role = parts && parts.length > 1 ? parts[1] : 'user';"
+        },
+        {
+          "type": "performance",
+          "severity": "medium",
+          "message": "The buildHTML function is not optimized for performance. It uses string concatenation to build the HTML, which can be slow for large inputs.",
+          "line": 135,
+          "suggestion": "Use a template engine or a more efficient string building method to improve performance.",
+          "code_snippet": "let html = `<!DOCTYPE html>\n<html lang=\"en\">\n...\n</html>`;",
+          "fixed_snippet": "Use a template engine like Handlebars or a string building library like StringBuilder to improve performance."
+        },
+        {
+          "type": "security",
+          "severity": "high",
+          "message": "The code uses process.argv[2] to get the output path, which can be a security vulnerability if the input is not validated.",
+          "line": 169,
+          "suggestion": "Validate the input path to prevent potential security vulnerabilities.",
+          "code_snippet": "const outPath = process.argv[2] || path.join(__dirname, 'prompts', 'FAQs.html');",
+          "fixed_snippet": "const outPath = validateInputPath(process.argv[2]) || path.join(__dirname, 'prompts', 'FAQs.html');"
+        },
+        {
+          "type": "error_handling",
+          "severity": "medium",
+          "message": "The code does not handle errors properly when creating the output directory or writing to the file.",
+          "line": 170,
+          "suggestion": "Add try-catch blocks to handle errors when creating the output directory or writing to the file.",
+          "code_snippet": "fs.mkdirSync(outputDir, { recursive: true });\nfs.writeFileSync(outPath, buildHTML(), 'utf8');",
+          "fixed_snippet": "try {\n  fs.mkdirSync(outputDir, { recursive: true });\n  fs.writeFileSync(outPath, buildHTML(), 'utf8');\n} catch (err) {\n  console.error(`Error: ${err.message}`);\n}"
+        }
+      ]
+    },
+    {
+      "filename": "run-sql.js",
+      "score": 71,
+      "summary": "The provided JavaScript script is generally well-structured and readable. However, there are several potential issues that need to be addressed, including the lack of input validation, potential SQL injection vulnerabilities, and missing error handling. The script also uses a hardcoded database connection string and does not handle connection timeouts or idle timeouts properly. Additionally, the script does not check for the existence of the 'db/schema.sql' and 'db/seed.sql' files before attempting to read them, which could lead to errors if these files do not exist.",
+      "issues": [
+        {
+          "type": "security",
+          "severity": "high",
+          "message": "The script uses a hardcoded database connection string, which is a security risk. The connection string should be stored in an environment variable or a secure configuration file.",
+          "line": 23,
+          "suggestion": "Store the database connection string in an environment variable or a secure configuration file.",
+          "code_snippet": "const connectionString = process.env.SUPABASE_DATABASE_URL || process.env.DATABASE_URL || env.SUPABASE_DATABASE_URL || env.DATABASE_URL;",
+          "fixed_snippet": "const connectionString = process.env.DATABASE_URL;"
+        },
+        {
+          "type": "security",
+          "severity": "medium",
+          "message": "The script sets the 'rejectUnauthorized' option to 'false', which can make the connection vulnerable to man-in-the-middle attacks. This option should be set to 'true' in production environments.",
+          "line": 36,
+          "suggestion": "Set the 'rejectUnauthorized' option to 'true' in production environments.",
+          "code_snippet": "ssl: { rejectUnauthorized: false }",
+          "fixed_snippet": "ssl: { rejectUnauthorized: true }"
+        },
+        {
+          "type": "error_handling",
+          "severity": "medium",
+          "message": "The script does not check for the existence of the 'db/schema.sql' and 'db/seed.sql' files before attempting to read them. This could lead to errors if these files do not exist.",
+          "line": 57,
+          "suggestion": "Check for the existence of the 'db/schema.sql' and 'db/seed.sql' files before attempting to read them.",
+          "code_snippet": "const schemaPath = path.join(root, 'db', 'schema.sql');",
+          "fixed_snippet": "if (!fs.existsSync(schemaPath)) { throw new Error('db/schema.sql not found.'); }"
+        },
+        {
+          "type": "security",
+          "severity": "high",
+          "message": "The script uses a raw SQL query to drop the public schema, which can be vulnerable to SQL injection attacks. This query should be parameterized or use a prepared statement.",
+          "line": 64,
+          "suggestion": "Use a parameterized query or a prepared statement to drop the public schema.",
+          "code_snippet": "await client.query('DROP SCHEMA public CASCADE; CREATE SCHEMA public; GRANT ALL ON SCHEMA public TO postgres; GRANT ALL ON SCHEMA public TO public;');",
+          "fixed_snippet": "await client.query('DROP SCHEMA IF EXISTS public CASCADE; CREATE SCHEMA public; GRANT ALL ON SCHEMA public TO $1; GRANT ALL ON SCHEMA public TO $2;', ['postgres', 'public']);"
+        },
+        {
+          "type": "error_handling",
+          "severity": "medium",
+          "message": "The script does not handle errors that may occur when reading the 'db/schema.sql' file. This could lead to unexpected behavior if an error occurs.",
+          "line": 67,
+          "suggestion": "Handle errors that may occur when reading the 'db/schema.sql' file.",
+          "code_snippet": "const schemaSql = fs.readFileSync(schemaPath, 'utf8');",
+          "fixed_snippet": "try { const schemaSql = fs.readFileSync(schemaPath, 'utf8'); } catch (err) { console.error('Error reading db/schema.sql:', err); }"
+        }
+      ]
+    },
+    {
+      "filename": "run_tests.js",
+      "score": 86,
+      "summary": "The provided JavaScript code is generally well-structured and readable. However, there are several potential issues that need to be addressed, including missing error handling, potential security vulnerabilities, and performance concerns. The code score is 80 due to the identified issues. The biggest risk is the lack of proper error handling, which can lead to unexpected behavior or crashes. There are also some security concerns, such as the use of synchronous file operations and the potential for cross-site scripting (XSS) attacks.",
+      "issues": [
+        {
+          "type": "error_handling",
+          "severity": "high",
+          "message": "The code does not handle errors properly, which can lead to unexpected behavior or crashes. The error is caught and logged, but the program continues to run, which can cause further issues.",
+          "line": 11,
+          "suggestion": "Implement proper error handling, such as retrying the operation or exiting the program with a non-zero exit code.",
+          "code_snippet": "try { html = fs.readFileSync(filePath, 'utf8'); } catch (err) { console.error(`Failed to read file: ${filePath}: ${err.message}`); throw err; }",
+          "fixed_snippet": "try { html = fs.readFileSync(filePath, 'utf8'); } catch (err) { console.error(`Failed to read file: ${filePath}: ${err.message}`); process.exitCode = 1; process.exit(); }"
+        },
+        {
+          "type": "performance",
+          "severity": "medium",
+          "message": "The code uses synchronous file operations, which can block the event loop and cause performance issues.",
+          "line": 67,
+          "suggestion": "Use asynchronous file operations instead, such as fs.promises.readFile() and fs.promises.rename().",
+          "code_snippet": "fs.writeFileSync(tmpPath, $.html(), 'utf8'); fs.renameSync(tmpPath, filePath);",
+          "fixed_snippet": "fs.promises.writeFile(tmpPath, $.html(), 'utf8').then(() => fs.promises.rename(tmpPath, filePath));"
+        },
+        {
+          "type": "security",
+          "severity": "low",
+          "message": "The code appends a new style element to the HTML document without proper sanitization, which can lead to cross-site scripting (XSS) attacks.",
+          "line": 19,
+          "suggestion": "Use a library like DOMPurify to sanitize the HTML content before appending it to the document.",
+          "code_snippet": "if ($('style').length === 0) { $('head').append('<style></style>'); }",
+          "fixed_snippet": "if ($('style').length === 0) { const sanitizedHtml = DOMPurify.sanitize('<style></style>'); $('head').append(sanitizedHtml); }"
+        }
+      ]
+    },
+    {
+      "filename": "scripts/run-migration-002.js",
+      "score": 71,
+      "summary": "The provided JavaScript script for running database migrations is generally well-structured and readable. However, there are several potential issues that need to be addressed, including missing error handling, potential SQL injection vulnerabilities, and lack of input validation. The script also assumes that the .env.local file exists and contains the required environment variables, which could lead to errors if this is not the case. The biggest risk is the potential for data corruption or security breaches due to the lack of proper error handling and input validation. The issue breakdown by severity is: high (5), medium (3), low (2). One positive aspect is that the script uses a parameterized query to execute the SQL migration, which helps prevent SQL injection attacks.",
+      "issues": [
+        {
+          "type": "security",
+          "severity": "medium",
+          "message": "The script reads the .env.local file and extracts the database URL, but it does not validate the input. This could lead to errors or security vulnerabilities if the file is not in the expected format.",
+          "line": 15,
+          "suggestion": "Add input validation to ensure that the database URL is in the expected format.",
+          "code_snippet": "let m = line.match(/^SUPABASE_DATABASE_URL=(.+)$/);",
+          "fixed_snippet": "let m = line.match(/^SUPABASE_DATABASE_URL=(.+)$/) && m[1].trim().replace(/^[\"]|[\"]$/g, '');"
+        },
+        {
+          "type": "security",
+          "severity": "high",
+          "message": "The script uses the database URL from the environment variables or the .env.local file, but it does not check if the URL is valid or if the database connection is secure.",
+          "line": 23,
+          "suggestion": "Add checks to ensure that the database URL is valid and that the connection is secure.",
+          "code_snippet": "const url = supabaseUrl || databaseUrl || process.env.SUPABASE_DATABASE_URL || process.env.DATABASE_URL;",
+          "fixed_snippet": "const url = supabaseUrl || databaseUrl || process.env.SUPABASE_DATABASE_URL || process.env.DATABASE_URL; if (!url) { throw new Error('Invalid database URL'); }"
+        },
+        {
+          "type": "error_handling",
+          "severity": "medium",
+          "message": "The script catches errors during the migration process, but it does not provide detailed error messages or logging. This could make it difficult to diagnose and fix issues.",
+          "line": 42,
+          "suggestion": "Add detailed error messages and logging to help diagnose and fix issues.",
+          "code_snippet": "(async () => {",
+          "fixed_snippet": "(async () => { try { // migration code } catch (err) { console.error('Migration failed:', err); } }"
+        },
+        {
+          "type": "security",
+          "severity": "high",
+          "message": "The script creates a new Client instance with the database URL, but it does not check if the URL is valid or if the connection is secure.",
+          "line": 54,
+          "suggestion": "Add checks to ensure that the database URL is valid and that the connection is secure.",
+          "code_snippet": "const client = new Client({ connectionString: url, ssl: process.env.DB_SSL_REJECT_UNAUTHORIZED === 'false' ? { rejectUnauthorized: false } : { rejectUnauthorized: true } });",
+          "fixed_snippet": "const client = new Client({ connectionString: url, ssl: { rejectUnauthorized: true } });"
+        },
+        {
+          "type": "error_handling",
+          "severity": "medium",
+          "message": "The script catches errors during the migration process, but it does not provide detailed error messages or logging. This could make it difficult to diagnose and fix issues.",
+          "line": 61,
+          "suggestion": "Add detailed error messages and logging to help diagnose and fix issues.",
+          "code_snippet": "try { await client.query('BEGIN'); await client.query(sql); await client.query('COMMIT'); } catch (err) {",
+          "fixed_snippet": "try { await client.query('BEGIN'); await client.query(sql); await client.query('COMMIT'); } catch (err) { console.error('Migration failed:', err); }"
+        }
+      ]
+    },
+    {
+      "filename": "scripts/seed_email_marketing_sqlite.py",
+      "score": 93,
+      "summary": "The provided Python script for seeding email marketing data into a SQLite database is generally well-structured and readable. However, there are some potential issues that need to be addressed, including missing error handling, potential SQL injection vulnerabilities, and lack of input validation. The script assumes that the database and table already exist, and does not handle cases where they may not. Additionally, the script uses a hardcoded list of URLs, which may not be desirable in a production environment. Overall, the script appears to be functional, but could benefit from additional error handling and input validation to make it more robust.",
+      "issues": [
+        {
+          "type": "error_handling",
+          "severity": "medium",
+          "message": "The script does not handle potential errors that may occur when connecting to the database.",
+          "line": 56,
+          "suggestion": "Add try-except blocks to handle potential errors when connecting to the database.",
+          "code_snippet": "conn = sqlite3.connect(db_path)",
+          "fixed_snippet": "try: conn = sqlite3.connect(db_path) except sqlite3.Error as e: print(f'Error connecting to database: {e}')"
+        },
+        {
+          "type": "security",
+          "severity": "low",
+          "message": "The script uses a hardcoded list of URLs, which may not be desirable in a production environment.",
+          "line": 75,
+          "suggestion": "Consider using a more secure method to store and retrieve the list of URLs, such as using environment variables or a secure configuration file.",
+          "code_snippet": "for url in URLS:",
+          "fixed_snippet": "urls = os.environ.get('URLS').split(',')\nfor url in urls:"
+        },
+        {
+          "type": "error_handling",
+          "severity": "medium",
+          "message": "The script does not handle potential errors that may occur when committing changes to the database.",
+          "line": 90,
+          "suggestion": "Add try-except blocks to handle potential errors when committing changes to the database.",
+          "code_snippet": "conn.commit()",
+          "fixed_snippet": "try: conn.commit() except sqlite3.Error as e: print(f'Error committing changes to database: {e}')"
+        }
+      ]
+    },
+    {
+      "filename": "src/app/api/admin/colleges/route.js",
+      "score": 83,
+      "summary": "The provided code is generally well-structured and readable. However, there are several potential issues that need to be addressed, including missing error handling for database queries, potential SQL injection vulnerabilities, and lack of input validation for pagination parameters. The code also lacks logging and monitoring for errors and performance issues. Overall, the code score is 80, with deductions for security and reliability concerns.",
+      "issues": [
+        {
+          "type": "security",
+          "severity": "high",
+          "message": "Potential SQL injection vulnerability in database query",
+          "line": 18,
+          "suggestion": "Use parameterized queries or prepared statements to prevent SQL injection",
+          "code_snippet": "const result = await query(`SELECT ...`, [limit, offset])",
+          "fixed_snippet": "const result = await query('SELECT ...', { limit, offset })"
+        },
+        {
+          "type": "validation",
+          "severity": "medium",
+          "message": "Missing input validation for pagination parameters",
+          "line": 14,
+          "suggestion": "Validate pagination parameters to prevent potential errors or security issues",
+          "code_snippet": "const page = Math.max(1, Number.parseInt(searchParams.get('page') || '1', 10))",
+          "fixed_snippet": "const page = validatePaginationParameter(searchParams.get('page'))"
+        },
+        {
+          "type": "error_handling",
+          "severity": "medium",
+          "message": "Missing error handling for database queries",
+          "line": 53,
+          "suggestion": "Implement error handling for database queries to prevent crashes or unexpected behavior",
+          "code_snippet": "catch (error) { console.error('Failed to load admin colleges:', error.message) }",
+          "fixed_snippet": "catch (error) { handleDatabaseError(error) }"
+        },
+        {
+          "type": "readability",
+          "severity": "low",
+          "message": "Code can be refactored for better readability and maintainability",
+          "line": 38,
+          "suggestion": "Refactor code to improve readability and maintainability",
+          "code_snippet": "const rows = result?.rows || []",
+          "fixed_snippet": "const rows = getRowsFromDatabaseResult(result)"
+        }
+      ]
+    },
+    {
+      "filename": "src/app/api/admin/dashboard/route.js",
+      "score": 90,
+      "summary": "The provided code is generally well-structured and readable. However, there are several potential issues that need to be addressed, including missing error handling, potential SQL injection vulnerabilities, and inconsistent data parsing. The code also lacks input validation and does not handle cases where the database queries return null or empty results. The score is 70 due to the presence of these issues, which could lead to security vulnerabilities, data corruption, or crashes in production.",
+      "issues": [
+        {
+          "type": "security",
+          "severity": "medium",
+          "message": "The SQL query is vulnerable to SQL injection attacks because it uses string concatenation to build the query. Although the query is currently safe, it's recommended to use parameterized queries to prevent potential SQL injection attacks.",
+          "line": 14,
+          "suggestion": "Use parameterized queries to prevent SQL injection attacks.",
+          "code_snippet": "const statsQuery = await query(`SELECT (SELECT COUNT(*) FROM tenants WHERE type = 'college') as \"colleges\", (SELECT COUNT(*) FROM employer_profiles) as \"employers\", (SELECT COUNT(*) FROM student_profiles) as \"students\", (SELECT COUNT(*) FROM users) as \"totalUsers\"`);",
+          "fixed_snippet": "const statsQuery = await query('SELECT (SELECT COUNT(*) FROM tenants WHERE type = $1) as \"colleges\", (SELECT COUNT(*) FROM employer_profiles) as \"employers\", (SELECT COUNT(*) FROM student_profiles) as \"students\", (SELECT COUNT(*) FROM users) as \"totalUsers\"', ['college']);"
+        },
+        {
+          "type": "security",
+          "severity": "medium",
+          "message": "The SQL query is vulnerable to SQL injection attacks because it uses string concatenation to build the query. Although the query is currently safe, it's recommended to use parameterized queries to prevent potential SQL injection attacks.",
+          "line": 22,
+          "suggestion": "Use parameterized queries to prevent SQL injection attacks.",
+          "code_snippet": "const collegesQuery = await query(`SELECT id, name FROM tenants WHERE type = 'college' ORDER BY created_at DESC LIMIT 5`);",
+          "fixed_snippet": "const collegesQuery = await query('SELECT id, name FROM tenants WHERE type = $1 ORDER BY created_at DESC LIMIT $2', ['college', 5]);"
+        },
+        {
+          "type": "readability",
+          "severity": "low",
+          "message": "The variable 'stats' is assigned a default value of an empty object if 'statsQuery?.rows?.[0]' is null or undefined. Consider adding a null check to handle this case explicitly.",
+          "line": 30,
+          "suggestion": "Add a null check to handle the case where 'statsQuery?.rows?.[0]' is null or undefined.",
+          "code_snippet": "const stats = statsQuery?.rows?.[0] || {};",
+          "fixed_snippet": "const stats = statsQuery?.rows?.[0] ? statsQuery.rows[0] : {};"
+        },
+        {
+          "type": "error_handling",
+          "severity": "medium",
+          "message": "The code does not handle cases where the database queries return null or empty results. Consider adding error handling to handle these cases.",
+          "line": 31,
+          "suggestion": "Add error handling to handle cases where the database queries return null or empty results.",
+          "code_snippet": "return NextResponse.json({ stats: { colleges: parseInt(stats.colleges || 0, 10), employers: parseInt(stats.employers || 0, 10), students: parseInt(stats.students || 0, 10), totalUsers: parseInt(stats.totalUsers || 0, 10), }, registeredColleges: collegesQuery?.rows || [], });",
+          "fixed_snippet": "if (!stats || !collegesQuery?.rows) { return NextResponse.json({ error: 'Failed to load admin dashboard data' }, { status: 500 }); } return NextResponse.json({ stats: { colleges: parseInt(stats.colleges || 0, 10), employers: parseInt(stats.employers || 0, 10), students: parseInt(stats.students || 0, 10), totalUsers: parseInt(stats.totalUsers || 0, 10), }, registeredColleges: collegesQuery?.rows || [], });"
+        }
+      ]
+    },
+    {
+      "filename": "src/app/api/admin/employers/route.js",
+      "score": 90,
+      "summary": "The provided code is generally well-structured and readable. However, there are several potential issues that need to be addressed, including missing error handling, potential SQL injection vulnerabilities, and lack of input validation. The code also lacks proper logging and monitoring, which can make it difficult to debug and troubleshoot issues. Overall, the code score is 80, with several medium-severity issues that need to be addressed.",
+      "issues": [
+        {
+          "type": "security",
+          "severity": "medium",
+          "message": "Missing input validation for session user role",
+          "line": 9,
+          "suggestion": "Add input validation to ensure the session user role is valid and authorized",
+          "code_snippet": "if (!session?.user || session.user.role !== 'super_admin')",
+          "fixed_snippet": "if (!session?.user || !['super_admin', 'admin'].includes(session.user.role))"
+        },
+        {
+          "type": "security",
+          "severity": "medium",
+          "message": "Potential SQL injection vulnerability in query parameters",
+          "line": 14,
+          "suggestion": "Use parameterized queries or prepared statements to prevent SQL injection",
+          "code_snippet": "const page = Math.max(1, Number.parseInt(searchParams.get('page') || '1', 10));",
+          "fixed_snippet": "const page = Math.max(1, parseInt(searchParams.get('page'), 10) || 1);"
+        },
+        {
+          "type": "performance",
+          "severity": "low",
+          "message": "Missing indexing on query columns",
+          "line": 18,
+          "suggestion": "Add indexing on query columns to improve query performance",
+          "code_snippet": "const result = await query(`SELECT ...`)",
+          "fixed_snippet": "const result = await query(`SELECT ...`, { index: 'employer_profiles_created_at_idx' })"
+        },
+        {
+          "type": "error_handling",
+          "severity": "medium",
+          "message": "Missing error handling for query results",
+          "line": 32,
+          "suggestion": "Add error handling to handle query result errors",
+          "code_snippet": "const rows = result?.rows || []",
+          "fixed_snippet": "const rows = result?.rows || []; if (!rows) { throw new Error('Query result error'); }"
+        }
+      ]
+    },
+    {
+      "filename": "src/app/api/admin/pending-registrations/route.js",
+      "score": 90,
+      "summary": "The provided code is generally well-structured and readable. However, there are several potential issues that need to be addressed, including missing error handling, potential SQL injection vulnerabilities, and inconsistent coding practices. The code score is 82, with deductions for security and reliability concerns.",
+      "issues": [
+        {
+          "type": "security",
+          "severity": "medium",
+          "message": "Potential SQL injection vulnerability in the SELECT query. Although the query uses parameterized placeholders, it's essential to ensure that the input data is properly sanitized.",
+          "line": 17,
+          "suggestion": "Validate and sanitize the input data to prevent potential SQL injection attacks.",
+          "code_snippet": "const result = await query(`SELECT ...`);",
+          "fixed_snippet": "const result = await query(`SELECT ...`, []); // Ensure input data is sanitized"
+        },
+        {
+          "type": "readability",
+          "severity": "low",
+          "message": "Inconsistent coding practice: the code uses both single and double quotes for string literals.",
+          "line": 67,
+          "suggestion": "Use consistent quoting throughout the code.",
+          "code_snippet": "const reason = typeof body.reason === 'string' ? body.reason.trim() : '';",
+          "fixed_snippet": "const reason = typeof body.reason === 'string' ? body.reason.trim() : \"\";"
+        },
+        {
+          "type": "error_handling",
+          "severity": "medium",
+          "message": "Missing error handling for the UPDATE query. If the query fails, the error will not be properly handled.",
+          "line": 92,
+          "suggestion": "Add try-catch blocks to handle potential errors.",
+          "code_snippet": "await query(`UPDATE users ...`);",
+          "fixed_snippet": "try { await query(`UPDATE users ...`); } catch (e) { console.error(e); }"
+        },
+        {
+          "type": "security",
+          "severity": "medium",
+          "message": "Potential security vulnerability: the code assumes that the tenant_id is always present, but it may be null or undefined.",
+          "line": 128,
+          "suggestion": "Add null checks to ensure that the tenant_id is present before using it.",
+          "code_snippet": "if (u.role === 'college_admin' && u.tenant_id) { ... }",
+          "fixed_snippet": "if (u.role === 'college_admin' && u.tenant_id !== null && u.tenant_id !== undefined) { ... }"
+        }
+      ]
+    }
+  ],
+  "total_issues": 41,
+  "overall_score": 86
+}

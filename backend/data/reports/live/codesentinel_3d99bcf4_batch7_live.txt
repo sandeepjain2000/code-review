@@ -1,0 +1,140 @@
+=================================================================
+  CODESENTINEL -- BATCH 7 REPORT
+  Files 151 - 159 of 229
+  Folder : C:\Users\sandeep\Downloads\Claudes\CampusPlacement\campus-placement
+  Saved  : 01/05/2026, 20:38:05
+=================================================================
+
+  Batch Score   : 91/100
+  Files Reviewed: 9
+  Total Issues  : 19
+
+=================================================================
+  FILE: src/app/dashboard/student/page.js
+  Score: 100/100   Issues: 0
+
+  The component is minimal and well-structured, with a loading skeleton for the unauthenticated state. The main risk is that the `DashboardFullScreenHub` component is imported but not reviewed, so any issues there (e.g., missing tenant isolation, unhandled errors) would propagate here. No critical or high-severity issues are present in this file.
+
+=================================================================
+  FILE: src/app/dashboard/student/discussions/page.js
+  Score: 99/100   Issues: 1
+
+  The provided code snippet is a deprecated redirect page for student discussions. It correctly redirects to the clarifications page. The main risk is the potential for the useRouter hook to return null or undefined, causing a runtime error. However, given the context of Next.js and the 'use client' directive, this risk is mitigated. The code is well-structured and safe.
+
+  [LOW] null_check -- Line 8
+  Potential null pointer exception if useRouter returns null or undefined
+  Fix: Add a null check for the router object
+
+=================================================================
+  FILE: src/app/data-entry/layout.js
+  Score: 87/100   Issues: 2
+
+  The layout is minimal and appears safe at first glance, but it lacks authentication and authorization checks for the data-entry route. Any authenticated user can access this layout and its children, which could expose sensitive data-entry functionality to unauthorized roles. Additionally, the DevScreenTag component is hardcoded into the layout with no environment gating, potentially leaking development-only UI in production.
+
+  [HIGH] authentication -- Line 5
+  DataEntryLayout has no authentication or authorization guard. Any user can access the /data-entry route and its children, potentially exposing sensitive data-entry functionality to unauthorized roles (students, employers, etc.).
+  Fix: Add a session check and role-based access control at the top of the layout, redirecting unauthorized users to the login or dashboard page.
+
+  [MEDIUM] configuration -- Line 18
+  DevScreenTag is rendered unconditionally in the layout. In production, this development-only component may leak internal information or confuse users. It should be gated behind an environment variable check.
+  Fix: Wrap DevScreenTag with a condition that checks process.env.NODE_ENV !== 'production' or a feature flag.
+
+=================================================================
+  FILE: src/app/dashboard/student/interviews/page.js
+  Score: 76/100   Issues: 4
+
+  The component is generally well-structured with proper loading and error states. The main risk is a runtime crash when interview items have missing optional fields (i.company, i.round, i.mode, i.location, i.status) causing the page to break. Additionally, the fetcher does not handle non-JSON responses, which will throw an unhandled error. The calendar view uses a hardcoded year/month (2026/8) which may be incorrect for production data.
+
+  [HIGH] null_pointer_exception -- Line 69
+  Accessing i.company, i.round, i.mode, i.location, i.status without null checks will crash the page if any interview object has missing optional fields. This breaks the entire list view.
+  Fix: Add optional chaining or default values for all accessed fields in the interview object.
+
+  [HIGH] error_handling -- Line 8
+  The fetcher calls res.json() before checking res.ok. If the API returns a non-JSON response (e.g., HTML error page, 500 with plain text), res.json() will throw a SyntaxError that is not caught, crashing the SWR fetch and showing no error to the user.
+  Fix: Check res.ok before parsing JSON, and handle non-JSON responses gracefully.
+
+  [MEDIUM] configuration -- Line 51
+  Hardcoded initialYear={2026} and initialMonth={8} in EmployerCalendarGrid will show incorrect calendar view for data from other years/months. This may confuse users if interviews span multiple years.
+  Fix: Derive initial year/month from the earliest interview date in the data, or default to current date.
+
+  [LOW] uiux -- Line 78
+  The badge color logic assumes only two statuses (Completed vs everything else). If status is undefined or a new status is added, it will always show 'badge-blue' which may be misleading.
+  Fix: Use a mapping object for status colors to handle all possible statuses explicitly.
+
+=================================================================
+  FILE: src/app/data-entry/page.js
+  Score: 100/100   Issues: 0
+
+  The DataEntryHubPage component is a static navigation hub with no runtime logic, external calls, or user input, making it safe from crashes, security issues, and data integrity risks. The primary concern is the lack of authentication and authorization checks at the page level, which is already flagged in the layout review. The code is clean, well-structured, and uses proper Next.js Link components. Score reflects the absence of critical or high-severity issues in this file.
+
+=================================================================
+  FILE: src/app/dashboard/student/projects/page.js
+  Score: 83/100   Issues: 4
+
+  The component is well-structured with proper loading, error, and empty states. The main risks are a potential runtime crash when `row.applicationStatus` is undefined or null (used in `getStatusColor` and `formatStatus`), and the fetcher silently swallowing non-JSON responses which could mask backend errors. The error display also exposes raw error messages to users, which may leak implementation details.
+
+  [HIGH] null_pointer_exception -- Line 130
+  When `row.applicationStatus` is undefined or null, `getStatusColor(row.applicationStatus)` and `formatStatus(row.applicationStatus)` may crash or produce unexpected output. This will break the entire card rendering for that item.
+  Fix: Add a fallback value for applicationStatus before passing to getStatusColor and formatStatus.
+
+  [MEDIUM] error_handling -- Line 10
+  The fetcher silently swallows non-JSON responses by catching JSON parse errors and returning an empty object. This can mask backend errors (e.g., HTML error pages) and lead to confusing behavior where `data.error` is undefined and the error message is just the status code.
+  Fix: Check the response content-type before parsing JSON, or throw a more descriptive error when JSON parsing fails.
+
+  [MEDIUM] security -- Line 68
+  The error message is directly rendered to the user via `{error.message}`. This can leak internal implementation details (table names, column names, SQL errors) to end users, which is a security concern.
+  Fix: Display a generic error message to the user and log the detailed error server-side.
+
+  [LOW] null_check -- Line 96
+  If `row.title` is null or undefined, the page will render an empty span which may be confusing. The same applies to `row.companyName` on line 99.
+  Fix: Add a fallback value for title and companyName, or conditionally render them.
+
+=================================================================
+  FILE: src/app/layout.js
+  Score: 97/100   Issues: 1
+
+  The root layout is clean and minimal, with proper provider nesting and no runtime logic. The main risk is the absence of a global error boundary, which could cause the entire app to unmount on an unhandled error in any child component. Additionally, the metadata is hardcoded and not tenant-aware, which is acceptable for a shared layout but worth noting for multi-tenancy. Overall, the code is safe and well-structured.
+
+  [MEDIUM] error_handling -- Line 12
+  RootLayout lacks a global error boundary (error.js). If any child component throws an unhandled error during rendering, the entire React tree will unmount, showing a white screen to the user instead of a fallback UI.
+  Fix: Add an error.js file in the app directory to catch rendering errors and display a user-friendly fallback.
+
+=================================================================
+  FILE: src/components/AuthProvider.js
+  Score: 96/100   Issues: 2
+
+  The AuthProvider component is well-structured and properly utilizes SessionProvider and SWRConfig. However, it lacks error handling and logging mechanisms. The component assumes that the children prop will always be provided, which could lead to runtime errors if not handled properly. The score is deducted due to the lack of error handling and potential issues with the children prop.
+
+  [MEDIUM] error_handling -- Line 5
+  The AuthProvider component lacks error handling mechanisms
+  Fix: Add try-catch blocks to handle potential errors
+
+  [LOW] code_smell -- Line 14
+  The children prop is not validated or checked for existence
+  Fix: Add a check to ensure the children prop is provided and valid
+
+=================================================================
+  FILE: src/components/ConfirmDialog.js
+  Score: 84/100   Issues: 5
+
+  The ConfirmDialog component is clean, well-structured, and handles the basic loading/disabled state. The primary risk is a runtime crash if `onConfirm` or `onCancel` are not provided (undefined), which would throw when clicked. Additionally, the component lacks keyboard accessibility (Escape to close, Enter to confirm) and focus trapping, which are important for modal dialogs. The aria-label on the overlay is redundant with the heading, and the message prop is not validated, potentially rendering undefined as text. Overall, the component is safe for basic use but has moderate UX and accessibility gaps.
+
+  [HIGH] null_pointer_exception -- Line 9
+  onConfirm and onCancel are optional props with no default value. If either is undefined and the user clicks the corresponding button, the component will throw a runtime error (e.g., 'onConfirm is not a function'), crashing the React tree.
+  Fix: Provide no-op default functions for onConfirm and onCancel to prevent crashes when callbacks are omitted.
+
+  [MEDIUM] uiux -- Line 17
+  The dialog overlay has role='dialog' and aria-modal='true', but lacks keyboard event handling for Escape (to close) and Enter (to confirm). This breaks accessibility for keyboard-only users and is a common UX expectation for modals.
+  Fix: Add onKeyDown handler to the overlay to close on Escape and confirm on Enter when appropriate.
+
+  [LOW] uiux -- Line 19
+  aria-label on the overlay is set to the title, but the title is already visible as an h3 inside the dialog. This creates redundant announcement for screen readers. The aria-label should be omitted or set to a more descriptive string.
+  Fix: Remove aria-label from the overlay or set it to a more descriptive string like 'Confirmation dialog'.
+
+  [LOW] uiux -- Line 36
+  The message prop is rendered directly without a fallback. If message is undefined or null, the paragraph will render 'undefined' or 'null' text to the user, which is unprofessional.
+  Fix: Provide a default empty string or conditionally render the paragraph only if message is provided.
+
+  [LOW] uiux -- Line 42
+  The confirm button shows 'Please wait…' when loading, but the cancel button remains visible and disabled. For destructive actions, it may be better to hide the cancel button during loading to prevent confusion.
+  Fix: Consider hiding the cancel button when loading is true for destructive confirmations, or keep as-is for non-destructive actions.

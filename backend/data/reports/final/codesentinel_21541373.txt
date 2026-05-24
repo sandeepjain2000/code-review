@@ -1,0 +1,263 @@
+=================================================================
+  CODESENTINEL -- AI CODE REVIEW REPORT
+=================================================================
+  Generated : 29/04/2026, 06:45:10
+  Review ID : 21541373d4324677
+  Model     : gpt-4o
+  Score     : 85 / 100
+  Files     : 10
+  Issues    : 17
+
+  HIGH       4
+  MEDIUM     11
+  LOW        2
+
+-----------------------------------------------------------------
+  SUMMARY
+-----------------------------------------------------------------
+=================================================================
+  PROJECT INTELLIGENCE REPORT — CodeSentinel
+=================================================================
+  Scope   : codebase
+  Files   : 10   Issues: 17   Avg Score: 85/100
+
+  PROJECT STATUS: ⚠️  Minor fixes needed — review high-severity issues before deploy
+  Security Risk Score: 66/100  (higher = safer)
+
+-----------------------------------------------------------------
+  ISSUE BREAKDOWN
+-----------------------------------------------------------------
+  🔴 Critical : 0
+  🟠 High     : 4
+  🟡 Medium   : 11
+  🔵 Low      : 2
+
+-----------------------------------------------------------------
+  TOP ISSUE CATEGORIES
+-----------------------------------------------------------------
+  Error Handling                   6 occurrences  in 4 file(s)
+  Security                         5 occurrences  in 3 file(s)
+  Performance                      4 occurrences  in 3 file(s)
+  Readability                      1 occurrences  in 1 file(s)
+  Bug                              1 occurrences  in 1 file(s)
+
+-----------------------------------------------------------------
+  REPEATED PATTERNS (architectural, not just file-level)
+-----------------------------------------------------------------
+  • Error Handling appears in 4 files (6 total occurrences)
+  • Performance appears in 3 files (4 total occurrences)
+  • Security appears in 3 files (5 total occurrences)
+
+  → These are architectural weaknesses — fix the root cause, not each instance.
+
+-----------------------------------------------------------------
+  TOP 5 FIXES (highest severity first)
+-----------------------------------------------------------------
+  1. [HIGH] generate_faqs.js (L169)
+     The code uses process.argv[2] to get the output path, which can be a security vulnerability if the input is not validate
+     Fix: Validate the input path to prevent potential security vulnerabilities.
+
+  2. [HIGH] run-sql.js (L23)
+     The script uses a hardcoded database connection string, which is a security risk. The connection string should be stored
+     Fix: Store the database connection string in an environment variable or a secure configuration file.
+
+  3. [HIGH] run-sql.js (L64)
+     The script uses a raw SQL query to drop the public schema, which can be vulnerable to SQL injection attacks. This query 
+     Fix: Use a parameterized query or a prepared statement to drop the public schema.
+
+  4. [HIGH] run_tests.js (L11)
+     The code does not handle errors properly, which can lead to unexpected behavior or crashes. The error is caught and logg
+     Fix: Implement proper error handling, such as retrying the operation or exiting the program with a non-ze
+
+  5. [MEDIUM] fix_emojis.js (L12)
+     The code uses synchronous file operations, which could block the event loop.
+     Fix: Use asynchronous file operations instead.
+
+-----------------------------------------------------------------
+  HOTSPOT FILES (most issues)
+-----------------------------------------------------------------
+  • run-sql.js  —  5 issue(s)  score 71/100
+  • generate_faqs.js  —  4 issue(s)  score 81/100
+  • fix_emojis.js  —  3 issue(s)  score 93/100
+  • run_tests.js  —  3 issue(s)  score 86/100
+  • generate_docs.py  —  2 issue(s)  score 94/100
+
+-----------------------------------------------------------------
+  ACTION PLAN
+-----------------------------------------------------------------
+  DAY 1 — Blockers:
+    - Resolve 5 security issue(s) across 3 files
+
+  DAY 2 — High Priority:
+    - Fix 3 high-severity security issue(s)
+    - Fix 1 high-severity error handling issue(s)
+
+  DAY 3 — Patterns & Medium:
+    - Refactor repeated error handling pattern (4 files) → extract shared helper
+    - Address 11 medium-severity issues (reliability/maintainability)
+
+=================================================================
+  END OF PROJECT SUMMARY
+=================================================================
+
+=================================================================
+  FILE: fix_emojis.js
+  Score: 93/100   Issues: 3
+
+  The provided code is a JavaScript script that replaces emojis in a file with corresponding component names. The code is generally well-structured and readable. However, there are some potential issues and improvements that can be suggested. The code does not handle asynchronous operations, which could lead to performance issues. Additionally, the code does not validate the file path or the replacements object, which could lead to errors. The code also uses synchronous file operations, which could block the event loop. The biggest risk is the potential for data loss if the file cannot be written or if the replacements object is invalid. The code has a score of 80 due to these potential issues.
+
+  [MEDIUM] IssueType.PERFORMANCE -- Line 12
+  The code uses synchronous file operations, which could block the event loop.
+  Fix: Use asynchronous file operations instead.
+  Code: content = fs.readFileSync(filePath, 'utf8');
+
+  [LOW] IssueType.READABILITY -- Line 43
+  The code uses a for loop to iterate over the replacements object, which could be replaced with a more functional approach.
+  Fix: Use Object.keys() or Object.entries() to iterate over the object.
+  Code: for (const [emoji, comp] of Object.entries(replacements)) { ... }
+
+  [MEDIUM] IssueType.PERFORMANCE -- Line 55
+  The code uses synchronous file operations, which could block the event loop.
+  Fix: Use asynchronous file operations instead.
+  Code: fs.copyFileSync(filePath, `${filePath}.bak`); fs.writeFileSync(filePath, content, 'utf8');
+
+=================================================================
+  FILE: generate_docs.py
+  Score: 94/100   Issues: 2
+
+  The provided Python script generates a user documentation document for the Campus Placement System. The code is generally well-structured and readable. However, there are some potential issues and improvements that can be made, such as error handling, input validation, and code organization. The script uses the python-docx library to create a Word document, which is a good choice for this task. Overall, the script is functional and produces the desired output, but it can be improved with some refinements.
+
+  [MEDIUM] IssueType.ERROR_HANDLING -- Line 3
+  The script does not handle the case where the python-docx package is not installed. While it does print an error message and exit, it would be better to provide more detailed instructions on how to install the package.
+  Fix: Add more detailed instructions on how to install the python-docx package.
+  Code: try:
+    from docx import Document
+    from docx.shared import Pt
+    from docx.enum.text import WD_ALIGN_PARAGRAPH
+exce
+
+  [MEDIUM] IssueType.ERROR_HANDLING -- Line 103
+  The script does not handle the case where the file path provided as an argument is invalid or the file cannot be saved. While it does print an error message and exit, it would be better to provide more detailed instructions on how to fix the issue.
+  Fix: Add more detailed instructions on how to fix the issue with the file path.
+  Code: try:
+    doc.save(file_path)
+    print(f"Document saved successfully as {file_path}")
+except OSError as e:
+    print(f"E
+
+=================================================================
+  FILE: generate_faqs.js
+  Score: 81/100   Issues: 4
+
+  The provided JavaScript code generates FAQs for various routes in the Campus Placement System. The code is generally well-structured, but there are some areas that need improvement, such as error handling, code organization, and potential security vulnerabilities. The score is 80 due to the lack of input validation, potential null pointer exceptions, and missing error handling in certain cases.
+
+  [MEDIUM] IssueType.BUG -- Line 78
+  Potential null pointer exception when accessing parts[parts.length - 1] or parts[1] if the routePath is empty or does not contain a '/' character.
+  Fix: Add null checks for parts[parts.length - 1] and parts[1] to prevent null pointer exceptions.
+  Code: const mainEntity = parts[parts.length - 1] || 'home';
+const role = parts.length > 1 ? parts[1] : 'user';
+
+  [MEDIUM] IssueType.PERFORMANCE -- Line 135
+  The buildHTML function is not optimized for performance. It uses string concatenation to build the HTML, which can be slow for large inputs.
+  Fix: Use a template engine or a more efficient string building method to improve performance.
+  Code: let html = `<!DOCTYPE html>
+<html lang="en">
+...
+</html>`;
+
+  [HIGH] IssueType.SECURITY -- Line 169
+  The code uses process.argv[2] to get the output path, which can be a security vulnerability if the input is not validated.
+  Fix: Validate the input path to prevent potential security vulnerabilities.
+  Code: const outPath = process.argv[2] || path.join(__dirname, 'prompts', 'FAQs.html');
+
+  [MEDIUM] IssueType.ERROR_HANDLING -- Line 170
+  The code does not handle errors properly when creating the output directory or writing to the file.
+  Fix: Add try-catch blocks to handle errors when creating the output directory or writing to the file.
+  Code: fs.mkdirSync(outputDir, { recursive: true });
+fs.writeFileSync(outPath, buildHTML(), 'utf8');
+
+=================================================================
+  FILE: run-sql.js
+  Score: 71/100   Issues: 5
+
+  The provided JavaScript script is generally well-structured and readable. However, there are several potential issues that need to be addressed, including the lack of input validation, potential SQL injection vulnerabilities, and missing error handling. The script also uses a hardcoded database connection string and does not handle connection timeouts or idle timeouts properly. Additionally, the script does not check for the existence of the 'db/schema.sql' and 'db/seed.sql' files before attempting to read them, which could lead to errors if these files do not exist.
+
+  [HIGH] IssueType.SECURITY -- Line 23
+  The script uses a hardcoded database connection string, which is a security risk. The connection string should be stored in an environment variable or a secure configuration file.
+  Fix: Store the database connection string in an environment variable or a secure configuration file.
+  Code: const connectionString = process.env.SUPABASE_DATABASE_URL || process.env.DATABASE_URL || env.SUPABASE_DATABASE_URL || e
+
+  [MEDIUM] IssueType.SECURITY -- Line 36
+  The script sets the 'rejectUnauthorized' option to 'false', which can make the connection vulnerable to man-in-the-middle attacks. This option should be set to 'true' in production environments.
+  Fix: Set the 'rejectUnauthorized' option to 'true' in production environments.
+  Code: ssl: { rejectUnauthorized: false }
+
+  [MEDIUM] IssueType.ERROR_HANDLING -- Line 57
+  The script does not check for the existence of the 'db/schema.sql' and 'db/seed.sql' files before attempting to read them. This could lead to errors if these files do not exist.
+  Fix: Check for the existence of the 'db/schema.sql' and 'db/seed.sql' files before attempting to read them.
+  Code: const schemaPath = path.join(root, 'db', 'schema.sql');
+
+  [HIGH] IssueType.SECURITY -- Line 64
+  The script uses a raw SQL query to drop the public schema, which can be vulnerable to SQL injection attacks. This query should be parameterized or use a prepared statement.
+  Fix: Use a parameterized query or a prepared statement to drop the public schema.
+  Code: await client.query('DROP SCHEMA public CASCADE; CREATE SCHEMA public; GRANT ALL ON SCHEMA public TO postgres; GRANT ALL 
+
+  [MEDIUM] IssueType.ERROR_HANDLING -- Line 67
+  The script does not handle errors that may occur when reading the 'db/schema.sql' file. This could lead to unexpected behavior if an error occurs.
+  Fix: Handle errors that may occur when reading the 'db/schema.sql' file.
+  Code: const schemaSql = fs.readFileSync(schemaPath, 'utf8');
+
+=================================================================
+  FILE: run_tests.js
+  Score: 86/100   Issues: 3
+
+  The provided JavaScript code is generally well-structured and readable. However, there are several potential issues that need to be addressed, including missing error handling, potential security vulnerabilities, and performance concerns. The code score is 80 due to the identified issues. The biggest risk is the lack of proper error handling, which can lead to unexpected behavior or crashes. There are also some security concerns, such as the use of synchronous file operations and the potential for cross-site scripting (XSS) attacks.
+
+  [HIGH] IssueType.ERROR_HANDLING -- Line 11
+  The code does not handle errors properly, which can lead to unexpected behavior or crashes. The error is caught and logged, but the program continues to run, which can cause further issues.
+  Fix: Implement proper error handling, such as retrying the operation or exiting the program with a non-zero exit code.
+  Code: try { html = fs.readFileSync(filePath, 'utf8'); } catch (err) { console.error(`Failed to read file: ${filePath}: ${err.m
+
+  [MEDIUM] IssueType.PERFORMANCE -- Line 67
+  The code uses synchronous file operations, which can block the event loop and cause performance issues.
+  Fix: Use asynchronous file operations instead, such as fs.promises.readFile() and fs.promises.rename().
+  Code: fs.writeFileSync(tmpPath, $.html(), 'utf8'); fs.renameSync(tmpPath, filePath);
+
+  [LOW] IssueType.SECURITY -- Line 19
+  The code appends a new style element to the HTML document without proper sanitization, which can lead to cross-site scripting (XSS) attacks.
+  Fix: Use a library like DOMPurify to sanitize the HTML content before appending it to the document.
+  Code: if ($('style').length === 0) { $('head').append('<style></style>'); }
+
+=================================================================
+  FILE: scripts/run-migration-002.js
+  Score: None/100   Issues: 0
+
+  Review failed: no such table: review_cache
+
+=================================================================
+  FILE: scripts/seed_email_marketing_sqlite.py
+  Score: None/100   Issues: 0
+
+  Review failed: no such table: review_cache
+
+=================================================================
+  FILE: src/app/api/admin/colleges/route.js
+  Score: None/100   Issues: 0
+
+  Review failed: no such table: review_cache
+
+=================================================================
+  FILE: src/app/api/admin/dashboard/route.js
+  Score: None/100   Issues: 0
+
+  Review failed: no such table: review_cache
+
+=================================================================
+  FILE: src/app/api/admin/employers/route.js
+  Score: None/100   Issues: 0
+
+  Review failed: no such table: review_cache
+
+=================================================================
+  END OF REPORT
+=================================================================

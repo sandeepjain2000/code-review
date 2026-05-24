@@ -1,0 +1,906 @@
+{
+  "review_id": "04a2b4bef2184f15",
+  "input_type": "folder_scan",
+  "status": "completed",
+  "files": [
+    {
+      "filename": "fix_emojis.js",
+      "language": "javascript",
+      "total_lines": 61,
+      "issues": [
+        {
+          "line": 46,
+          "line_end": null,
+          "severity": "medium",
+          "type": "bug",
+          "message": "totalReplacements only counts how many emoji keys matched at least once, not the actual number of replacements made. If a single emoji appears 5 times, it still counts as 1. The log message on line 57 is therefore misleading.",
+          "suggestion": "Use a regex with matchAll or split to count actual occurrences before replacing.",
+          "code_snippet": "if (updated !== content) totalReplacements += 1;",
+          "fixed_snippet": "const occurrences = content.split(`icon: ${emoji}`).length - 1;\ntotalReplacements += occurrences;"
+        },
+        {
+          "line": 55,
+          "line_end": null,
+          "severity": "medium",
+          "type": "data_integrity",
+          "message": "If the script is run twice, the .bak file from the first (original) run is silently overwritten with the already-modified content, destroying the only backup of the original file.",
+          "suggestion": "Check if the .bak file already exists before overwriting, or use a timestamped backup name.",
+          "code_snippet": "fs.copyFileSync(filePath, `${filePath}.bak`);",
+          "fixed_snippet": "const bakPath = `${filePath}.bak`;\nif (!fs.existsSync(bakPath)) {\n  fs.copyFileSync(filePath, bakPath);\n} else {\n  console.log('Backup already exists, skipping backup creation.');\n}"
+        },
+        {
+          "line": 45,
+          "line_end": null,
+          "severity": "low",
+          "type": "bug",
+          "message": "replaceAll only matches the exact pattern `icon: '📊'` (with single quotes). If the source file uses double quotes, template literals, or has different spacing (e.g., `icon:'📊'` or `icon:  '📊'`), no replacement will occur and the script will silently do nothing.",
+          "suggestion": "Use a regex pattern that is more tolerant of whitespace and quote style, e.g. /icon:\\s*['\"]📊['\"]/g.",
+          "code_snippet": null,
+          "fixed_snippet": null
+        },
+        {
+          "line": 36,
+          "line_end": 39,
+          "severity": "low",
+          "type": "maintainability",
+          "message": "Two different emojis ('⚙️' on line 37 and '🔧' on line 38) both map to 'Settings', and two emojis ('🏛️' on line 34 and '🏫' on line 39) both map to 'Building'. This may be intentional but could also indicate a copy-paste error where distinct icons should have distinct component names.",
+          "suggestion": "Verify that the duplicate target component names are intentional. If not, assign unique Lucide icon names.",
+          "code_snippet": null,
+          "fixed_snippet": null
+        },
+        {
+          "line": 56,
+          "line_end": null,
+          "severity": "low",
+          "type": "reliability",
+          "message": "If writeFileSync fails after copyFileSync succeeds, the .bak file exists but the original file may be left in a corrupted/truncated state. Writing to a temp file first and then renaming would be safer.",
+          "suggestion": "Write to a temporary file first, then use fs.renameSync to atomically replace the target.",
+          "code_snippet": "fs.writeFileSync(filePath, content, 'utf8');",
+          "fixed_snippet": "const tmpPath = `${filePath}.tmp`;\nfs.writeFileSync(tmpPath, content, 'utf8');\nfs.renameSync(tmpPath, filePath);"
+        },
+        {
+          "line": 1,
+          "line_end": null,
+          "severity": "low",
+          "type": "readability",
+          "message": "Every line has a duplicate line-number prefix (e.g., '1:  1:'), suggesting a copy-paste or tooling artifact. If this is checked into the repo it will cause a syntax error at runtime.",
+          "suggestion": "Remove the duplicate line-number prefixes so the file is valid JavaScript.",
+          "code_snippet": null,
+          "fixed_snippet": null
+        },
+        {
+          "line": 4,
+          "line_end": null,
+          "severity": "low",
+          "type": "configuration",
+          "message": "The target file path is hardcoded to 'src/app/dashboard/layout.js'. If the project structure changes or the script needs to fix a different file, it must be manually edited.",
+          "suggestion": "Accept the file path as a CLI argument with a sensible default: `const filePath = process.argv[2] ? path.resolve(process.argv[2]) : path.resolve(__dirname, 'src', 'app', 'dashboard', 'layout.js');`",
+          "code_snippet": null,
+          "fixed_snippet": null
+        }
+      ],
+      "summary": "This is a one-off build/fix script, not a production runtime file. It is reasonably well-structured with error handling for file I/O. Issues are mostly low-to-medium severity: the replacement count is inaccurate (counts keys matched, not occurrences), the backup file could be overwritten on re-runs, and there's no cleanup of the .bak file. The duplicate line-number prefix on every line suggests a copy-paste artifact but doesn't affect runtime.",
+      "score": 87,
+      "was_chunked": false,
+      "chunks_processed": 1
+    },
+    {
+      "filename": "generate_docs.py",
+      "language": "python",
+      "total_lines": 112,
+      "issues": [
+        {
+          "line": 103,
+          "line_end": null,
+          "severity": "medium",
+          "type": "security",
+          "message": "User-controlled file path from sys.argv[1] is passed directly to doc.save() without any validation or sanitization. An attacker or misconfigured CI job could write to arbitrary locations (path traversal), e.g., `../../etc/cron.d/malicious`.",
+          "suggestion": "Validate the file path: ensure it ends with '.docx', resolve it to an expected directory, and reject paths containing '..' or absolute paths outside the project.",
+          "code_snippet": "file_path = sys.argv[1] if len(sys.argv) > 1 else 'Campus_Placement_System_User_Document.docx'",
+          "fixed_snippet": "import os\n\nfile_path = sys.argv[1] if len(sys.argv) > 1 else 'Campus_Placement_System_User_Document.docx'\nfile_path = os.path.basename(file_path)  # prevent path traversal\nif not file_path.endswith('.docx'):\n    print('Error: Output file must have a .docx extension')\n    raise SystemExit(1)"
+        },
+        {
+          "line": 107,
+          "line_end": null,
+          "severity": "low",
+          "type": "error_handling",
+          "message": "Only OSError is caught when saving the document. python-docx could raise other exceptions (e.g., ValueError for invalid document state, or PermissionError which is a subclass of OSError on some platforms but worth noting). A broader except or at least logging the full traceback would aid debugging.",
+          "suggestion": "Consider catching Exception with a logged traceback for unexpected failures, while still catching OSError specifically for file I/O issues.",
+          "code_snippet": "except OSError as e:\n    print(f\"Error saving document to {file_path}: {e}\")\n    raise SystemExit(1)",
+          "fixed_snippet": "except Exception as e:\n    print(f\"Error saving document to {file_path}: {e}\")\n    import traceback\n    traceback.print_exc()\n    raise SystemExit(1)"
+        },
+        {
+          "line": 106,
+          "line_end": null,
+          "severity": "low",
+          "type": "observability",
+          "message": "The script uses plain print() for output. In a CI/CD pipeline context, structured logging or at minimum writing to stderr for errors would improve observability and allow stdout to be cleanly captured.",
+          "suggestion": "Use sys.stderr.write() or logging module for error messages, reserving stdout for success output.",
+          "code_snippet": "print(f\"Document saved successfully as {file_path}\")",
+          "fixed_snippet": "import logging\nlogging.basicConfig(level=logging.INFO)\nlogger = logging.getLogger(__name__)\nlogger.info(f\"Document saved successfully as {file_path}\")"
+        },
+        {
+          "line": 1,
+          "line_end": 1,
+          "severity": "low",
+          "type": "best_practice",
+          "message": "The file has duplicate line numbering (e.g., '1:   1:') suggesting a formatting artifact. If this is the actual file content, it would cause a SyntaxError at runtime.",
+          "suggestion": "Ensure the actual source file does not contain the line number prefixes; this appears to be a review tool artifact and can be ignored if so.",
+          "code_snippet": "  1:   1: import sys",
+          "fixed_snippet": null
+        },
+        {
+          "line": 8,
+          "line_end": null,
+          "severity": "low",
+          "type": "best_practice",
+          "message": "raise SystemExit(1) works but is unconventional. sys.exit(1) is the standard idiom and is more readable.",
+          "suggestion": "Replace `raise SystemExit(1)` with `sys.exit(1)`.",
+          "code_snippet": "raise SystemExit(1)",
+          "fixed_snippet": "sys.exit(1)"
+        }
+      ],
+      "summary": "This is a standalone documentation generation script, not a production runtime file. It is reasonably well-structured for its purpose with basic error handling for the import and file save. Issues are minor: path traversal via argv, no input validation on the output path, and minor code quality items. No database interaction, no multi-tenancy concerns, no security-critical paths.",
+      "score": 92,
+      "was_chunked": false,
+      "chunks_processed": 1
+    },
+    {
+      "filename": "generate_faqs.js",
+      "language": "javascript",
+      "total_lines": 176,
+      "issues": [
+        {
+          "line": 166,
+          "line_end": null,
+          "severity": "medium",
+          "type": "security",
+          "message": "process.argv[2] is used directly as a file path without any sanitization. A malicious or accidental argument like '../../etc/cron.d/evil' could write files to arbitrary locations. While this is a build script, it's still a path traversal risk.",
+          "suggestion": "Validate or restrict the output path to an expected directory, or at minimum resolve and check it stays within the project root.",
+          "code_snippet": "const outPath = process.argv[2] || path.join(__dirname, 'prompts', 'FAQs.html');",
+          "fixed_snippet": "const defaultPath = path.join(__dirname, 'prompts', 'FAQs.html');\nconst outPath = process.argv[2] ? path.resolve(process.argv[2]) : defaultPath;\nif (!outPath.startsWith(path.resolve(__dirname))) {\n  console.error('Output path must be within the project directory.');\n  process.exit(1);\n}"
+        },
+        {
+          "line": 141,
+          "line_end": null,
+          "severity": "low",
+          "type": "security",
+          "message": "Route values from ROUTES_SORTED are interpolated directly into HTML without escaping. Currently the data is hardcoded and safe, but if routes were ever loaded from an external source (config file, API), this would be an XSS vector in the generated HTML.",
+          "suggestion": "Use a simple HTML-escape utility when interpolating values into the HTML template.",
+          "code_snippet": "<h2 class=\"screen-title\">Path: <code>${route}</code></h2>",
+          "fixed_snippet": "<h2 class=\"screen-title\">Path: <code>${escapeHtml(route)}</code></h2>\n\n// Add helper:\nfunction escapeHtml(str) {\n  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\"/g,'&quot;');\n}"
+        },
+        {
+          "line": 1,
+          "line_end": null,
+          "severity": "low",
+          "type": "readability",
+          "message": "Every line has a duplicate line number prefix (e.g., '  1:   1:'), which appears to be an artifact. If this is actually in the source file, it would cause a syntax error at runtime.",
+          "suggestion": "Ensure the file does not contain duplicate line number prefixes. This is likely a review submission artifact, but verify the actual source file.",
+          "code_snippet": null,
+          "fixed_snippet": null
+        },
+        {
+          "line": 112,
+          "line_end": null,
+          "severity": "low",
+          "type": "performance",
+          "message": "buildHTML() concatenates strings in a loop using +=. For 74 routes × 10 FAQs each, this creates many intermediate string allocations. Not a real problem at this scale, but using an array with .join('') is more idiomatic and efficient.",
+          "suggestion": "Collect HTML parts in an array and join at the end.",
+          "code_snippet": "let html = `<!DOCTYPE html>...`;\nROUTES_SORTED.forEach((route, index) => {\n  html += `<div ...`;",
+          "fixed_snippet": "const parts = [`<!DOCTYPE html>...`];\nROUTES_SORTED.forEach((route, index) => {\n  parts.push(`<div ...`);\n});\nreturn parts.join('\\n');"
+        },
+        {
+          "line": 84,
+          "line_end": null,
+          "severity": "low",
+          "type": "maintainability",
+          "message": "The 10 FAQ templates are hardcoded with generic placeholder text. If this generated content is user-facing, the generic answers (e.g., 'Yes, the data is fetched directly from the database') may be misleading for screens where that isn't true.",
+          "suggestion": "Add a disclaimer in the generated HTML that these are auto-generated placeholder FAQs, or make the templates configurable per route category.",
+          "code_snippet": null,
+          "fixed_snippet": null
+        },
+        {
+          "line": 172,
+          "line_end": null,
+          "severity": "low",
+          "type": "observability",
+          "message": "console.log outputs the full file path on success. In a CI/CD environment this is fine, but the error path at line 174 only logs err.message, losing the stack trace which could help debug permission or disk issues.",
+          "suggestion": "Log the full error object or stack trace for debugging.",
+          "code_snippet": "console.error(`Failed to write FAQs to ${outPath}: ${err.message}`);",
+          "fixed_snippet": "console.error(`Failed to write FAQs to ${outPath}:`, err);"
+        }
+      ],
+      "summary": "This is a one-off build/documentation script that generates a static HTML FAQ file from hardcoded route paths. It is reasonably well-structured for its purpose with proper error handling for file I/O. Issues are minor: potential XSS if route data were ever dynamic, duplicate line numbering artifact, and the output path being user-controllable via argv without sanitization. No critical production runtime risks since this is a build-time tool.",
+      "score": 91,
+      "was_chunked": false,
+      "chunks_processed": 1
+    },
+    {
+      "filename": "run-sql.js",
+      "language": "javascript",
+      "total_lines": 97,
+      "issues": [
+        {
+          "line": 43,
+          "line_end": null,
+          "severity": "high",
+          "type": "security",
+          "message": "The production guard only checks `process.env.NODE_ENV === 'production'`. If NODE_ENV is unset, undefined, or set to any other value (e.g., 'prod', 'PRODUCTION'), this destructive schema reset will proceed against whatever database the connection string points to. This is a dangerous default-allow pattern for a script that drops the entire public schema.",
+          "suggestion": "Invert the logic: only allow execution in explicitly safe environments (e.g., 'development', 'test'), or require an additional environment-specific confirmation.",
+          "code_snippet": "if (process.env.NODE_ENV === 'production') {\n    throw new Error('Refusing to run destructive schema reset in production.');\n  }",
+          "fixed_snippet": "const allowedEnvs = ['development', 'test', 'local'];\n  const currentEnv = (process.env.NODE_ENV || '').toLowerCase();\n  if (!allowedEnvs.includes(currentEnv)) {\n    throw new Error(`Refusing to run destructive schema reset. NODE_ENV must be one of: ${allowedEnvs.join(', ')}. Current: '${process.env.NODE_ENV || '(unset)}'`);\n  }"
+        },
+        {
+          "line": 37,
+          "line_end": null,
+          "severity": "medium",
+          "type": "security",
+          "message": "`ssl: { rejectUnauthorized: false }` disables TLS certificate verification, making the connection vulnerable to man-in-the-middle attacks. While common in dev scripts, if this script is ever run against a real database over a network, credentials and data could be intercepted.",
+          "suggestion": "Use `rejectUnauthorized: true` by default or conditionally disable it only when an explicit env var opts in (e.g., `DB_SSL_REJECT_UNAUTHORIZED=false`).",
+          "code_snippet": "ssl: { rejectUnauthorized: false },",
+          "fixed_snippet": "ssl: process.env.DB_SSL_REJECT_UNAUTHORIZED === 'false'\n    ? { rejectUnauthorized: false }\n    : { rejectUnauthorized: true },"
+        },
+        {
+          "line": 64,
+          "line_end": null,
+          "severity": "medium",
+          "type": "data_integrity",
+          "message": "`DROP SCHEMA public CASCADE` is extremely destructive — it drops all tables, views, functions, types, extensions, and grants in the public schema. The subsequent `GRANT ALL ... TO postgres; GRANT ALL ... TO public;` assumes the database user is a superuser or the owner. On managed databases (e.g., Supabase), the connected role may not have permission to drop/create schemas or grant to `postgres`, causing the entire transaction to fail.",
+          "suggestion": "Consider using a less destructive approach like dropping individual tables, or document that this script requires superuser privileges. Also consider checking the connected user's permissions first.",
+          "code_snippet": "await client.query('DROP SCHEMA public CASCADE; CREATE SCHEMA public; GRANT ALL ON SCHEMA public TO postgres; GRANT ALL ON SCHEMA public TO public;');",
+          "fixed_snippet": null
+        },
+        {
+          "line": 31,
+          "line_end": null,
+          "severity": "low",
+          "type": "observability",
+          "message": "When the connection string is missing, the error message doesn't indicate which sources were checked (process.env vs .env.local), making debugging harder for developers who think they've set the variable.",
+          "suggestion": "Include which sources were checked in the error message.",
+          "code_snippet": "console.error('DATABASE_URL or SUPABASE_DATABASE_URL is required.');",
+          "fixed_snippet": "console.error('DATABASE_URL or SUPABASE_DATABASE_URL is required. Checked process.env and', envPath);"
+        },
+        {
+          "line": 67,
+          "line_end": 72,
+          "severity": "low",
+          "type": "performance",
+          "message": "Large SQL files are read synchronously with `readFileSync` and then sent as a single query string. If schema.sql or seed.sql is very large, this could cause memory pressure or exceed PostgreSQL's maximum query size. For a dev utility this is acceptable, but worth noting.",
+          "suggestion": "For very large SQL files, consider splitting by statement or using a streaming approach. For typical schema files this is fine.",
+          "code_snippet": "const schemaSql = fs.readFileSync(schemaPath, 'utf8');\n    await client.query(schemaSql);\n\n    console.log('Running seed.sql...');\n    const seedSql = fs.readFileSync(seedPath, 'utf8');\n    await client.query(seedSql);",
+          "fixed_snippet": null
+        },
+        {
+          "line": 94,
+          "line_end": 97,
+          "severity": "low",
+          "type": "error_handling",
+          "message": "The top-level `.catch()` handler calls `process.exit(1)` which will terminate immediately without waiting for the pool to close (the `finally` block in `runSQL` would have already run for errors inside `runSQL`, but the errors thrown at lines 44 and 47 bypass the `finally` block since they're thrown before `pool.connect()`). This means the pool is created but never closed for those early-exit error paths.",
+          "suggestion": "Ensure pool.end() is called in the top-level catch as well.",
+          "code_snippet": "runSQL().catch((err) => {\n  console.error('Unhandled error:', err.message || err);\n  process.exit(1);\n});",
+          "fixed_snippet": "runSQL().catch(async (err) => {\n  console.error('Unhandled error:', err.message || err);\n  try { await pool.end(); } catch (_) {}\n  process.exit(1);\n});"
+        },
+        {
+          "line": 17,
+          "line_end": null,
+          "severity": "low",
+          "type": "bug",
+          "message": "The .env parser's regex `replace(/^[\"']|[\"']$/g, '')` only strips matching quote types independently — a value like `\"hello'` would have the leading double-quote stripped but the trailing single-quote also stripped, which may not be intended. This is a minor edge case for a dev utility.",
+          "suggestion": "Match only balanced quotes: check if the first and last characters are the same quote type before stripping.",
+          "code_snippet": "const value = line.slice(idx + 1).trim().replace(/^[\"']|[\"']$/g, '');",
+          "fixed_snippet": "let value = line.slice(idx + 1).trim();\n    if ((value.startsWith('\"') && value.endsWith('\"')) || (value.startsWith(\"'\") && value.endsWith(\"'\"))) {\n      value = value.slice(1, -1);\n    }"
+        }
+      ],
+      "summary": "This is a destructive database reset utility script (not a production runtime file). It has reasonable safeguards including a production environment check and a --confirm-destructive flag. The main concerns are the weak production guard (easily bypassed if NODE_ENV is unset), SSL configuration disabling certificate verification, and the connection string potentially being logged or leaked. Overall, for a dev utility script, it is reasonably well-structured.",
+      "score": 78,
+      "was_chunked": false,
+      "chunks_processed": 1
+    },
+    {
+      "filename": "run_tests.js",
+      "language": "javascript",
+      "total_lines": 91,
+      "issues": [
+        {
+          "line": 55,
+          "line_end": 62,
+          "severity": "medium",
+          "type": "security",
+          "message": "XSS injection via unsanitized `status` and `notes` values interpolated directly into HTML. While currently sourced from hardcoded `knownResults`, if this script is ever extended to accept external input (e.g., from a CI pipeline or file), arbitrary HTML/JS can be injected into the output files.",
+          "suggestion": "Use cheerio's `.text()` method for text content and escape HTML entities for values inserted via `.html()`. For `status`, use `$('<span>').addClass('res').addClass(resClass).text(status)` instead of string interpolation.",
+          "code_snippet": "$(this).append(`\n        <td><span class=\"res ${resClass}\">${status}</span></td>\n        <td class=\"notes\">${notes}</td>\n      `);",
+          "fixed_snippet": "const $statusTd = $('<td>');\n$('<span>').addClass('res').addClass(resClass).text(status).appendTo($statusTd);\nconst $notesTd = $('<td>').addClass('notes').text(notes);\n$(this).append($statusTd).append($notesTd);"
+        },
+        {
+          "line": 67,
+          "line_end": 68,
+          "severity": "medium",
+          "type": "error_handling",
+          "message": "fs.writeFileSync and fs.renameSync on lines 67-68 are not wrapped in try/catch. If the write fails (disk full, permissions), the error propagates as an unhandled exception from within the outer try/catch, but the `.tmp` file may be left behind as an orphan.",
+          "suggestion": "Wrap the write/rename in a try/catch that cleans up the `.tmp` file on failure.",
+          "code_snippet": "const tmpPath = `${filePath}.tmp`;\nfs.writeFileSync(tmpPath, $.html(), 'utf8');\nfs.renameSync(tmpPath, filePath);",
+          "fixed_snippet": "const tmpPath = `${filePath}.tmp`;\ntry {\n  fs.writeFileSync(tmpPath, $.html(), 'utf8');\n  fs.renameSync(tmpPath, filePath);\n} catch (writeErr) {\n  try { fs.unlinkSync(tmpPath); } catch (_) {}\n  throw writeErr;\n}"
+        },
+        {
+          "line": 53,
+          "line_end": 56,
+          "severity": "medium",
+          "type": "bug",
+          "message": "When `hasHeaders` is true, the logic assumes the last two `<td>` elements are Status and Notes columns. If a row has a different number of columns (e.g., a row with colspan or missing cells), `$(this).find('td').last().prev()` will overwrite the wrong cell, corrupting data.",
+          "suggestion": "Use more specific selectors or add Status/Notes columns with dedicated classes (e.g., `.status-col`, `.notes-col`) and select by class instead of positional index.",
+          "code_snippet": "$(this).find('td').last().prev().html(`<span class=\"res ${resClass}\">${status}</span>`);\n$(this).find('td').last().text(notes);",
+          "fixed_snippet": null
+        },
+        {
+          "line": 32,
+          "line_end": null,
+          "severity": "low",
+          "type": "bug",
+          "message": "The `hasHeaders` check looks at the first `thead tr`'s last `th` text being exactly 'Notes'. If the HTML file has been partially modified (e.g., only 'Status' header added but not 'Notes'), this check will be false and duplicate headers will be appended.",
+          "suggestion": "Check for both 'Status' and 'Notes' headers, or use a more robust detection mechanism like checking the count of `th` elements.",
+          "code_snippet": "const hasHeaders = $('thead tr').first().find('th').last().text().trim() === 'Notes';",
+          "fixed_snippet": null
+        },
+        {
+          "line": 51,
+          "line_end": null,
+          "severity": "low",
+          "type": "bug",
+          "message": "Any status value other than 'Passed' (including 'Not Run') gets the 'fail' CSS class. 'Not Run' is semantically different from 'Failed' and should have its own visual treatment.",
+          "suggestion": "Add a third class for 'Not Run' status, e.g., `const resClass = status === 'Passed' ? 'pass' : status === 'Not Run' ? 'notrun' : 'fail';`",
+          "code_snippet": "const resClass = status === 'Passed' ? 'pass' : 'fail';",
+          "fixed_snippet": "const resClass = status === 'Passed' ? 'pass' : (status === 'Not Run' ? 'notrun' : 'fail');"
+        },
+        {
+          "line": 86,
+          "line_end": 87,
+          "severity": "low",
+          "type": "error_handling",
+          "message": "If `processHtml(beFile, ...)` throws, `processHtml(feFile, ...)` is never executed. The catch block sets exitCode=1 but only after the first failure. Both files should be processed independently so one failure doesn't block the other.",
+          "suggestion": "Process both files independently and collect errors.",
+          "code_snippet": "try {\n  processHtml(beFile, knownResults);\n  processHtml(feFile, knownResults);\n} catch (e) {\n  console.error(e);\n  process.exitCode = 1;\n}",
+          "fixed_snippet": "let hasError = false;\nfor (const file of [beFile, feFile]) {\n  try {\n    processHtml(file, knownResults);\n  } catch (e) {\n    console.error(e);\n    hasError = true;\n  }\n}\nif (hasError) process.exitCode = 1;"
+        },
+        {
+          "line": 1,
+          "line_end": null,
+          "severity": "low",
+          "type": "maintainability",
+          "message": "Line numbers appear to be duplicated in the source (e.g., '1:  1:'). This looks like a copy-paste artifact and would cause a syntax error if this is the actual file content.",
+          "suggestion": "Ensure the file does not contain duplicate line number prefixes.",
+          "code_snippet": null,
+          "fixed_snippet": null
+        },
+        {
+          "line": 72,
+          "line_end": 83,
+          "severity": "low",
+          "type": "maintainability",
+          "message": "Test results are hardcoded in the script. This makes the script inflexible — any new test result requires editing the source code. Consider loading results from an external JSON file or accepting them as CLI input.",
+          "suggestion": "Load `knownResults` from a JSON file path provided as a CLI argument, e.g., `const knownResults = JSON.parse(fs.readFileSync(resultsFile, 'utf8'));`",
+          "code_snippet": null,
+          "fixed_snippet": null
+        }
+      ],
+      "summary": "This is a build/test utility script that updates HTML test case files with known results. It has XSS injection risks from unsanitized data inserted into HTML, missing error handling around file writes, and minor logic issues. Since it is not a production runtime file, the overall risk is moderate but the XSS pattern is concerning if the script is ever adapted for dynamic input.",
+      "score": 83,
+      "was_chunked": false,
+      "chunks_processed": 1
+    },
+    {
+      "filename": "scripts/run-migration-002.js",
+      "language": "javascript",
+      "total_lines": 46,
+      "issues": [
+        {
+          "line": 37,
+          "line_end": null,
+          "severity": "critical",
+          "type": "security",
+          "message": "ssl.rejectUnauthorized set to false disables TLS certificate verification, allowing man-in-the-middle attacks against the database connection. Database credentials and all query data can be intercepted.",
+          "suggestion": "Use `ssl: { rejectUnauthorized: true }` or conditionally disable only for local development (e.g. `rejectUnauthorized: process.env.NODE_ENV !== 'development' ? true : false`). For Supabase connections, their CA cert should be trusted by default.",
+          "code_snippet": "ssl: { rejectUnauthorized: false },",
+          "fixed_snippet": "ssl: { rejectUnauthorized: process.env.NODE_ENV === 'development' ? false : true },"
+        },
+        {
+          "line": 34,
+          "line_end": 46,
+          "severity": "high",
+          "type": "reliability",
+          "message": "No production environment safety check. The sibling script run-sql.js explicitly blocks execution in production, but this migration script has no such guard. An accidental run against production could apply an untested migration.",
+          "suggestion": "Add a confirmation prompt or at minimum a NODE_ENV check before executing, similar to run-sql.js.",
+          "code_snippet": "(async () => {\n  const client = new Client({\n    connectionString: url,\n    ssl: { rejectUnauthorized: false },\n  });\n  await client.connect();\n  await client.query(sql);\n  console.log('Applied:', sqlPath);\n  await client.end();\n})().catch((err) => {",
+          "fixed_snippet": "(async () => {\n  if (process.env.NODE_ENV === 'production') {\n    console.error('Refusing to run migration directly in production. Use a managed migration tool.');\n    process.exit(1);\n  }\n  const client = new Client({\n    connectionString: url,\n    ssl: { rejectUnauthorized: false },\n  });\n  try {\n    await client.connect();\n    await client.query(sql);\n    console.log('Applied:', sqlPath);\n  } finally {\n    await client.end();\n  }\n})().catch((err) => {\n  console.error(err.message || err);\n  process.exit(1);\n});"
+        },
+        {
+          "line": 40,
+          "line_end": null,
+          "severity": "high",
+          "type": "data_integrity",
+          "message": "The entire SQL file is executed as a single query string without being wrapped in a transaction. If the migration file contains multiple statements and one fails partway through, the database is left in a partially migrated state with no rollback.",
+          "suggestion": "Wrap the execution in a transaction: BEGIN, execute SQL, COMMIT, and ROLLBACK on error.",
+          "code_snippet": "await client.query(sql);",
+          "fixed_snippet": "try {\n  await client.query('BEGIN');\n  await client.query(sql);\n  await client.query('COMMIT');\n  console.log('Applied:', sqlPath);\n} catch (err) {\n  await client.query('ROLLBACK');\n  throw err;\n}"
+        },
+        {
+          "line": 39,
+          "line_end": 42,
+          "severity": "medium",
+          "type": "reliability",
+          "message": "If client.query(sql) throws, client.end() is never called because the error jumps to the outer .catch(). This leaks the database connection until the process exits (which happens immediately via process.exit, but in a different context could be a connection leak).",
+          "suggestion": "Use a try/finally block to ensure client.end() is always called.",
+          "code_snippet": "await client.connect();\n  await client.query(sql);\n  console.log('Applied:', sqlPath);\n  await client.end();",
+          "fixed_snippet": "await client.connect();\n  try {\n    await client.query(sql);\n    console.log('Applied:', sqlPath);\n  } finally {\n    await client.end();\n  }"
+        },
+        {
+          "line": 7,
+          "line_end": null,
+          "severity": "medium",
+          "type": "error_handling",
+          "message": "fs.readFileSync(envPath) will throw an unhandled exception with a raw Node.js error if .env.local does not exist. The error message won't be user-friendly.",
+          "suggestion": "Wrap in try/catch with a clear error message, or check fs.existsSync(envPath) first.",
+          "code_snippet": "const raw = fs.readFileSync(envPath, 'utf8');",
+          "fixed_snippet": "if (!fs.existsSync(envPath)) {\n  console.error('.env.local not found at', envPath);\n  process.exit(1);\n}\nconst raw = fs.readFileSync(envPath, 'utf8');"
+        },
+        {
+          "line": 32,
+          "line_end": null,
+          "severity": "medium",
+          "type": "error_handling",
+          "message": "fs.readFileSync(sqlPath) will throw an unhandled exception if the migration file 002_platform_feedback.sql does not exist, with no user-friendly message.",
+          "suggestion": "Check file existence before reading or wrap in try/catch.",
+          "code_snippet": "const sql = fs.readFileSync(sqlPath, 'utf8');",
+          "fixed_snippet": "if (!fs.existsSync(sqlPath)) {\n  console.error('Migration file not found:', sqlPath);\n  process.exit(1);\n}\nconst sql = fs.readFileSync(sqlPath, 'utf8');"
+        },
+        {
+          "line": 40,
+          "line_end": null,
+          "severity": "medium",
+          "type": "data_integrity",
+          "message": "No idempotency check. Running this script twice will either fail (if the migration SQL doesn't use IF NOT EXISTS) or silently re-apply. There's no migration tracking table to record which migrations have been applied.",
+          "suggestion": "Consider checking a migrations tracking table before applying, or at minimum document that the SQL file must be idempotent (use CREATE TABLE IF NOT EXISTS, etc.).",
+          "code_snippet": null,
+          "fixed_snippet": null
+        },
+        {
+          "line": 44,
+          "line_end": null,
+          "severity": "low",
+          "type": "observability",
+          "message": "Only err.message is logged on failure, losing the full stack trace which is valuable for debugging migration failures (e.g., which SQL statement failed, at what position).",
+          "suggestion": "Log the full error object including stack trace.",
+          "code_snippet": "console.error(err.message || err);",
+          "fixed_snippet": "console.error('Migration failed:', err);"
+        },
+        {
+          "line": 18,
+          "line_end": null,
+          "severity": "low",
+          "type": "security",
+          "message": "Database connection URL (potentially containing credentials) is stored in a variable derived from a file. While acceptable for a script, if any logging were added that prints `url`, credentials would be exposed in logs.",
+          "suggestion": "Ensure the connection string is never logged. Consider masking it in any debug output.",
+          "code_snippet": null,
+          "fixed_snippet": null
+        },
+        {
+          "line": 1,
+          "line_end": null,
+          "severity": "low",
+          "type": "maintainability",
+          "message": "Lines are double-numbered (e.g., '1:  1:'), suggesting a copy-paste artifact in the file. This is cosmetic but indicates the file may not have been reviewed carefully.",
+          "suggestion": "Remove the duplicate line numbering if present in the actual source file.",
+          "code_snippet": null,
+          "fixed_snippet": null
+        }
+      ],
+      "summary": "This is a one-off database migration script, not a production runtime file. It has a critical security issue with SSL verification disabled, lacks a production environment safety check (unlike the sibling run-sql.js), and has no error handling around file reads. The script is simple and fit for its narrow purpose but carries real risk if accidentally run against production.",
+      "score": 36,
+      "was_chunked": false,
+      "chunks_processed": 1
+    },
+    {
+      "filename": "scripts/seed_email_marketing_sqlite.py",
+      "language": "python",
+      "total_lines": 102,
+      "issues": [
+        {
+          "line": 55,
+          "line_end": 95,
+          "severity": "medium",
+          "type": "error_handling",
+          "message": "sqlite3.connect() and subsequent operations are not wrapped in try/except or a context manager. If any operation fails (e.g., disk full, permission denied, corrupt DB), the connection is never closed, potentially leaving a WAL lock file behind.",
+          "suggestion": "Use a context manager (`with sqlite3.connect(db_path) as conn:`) or wrap in try/finally to ensure conn.close() is always called.",
+          "code_snippet": "conn = sqlite3.connect(db_path)\nconn.execute(\"PRAGMA journal_mode = WAL;\")\n...\nconn.close()",
+          "fixed_snippet": "try:\n    conn = sqlite3.connect(db_path)\n    conn.execute(\"PRAGMA journal_mode = WAL;\")\n\n    conn.executescript(\n        \"\"\"\n        CREATE TABLE IF NOT EXISTS email_marketing_sources (\n            id INTEGER PRIMARY KEY AUTOINCREMENT,\n            website_url TEXT NOT NULL UNIQUE,\n            channel TEXT NOT NULL DEFAULT 'email_marketing',\n            source_label TEXT NOT NULL DEFAULT 'manual_seed_apr_2026',\n            segment TEXT NOT NULL DEFAULT 'education',\n            is_active INTEGER NOT NULL DEFAULT 1,\n            notes TEXT,\n            created_at TEXT NOT NULL DEFAULT (datetime('now')),\n            updated_at TEXT NOT NULL DEFAULT (datetime('now'))\n        );\n        \"\"\"\n    )\n\n    for url in URLS:\n        conn.execute(\n            \"\"\"\n            INSERT INTO email_marketing_sources\n                (website_url, channel, source_label, segment, is_active)\n            VALUES\n                (?, 'email_marketing', 'manual_seed_apr_2026', 'education', 1)\n            ON CONFLICT(website_url) DO UPDATE SET\n                is_active = 1,\n                updated_at = datetime('now')\n            \"\"\",\n            (url,),\n        )\n\n    conn.commit()\n\n    total_count = conn.execute(\"SELECT COUNT(*) FROM email_marketing_sources\").fetchone()[0]\n    active_count = conn.execute(\n        \"SELECT COUNT(*) FROM email_marketing_sources WHERE is_active = 1\"\n    ).fetchone()[0]\n\n    print(f\"SQLite DB: {db_path}\")\n    print(f\"Rows in email_marketing_sources: {total_count} (active: {active_count})\")\nfinally:\n    conn.close()"
+        },
+        {
+          "line": 15,
+          "line_end": 46,
+          "severity": "medium",
+          "type": "security",
+          "message": "16 of the 30 URLs use plain HTTP instead of HTTPS (e.g., http://cuo.ac.in/, http://www.bhu.ac.in/). If these URLs are later used for scraping or email campaigns, HTTP connections are vulnerable to MITM attacks and content injection. This also raises questions about the legitimacy of scraping government/university websites for email marketing.",
+          "suggestion": "Use HTTPS for all URLs where available. Verify that scraping these sites for email marketing purposes is legally permissible and compliant with their terms of service.",
+          "code_snippet": "\"http://cuo.ac.in/\",\n\"http://evisitors.nic.in/\",\n\"http://rusa.nic.in/\",",
+          "fixed_snippet": null
+        },
+        {
+          "line": 15,
+          "line_end": 46,
+          "severity": "medium",
+          "type": "gdpr",
+          "message": "This script seeds a database of website URLs explicitly labeled for 'email_marketing' with source_label 'manual_seed_apr_2026'. If these URLs are used to scrape email addresses from educational institutions for unsolicited marketing, this likely violates anti-spam laws (CAN-SPAM, GDPR, India's IT Act) and the institutions' terms of service. There is no consent mechanism or legal basis documented.",
+          "suggestion": "Document the legal basis for collecting and using data from these sources. Ensure compliance with applicable data protection and anti-spam regulations. Add a consent/opt-in mechanism before sending marketing emails.",
+          "code_snippet": null,
+          "fixed_snippet": null
+        },
+        {
+          "line": 74,
+          "line_end": 86,
+          "severity": "low",
+          "type": "performance",
+          "message": "Each URL is inserted in a separate execute() call inside a loop (30 iterations). While acceptable for 30 rows, this could be replaced with executemany() for cleaner code and slightly better performance.",
+          "suggestion": "Use conn.executemany() with the list of URLs to batch the inserts.",
+          "code_snippet": "for url in URLS:\n    conn.execute(\n        \"\"\"\n        INSERT INTO email_marketing_sources\n            ...\n        \"\"\",\n        (url,),\n    )",
+          "fixed_snippet": "conn.executemany(\n    \"\"\"\n    INSERT INTO email_marketing_sources\n        (website_url, channel, source_label, segment, is_active)\n    VALUES\n        (?, 'email_marketing', 'manual_seed_apr_2026', 'education', 1)\n    ON CONFLICT(website_url) DO UPDATE SET\n        is_active = 1,\n        updated_at = datetime('now')\n    \"\"\",\n    [(url,) for url in URLS],\n)"
+        },
+        {
+          "line": 64,
+          "line_end": 64,
+          "severity": "low",
+          "type": "maintainability",
+          "message": "The source_label 'manual_seed_apr_2026' is hardcoded both in the table default (line 64) and in the INSERT statement (line 80). This is a magic string that appears in two places and will need to be updated in both locations if the label changes.",
+          "suggestion": "Extract the source label into a constant at the top of the file, e.g., `SOURCE_LABEL = 'manual_seed_apr_2026'`, and use it in both the schema default and the INSERT.",
+          "code_snippet": "source_label TEXT NOT NULL DEFAULT 'manual_seed_apr_2026',",
+          "fixed_snippet": null
+        },
+        {
+          "line": 54,
+          "line_end": 54,
+          "severity": "low",
+          "type": "security",
+          "message": "The SQLite database is created at a path relative to the repo root (db/sqlite/email_marketing.sqlite) with default file permissions. Depending on the umask, this file may be world-readable, exposing the marketing source data.",
+          "suggestion": "Set restrictive file permissions on the database file after creation, e.g., `db_path.chmod(0o600)`.",
+          "code_snippet": null,
+          "fixed_snippet": null
+        },
+        {
+          "line": 97,
+          "line_end": 98,
+          "severity": "low",
+          "type": "observability",
+          "message": "The script uses plain print() for output. For a utility script this is acceptable, but there's no logging of errors or structured output that could be captured by CI/CD systems.",
+          "suggestion": "Consider using Python's logging module for consistency with other scripts, especially if this runs in automated pipelines.",
+          "code_snippet": null,
+          "fixed_snippet": null
+        },
+        {
+          "line": 49,
+          "line_end": 98,
+          "severity": "low",
+          "type": "best_practice",
+          "message": "The main() function has no guard against accidental execution in production environments. Unlike the run-sql.js script which checks NODE_ENV, this script has no environment check before writing to the database.",
+          "suggestion": "Add an environment check or confirmation prompt to prevent accidental execution in production, similar to other scripts in the codebase.",
+          "code_snippet": null,
+          "fixed_snippet": null
+        }
+      ],
+      "summary": "This is a standalone seed/utility script for populating a SQLite email-marketing table. It is reasonably well-structured for its purpose. The main concerns are: missing error handling around database operations, the connection not being closed on exceptions, questionable purpose of an email-marketing scraping table in a campus placement SaaS, and several HTTP URLs that should use HTTPS. No critical production runtime risks since this is a one-off script.",
+      "score": 83,
+      "was_chunked": false,
+      "chunks_processed": 1
+    },
+    {
+      "filename": "src/app/api/admin/colleges/route.js",
+      "language": "javascript",
+      "total_lines": 45,
+      "issues": [
+        {
+          "line": 14,
+          "line_end": 27,
+          "severity": "medium",
+          "type": "performance",
+          "message": "Unbounded query with no LIMIT/OFFSET — if there are thousands of tenants of type 'college', this loads all of them plus aggregates into memory in a single response. This will degrade as the platform scales.",
+          "suggestion": "Add pagination with LIMIT/OFFSET and accept page/pageSize query parameters, or at minimum add a reasonable LIMIT (e.g., 1000).",
+          "code_snippet": "const result = await query(\n  `SELECT\n    t.id,\n    ...\n    ORDER BY t.created_at DESC`\n);",
+          "fixed_snippet": "// Accept searchParams for pagination\nexport async function GET(request) {\n  const { searchParams } = new URL(request.url);\n  const page = Math.max(1, parseInt(searchParams.get('page') || '1', 10));\n  const pageSize = Math.min(100, Math.max(1, parseInt(searchParams.get('pageSize') || '50', 10)));\n  const offset = (page - 1) * pageSize;\n  // ... auth check ...\n  const result = await query(\n    `SELECT ... ORDER BY t.created_at DESC LIMIT $1 OFFSET $2`,\n    [pageSize, offset]\n  );"
+        },
+        {
+          "line": 26,
+          "line_end": 26,
+          "severity": "medium",
+          "type": "bug",
+          "message": "`ORDER BY t.created_at DESC` but `t.created_at` is not included in the GROUP BY clause. While PostgreSQL allows this when `t.id` is the primary key (since all other tenant columns are functionally dependent on it), this is fragile and may confuse future maintainers or break if the query is adapted.",
+          "suggestion": "Add `t.created_at` to the GROUP BY clause or select it explicitly.",
+          "code_snippet": "GROUP BY t.id, t.name, t.slug, t.city, t.is_active\nORDER BY t.created_at DESC",
+          "fixed_snippet": "GROUP BY t.id, t.name, t.slug, t.city, t.is_active, t.created_at\nORDER BY t.created_at DESC"
+        },
+        {
+          "line": 35,
+          "line_end": 35,
+          "severity": "medium",
+          "type": "bug",
+          "message": "The `naac` field is hardcoded to '—' instead of reading from `t.naac_grade` which exists in the tenants table. This means the UI will never display actual NAAC grades for colleges.",
+          "suggestion": "Add `t.naac_grade` to the SELECT and GROUP BY, then use it in the response mapping.",
+          "code_snippet": "naac: '—',",
+          "fixed_snippet": "naac: r.naac_grade || '—',"
+        },
+        {
+          "line": 42,
+          "line_end": 42,
+          "severity": "medium",
+          "type": "observability",
+          "message": "`console.error` logs the full error object which may contain sensitive database connection details, query text, or stack traces. In production, use structured logging with controlled fields.",
+          "suggestion": "Use a structured logger that redacts sensitive fields, or at minimum log only `error.message`.",
+          "code_snippet": "console.error('Failed to load admin colleges:', error);",
+          "fixed_snippet": "console.error('Failed to load admin colleges:', error.message);"
+        },
+        {
+          "line": 9,
+          "line_end": 9,
+          "severity": "low",
+          "type": "security",
+          "message": "The auth check uses `session.user.role !== 'super_admin'` which returns 401 (Unauthorized) for authenticated users who lack the role. Semantically, 403 (Forbidden) is more appropriate for authenticated but unauthorized users.",
+          "suggestion": "Return 403 for authenticated users without the required role, 401 for unauthenticated users.",
+          "code_snippet": "if (!session || session.user.role !== 'super_admin') {\n  return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });",
+          "fixed_snippet": "if (!session) {\n  return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });\n}\nif (session.user.role !== 'super_admin') {\n  return NextResponse.json({ error: 'Forbidden' }, { status: 403 });\n}"
+        },
+        {
+          "line": 6,
+          "line_end": 6,
+          "severity": "low",
+          "type": "reliability",
+          "message": "The GET handler does not accept the `request` parameter, so if pagination or filtering query parameters are added later, the request object won't be available. This also means there's no way to add cache-control headers or read any request context.",
+          "suggestion": "Accept the request parameter: `export async function GET(request) {`",
+          "code_snippet": "export async function GET() {",
+          "fixed_snippet": "export async function GET(request) {"
+        },
+        {
+          "line": 30,
+          "line_end": 30,
+          "severity": "low",
+          "type": "error_handling",
+          "message": "`result.rows` assumes the query library always returns an object with a `rows` property. If the `query` function returns a different shape (e.g., returns the rows directly, or returns undefined on error), this will throw a TypeError.",
+          "suggestion": "Add a defensive check: `const rows = result?.rows || [];`",
+          "code_snippet": "colleges: result.rows.map((r) => ({",
+          "fixed_snippet": "const rows = result?.rows ?? [];\n// then use:\ncolleges: rows.map((r) => ({"
+        }
+      ],
+      "summary": "This admin colleges endpoint is reasonably well-structured with proper auth checks and error handling. Key issues include an unbounded query with no pagination that could return massive result sets, missing `t.created_at` in the GROUP BY clause (which is non-standard SQL and may fail on strict PostgreSQL configurations), and the `naac` field being hardcoded to a placeholder instead of reading from the `naac_grade` column in the tenants table. No critical security vulnerabilities found.",
+      "score": 81,
+      "was_chunked": false,
+      "chunks_processed": 1
+    },
+    {
+      "filename": "src/app/api/admin/dashboard/route.js",
+      "language": "javascript",
+      "total_lines": 46,
+      "issues": [
+        {
+          "line": 32,
+          "line_end": 35,
+          "severity": "high",
+          "type": "bug",
+          "message": "statsQuery.rows[0] will throw TypeError if rows is empty or undefined. While a SELECT with scalar subqueries should always return one row, a database connection issue or query library behavior difference could return an empty rows array, causing `Cannot read properties of undefined (reading 'colleges')`.",
+          "suggestion": "Add a null check: `const stats = statsQuery.rows?.[0] || {};` and use that object.",
+          "code_snippet": "colleges: parseInt(statsQuery.rows[0].colleges || 0),\n        employers: parseInt(statsQuery.rows[0].employers || 0),\n        students: parseInt(statsQuery.rows[0].students || 0),\n        totalUsers: parseInt(statsQuery.rows[0].totalUsers || 0),",
+          "fixed_snippet": "const stats = statsQuery.rows?.[0] || {};\n\n    return NextResponse.json({\n      stats: {\n        colleges: parseInt(stats.colleges || 0, 10),\n        employers: parseInt(stats.employers || 0, 10),\n        students: parseInt(stats.students || 0, 10),\n        totalUsers: parseInt(stats.totalUsers || 0, 10),\n      },\n      registeredColleges: collegesQuery.rows || [],\n    });"
+        },
+        {
+          "line": 32,
+          "line_end": 35,
+          "severity": "low",
+          "type": "bug",
+          "message": "parseInt() is called without a radix parameter. While the values are numeric strings from COUNT(*), best practice is to always specify radix 10 to avoid unexpected behavior.",
+          "suggestion": "Use `parseInt(value, 10)` or `Number(value)` instead.",
+          "code_snippet": "parseInt(statsQuery.rows[0].colleges || 0)",
+          "fixed_snippet": "parseInt(statsQuery.rows[0].colleges || 0, 10)"
+        },
+        {
+          "line": 17,
+          "line_end": 18,
+          "severity": "medium",
+          "type": "multi_tenancy",
+          "message": "The employer_profiles and student_profiles counts are global (all tenants). For a super_admin dashboard this may be intentional, but student_profiles has a tenant_id column — if this SaaS serves multiple colleges, the counts include all tenants which is correct for super_admin. However, if this endpoint is ever reused for college_admin, it would leak cross-tenant counts. Document the intent or add a comment.",
+          "suggestion": "Add a code comment clarifying these are intentionally global counts for super_admin. If college_admin access is ever added, filter by tenant_id.",
+          "code_snippet": "(SELECT COUNT(*) FROM employer_profiles) as \"employers\",\n        (SELECT COUNT(*) FROM student_profiles) as \"students\",",
+          "fixed_snippet": null
+        },
+        {
+          "line": 14,
+          "line_end": 20,
+          "severity": "medium",
+          "type": "performance",
+          "message": "The stats query executes 4 sequential subqueries (each a full table COUNT). On large datasets, COUNT(*) on PostgreSQL performs a sequential scan unless there's an index-only scan available. With millions of rows in users or student_profiles, this could be slow. Consider caching these counts or using approximate counts for the dashboard.",
+          "suggestion": "Cache dashboard stats in Redis with a short TTL (e.g., 60 seconds), or use PostgreSQL's `pg_stat_user_tables.n_live_tup` for approximate counts on the dashboard.",
+          "code_snippet": null,
+          "fixed_snippet": null
+        },
+        {
+          "line": 40,
+          "line_end": 40,
+          "severity": "medium",
+          "type": "observability",
+          "message": "console.error logs the full error object which may contain sensitive database connection details, query text, or stack traces. In production, this should use structured logging with appropriate redaction.",
+          "suggestion": "Use a structured logger (e.g., pino/winston) that redacts sensitive fields, and include a request correlation ID.",
+          "code_snippet": "console.error('Failed to load admin dashboard data:', error);",
+          "fixed_snippet": "logger.error({ err: error, endpoint: 'admin/dashboard' }, 'Failed to load admin dashboard data');"
+        },
+        {
+          "line": 10,
+          "line_end": 10,
+          "severity": "medium",
+          "type": "security",
+          "message": "The auth check only verifies role === 'super_admin' but does not verify session.user exists before accessing session.user.role. If the session object exists but user is undefined (e.g., corrupted session), this will throw a TypeError before returning 401.",
+          "suggestion": "Use optional chaining: `session?.user?.role !== 'super_admin'`",
+          "code_snippet": "if (!session || session.user.role !== 'super_admin') {",
+          "fixed_snippet": "if (!session?.user || session.user.role !== 'super_admin') {"
+        },
+        {
+          "line": 37,
+          "line_end": 37,
+          "severity": "low",
+          "type": "data_integrity",
+          "message": "collegesQuery.rows could theoretically be undefined if the query library returns an unexpected shape. Defensive coding would default to an empty array.",
+          "suggestion": "Use `collegesQuery.rows || []`",
+          "code_snippet": "registeredColleges: collegesQuery.rows,",
+          "fixed_snippet": "registeredColleges: collegesQuery.rows || [],"
+        },
+        {
+          "line": 6,
+          "line_end": 46,
+          "severity": "low",
+          "type": "reliability",
+          "message": "No timeout is set on the database queries. If the database is under heavy load, these COUNT(*) queries could hang indefinitely, tying up the request.",
+          "suggestion": "Set a statement_timeout on the query or use AbortSignal/timeout wrapper, e.g., `query('SET statement_timeout = 5000; SELECT ...')` or configure at the connection pool level.",
+          "code_snippet": null,
+          "fixed_snippet": null
+        },
+        {
+          "line": 6,
+          "line_end": 46,
+          "severity": "low",
+          "type": "best_practice",
+          "message": "No cache-control headers are set on the response. Dashboard stats are expensive to compute and unlikely to change second-by-second. Adding Cache-Control headers would reduce load.",
+          "suggestion": "Add `{ headers: { 'Cache-Control': 'private, max-age=30' } }` to the NextResponse.json options.",
+          "code_snippet": null,
+          "fixed_snippet": null
+        }
+      ],
+      "summary": "This admin dashboard endpoint is reasonably well-structured with proper auth checks and error handling. Key issues include potential null dereference if the stats query returns no rows, missing tenant_id scoping for multi-tenant counts, lack of structured logging, and minor parseInt radix concerns. Overall a low-risk endpoint but with a few production-hardening gaps.",
+      "score": 70,
+      "was_chunked": false,
+      "chunks_processed": 1
+    },
+    {
+      "filename": "src/app/api/admin/employers/route.js",
+      "language": "javascript",
+      "total_lines": 39,
+      "issues": [
+        {
+          "line": 13,
+          "line_end": 23,
+          "severity": "high",
+          "type": "scalability",
+          "message": "Unbounded SELECT on employer_profiles with no LIMIT or pagination. As the platform grows, this query will return all employer rows into memory, causing slow responses and potential OOM for large datasets.",
+          "suggestion": "Add LIMIT/OFFSET pagination controlled by query parameters, e.g. `LIMIT $1 OFFSET $2` with sensible defaults (e.g., 50).",
+          "code_snippet": "const result = await query(\n  `SELECT\n    ep.id,\n    ep.company_name,\n    ep.industry,\n    ep.total_hires,\n    ep.is_verified,\n    ep.is_blacklisted\n  FROM employer_profiles ep\n  ORDER BY ep.created_at DESC`\n);",
+          "fixed_snippet": "const url = new URL(request.url);\nconst page = Math.max(1, parseInt(url.searchParams.get('page') || '1', 10));\nconst limit = Math.min(100, Math.max(1, parseInt(url.searchParams.get('limit') || '50', 10)));\nconst offset = (page - 1) * limit;\n\nconst result = await query(\n  `SELECT\n    ep.id,\n    ep.company_name,\n    ep.industry,\n    ep.total_hires,\n    ep.is_verified,\n    ep.is_blacklisted\n  FROM employer_profiles ep\n  ORDER BY ep.created_at DESC\n  LIMIT $1 OFFSET $2`,\n  [limit, offset]\n);"
+        },
+        {
+          "line": 6,
+          "line_end": 6,
+          "severity": "medium",
+          "type": "bug",
+          "message": "GET function does not accept the `request` parameter, so if pagination via query params is added, there is no access to the URL. Even without pagination, Next.js App Router route handlers typically receive the request object.",
+          "suggestion": "Change signature to `export async function GET(request)` to access query parameters.",
+          "code_snippet": "export async function GET() {",
+          "fixed_snippet": "export async function GET(request) {"
+        },
+        {
+          "line": 26,
+          "line_end": 26,
+          "severity": "medium",
+          "type": "error_handling",
+          "message": "`result.rows` could be undefined if the `query` helper returns an unexpected shape (e.g., on connection failure that doesn't throw, or a different DB driver). Calling `.map()` on undefined will throw an unhandled TypeError.",
+          "suggestion": "Add a defensive check: `const rows = result?.rows || [];`",
+          "code_snippet": "employers: result.rows.map((r) => ({",
+          "fixed_snippet": "employers: (result?.rows || []).map((r) => ({"
+        },
+        {
+          "line": 9,
+          "line_end": 9,
+          "severity": "medium",
+          "type": "multi_tenancy",
+          "message": "Only super_admin can access this endpoint. College admins (college_admin role) who may need to see employers associated with their placement drives are excluded. If college_admin access is intended, tenant_id filtering is missing, which would be a cross-tenant data leakage risk.",
+          "suggestion": "If college_admin should access this, add tenant-scoped filtering: `WHERE ep.id IN (SELECT employer_id FROM placement_drives WHERE tenant_id = $1)`. If super_admin-only is intentional, document this decision.",
+          "code_snippet": "if (!session || session.user.role !== 'super_admin') {",
+          "fixed_snippet": null
+        },
+        {
+          "line": 9,
+          "line_end": 9,
+          "severity": "medium",
+          "type": "security",
+          "message": "Accessing `session.user.role` without verifying `session.user` exists first. If the session object exists but `user` is null/undefined (e.g., corrupted session), this will throw a TypeError before the auth check completes, resulting in a 500 instead of a 401.",
+          "suggestion": "Add a null check for session.user.",
+          "code_snippet": "if (!session || session.user.role !== 'super_admin') {",
+          "fixed_snippet": "if (!session || !session.user || session.user.role !== 'super_admin') {"
+        },
+        {
+          "line": 36,
+          "line_end": 36,
+          "severity": "medium",
+          "type": "observability",
+          "message": "Using `console.error` instead of structured logging. The error object may contain sensitive information (connection strings, stack traces) that gets logged without redaction. Also missing request correlation IDs for tracing.",
+          "suggestion": "Use a structured logger (e.g., pino/winston) with context fields and avoid logging the full error object in production.",
+          "code_snippet": "console.error('Failed to load admin employers:', error);",
+          "fixed_snippet": null
+        },
+        {
+          "line": 22,
+          "line_end": 22,
+          "severity": "medium",
+          "type": "performance",
+          "message": "The query orders by `ep.created_at DESC` but the schema does not show an index on `employer_profiles.created_at`. This will cause a full table sort on every request.",
+          "suggestion": "Add an index: `CREATE INDEX idx_employer_profiles_created_at ON employer_profiles(created_at DESC);`",
+          "code_snippet": null,
+          "fixed_snippet": null
+        },
+        {
+          "line": 36,
+          "line_end": 36,
+          "severity": "low",
+          "type": "gdpr",
+          "message": "The full error object is logged via console.error, which could include PII from query results or connection details in stack traces.",
+          "suggestion": "Log only the error message and a sanitized stack trace, not the full error object.",
+          "code_snippet": "console.error('Failed to load admin employers:', error);",
+          "fixed_snippet": "console.error('Failed to load admin employers:', error.message);"
+        },
+        {
+          "line": 13,
+          "line_end": 23,
+          "severity": "low",
+          "type": "reliability",
+          "message": "No query timeout is set. A slow or hung database connection will block this request indefinitely with no timeout.",
+          "suggestion": "Add a statement_timeout or use the query helper's timeout option if available, e.g., `query('SET statement_timeout = 5000; SELECT ...')` or pass a timeout parameter.",
+          "code_snippet": null,
+          "fixed_snippet": null
+        }
+      ],
+      "summary": "This admin employers endpoint is reasonably structured with auth checks and error handling. Key issues include an unbounded query with no pagination (fetches all employer_profiles), super_admin-only access without tenant scoping which may be intentional but lacks college_admin access, potential null dereference on `result.rows` if the query helper returns an unexpected shape, and missing structured logging. No critical security vulnerabilities, but scalability and resilience concerns exist.",
+      "score": 64,
+      "was_chunked": false,
+      "chunks_processed": 1
+    }
+  ],
+  "overall_summary": "Reviewed 10 file(s) in the codebase. Found 76 total issue(s), including 1 critical and 5 high-severity problems that require immediate attention. Average code quality score: 76/100.",
+  "total_issues": 76,
+  "issues_by_severity": {
+    "medium": 30,
+    "low": 40,
+    "high": 5,
+    "critical": 1
+  },
+  "issues_by_type": {
+    "bug": 11,
+    "data_integrity": 5,
+    "maintainability": 6,
+    "reliability": 6,
+    "readability": 2,
+    "configuration": 1,
+    "security": 13,
+    "error_handling": 9,
+    "observability": 8,
+    "best_practice": 4,
+    "performance": 6,
+    "gdpr": 2,
+    "multi_tenancy": 2,
+    "scalability": 1
+  },
+  "overall_score": 76,
+  "model_used": "gpt-4o",
+  "tokens_used": 0,
+  "cached": false,
+  "error": null
+}

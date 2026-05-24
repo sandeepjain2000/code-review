@@ -1,0 +1,1443 @@
+{
+  "job_id": "dad5a400475749a5",
+  "status": "in_progress",
+  "folder_path": "C:\\Users\\sandeep\\Downloads\\Claudes\\CampusPlacement\\campus-placement",
+  "model_used": "nvidia/meta/llama-3.3-70b-instruct",
+  "updated_at": "2026-05-23T14:44:47.982507",
+  "files_done": 40,
+  "total_files": 1208,
+  "files": [
+    {
+      "filename": ".agents/skills/docx/scripts/office/helpers/__init__.py",
+      "score": 100,
+      "summary": "No code provided for review. The file appears to be empty.",
+      "issues": [],
+      "test_cases": [],
+      "time_taken": 9.82,
+      "provider": "nvidia"
+    },
+    {
+      "filename": ".agents/skills/docx/scripts/__init__.py",
+      "score": 100,
+      "summary": "No code provided for review. Cannot assess security, reliability, or performance.",
+      "issues": [],
+      "test_cases": [],
+      "time_taken": 7.93,
+      "provider": "nvidia"
+    },
+    {
+      "filename": ".agents/skills/algorithmic-art/templates/generator_template.js",
+      "score": 92,
+      "summary": "The provided code is a well-structured template for generative art using p5.js, following best practices for parameter organization, seeded randomness, and performance considerations. However, there are some areas that need improvement, such as adding more comments and documentation, handling potential errors, and considering security vulnerabilities. The code score is 85, with some minor issues and suggestions for improvement.",
+      "issues": [
+        {
+          "type": "readability",
+          "severity": "medium",
+          "message": "The params object is not fully defined, consider adding more parameters or documenting the existing ones",
+          "line": 24,
+          "suggestion": "Add more parameters or comments to explain the purpose of each parameter",
+          "code_snippet": "let params = { ... }",
+          "fixed_snippet": "let params = { /* add more parameters or comments */ }"
+        },
+        {
+          "type": "best_practice",
+          "severity": "low",
+          "message": "The initializeSeed function is not checking for errors",
+          "line": 43,
+          "suggestion": "Add error handling to the initializeSeed function",
+          "code_snippet": "function initializeSeed(seed) { ... }",
+          "fixed_snippet": "function initializeSeed(seed) { try { ... } catch (error) { ... } }"
+        },
+        {
+          "type": "performance",
+          "severity": "medium",
+          "message": "The setup function is not optimized for performance",
+          "line": 53,
+          "suggestion": "Consider using p5 vectors efficiently and limiting expensive operations",
+          "code_snippet": "function setup() { ... }",
+          "fixed_snippet": "function setup() { /* optimize performance */ }"
+        },
+        {
+          "type": "security",
+          "severity": "low",
+          "message": "The hexToRgb function is not validating user input",
+          "line": 131,
+          "suggestion": "Add input validation to the hexToRgb function",
+          "code_snippet": "function hexToRgb(hex) { ... }",
+          "fixed_snippet": "function hexToRgb(hex) { /* validate input */ }"
+        }
+      ],
+      "test_cases": [
+        "Test parameter updates and regeneration",
+        "Test performance with large numbers of elements",
+        "Test seeded randomness for reproducibility"
+      ],
+      "time_taken": 41.81,
+      "provider": "nvidia"
+    },
+    {
+      "filename": ".agents/skills/ckm-design-system/scripts/slide-token-validator.py",
+      "score": 93,
+      "summary": "The provided Python script is a legacy wrapper that delegates to another script for unified HTML validation. It appears to be well-structured and follows best practices. However, there are some potential issues and improvements that can be suggested. The script uses the subprocess module to run another Python script, which could potentially lead to security issues if not used carefully. Additionally, the script does not handle any exceptions that may occur during the execution of the subprocess. The script also uses the sys.argv to parse command-line arguments, which could be improved by using a more robust argument parsing library.",
+      "issues": [
+        {
+          "type": "security",
+          "severity": "medium",
+          "message": "The script uses the subprocess module to run another Python script, which could potentially lead to security issues if not used carefully.",
+          "line": 30,
+          "suggestion": "Consider using a more secure way to run the subprocess, such as using the run function from the subprocess module with the check argument set to True.",
+          "code_snippet": "result = subprocess.run(cmd)",
+          "fixed_snippet": "result = subprocess.run(cmd, check=True)"
+        },
+        {
+          "type": "error_handling",
+          "severity": "medium",
+          "message": "The script does not handle any exceptions that may occur during the execution of the subprocess.",
+          "line": 30,
+          "suggestion": "Consider adding a try-except block to handle any exceptions that may occur during the execution of the subprocess.",
+          "code_snippet": "result = subprocess.run(cmd)",
+          "fixed_snippet": "try:\n    result = subprocess.run(cmd)\nexcept subprocess.SubprocessError as e:\n    print(f'An error occurred: {e}')"
+        },
+        {
+          "type": "best_practice",
+          "severity": "low",
+          "message": "The script uses the sys.argv to parse command-line arguments, which could be improved by using a more robust argument parsing library.",
+          "line": 22,
+          "suggestion": "Consider using a library such as argparse to parse command-line arguments.",
+          "code_snippet": "args = sys.argv[1:]",
+          "fixed_snippet": "import argparse\nparser = argparse.ArgumentParser()\nargs = parser.parse_args()"
+        }
+      ],
+      "test_cases": [
+        "Should handle invalid command-line arguments",
+        "Should handle exceptions during subprocess execution",
+        "Should validate the existence of the unified validator script before running it"
+      ],
+      "time_taken": 60.49,
+      "provider": "nvidia"
+    },
+    {
+      "filename": ".agents/skills/docx/scripts/office/helpers/simplify_redlines.py",
+      "score": 86,
+      "summary": "The provided Python code appears to be well-structured and readable. However, there are some potential issues and improvements that can be suggested. The code seems to be handling XML parsing and manipulation, which can be error-prone if not handled correctly. There are also some potential security concerns, such as the use of `defusedxml.minidom` which may not be the most secure way to parse XML. Additionally, there are some areas where the code can be improved for better performance and readability.",
+      "issues": [
+        {
+          "type": "security",
+          "severity": "medium",
+          "message": "Using `defusedxml.minidom` may not be the most secure way to parse XML. Consider using a more secure library.",
+          "line": 29,
+          "suggestion": "Use a more secure XML parsing library, such as `xml.etree.ElementTree`",
+          "code_snippet": "dom = defusedxml.minidom.parseString(doc_xml.read_text(encoding=\"utf-8\"))",
+          "fixed_snippet": "tree = ET.parse(doc_xml)"
+        },
+        {
+          "type": "error_handling",
+          "severity": "high",
+          "message": "The code does not handle exceptions correctly. It catches all exceptions and returns a generic error message.",
+          "line": 44,
+          "suggestion": "Handle specific exceptions and provide more informative error messages",
+          "code_snippet": "except Exception as e: return 0, f\"Error: {e}\"",
+          "fixed_snippet": "except ET.ParseError as e: return 0, f\"Error parsing XML: {e}\""
+        },
+        {
+          "type": "readability",
+          "severity": "low",
+          "message": "The variable name `tracked` is not very descriptive. Consider using a more descriptive name.",
+          "line": 51,
+          "suggestion": "Use a more descriptive variable name, such as `tracked_changes`",
+          "code_snippet": "tracked = [child for child in container.childNodes if child.nodeType == child.ELEMENT_NODE and _is_element(child, tag)]",
+          "fixed_snippet": "tracked_changes = [child for child in container.childNodes if child.nodeType == child.ELEMENT_NODE and _is_element(child, tag)]"
+        }
+      ],
+      "test_cases": [
+        "Should handle XML parsing errors correctly",
+        "Should handle invalid XML input correctly",
+        "Should handle large XML files correctly",
+        "Should handle concurrent access to XML files correctly"
+      ],
+      "time_taken": 51.55,
+      "provider": "nvidia"
+    },
+    {
+      "filename": ".agents/skills/ckm-design/scripts/logo/core.py",
+      "score": 100,
+      "summary": "Could not parse model response.",
+      "issues": [],
+      "test_cases": [],
+      "time_taken": 53.6,
+      "provider": "nvidia"
+    },
+    {
+      "filename": ".agents/skills/ckm-design/scripts/cip/search.py",
+      "score": 93,
+      "summary": "The provided Python script for searching CIP design guidelines appears to be well-structured and readable. However, there are some potential issues and improvements that can be suggested. The script lacks error handling for cases like invalid user input, database connection issues, or file not found errors. Additionally, the script uses hardcoded values and magic numbers in some places, which can make it less maintainable. The script also does not follow the principle of separation of concerns, as it mixes the concerns of parsing command-line arguments, searching the database, and formatting the output. The script can be improved by adding more comments and docstrings to explain its functionality and by using more descriptive variable names. The script can also be made more robust by adding try-except blocks to handle potential errors and exceptions.",
+      "issues": [
+        {
+          "type": "error_handling",
+          "severity": "medium",
+          "message": "The script does not handle potential errors when generating the CIP brief",
+          "line": 100,
+          "suggestion": "Add try-except blocks to handle potential errors and exceptions",
+          "code_snippet": "brief = get_cip_brief(args.brand, args.query, args.style)",
+          "fixed_snippet": "try: brief = get_cip_brief(args.brand, args.query, args.style) except Exception as e: print(f'Error generating CIP brief: {e}')"
+        },
+        {
+          "type": "error_handling",
+          "severity": "medium",
+          "message": "The script does not handle potential errors when searching the database",
+          "line": 116,
+          "suggestion": "Add try-except blocks to handle potential errors and exceptions",
+          "code_snippet": "result = search(args.query, args.domain, args.max)",
+          "fixed_snippet": "try: result = search(args.query, args.domain, args.max) except Exception as e: print(f'Error searching database: {e}')"
+        },
+        {
+          "type": "code_smell",
+          "severity": "low",
+          "message": "The script uses a hardcoded value for the parent directory",
+          "line": 13,
+          "suggestion": "Consider using a more dynamic approach to determine the parent directory",
+          "code_snippet": "sys.path.insert(0, str(Path(__file__).parent))",
+          "fixed_snippet": "sys.path.insert(0, str(Path(__file__).resolve().parent))"
+        }
+      ],
+      "test_cases": [
+        "Should handle invalid user input gracefully",
+        "Should handle database connection issues",
+        "Should handle file not found errors",
+        "Should validate user input for security",
+        "Should use parameterized queries to prevent SQL injection",
+        "Should follow the principle of separation of concerns"
+      ],
+      "time_taken": 52.18,
+      "provider": "nvidia"
+    },
+    {
+      "filename": ".agents/skills/docx/scripts/office/helpers/merge_runs.py",
+      "score": 93,
+      "summary": "The provided Python script appears to be well-structured and readable. It effectively merges adjacent runs with identical formatting in DOCX files. However, there are some potential issues and improvements that can be suggested. The script does not handle exceptions well, and it does not check for potential XML parsing errors. Additionally, the script assumes that the input directory exists and that the 'document.xml' file is present in the 'word' directory. The script also does not validate the input directory path. The script uses the 'defusedxml' library to parse XML, which is a good practice to prevent XML-based attacks.",
+      "issues": [
+        {
+          "type": "error_handling",
+          "severity": "medium",
+          "message": "The script does not handle exceptions well when parsing XML files.",
+          "line": 23,
+          "suggestion": "Add try-except blocks to handle potential XML parsing errors.",
+          "code_snippet": "dom = defusedxml.minidom.parseString(doc_xml.read_text(encoding=\"utf-8\"))",
+          "fixed_snippet": "try: dom = defusedxml.minidom.parseString(doc_xml.read_text(encoding=\"utf-8\")) except Exception as e: print(f\"Error parsing XML: {e}\")"
+        },
+        {
+          "type": "input_validation",
+          "severity": "low",
+          "message": "The script assumes that the input directory exists and that the 'document.xml' file is present in the 'word' directory.",
+          "line": 17,
+          "suggestion": "Add input validation to check if the input directory exists and if the 'document.xml' file is present.",
+          "code_snippet": "doc_xml = Path(input_dir) / \"word\" / \"document.xml\"",
+          "fixed_snippet": "if not Path(input_dir).exists(): print(\"Error: Input directory does not exist\"); return"
+        },
+        {
+          "type": "error_handling",
+          "severity": "medium",
+          "message": "The script does not handle exceptions well when writing the modified XML file.",
+          "line": 39,
+          "suggestion": "Add try-except blocks to handle potential errors when writing the modified XML file.",
+          "code_snippet": "doc_xml.write_bytes(dom.toxml(encoding=\"UTF-8\"))",
+          "fixed_snippet": "try: doc_xml.write_bytes(dom.toxml(encoding=\"UTF-8\")) except Exception as e: print(f\"Error writing XML: {e}\")"
+        }
+      ],
+      "test_cases": [
+        "Test case 1: Merge adjacent runs with identical formatting in a DOCX file.",
+        "Test case 2: Handle exceptions when parsing XML files.",
+        "Test case 3: Validate input directory path and check for the presence of 'document.xml' file."
+      ],
+      "time_taken": 58.21,
+      "provider": "nvidia"
+    },
+    {
+      "filename": ".agents/skills/docx/scripts/office/validators/__init__.py",
+      "score": 100,
+      "summary": "The provided Python code is an empty __init__.py file for the validators module, which appears to be well-structured and readable. However, there are no significant issues or improvements to suggest as the file only contains import statements and an __all__ declaration. The score is high due to the lack of any potential security, reliability, or performance issues.",
+      "issues": [],
+      "test_cases": [],
+      "time_taken": 5.35,
+      "provider": "nvidia"
+    },
+    {
+      "filename": ".agents/skills/ckm-design/scripts/logo/search.py",
+      "score": 87,
+      "summary": "The provided Python script for logo design search has a good structure and clear documentation. However, there are some potential issues and improvements that can be suggested. The script lacks error handling for cases like invalid query, domain, or max results. Additionally, the script does not validate the input for the brand name. The script also uses a simple CSV configuration which might not be suitable for large-scale applications. The script does not have any logging or monitoring mechanism which can make it difficult to debug and monitor the application.",
+      "issues": [
+        {
+          "type": "error_handling",
+          "severity": "medium",
+          "message": "The script does not handle invalid query input",
+          "line": 97,
+          "suggestion": "Add try-except block to handle invalid query input",
+          "code_snippet": "parser.add_argument(\"query\", help=\"Search query\")",
+          "fixed_snippet": "try:\n    parser.add_argument(\"query\", help=\"Search query\")\nexcept Exception as e:\n    print(f\"Error: {e}\")"
+        },
+        {
+          "type": "error_handling",
+          "severity": "medium",
+          "message": "The script does not handle invalid domain input",
+          "line": 98,
+          "suggestion": "Add try-except block to handle invalid domain input",
+          "code_snippet": "parser.add_argument(\"--domain\", \"-d\", choices=list(CSV_CONFIG.keys()), help=\"Search domain\")",
+          "fixed_snippet": "try:\n    parser.add_argument(\"--domain\", \"-d\", choices=list(CSV_CONFIG.keys()), help=\"Search domain\")\nexcept Exception as e:\n    print(f\"Error: {e}\")"
+        },
+        {
+          "type": "error_handling",
+          "severity": "medium",
+          "message": "The script does not handle invalid max results input",
+          "line": 99,
+          "suggestion": "Add try-except block to handle invalid max results input",
+          "code_snippet": "parser.add_argument(\"--max-results\", \"-n\", type=int, default=MAX_RESULTS, help=\"Max results (default: 3)\")",
+          "fixed_snippet": "try:\n    parser.add_argument(\"--max-results\", \"-n\", type=int, default=MAX_RESULTS, help=\"Max results (default: 3)\")\nexcept Exception as e:\n    print(f\"Error: {e}\")"
+        },
+        {
+          "type": "input_validation",
+          "severity": "medium",
+          "message": "The script does not validate the brand name input",
+          "line": 101,
+          "suggestion": "Add input validation for brand name",
+          "code_snippet": "parser.add_argument(\"--brand-name\", \"-p\", type=str, default=None, help=\"Brand name for design brief\")",
+          "fixed_snippet": "if args.brand_name:\n    if not args.brand_name.isalpha():\n        print(\"Error: Brand name should only contain alphabets\")"
+        },
+        {
+          "type": "code_smell",
+          "severity": "low",
+          "message": "The script uses a simple CSV configuration which might not be suitable for large-scale applications",
+          "line": 112,
+          "suggestion": "Consider using a more robust configuration management system",
+          "code_snippet": "import json",
+          "fixed_snippet": "Consider using a configuration management library like configparser or yaml"
+        }
+      ],
+      "test_cases": [
+        "Should handle invalid query input",
+        "Should handle invalid domain input",
+        "Should handle invalid max results input",
+        "Should validate brand name input",
+        "Should handle CSV configuration errors",
+        "Should implement logging and monitoring mechanism"
+      ],
+      "time_taken": 78.81,
+      "provider": "nvidia"
+    },
+    {
+      "filename": ".agents/skills/docx/scripts/office/unpack.py",
+      "score": 93,
+      "summary": "The provided Python script for unpacking Office files (DOCX, PPTX, XLSX) is well-structured and follows best practices for parameter organization and error handling. However, there are some potential issues with file handling, XML parsing, and exception handling that need to be addressed. The script lacks input validation for the output directory, which could lead to security vulnerabilities if not properly sanitized. Additionally, the script uses a broad exception handler that could mask important error messages, making it difficult to diagnose issues.",
+      "issues": [
+        {
+          "type": "security",
+          "severity": "medium",
+          "message": "Input validation for output directory is missing, which could lead to security vulnerabilities if not properly sanitized",
+          "line": 44,
+          "suggestion": "Add input validation for output directory to prevent potential security vulnerabilities",
+          "code_snippet": "if not input_path.exists():",
+          "fixed_snippet": "if not input_path.exists() and not output_path.is_dir():"
+        },
+        {
+          "type": "error_handling",
+          "severity": "medium",
+          "message": "Broad exception handler could mask important error messages, making it difficult to diagnose issues",
+          "line": 77,
+          "suggestion": "Use more specific exception handlers to catch and handle specific exceptions",
+          "code_snippet": "except Exception as e:",
+          "fixed_snippet": "except zipfile.BadZipFile as e:"
+        },
+        {
+          "type": "code_smell",
+          "severity": "low",
+          "message": "Empty except block could be removed or replaced with a more specific exception handler",
+          "line": 88,
+          "suggestion": "Remove or replace the empty except block with a more specific exception handler",
+          "code_snippet": "except Exception: pass",
+          "fixed_snippet": "except defusedxml.minidom.ParseError as e: print(f'XML parsing error: {e}')"
+        }
+      ],
+      "test_cases": [
+        "Should handle invalid input file paths",
+        "Should handle non-Office file types",
+        "Should handle corrupted or invalid ZIP archives",
+        "Should handle XML parsing errors",
+        "Should handle file system errors during output directory creation"
+      ],
+      "time_taken": 37.04,
+      "provider": "nvidia"
+    },
+    {
+      "filename": ".agents/skills/docx/scripts/office/pack.py",
+      "score": 88,
+      "summary": "The provided Python script appears to be well-structured and readable. However, there are some potential issues that need to be addressed, such as error handling, input validation, and potential security vulnerabilities. The script uses the `defusedxml` library to parse XML files, which is a good practice to prevent XML-based attacks. The script also uses the `argparse` library to handle command-line arguments, which is a good practice to make the script more user-friendly. The script has a good separation of concerns, with different functions handling different tasks, such as validation, XML condensing, and packing. However, there are some areas that need improvement, such as adding more error handling and input validation to prevent potential issues.",
+      "issues": [
+        {
+          "type": "error_handling",
+          "severity": "medium",
+          "message": "The script does not handle the case where the input directory does not exist.",
+          "line": 35,
+          "suggestion": "Add error handling to check if the input directory exists before attempting to pack it.",
+          "code_snippet": "if not input_dir.is_dir():",
+          "fixed_snippet": "if not input_dir.exists():\n    raise FileNotFoundError(f\"Input directory '{input_dir}' does not exist.\")"
+        },
+        {
+          "type": "error_handling",
+          "severity": "medium",
+          "message": "The script does not handle the case where the original file does not exist.",
+          "line": 42,
+          "suggestion": "Add error handling to check if the original file exists before attempting to validate it.",
+          "code_snippet": "if original_path.exists():",
+          "fixed_snippet": "if not original_path.exists():\n    raise FileNotFoundError(f\"Original file '{original_path}' does not exist.\")"
+        },
+        {
+          "type": "error_handling",
+          "severity": "medium",
+          "message": "The script does not handle the case where the XML file cannot be parsed.",
+          "line": 110,
+          "suggestion": "Add error handling to catch any exceptions that occur during XML parsing.",
+          "code_snippet": "dom = defusedxml.minidom.parse(f)",
+          "fixed_snippet": "try:\n    dom = defusedxml.minidom.parse(f)\nexcept Exception as e:\n    raise ValueError(f\"Failed to parse XML file: {e}\")"
+        },
+        {
+          "type": "error_handling",
+          "severity": "medium",
+          "message": "The script does not handle the case where an exception occurs during XML condensing.",
+          "line": 127,
+          "suggestion": "Add error handling to catch any exceptions that occur during XML condensing.",
+          "code_snippet": "except Exception as e:",
+          "fixed_snippet": "except Exception as e:\n    raise ValueError(f\"Failed to condense XML file: {e}\")"
+        }
+      ],
+      "test_cases": [
+        "Test packing a directory into a DOCX file",
+        "Test packing a directory into a PPTX file",
+        "Test packing a directory into an XLSX file",
+        "Test validation with auto-repair",
+        "Test XML condensing",
+        "Test error handling for invalid input",
+        "Test error handling for XML parsing errors"
+      ],
+      "time_taken": 89.48,
+      "provider": "nvidia"
+    },
+    {
+      "filename": ".agents/skills/docx/scripts/office/validate.py",
+      "score": 93,
+      "summary": "The provided Python script is a command-line tool for validating Office document XML files against XSD schemas and tracked changes. It appears to be well-structured and follows best practices for parameter organization and error handling. However, there are some potential issues with file path handling, temporary directory creation, and validation logic. The script also lacks input validation and sanitization, which could lead to security vulnerabilities. The score is 80 due to the presence of some potential issues, but overall the script is well-organized and maintainable.",
+      "issues": [
+        {
+          "type": "error_handling",
+          "severity": "medium",
+          "message": "The script does not handle the case where the file path does not exist, but the error message is not very informative",
+          "line": 56,
+          "suggestion": "Improve the error message to provide more context",
+          "code_snippet": "assert path.exists(), f\"Error: {path} does not exist\"",
+          "fixed_snippet": "if not path.exists():\n    print(f\"Error: {path} does not exist. Please check the file path and try again.\")\n    sys.exit(1)"
+        },
+        {
+          "type": "security",
+          "severity": "medium",
+          "message": "The script uses a temporary directory to extract the Office file, but it does not check for potential security vulnerabilities like directory traversal",
+          "line": 72,
+          "suggestion": "Use a more secure way to create and manage temporary directories",
+          "code_snippet": "temp_dir = tempfile.mkdtemp()\nwith zipfile.ZipFile(path, \"r\") as zf:\n    zf.extractall(temp_dir)",
+          "fixed_snippet": "import tempfile\nimport os\n\ntemp_dir = tempfile.mkdtemp(dir=os.getcwd())\nwith zipfile.ZipFile(path, \"r\") as zf:\n    zf.extractall(temp_dir)"
+        },
+        {
+          "type": "code_smell",
+          "severity": "low",
+          "message": "The script uses a magic number (1) as the exit code for failure, but it would be better to use a named constant",
+          "line": 97,
+          "suggestion": "Define a named constant for the exit code",
+          "code_snippet": "sys.exit(1)",
+          "fixed_snippet": "EXIT_FAILURE = 1\nsys.exit(EXIT_FAILURE)"
+        }
+      ],
+      "test_cases": [
+        "Should handle invalid file paths and extensions",
+        "Should validate XML files against XSD schemas correctly",
+        "Should handle tracked changes and redlining validation",
+        "Should auto-repair common issues like hex IDs and whitespace preservation",
+        "Should handle temporary directory creation and cleanup"
+      ],
+      "time_taken": 57.11,
+      "provider": "nvidia"
+    },
+    {
+      "filename": ".agents/skills/docx/scripts/office/soffice.py",
+      "score": 93,
+      "summary": "The provided Python code appears to be a helper for running LibreOffice (soffice) in environments where AF_UNIX sockets may be blocked. It detects the restriction at runtime and applies an LD_PRELOAD shim if needed. The code seems to be well-structured, but there are some potential issues that need to be addressed. The biggest risk is the use of a temporary file to store the shim source code, which could be a security risk if not properly cleaned up. Additionally, the code uses the `subprocess` module to run the `gcc` compiler, which could be a security risk if not properly validated. The code also uses the `os` and `socket` modules, which could be a security risk if not properly validated. The score is 80 due to these potential security risks.",
+      "issues": [
+        {
+          "type": "security",
+          "severity": "medium",
+          "message": "The temporary file used to store the shim source code is not properly cleaned up, which could be a security risk.",
+          "line": 54,
+          "suggestion": "Use a secure way to create and clean up the temporary file, such as using the `tempfile` module with the `delete` parameter set to `True`.",
+          "code_snippet": "src = Path(tempfile.gettempdir()) / 'lo_socket_shim.c'",
+          "fixed_snippet": "with tempfile.NamedTemporaryFile(mode='w', delete=True) as src:"
+        },
+        {
+          "type": "security",
+          "severity": "medium",
+          "message": "The `subprocess` module is used to run the `gcc` compiler, which could be a security risk if not properly validated.",
+          "line": 59,
+          "suggestion": "Use a secure way to run the `gcc` compiler, such as using the `subprocess` module with the `shell` parameter set to `False` and the `check` parameter set to `True`.",
+          "code_snippet": "subprocess.run(['gcc', '-shared', '-fPIC', '-o', str(_SHIM_SO), str(src), '-ldl'], check=True, capture_output=True)",
+          "fixed_snippet": "subprocess.run(['gcc', '-shared', '-fPIC', '-o', str(_SHIM_SO), str(src), '-ldl'], shell=False, check=True, capture_output=True)"
+        },
+        {
+          "type": "readability",
+          "severity": "low",
+          "message": "The imports are not properly organized, which could make the code harder to read.",
+          "line": 17,
+          "suggestion": "Organize the imports in a consistent way, such as using the `import` statement with the module name and then the specific functions or classes needed.",
+          "code_snippet": "import os\nimport socket\nimport subprocess\nimport tempfile\nfrom pathlib import Path",
+          "fixed_snippet": "import os\nimport socket\nimport subprocess\nimport tempfile\nfrom pathlib import Path\n\n# Import specific functions or classes needed"
+        }
+      ],
+      "test_cases": [
+        "Should handle the case where the AF_UNIX socket is blocked",
+        "Should handle the case where the LD_PRELOAD shim is not needed",
+        "Should handle the case where the temporary file cannot be created",
+        "Should handle the case where the gcc compiler is not available",
+        "Should handle the case where the soffice command fails"
+      ],
+      "time_taken": 98.58,
+      "provider": "nvidia"
+    },
+    {
+      "filename": ".agents/skills/pptx/scripts/office/helpers/__init__.py",
+      "score": 100,
+      "summary": "No code was provided for review. The submission is empty.",
+      "issues": [],
+      "test_cases": [],
+      "time_taken": 7.53,
+      "provider": "nvidia"
+    },
+    {
+      "filename": ".agents/skills/pdf/scripts/convert_pdf_to_images.py",
+      "score": 100,
+      "summary": "Could not parse model response.",
+      "issues": [],
+      "test_cases": [],
+      "time_taken": 31.92,
+      "provider": "nvidia"
+    },
+    {
+      "filename": ".agents/skills/pdf/scripts/create_validation_image.py",
+      "score": 93,
+      "summary": "The provided Python script for creating validation images has a clear structure and is well-readable. However, there are some potential issues that need to be addressed, such as error handling and input validation. The script assumes that the input JSON file and image paths are valid, which could lead to errors if they are not. Additionally, the script does not check if the page number is within the valid range of the PDF document.",
+      "issues": [
+        {
+          "type": "error_handling",
+          "severity": "medium",
+          "message": "The script does not handle potential errors when opening the JSON file, such as file not found or invalid JSON format.",
+          "line": 10,
+          "suggestion": "Add try-except block to handle potential errors when opening the JSON file.",
+          "code_snippet": "with open(fields_json_path, 'r') as f:",
+          "fixed_snippet": "try:\n    with open(fields_json_path, 'r') as f:\n        data = json.load(f)\nexcept FileNotFoundError:\n    print(f\"Error: {fields_json_path} not found.\")\n    sys.exit(1)\nexcept json.JSONDecodeError:\n    print(f\"Error: Invalid JSON format in {fields_json_path}.\")\n    sys.exit(1)"
+        },
+        {
+          "type": "error_handling",
+          "severity": "medium",
+          "message": "The script does not handle potential errors when opening the input image, such as file not found or invalid image format.",
+          "line": 13,
+          "suggestion": "Add try-except block to handle potential errors when opening the input image.",
+          "code_snippet": "img = Image.open(input_path)",
+          "fixed_snippet": "try:\n    img = Image.open(input_path)\nexcept FileNotFoundError:\n    print(f\"Error: {input_path} not found.\")\n    sys.exit(1)\nexcept IOError:\n    print(f\"Error: Invalid image format in {input_path}.\")\n    sys.exit(1)"
+        },
+        {
+          "type": "input_validation",
+          "severity": "low",
+          "message": "The script does not validate the input page number, which could lead to errors if it is not a valid integer.",
+          "line": 30,
+          "suggestion": "Add input validation to ensure the page number is a valid integer.",
+          "code_snippet": "page_number = int(sys.argv[1])",
+          "fixed_snippet": "try:\n    page_number = int(sys.argv[1])\nexcept ValueError:\n    print(\"Error: Invalid page number.\")\n    sys.exit(1)"
+        }
+      ],
+      "test_cases": [
+        "Should handle invalid JSON input",
+        "Should handle non-existent input image path",
+        "Should handle invalid page number",
+        "Should handle missing required fields in JSON input"
+      ],
+      "time_taken": 31.42,
+      "provider": "nvidia"
+    },
+    {
+      "filename": ".agents/skills/pdf/scripts/fill_fillable_fields.py",
+      "score": 91,
+      "summary": "The provided Python script for filling fillable PDF fields has a good structure and clear documentation. However, there are some potential issues and improvements that can be made, such as error handling, validation, and security. The script uses the pypdf library to read and write PDF files, and it includes a monkeypatch to fix an issue with the library. The script also includes a validation function to check the values of the fields. Overall, the script is well-organized and readable, but it can be improved with additional error handling and security measures.",
+      "issues": [
+        {
+          "type": "error_handling",
+          "severity": "medium",
+          "message": "The script does not handle errors when opening the fields JSON file. It should add a try-except block to handle potential errors.",
+          "line": 12,
+          "suggestion": "Add a try-except block to handle errors when opening the fields JSON file.",
+          "code_snippet": "with open(fields_json_path) as f:",
+          "fixed_snippet": "try:\n    with open(fields_json_path) as f:\n        fields = json.load(f)\nexcept FileNotFoundError:\n    print(f\"Error: {fields_json_path} not found\")\n    sys.exit(1)"
+        },
+        {
+          "type": "error_handling",
+          "severity": "medium",
+          "message": "The script does not handle errors when reading the input PDF file. It should add a try-except block to handle potential errors.",
+          "line": 23,
+          "suggestion": "Add a try-except block to handle errors when reading the input PDF file.",
+          "code_snippet": "reader = PdfReader(input_pdf_path)",
+          "fixed_snippet": "try:\n    reader = PdfReader(input_pdf_path)\nexcept FileNotFoundError:\n    print(f\"Error: {input_pdf_path} not found\")\n    sys.exit(1)"
+        },
+        {
+          "type": "error_handling",
+          "severity": "medium",
+          "message": "The script does not handle errors when writing to the output PDF file. It should add a try-except block to handle potential errors.",
+          "line": 51,
+          "suggestion": "Add a try-except block to handle errors when writing to the output PDF file.",
+          "code_snippet": "with open(output_pdf_path, \"wb\") as f:",
+          "fixed_snippet": "try:\n    with open(output_pdf_path, \"wb\") as f:\n        writer.write(f)\nexcept FileNotFoundError:\n    print(f\"Error: {output_pdf_path} not found\")\n    sys.exit(1)"
+        }
+      ],
+      "test_cases": [
+        "Should handle invalid input PDF file",
+        "Should handle invalid field values JSON file",
+        "Should handle invalid output PDF file path",
+        "Should validate field values correctly",
+        "Should handle errors when writing to output PDF file"
+      ],
+      "time_taken": 29.1,
+      "provider": "nvidia"
+    },
+    {
+      "filename": ".agents/skills/mcp-builder/scripts/connections.py",
+      "score": 93,
+      "summary": "The provided Python code for MCP connection handling is well-structured and readable. However, there are some potential issues and improvements that can be made, such as adding error handling for unsupported transport types, improving the documentation for the create_connection function, and considering the use of a more robust way to handle the creation of MCP connections. The code score is 85 due to the lack of error handling and potential security vulnerabilities.",
+      "issues": [
+        {
+          "type": "error_handling",
+          "severity": "medium",
+          "message": "The create_connection function does not handle errors when creating the MCP connection context",
+          "line": 151,
+          "suggestion": "Add try-except blocks to handle potential errors when creating the MCP connection context",
+          "code_snippet": "raise ValueError(f\"Unsupported transport type: {transport}. Use 'stdio', 'sse', or 'http'\")",
+          "fixed_snippet": "try: ... except Exception as e: logging.error(f\"Error creating MCP connection context: {e}\")"
+        },
+        {
+          "type": "code_smell",
+          "severity": "low",
+          "message": "The transport type is converted to lowercase using the lower() method, which may not be necessary",
+          "line": 133,
+          "suggestion": "Consider removing the lower() method call if it is not necessary",
+          "code_snippet": "transport = transport.lower()",
+          "fixed_snippet": "transport = transport"
+        },
+        {
+          "type": "error_handling",
+          "severity": "medium",
+          "message": "The create_connection function does not handle errors when the command is not provided for stdio transport",
+          "line": 135,
+          "suggestion": "Add a check to ensure that the command is provided for stdio transport",
+          "code_snippet": "if transport == \"stdio\":",
+          "fixed_snippet": "if transport == \"stdio\" and not command: raise ValueError(\"Command is required for stdio transport\")"
+        }
+      ],
+      "test_cases": [
+        "Should handle unsupported transport types gracefully",
+        "Should raise an error when command is not provided for stdio transport",
+        "Should raise an error when URL is not provided for sse and http transports",
+        "Should create the appropriate MCP connection based on the transport type",
+        "Should handle errors when creating the MCP connection context"
+      ],
+      "time_taken": 113.12,
+      "provider": "nvidia"
+    },
+    {
+      "filename": ".agents/skills/pptx/scripts/office/helpers/merge_runs.py",
+      "score": 94,
+      "summary": "The provided Python script for merging adjacent runs with identical formatting in DOCX files appears to be well-structured and readable. However, there are some potential issues that need to be addressed, such as error handling and potential XML parsing vulnerabilities. The script uses defusedxml.minidom to parse the XML, which is a good practice to prevent XML-based attacks. The script also removes rsid attributes from runs and proofErr elements, which is a good practice to reduce the file size and improve performance. The merge_runs function is the main entry point of the script, and it takes an input directory as an argument. It returns a tuple containing the number of merged runs and a message indicating the result of the operation.",
+      "issues": [
+        {
+          "type": "error_handling",
+          "severity": "medium",
+          "message": "The script does not handle XML parsing errors explicitly. It relies on the defusedxml.minidom parser to raise an exception if the XML is malformed. However, it would be better to handle this exception explicitly and provide a more informative error message.",
+          "line": 23,
+          "suggestion": "Add a try-except block around the XML parsing code to handle parsing errors explicitly.",
+          "code_snippet": "dom = defusedxml.minidom.parseString(doc_xml.read_text(encoding=\"utf-8\"))",
+          "fixed_snippet": "try: dom = defusedxml.minidom.parseString(doc_xml.read_text(encoding=\"utf-8\")) except Exception as e: print(f\"Error parsing XML: {e}\")"
+        },
+        {
+          "type": "error_handling",
+          "severity": "medium",
+          "message": "The script catches all exceptions and returns a generic error message. It would be better to catch specific exceptions and provide more informative error messages.",
+          "line": 39,
+          "suggestion": "Catch specific exceptions instead of catching all exceptions.",
+          "code_snippet": "except Exception as e: return 0, f\"Error: {e}\"",
+          "fixed_snippet": "except FileNotFoundError: return 0, \"Error: Input directory not found\" except Exception as e: return 0, f\"Error: {e}\""
+        }
+      ],
+      "test_cases": [
+        "Should handle XML parsing errors gracefully",
+        "Should merge adjacent runs with identical formatting correctly",
+        "Should remove rsid attributes and proofErr elements correctly",
+        "Should handle cases where the input directory does not exist or is not a valid DOCX file"
+      ],
+      "time_taken": 48.58,
+      "provider": "nvidia"
+    },
+    {
+      "filename": ".agents/skills/pptx/scripts/office/validators/__init__.py",
+      "score": 100,
+      "summary": "The provided Python script is an initialization file for validation modules in the context of Word document processing. It imports and exports various schema validators without containing any executable code or complex logic. The code is well-structured, readable, and follows best practices for import and export statements. However, there are no significant issues or improvements suggested as the code snippet is minimal and primarily serves as a module initializer.",
+      "issues": [],
+      "test_cases": [],
+      "time_taken": 31.93,
+      "provider": "nvidia"
+    },
+    {
+      "filename": ".agents/skills/pptx/scripts/__init__.py",
+      "score": 100,
+      "summary": "The file is empty, containing no code to review. This is not a bug or security issue, but it may indicate an incomplete implementation or a placeholder that should be removed or populated. No runtime failures, security vulnerabilities, or other issues are present because there is no executable code.",
+      "issues": [],
+      "test_cases": [],
+      "time_taken": 69.38,
+      "provider": "nvidia"
+    },
+    {
+      "filename": ".agents/skills/pdf/scripts/check_fillable_fields.py",
+      "score": 94,
+      "summary": "The provided Python script checks if a PDF has fillable form fields. It uses the pypdf library and takes the PDF file path as a command-line argument. The script is straightforward but lacks error handling and input validation. The code is readable, but there are potential issues with file path handling and exception management. Score: 80",
+      "issues": [
+        {
+          "type": "error_handling",
+          "severity": "medium",
+          "message": "The script does not handle the case where the PDF file is not found or cannot be opened.",
+          "line": 7,
+          "suggestion": "Add try-except block to handle exceptions when opening the PDF file.",
+          "code_snippet": "reader = PdfReader(sys.argv[1])",
+          "fixed_snippet": "try: reader = PdfReader(sys.argv[1])\nexcept FileNotFoundError: print('Error: PDF file not found.')"
+        },
+        {
+          "type": "input_validation",
+          "severity": "medium",
+          "message": "The script does not validate the input PDF file path.",
+          "line": 7,
+          "suggestion": "Add input validation to check if the PDF file path is valid and exists.",
+          "code_snippet": "reader = PdfReader(sys.argv[1])",
+          "fixed_snippet": "if not os.path.exists(sys.argv[1]): print('Error: Invalid PDF file path.')\nreader = PdfReader(sys.argv[1])"
+        }
+      ],
+      "test_cases": [
+        "Should handle PDF file not found error",
+        "Should handle PDF file with invalid format",
+        "Should handle PDF file with fillable form fields",
+        "Should handle PDF file without fillable form fields"
+      ],
+      "time_taken": 96.28,
+      "provider": "nvidia"
+    },
+    {
+      "filename": ".agents/skills/pptx/scripts/office/helpers/simplify_redlines.py",
+      "score": 88,
+      "summary": "The provided Python script for simplifying tracked changes in Word documents appears to be well-structured and readable. However, there are some potential issues that need to be addressed, such as error handling and input validation. The script uses defusedxml to parse XML files, which is a good practice to prevent XML-based attacks. The script also uses a consistent naming convention and follows PEP 8 guidelines. Overall, the script is well-organized, but some improvements can be made to enhance its reliability and security.",
+      "issues": [
+        {
+          "type": "error_handling",
+          "severity": "medium",
+          "message": "The function simplify_redlines does not check if the input directory is a valid directory before attempting to read the document.xml file.",
+          "line": 23,
+          "suggestion": "Add a check to ensure the input directory is a valid directory before attempting to read the document.xml file.",
+          "code_snippet": "doc_xml = Path(input_dir) / \"word\" / \"document.xml\"",
+          "fixed_snippet": "if not Path(input_dir).is_dir():\n    return 0, f\"Error: {input_dir} is not a valid directory\""
+        },
+        {
+          "type": "error_handling",
+          "severity": "medium",
+          "message": "The function simplify_redlines does not handle parsing errors in the XML file.",
+          "line": 29,
+          "suggestion": "Add a try-except block to handle parsing errors in the XML file.",
+          "code_snippet": "dom = defusedxml.minidom.parseString(doc_xml.read_text(encoding=\"utf-8\"))",
+          "fixed_snippet": "try:\n    dom = defusedxml.minidom.parseString(doc_xml.read_text(encoding=\"utf-8\"))\nexcept ET.ParseError as e:\n    return 0, f\"Error: {e}\""
+        },
+        {
+          "type": "error_handling",
+          "severity": "medium",
+          "message": "The function simplify_redlines catches all exceptions, which can mask other issues.",
+          "line": 44,
+          "suggestion": "Catch specific exceptions instead of catching all exceptions.",
+          "code_snippet": "except Exception as e:",
+          "fixed_snippet": "except (ET.ParseError, zipfile.BadZipFile) as e:"
+        },
+        {
+          "type": "error_handling",
+          "severity": "medium",
+          "message": "The function infer_author does not check if the modified directory is a valid directory before attempting to read the document.xml file.",
+          "line": 173,
+          "suggestion": "Add a check to ensure the modified directory is a valid directory before attempting to read the document.xml file.",
+          "code_snippet": "modified_xml = modified_dir / \"word\" / \"document.xml\"",
+          "fixed_snippet": "if not modified_dir.is_dir():\n    return default"
+        }
+      ],
+      "test_cases": [
+        "Should handle invalid input directories",
+        "Should handle missing document.xml files",
+        "Should handle parsing errors in XML files",
+        "Should handle multiple authors with new changes",
+        "Should handle empty tracked change lists"
+      ],
+      "time_taken": 86.51,
+      "provider": "nvidia"
+    },
+    {
+      "filename": ".agents/skills/pdf/scripts/check_bounding_boxes.py",
+      "score": 95,
+      "summary": "The provided Python script for checking bounding boxes in PDF fields has a good structure and clear documentation. However, there are some potential issues and improvements that can be made, such as adding error handling for file operations and improving the intersection detection logic. The script also lacks input validation and does not handle cases where the input JSON file is malformed or missing required fields.",
+      "issues": [
+        {
+          "type": "error_handling",
+          "severity": "medium",
+          "message": "The script does not handle errors that may occur when loading the input JSON file. It assumes that the file is always valid and does not contain any syntax errors.",
+          "line": 17,
+          "suggestion": "Add try-except block to handle JSONDecodeError and other potential exceptions when loading the input JSON file.",
+          "code_snippet": "fields = json.load(fields_json_stream)",
+          "fixed_snippet": "try: fields = json.load(fields_json_stream) except json.JSONDecodeError as e: print(f'Error loading JSON file: {e}'); sys.exit(1)"
+        },
+        {
+          "type": "logic",
+          "severity": "low",
+          "message": "The intersection detection logic only checks for horizontal and vertical disjointness, but does not consider cases where the rectangles overlap diagonally.",
+          "line": 35,
+          "suggestion": "Improve the intersection detection logic to handle diagonal overlaps.",
+          "code_snippet": "return not (disjoint_horizontal or disjoint_vertical)",
+          "fixed_snippet": "return not (disjoint_horizontal or disjoint_vertical or (r1[0] < r2[2] and r1[2] > r2[0] and r1[1] < r2[3] and r1[3] > r2[1]))"
+        },
+        {
+          "type": "input_validation",
+          "severity": "low",
+          "message": "The script does not validate the input command-line argument. It assumes that the argument is always a valid file path.",
+          "line": 60,
+          "suggestion": "Add input validation to check if the command-line argument is a valid file path.",
+          "code_snippet": "if len(sys.argv) != 2:",
+          "fixed_snippet": "if len(sys.argv) != 2 or not os.path.isfile(sys.argv[1]): print('Usage: check_bounding_boxes.py [fields.json]'); sys.exit(1)"
+        }
+      ],
+      "test_cases": [
+        "Should handle valid input JSON file with no intersecting bounding boxes",
+        "Should handle valid input JSON file with intersecting bounding boxes",
+        "Should handle invalid input JSON file with missing required fields",
+        "Should handle file operation errors when reading the input JSON file"
+      ],
+      "time_taken": 148.67,
+      "provider": "nvidia"
+    },
+    {
+      "filename": ".agents/skills/slack-gif-creator/core/validators.py",
+      "score": 93,
+      "summary": "The provided Python script for validating GIFs for Slack has a clear structure and documentation. However, there are some potential issues and improvements that can be made. The script does not handle all possible exceptions that may occur when opening or processing the GIF file. Additionally, the script does not check for the maximum allowed frame count or duration for Slack GIFs. The script also does not provide any feedback or logging for errors that may occur during validation.",
+      "issues": [
+        {
+          "type": "error_handling",
+          "severity": "medium",
+          "message": "The script does not handle the case where the GIF file does not exist",
+          "line": 29,
+          "suggestion": "Add a try-except block to handle the FileNotFoundError exception",
+          "code_snippet": "if not gif_path.exists():",
+          "fixed_snippet": "try: gif_path.exists()\nexcept FileNotFoundError: return False, {\"error\": f\"File not found: {gif_path}\"}"
+        },
+        {
+          "type": "error_handling",
+          "severity": "medium",
+          "message": "The script does not handle exceptions that may occur when opening the GIF file",
+          "line": 39,
+          "suggestion": "Add a try-except block to handle exceptions that may occur when opening the GIF file",
+          "code_snippet": "with Image.open(gif_path) as img:",
+          "fixed_snippet": "try:\n    with Image.open(gif_path) as img:\nexcept Exception as e:\n    return False, {\"error\": f\"Failed to open GIF: {e}\"}"
+        },
+        {
+          "type": "code_smell",
+          "severity": "low",
+          "message": "The script uses magic numbers for the optimal and acceptable dimensions",
+          "line": 64,
+          "suggestion": "Define constants for the optimal and acceptable dimensions",
+          "code_snippet": "if is_emoji:\n    optimal = width == height == 128",
+          "fixed_snippet": "OPTIMAL_DIMENSION = 128\nif is_emoji:\n    optimal = width == height == OPTIMAL_DIMENSION"
+        }
+      ],
+      "test_cases": [
+        "Should handle invalid GIF file paths",
+        "Should handle GIF files with invalid dimensions",
+        "Should handle GIF files with too many frames",
+        "Should handle GIF files with too long duration",
+        "Should provide feedback for invalid GIF files"
+      ],
+      "time_taken": 39.38,
+      "provider": "nvidia"
+    },
+    {
+      "filename": ".agents/skills/skill-creator/scripts/utils.py",
+      "score": 93,
+      "summary": "The provided Python script for parsing SKILL.md files appears to be well-structured and readable. However, there are some potential issues with error handling and input validation. The script assumes that the SKILL.md file exists and has a specific format, but it does not handle cases where the file is missing or has an incorrect format. Additionally, the script uses string manipulation to extract the name and description from the frontmatter, which may not be robust if the frontmatter has a complex structure.",
+      "issues": [
+        {
+          "type": "error_handling",
+          "severity": "medium",
+          "message": "The script does not handle the case where the SKILL.md file is missing or cannot be read.",
+          "line": 9,
+          "suggestion": "Add try-except block to handle FileNotFoundError and other exceptions.",
+          "code_snippet": "(skill_path / \"SKILL.md\").read_text()",
+          "fixed_snippet": "try: content = (skill_path / \"SKILL.md\").read_text(); except FileNotFoundError: raise ValueError(\"SKILL.md file not found\"); except Exception as e: raise ValueError(f\"Error reading SKILL.md file: {e}\")"
+        },
+        {
+          "type": "input_validation",
+          "severity": "medium",
+          "message": "The script assumes that the first line of the SKILL.md file is the frontmatter opening marker, but it does not handle cases where this is not true.",
+          "line": 13,
+          "suggestion": "Add input validation to check that the first line is the frontmatter opening marker.",
+          "code_snippet": "if lines[0].strip() != \"---\":",
+          "fixed_snippet": "if not lines or lines[0].strip() != \"---\": raise ValueError(\"SKILL.md file has incorrect format\")"
+        },
+        {
+          "type": "code_smell",
+          "severity": "low",
+          "message": "The script uses string manipulation to extract the name and description from the frontmatter, which may not be robust if the frontmatter has a complex structure.",
+          "line": 31,
+          "suggestion": "Consider using a YAML parser to extract the name and description from the frontmatter.",
+          "code_snippet": "name = line[len(\"name:\"):].strip().strip('\"').strip(\"'\")",
+          "fixed_snippet": "import yaml; ...; name = yaml.safe_load(line)['name']"
+        }
+      ],
+      "test_cases": [
+        "Should handle missing SKILL.md file",
+        "Should handle SKILL.md file with incorrect format",
+        "Should handle frontmatter with complex structure"
+      ],
+      "time_taken": 136.55,
+      "provider": "nvidia"
+    },
+    {
+      "filename": ".agents/skills/slack-gif-creator/core/frame_composer.py",
+      "score": 93,
+      "summary": "The provided Python script for frame composition utilities appears to be well-structured and readable. However, there are some potential issues and improvements that can be suggested. The script lacks error handling and input validation, which can lead to runtime errors or unexpected behavior. Additionally, some functions can be optimized for better performance. The script also uses the Pillow library, which is a potential security risk if not used properly. Overall, the script is well-organized, but it requires some improvements to make it more robust and secure.",
+      "issues": [
+        {
+          "type": "error_handling",
+          "severity": "medium",
+          "message": "The create_blank_frame function does not validate its input parameters, which can lead to runtime errors.",
+          "line": 16,
+          "suggestion": "Add input validation to ensure that the width, height, and color are valid.",
+          "code_snippet": "def create_blank_frame(width: int, height: int, color: tuple[int, int, int] = (255, 255, 255)) -> Image.Image:",
+          "fixed_snippet": "def create_blank_frame(width: int, height: int, color: tuple[int, int, int] = (255, 255, 255)) -> Image.Image:\n    if not isinstance(width, int) or not isinstance(height, int) or not isinstance(color, tuple):\n        raise ValueError('Invalid input parameters')"
+        },
+        {
+          "type": "performance",
+          "severity": "low",
+          "message": "The draw_circle function uses the ImageDraw.Draw method, which can be slow for large frames or complex compositions.",
+          "line": 55,
+          "suggestion": "Consider using a more efficient drawing method, such as using NumPy arrays to manipulate pixel values.",
+          "code_snippet": "draw = ImageDraw.Draw(frame)\n    x, y = center\n    bbox = [x - radius, y - radius, x + radius, y + radius]\n    draw.ellipse(bbox, fill=fill_color, outline=outline_color, width=outline_width)",
+          "fixed_snippet": "import numpy as np\n    # ... \n    frame_array = np.array(frame)\n    # Manipulate pixel values using NumPy arrays\n    frame = Image.fromarray(frame_array)"
+        },
+        {
+          "type": "security",
+          "severity": "medium",
+          "message": "The create_gradient_background function uses the Pillow library, which can be a security risk if not used properly.",
+          "line": 121,
+          "suggestion": "Ensure that the Pillow library is used securely, such as by validating user input and using secure protocols for image processing.",
+          "code_snippet": "frame = Image.new('RGB', (width, height))\n    draw = ImageDraw.Draw(frame)\n    # ...",
+          "fixed_snippet": "frame = Image.new('RGB', (width, height))\n    draw = ImageDraw.Draw(frame)\n    # Validate user input and use secure protocols for image processing"
+        }
+      ],
+      "test_cases": [
+        "Should handle invalid input for frame size and color",
+        "Should handle errors when drawing shapes or text on the frame",
+        "Should optimize performance for large frame sizes or complex compositions"
+      ],
+      "time_taken": 109.72,
+      "provider": "nvidia"
+    },
+    {
+      "filename": ".agents/skills/xlsx/scripts/office/soffice.py",
+      "score": 86,
+      "summary": "The provided Python script for running LibreOffice (soffice) in environments where AF_UNIX sockets may be blocked appears to be well-structured and readable. However, there are some potential issues and improvements that can be made. The script uses a shim to detect and apply an LD_PRELOAD shim if needed, which may pose a security risk if not properly validated. Additionally, the script uses subprocess calls to run soffice, which may lead to security vulnerabilities if not properly sanitized. The script also uses a temporary file to store the shim source code, which may pose a security risk if not properly cleaned up.",
+      "issues": [
+        {
+          "type": "security",
+          "severity": "high",
+          "message": "The shim source code is stored in a temporary file, which may pose a security risk if not properly cleaned up.",
+          "line": 29,
+          "suggestion": "Use a secure method to store and clean up the shim source code, such as using a secure temporary file or a secure storage mechanism.",
+          "code_snippet": "src = Path(tempfile.gettempdir()) / 'lo_socket_shim.c'",
+          "fixed_snippet": "src = Path('/dev/shm') / 'lo_socket_shim.c'"
+        },
+        {
+          "type": "security",
+          "severity": "medium",
+          "message": "The subprocess call to run soffice may lead to security vulnerabilities if not properly sanitized.",
+          "line": 60,
+          "suggestion": "Use a secure method to sanitize the arguments passed to soffice, such as using a whitelist or a secure argument parsing mechanism.",
+          "code_snippet": "subprocess.run(['gcc', '-shared', '-fPIC', '-o', str(_SHIM_SO), str(src), '-ldl'])",
+          "fixed_snippet": "subprocess.run(['gcc', '-shared', '-fPIC', '-o', str(_SHIM_SO), str(src), '-ldl'], check=True, capture_output=True)"
+        },
+        {
+          "type": "readability",
+          "severity": "low",
+          "message": "The script uses a simple sys.exit call to exit the program, which may not provide enough information about the exit status.",
+          "line": 181,
+          "suggestion": "Use a more informative method to exit the program, such as using a logging mechanism or a more descriptive exit message.",
+          "code_snippet": "sys.exit(result.returncode)",
+          "fixed_snippet": "logging.info('Exiting with return code %d', result.returncode); sys.exit(result.returncode)"
+        }
+      ],
+      "test_cases": [
+        "Should handle soffice execution with valid arguments",
+        "Should handle soffice execution with invalid arguments",
+        "Should handle shim detection and application correctly",
+        "Should handle subprocess calls securely"
+      ],
+      "time_taken": 52.18,
+      "provider": "nvidia"
+    },
+    {
+      "filename": ".agents/skills/xlsx/scripts/recalc.py",
+      "score": 86,
+      "summary": "The provided Python script for recalculating Excel formulas using LibreOffice has a good structure and clear documentation. However, there are some potential issues with error handling, security, and performance. The script uses subprocess to run LibreOffice commands, which can be a security risk if not properly sanitized. Additionally, the script does not handle errors well, and can crash if LibreOffice is not installed or configured properly. The script also uses a fixed timeout for LibreOffice commands, which can cause issues if the commands take longer than expected to complete.",
+      "issues": [
+        {
+          "type": "security",
+          "severity": "high",
+          "message": "The script uses subprocess to run LibreOffice commands, which can be a security risk if not properly sanitized",
+          "line": 93,
+          "suggestion": "Use a more secure way to run LibreOffice commands, such as using a library that provides a safer interface",
+          "code_snippet": "result = subprocess.run(cmd, capture_output=True, text=True, env=get_soffice_env())",
+          "fixed_snippet": "Use a library like python-libreoffice to run LibreOffice commands"
+        },
+        {
+          "type": "error_handling",
+          "severity": "medium",
+          "message": "The script does not handle errors well, and can crash if an exception occurs",
+          "line": 161,
+          "suggestion": "Add better error handling to prevent the script from crashing",
+          "code_snippet": "except Exception as e: return {\"error\": str(e)}",
+          "fixed_snippet": "except Exception as e: logging.error(str(e)); return {\"error\": \"An error occurred\"}"
+        },
+        {
+          "type": "performance",
+          "severity": "low",
+          "message": "The script uses a fixed timeout for LibreOffice commands, which can cause issues if the commands take longer than expected to complete",
+          "line": 90,
+          "suggestion": "Use a more dynamic way to set the timeout, such as based on the size of the Excel file",
+          "code_snippet": "cmd = [\"gtimeout\", str(timeout)] + cmd",
+          "fixed_snippet": "Use a library like python-libreoffice to run LibreOffice commands with a dynamic timeout"
+        }
+      ],
+      "test_cases": [
+        "Should handle LibreOffice not installed or configured properly",
+        "Should handle errors when running LibreOffice commands",
+        "Should handle timeouts when running LibreOffice commands",
+        "Should sanitize input to prevent security risks"
+      ],
+      "time_taken": 31.38,
+      "provider": "nvidia"
+    },
+    {
+      "filename": "backups/src_backup_20260506_153937/app/api/audit/reports/export/route.js",
+      "score": 86,
+      "summary": "The provided JavaScript code for exporting audit reports has a good structure and clear documentation. However, there are some potential issues and improvements that can be made. The code lacks input validation for the 'tenantId' and 'email' fields, which could lead to security vulnerabilities. Additionally, the code does not handle errors properly, and the error messages are not specific enough. The code also uses a try-catch block to handle errors, but it does not provide any feedback to the user in case of an error. The code uses the 'console.error' function to log errors, but it does not provide any additional information about the error. The code also lacks a circuit breaker pattern for external API calls, which could lead to cascading failures. The code uses the 'randomUUID' function to generate a unique ID, but it does not check if the generated ID is already in use. The code also lacks a mechanism for handling retries and timeouts for external API calls.",
+      "issues": [
+        {
+          "type": "security",
+          "severity": "high",
+          "message": "Lack of input validation for 'tenantId' and 'email' fields",
+          "line": 27,
+          "suggestion": "Add input validation for 'tenantId' and 'email' fields to prevent security vulnerabilities",
+          "code_snippet": "const body = await request.json().catch(() => ({}));",
+          "fixed_snippet": "const body = await request.json().catch(() => ({}));\nconst tenantId = validateInput(body.tenantId);\nconst email = validateInput(body.email);"
+        },
+        {
+          "type": "error_handling",
+          "severity": "medium",
+          "message": "Error handling is not proper and does not provide specific error messages",
+          "line": 48,
+          "suggestion": "Improve error handling to provide specific error messages and feedback to the user",
+          "code_snippet": "try { ... } catch (innerError) { ... }",
+          "fixed_snippet": "try { ... } catch (innerError) { \n  const errorMessage = 'Error exporting audit report: ' + innerError.message;\n  return NextResponse.json({ error: errorMessage }, { status: 500 });\n}"
+        },
+        {
+          "type": "code_smell",
+          "severity": "low",
+          "message": "The 'randomUUID' function is used to generate a unique ID, but it does not check if the generated ID is already in use",
+          "line": 89,
+          "suggestion": "Add a check to ensure the generated ID is not already in use",
+          "code_snippet": "const key = `audit-reports/${tenantId}/${from}_to_${to}/${exportId}-${randomUUID()}.csv`;",
+          "fixed_snippet": "const key = `audit-reports/${tenantId}/${from}_to_${to}/${exportId}-${generateUniqueID()}.csv`;\nfunction generateUniqueID() { ... }"
+        }
+      ],
+      "test_cases": [
+        "Should handle invalid input for 'from' and 'to' dates",
+        "Should handle invalid input for 'tenantId' and 'email' fields",
+        "Should handle errors properly and provide specific error messages",
+        "Should implement a circuit breaker pattern for external API calls",
+        "Should handle retries and timeouts for external API calls"
+      ],
+      "time_taken": 71.37,
+      "provider": "nvidia"
+    },
+    {
+      "filename": "backups/src_backup_20260506_153937/app/api/audit/logs/route.js",
+      "score": 93,
+      "summary": "The provided JavaScript code for handling GET requests to the /api/audit/logs endpoint has a good structure and clear authentication checks. However, there are some potential issues and improvements that can be made, such as input validation, error handling, and SQL query construction. The code score is 85 due to some medium-severity issues found.",
+      "issues": [
+        {
+          "type": "input_validation",
+          "severity": "medium",
+          "message": "Input validation for query parameters is missing",
+          "line": 20,
+          "suggestion": "Add input validation for query parameters to prevent potential security issues",
+          "code_snippet": "const from = parseDate(url.searchParams.get('from'), '1970-01-01');",
+          "fixed_snippet": "const from = parseDate(url.searchParams.get('from'), '1970-01-01'); if (!from) { return NextResponse.json({ error: 'Invalid date format' }, { status: 400 }); }"
+        },
+        {
+          "type": "sql_injection",
+          "severity": "medium",
+          "message": "SQL query construction is vulnerable to SQL injection attacks",
+          "line": 38,
+          "suggestion": "Use parameterized queries or prepared statements to prevent SQL injection attacks",
+          "code_snippet": "const where = ['tenant_id = $1::uuid', 'DATE(created_at) >= $2::date', 'DATE(created_at) <= $3::date'];",
+          "fixed_snippet": "const where = ['tenant_id = $1::uuid', 'DATE(created_at) >= $2::date', 'DATE(created_at) <= $3::date']; const params = [tenantId, from, to];"
+        },
+        {
+          "type": "error_handling",
+          "severity": "low",
+          "message": "Error handling can be improved to provide more informative error messages",
+          "line": 59,
+          "suggestion": "Improve error handling to provide more informative error messages",
+          "code_snippet": "return NextResponse.json({ error: 'Failed to load audit logs' }, { status: 500 });",
+          "fixed_snippet": "return NextResponse.json({ error: `Failed to load audit logs: ${error.message}` }, { status: 500 });"
+        }
+      ],
+      "test_cases": [
+        "Should handle invalid date formats in query parameters",
+        "Should prevent SQL injection attacks through user input",
+        "Should return a 401 error for unauthorized users",
+        "Should return a 400 error for missing or invalid tenant context",
+        "Should return a 500 error for database query failures"
+      ],
+      "time_taken": 93.13,
+      "provider": "nvidia"
+    },
+    {
+      "filename": "backups/src_backup_20260506_153937/app/api/college/dashboard/route.js",
+      "score": 81,
+      "summary": "The provided code is a Next.js API route for the college dashboard. It fetches various statistics and pending actions for a college admin. The code is well-structured, but there are some potential issues and improvements that can be made. The biggest risk is the lack of input validation and error handling, which can lead to security vulnerabilities and data corruption. The code also uses multiple database queries, which can impact performance. Overall, the code is good, but it needs some improvements to make it more robust and secure.",
+      "issues": [
+        {
+          "type": "security",
+          "severity": "medium",
+          "message": "Unauthorized access is not handled properly. The error message should be more specific and not reveal sensitive information.",
+          "line": 10,
+          "suggestion": "Return a more specific error message and consider logging the error for further investigation.",
+          "code_snippet": "return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });",
+          "fixed_snippet": "return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });"
+        },
+        {
+          "type": "performance",
+          "severity": "medium",
+          "message": "The database query is not optimized. It uses multiple subqueries, which can impact performance.",
+          "line": 17,
+          "suggestion": "Consider using a single query with joins or optimizing the subqueries.",
+          "code_snippet": "const statsQuery = await query(`SELECT ...`",
+          "fixed_snippet": "const statsQuery = await query(`SELECT ...`).join(...)"
+        },
+        {
+          "type": "performance",
+          "severity": "medium",
+          "message": "The database query is not optimized. It uses multiple subqueries, which can impact performance.",
+          "line": 43,
+          "suggestion": "Consider using a single query with joins or optimizing the subqueries.",
+          "code_snippet": "const pendingQuery = await query(`SELECT ...`",
+          "fixed_snippet": "const pendingQuery = await query(`SELECT ...`).join(...)"
+        },
+        {
+          "type": "error_handling",
+          "severity": "high",
+          "message": "The error handling is not proper. It logs the error, but does not provide any useful information.",
+          "line": 76,
+          "suggestion": "Consider logging the error with more context and providing a more specific error message.",
+          "code_snippet": "console.error('Failed to load college dashboard data:', error);",
+          "fixed_snippet": "console.error('Failed to load college dashboard data:', { error, query: statsQuery });"
+        }
+      ],
+      "test_cases": [
+        "Should handle database query errors",
+        "Should validate user input",
+        "Should handle unauthorized access",
+        "Should fetch statistics correctly",
+        "Should fetch pending actions correctly"
+      ],
+      "time_taken": 100.5,
+      "provider": "nvidia"
+    },
+    {
+      "filename": "backups/src_backup_20260506_153937/app/api/college/offers/upload/route.js",
+      "score": 84,
+      "summary": "The provided code is a Next.js API route for uploading college offers via CSV. It has a good structure and clear authentication checks. However, there are some potential issues and improvements that can be made. The code does not handle errors well, and there are some potential SQL injection vulnerabilities. The code also does not validate the CSV file properly, which can lead to errors. The code uses a try-catch block to handle errors, but it does not provide much information about the error. The code also uses a generic error message, which can make it difficult to diagnose issues. The code does not check if the student_id exists before inserting a new offer, which can lead to errors if the student_id does not exist. The code also does not check if the employer_id exists before inserting a new offer, which can lead to errors if the employer_id does not exist.",
+      "issues": [
+        {
+          "type": "security",
+          "severity": "high",
+          "message": "Potential SQL injection vulnerability in the INSERT INTO offers query",
+          "line": 61,
+          "suggestion": "Use parameterized queries or prepared statements to prevent SQL injection",
+          "code_snippet": "await query(`INSERT INTO offers (student_id, employer_id, job_title, salary, location, status, joining_date, deadline, salary_currency, reported_company_name) VALUES ($1, NULL, $2, $3, $4, $5, NULL, $6, 'INR', $7)`, [studentId, jobTitle, salary, location, status, deadline, company])",
+          "fixed_snippet": "await query(`INSERT INTO offers (student_id, employer_id, job_title, salary, location, status, joining_date, deadline, salary_currency, reported_company_name) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`, [studentId, null, jobTitle, salary, location, status, null, deadline, 'INR', company])"
+        },
+        {
+          "type": "error_handling",
+          "severity": "medium",
+          "message": "Error handling can be improved by providing more information about the error",
+          "line": 94,
+          "suggestion": "Use a more specific error message and log the error with more context",
+          "code_snippet": "console.error('college offers csv row', lineNo, e); errors.push({ line: lineNo, message: e.message || 'Insert failed' })",
+          "fixed_snippet": "console.error(`Error inserting offer on line ${lineNo}: ${e.message}`); errors.push({ line: lineNo, message: `Error inserting offer: ${e.message}` })"
+        },
+        {
+          "type": "error_handling",
+          "severity": "medium",
+          "message": "Error handling can be improved by providing more information about the error",
+          "line": 101,
+          "suggestion": "Use a more specific error message and log the error with more context",
+          "code_snippet": "console.error('POST /api/college/offers/upload', error); return NextResponse.json({ error: 'Failed to import CSV' }, { status: 500 })",
+          "fixed_snippet": "console.error(`Error uploading college offers: ${error.message}`); return NextResponse.json({ error: `Error uploading college offers: ${error.message}` }, { status: 500 })"
+        }
+      ],
+      "test_cases": [
+        "Should handle CSV file with missing header row",
+        "Should handle CSV file with missing data rows",
+        "Should handle CSV file with invalid data",
+        "Should handle errors when inserting offers into the database",
+        "Should handle errors when refreshing offer latest flags for students"
+      ],
+      "time_taken": 57.34,
+      "provider": "nvidia"
+    },
+    {
+      "filename": "backups/src_backup_20260506_153937/app/api/data-entry/options/route.js",
+      "score": 84,
+      "summary": "The provided code is a Next.js API route for fetching data-entry options. It has a good structure and clear authentication checks. However, there are some potential issues and improvements that can be made. The code is vulnerable to SQL injection attacks if the tenantId is not properly sanitized. Additionally, the error handling can be improved to provide more specific error messages. The code also lacks input validation and sanitization for the tenantId parameter.",
+      "issues": [
+        {
+          "type": "security",
+          "severity": "high",
+          "message": "The tenantId parameter is not properly sanitized, making the code vulnerable to SQL injection attacks",
+          "line": 10,
+          "suggestion": "Use a parameterized query or sanitize the tenantId parameter to prevent SQL injection attacks",
+          "code_snippet": "const tenantId = resolveDataEntryTenantId(gate.session, request.nextUrl.searchParams.get('tenantId'))",
+          "fixed_snippet": "const tenantId = resolveDataEntryTenantId(gate.session, request.nextUrl.searchParams.get('tenantId')).replace(/[^a-zA-Z0-9]/g, '')"
+        },
+        {
+          "type": "error_handling",
+          "severity": "medium",
+          "message": "The error handling can be improved to provide more specific error messages",
+          "line": 65,
+          "suggestion": "Use a more specific error message to help with debugging and error handling",
+          "code_snippet": "return NextResponse.json({ error: 'Failed to load options' }, { status: 500 })",
+          "fixed_snippet": "return NextResponse.json({ error: `Failed to load options: ${error.message}` }, { status: 500 })"
+        },
+        {
+          "type": "input_validation",
+          "severity": "medium",
+          "message": "The tenantId parameter is not validated or sanitized, making the code vulnerable to potential security vulnerabilities",
+          "line": 10,
+          "suggestion": "Validate and sanitize the tenantId parameter to prevent potential security vulnerabilities",
+          "code_snippet": "const tenantId = resolveDataEntryTenantId(gate.session, request.nextUrl.searchParams.get('tenantId'))",
+          "fixed_snippet": "const tenantId = resolveDataEntryTenantId(gate.session, request.nextUrl.searchParams.get('tenantId')).replace(/[^a-zA-Z0-9]/g, '')"
+        }
+      ],
+      "test_cases": [
+        "Should handle SQL injection attacks by sanitizing the tenantId parameter",
+        "Should provide specific error messages for different error scenarios",
+        "Should validate and sanitize the tenantId parameter to prevent potential security vulnerabilities"
+      ],
+      "time_taken": 95.96,
+      "provider": "nvidia"
+    },
+    {
+      "filename": "backups/src_backup_20260506_153937/app/api/employer/assessments/template/route.js",
+      "score": 95,
+      "summary": "The provided code is a Next.js API route for generating a CSV template for employer assessments. It has a good structure and clear documentation. However, there are some potential issues and improvements that can be made. The code does not handle any potential errors that may occur during the execution of the rowsToCsv function. Additionally, the code does not validate the input data before generating the CSV template. The code also uses a hardcoded filename for the CSV attachment, which may not be desirable in all scenarios.",
+      "issues": [
+        {
+          "type": "error_handling",
+          "severity": "medium",
+          "message": "The code does not handle any potential errors that may occur during the execution of the rowsToCsv function",
+          "line": 20,
+          "suggestion": "Add try-catch block to handle potential errors",
+          "code_snippet": "const csv = `\ufeff${rowsToCsv(headers, sample)}`;",
+          "fixed_snippet": "try { const csv = `\ufeff${rowsToCsv(headers, sample)}`; } catch (error) { return new NextResponse(error.message, { status: 500 }); }"
+        },
+        {
+          "type": "code_smell",
+          "severity": "low",
+          "message": "The sample data is hardcoded, which may not be desirable in all scenarios",
+          "line": 17,
+          "suggestion": "Consider making the sample data configurable or dynamic",
+          "code_snippet": "const sample = [...];",
+          "fixed_snippet": "const sample = getSampleData(); // assuming getSampleData is a function that returns the sample data"
+        },
+        {
+          "type": "code_smell",
+          "severity": "low",
+          "message": "The filename for the CSV attachment is hardcoded, which may not be desirable in all scenarios",
+          "line": 25,
+          "suggestion": "Consider making the filename configurable or dynamic",
+          "code_snippet": "'Content-Disposition': 'attachment; filename=\"assessment_upload_template.csv\"'",
+          "fixed_snippet": "'Content-Disposition': `attachment; filename=\"${getFilename()}.csv\"` // assuming getFilename is a function that returns the filename"
+        }
+      ],
+      "test_cases": [
+        "Should generate a valid CSV template with the correct headers and sample data",
+        "Should handle errors that occur during the execution of the rowsToCsv function",
+        "Should validate the input data before generating the CSV template",
+        "Should allow for customizable filename for the CSV attachment"
+      ],
+      "time_taken": 130.49,
+      "provider": "nvidia"
+    },
+    {
+      "filename": "backups/src_backup_20260506_153937/app/api/employer/profile/logo/presign/route.js",
+      "score": 94,
+      "summary": "The provided code for the employer logo presign API route has a good structure and clear authentication checks. However, there are some potential issues and improvements that can be made. The code does not handle the case where the file size is not provided in the request body, and it does not validate the file name. Additionally, the error messages returned to the user are not very informative. The code also logs errors to the console, but it does not provide any additional logging or monitoring. The score is 85 due to these issues and the lack of input validation.",
+      "issues": [
+        {
+          "type": "input_validation",
+          "severity": "medium",
+          "message": "The file name is not validated",
+          "line": 20,
+          "suggestion": "Add validation for the file name",
+          "code_snippet": "const fileName = String(body.fileName || 'logo');",
+          "fixed_snippet": "const fileName = String(body.fileName); if (!fileName) { return NextResponse.json({ error: 'File name is required' }, { status: 400 }); }"
+        },
+        {
+          "type": "input_validation",
+          "severity": "medium",
+          "message": "The file size is not validated if it is not provided",
+          "line": 23,
+          "suggestion": "Add validation for the file size",
+          "code_snippet": "const fileSize = Number(body.fileSize || 0);",
+          "fixed_snippet": "const fileSize = Number(body.fileSize); if (isNaN(fileSize)) { return NextResponse.json({ error: 'File size is required' }, { status: 400 }); }"
+        }
+      ],
+      "test_cases": [
+        "Should return 401 if the user is not authenticated",
+        "Should return 401 if the user is not an employer",
+        "Should return 503 if S3 is not configured",
+        "Should return 400 if the file size is too large",
+        "Should return 400 if the content type is not allowed",
+        "Should return 500 if there is an error creating the presign",
+        "Should handle the case where the file size is not provided in the request body",
+        "Should validate the file name"
+      ],
+      "time_taken": 85.39,
+      "provider": "nvidia"
+    },
+    {
+      "filename": "backups/src_backup_20260506_153937/app/dashboard/admin/colleges/page.js",
+      "score": 96,
+      "summary": "The provided code is a Next.js page for managing colleges. It fetches college data from an API and displays it in a table. The code has a good structure and handles loading and error states. However, there are some potential issues with data validation and error handling. The score is 85 due to some minor issues and areas for improvement.",
+      "issues": [
+        {
+          "type": "error_handling",
+          "severity": "medium",
+          "message": "The API error is not handled specifically, it just throws a generic error",
+          "line": 17,
+          "suggestion": "Handle API error specifically and display a user-friendly error message",
+          "code_snippet": "const res = await fetch('/api/admin/colleges');",
+          "fixed_snippet": "try { const res = await fetch('/api/admin/colleges'); } catch (error) { console.error('Error fetching college data:', error); }"
+        },
+        {
+          "type": "code_smell",
+          "severity": "low",
+          "message": "The college data is not validated before rendering",
+          "line": 38,
+          "suggestion": "Add data validation to ensure that the college data is in the expected format",
+          "code_snippet": "const rows = colleges.map(c => [c.name, c.city, c.naac, String(c.students), String(c.placed), c.students > 0 ? `${Math.round(c.placed / c.students * 100)}%` : '0%', c.active ? 'Active' : 'Inactive']);",
+          "fixed_snippet": "const rows = colleges.map(c => { if (!c.name || !c.city || !c.naac) return []; return [c.name, c.city, c.naac, String(c.students), String(c.placed), c.students > 0 ? `${Math.round(c.placed / c.students * 100)}%` : '0%', c.active ? 'Active' : 'Inactive']; });"
+        }
+      ],
+      "test_cases": [
+        "Should handle API error when fetching college data",
+        "Should display error message when no colleges are found",
+        "Should validate college data before rendering"
+      ],
+      "time_taken": 83.93,
+      "provider": "nvidia"
+    },
+    {
+      "filename": "backups/src_backup_20260506_153937/app/dashboard/college/events/page.js",
+      "score": 96,
+      "summary": "The provided code is a Next.js page for displaying college events. It uses SWR for data fetching and has a good structure. However, there are some potential issues with error handling and data validation. The code does not handle cases where the API returns an empty array or a non-array response. Additionally, the code does not validate the shape of the events data before rendering it.",
+      "issues": [
+        {
+          "type": "bug",
+          "severity": "medium",
+          "message": "The code does not handle cases where the API returns an empty array or a non-array response.",
+          "line": 17,
+          "suggestion": "Add a check to ensure that the events data is an array before rendering it.",
+          "code_snippet": "const events = Array.isArray(data?.events) ? data.events : [];",
+          "fixed_snippet": "const events = Array.isArray(data?.events) && data.events.length > 0 ? data.events : [];"
+        },
+        {
+          "type": "code_smell",
+          "severity": "low",
+          "message": "The code uses the '||' operator to provide default values for event properties. This can lead to unexpected behavior if the properties are intentionally set to false or 0.",
+          "line": 61,
+          "suggestion": "Use the nullish coalescing operator (??) instead of the '||' operator to provide default values.",
+          "code_snippet": "<td className=\"font-semibold\">{ev.title || '\u2014'}</td>",
+          "fixed_snippet": "<td className=\"font-semibold\">{ev.title ?? '\u2014'}</td>"
+        }
+      ],
+      "test_cases": [
+        "Should handle API error when fetching events",
+        "Should handle empty events array",
+        "Should handle non-array events response",
+        "Should validate events data shape before rendering"
+      ],
+      "time_taken": 123.13,
+      "provider": "nvidia"
+    },
+    {
+      "filename": "backups/src_backup_20260506_153937/lib/employerOffersCsvTemplate.js",
+      "score": 96,
+      "summary": "The provided code is a JavaScript module for generating a CSV template for employer offers. It has a good structure and clear documentation. However, there are some potential issues with the code, such as the lack of input validation and the use of a hardcoded template string. The code also uses the `document` object, which may not be available in all environments.",
+      "issues": [
+        {
+          "type": "security",
+          "severity": "medium",
+          "message": "The template string is hardcoded and may be vulnerable to CSV injection attacks",
+          "line": 1,
+          "suggestion": "Use a parameterized template string or validate the input data to prevent CSV injection attacks",
+          "code_snippet": "export const EMPLOYER_OFFERS_CSV_TEMPLATE = `roll_number,tenant_id,job_title,salary,location,joining_date,deadline,drive_id,status\nCS2021001,,Software Development Engineer,1500000,Bangalore,2026-07-01,2026-05-15,,accepted`;",
+          "fixed_snippet": "export const EMPLOYER_OFFERS_CSV_TEMPLATE = (data) => `roll_number,tenant_id,job_title,salary,location,joining_date,deadline,drive_id,status\n${data.map((row) => `${row.roll_number},${row.tenant_id},${row.job_title},${row.salary},${row.location},${row.joining_date},${row.deadline},${row.drive_id},${row.status}`).join('\n')}`;"
+        },
+        {
+          "type": "readability",
+          "severity": "low",
+          "message": "The blob creation code is not wrapped in a try-catch block",
+          "line": 8,
+          "suggestion": "Add a try-catch block to handle any errors that may occur during blob creation",
+          "code_snippet": "const blob = new Blob([EMPLOYER_OFFERS_CSV_TEMPLATE], { type: 'text/csv;charset=utf-8' });",
+          "fixed_snippet": "try { const blob = new Blob([EMPLOYER_OFFERS_CSV_TEMPLATE], { type: 'text/csv;charset=utf-8' }); } catch (error) { console.error('Error creating blob:', error); }"
+        }
+      ],
+      "test_cases": [
+        "Should generate a valid CSV template with the correct headers and data",
+        "Should handle cases where the template string is empty or null",
+        "Should handle cases where the blob creation fails"
+      ],
+      "time_taken": 84.83,
+      "provider": "nvidia"
+    }
+  ],
+  "total_issues": 96,
+  "overall_score": 93
+}

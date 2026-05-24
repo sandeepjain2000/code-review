@@ -1,0 +1,510 @@
+=================================================================
+  CODESENTINEL -- BATCH 1 REPORT
+  Files 1 - 23 of 107
+  Folder : C:\Users\sandeep\Downloads\Claudes\CampusPlacement\campus-placement\src\lib
+  Saved  : 24/05/2026, 20:49:54
+=================================================================
+
+  Batch Score   : 93/100
+  Files Reviewed: 23
+  Total Issues  : 59
+
+=================================================================
+  FILE: academicYear.js
+  Score: 94/100   Issues: 2   Provider: nvidia   Time: 31.83s
+
+  The provided code is generally well-structured and readable. However, there are a few potential issues and improvements that can be suggested. The code does not handle invalid input dates and does not account for potential errors when parsing the center year in the getAcademicYearOptions function. Additionally, the code does not include any input validation or error handling, which could lead to issues if the functions are called with unexpected input.
+
+  [MEDIUM] error_handling -- Line 1
+  The getCurrentAcademicYear function does not handle invalid input dates
+  Fix: Add input validation to handle invalid dates
+
+  [MEDIUM] error_handling -- Line 10
+  The getAcademicYearOptions function does not handle non-numeric center year
+  Fix: Add input validation to handle non-numeric center year
+
+  🧪 Test Coverage Generator
+    - Should handle invalid input dates
+    - Should handle non-numeric center year
+    - Should return correct academic year options
+
+=================================================================
+  FILE: adminAuth.js
+  Score: 96/100   Issues: 2   Provider: nvidia   Time: 28.10s
+
+  The provided code snippet appears to be a part of an authentication system, specifically designed to check for super admin roles. It correctly checks the session and role, but there are a few potential issues and improvements that can be suggested. The code does not handle errors that might occur during the execution of getServerSession, and it does not validate the session object thoroughly. Additionally, the error handling could be more robust, and the function could benefit from more detailed logging for debugging purposes.
+
+  [MEDIUM] error_handling -- Line 12
+  The getServerSession function call is not wrapped in a try-catch block, which could lead to unhandled errors if the function fails.
+  Fix: Wrap the getServerSession function call in a try-catch block to handle potential errors.
+
+  [LOW] code_smell -- Line 13
+  The session object is not thoroughly validated before accessing its properties.
+  Fix: Add more detailed validation for the session object to ensure it has the expected properties.
+
+  🧪 Test Coverage Generator
+    - Should return error when session is null
+    - Should return error when user role is not super_admin
+    - Should return session when user role is super_admin
+    - Should handle errors during getServerSession execution
+
+=================================================================
+  FILE: auditScope.js
+  Score: 93/100   Issues: 3   Provider: nvidia   Time: 27.68s
+
+  The provided code is generally well-structured and handles different user roles and tenant IDs correctly. However, there are a few potential issues that could be improved for better security and reliability. The code does not validate the user object's properties, and it assumes that the user role will always be one of the expected values. Additionally, the error messages could be more specific to help with debugging and security auditing.
+
+  [MEDIUM] security -- Line 8
+  The code does not validate the user object's properties, which could lead to security vulnerabilities if the user object is tampered with.
+  Fix: Add validation for the user object's properties to ensure they are not tampered with.
+
+  [MEDIUM] security -- Line 15
+  The code assumes that the user role will always be one of the expected values, which could lead to security vulnerabilities if the user role is tampered with.
+  Fix: Add validation for the user role to ensure it is one of the expected values.
+
+  [LOW] security -- Line 29
+  The error message could be more specific to help with debugging and security auditing.
+  Fix: Add more specific error messages to help with debugging and security auditing.
+
+  🧪 Test Coverage Generator
+    - Should return Unauthorized for missing user
+    - Should return Unauthorized for invalid user role
+    - Should resolve tenant scope for college admin
+    - Should resolve tenant scope for super admin with valid tenant ID
+    - Should resolve platform scope for super admin without tenant ID
+
+=================================================================
+  FILE: clientStudentAvatarUpload.js
+  Score: 93/100   Issues: 3   Provider: nvidia   Time: 29.45s
+
+  The provided code snippet appears to be a part of a client-side JavaScript application, responsible for uploading a student's avatar via a server. The code seems generally well-structured, but there are a few potential issues and improvements that can be suggested. The biggest risk is the lack of error handling for the fetch API call and potential security vulnerabilities if the server-side API is not properly validated. The code does not handle cases where the fetch call fails due to network errors or if the server returns an error response. Additionally, there is no validation for the file type and size on the client-side, which could lead to security vulnerabilities if not handled properly on the server-side.
+
+  [MEDIUM] error_handling -- Line 17
+  The fetch API call does not handle potential network errors or server error responses.
+  Fix: Add try-catch block around the fetch call to handle potential errors.
+
+  [LOW] validation -- Line 9
+  The validateStudentAvatarFile function is not defined in this snippet, but it should be validated to ensure it properly checks the file type and size.
+  Fix: Ensure the validateStudentAvatarFile function properly validates the file type and size.
+
+  [MEDIUM] error_handling -- Line 21
+  The res.json() call does not handle potential JSON parsing errors.
+  Fix: Add try-catch block around the res.json() call to handle potential JSON parsing errors.
+
+  🧪 Test Coverage Generator
+    - Should handle network errors during fetch call
+    - Should handle server error responses
+    - Should validate file type and size on the client-side
+    - Should handle cases where the file is not provided
+
+=================================================================
+  FILE: auditReportsFetcher.js
+  Score: 92/100   Issues: 4   Provider: nvidia   Time: 34.27s
+
+  The provided code is a fetcher function for audit reports, designed to never throw errors and handle non-OK responses by returning an empty payload. However, there are several areas that can be improved for better reliability, security, and maintainability. The function lacks input validation, error logging, and handling for specific error cases. Additionally, the use of a generic catch block can mask important errors and make debugging more difficult.
+
+  [MEDIUM] error_handling -- Line 21
+  The catch block is too generic and can mask important errors. It's better to catch specific errors and handle them accordingly.
+  Fix: Catch specific errors and handle them separately.
+
+  [LOW] security -- Line 22
+  The fetch function is called with the 'include' credentials option, which can be a security risk if not properly validated.
+  Fix: Validate the input URL and credentials before making the fetch call.
+
+  [MEDIUM] error_handling -- Line 25
+  The catch block for JSON parsing errors is too generic and can mask important errors. It's better to catch specific errors and handle them accordingly.
+  Fix: Catch specific errors and handle them separately.
+
+  [LOW] logic -- Line 29
+  The function returns an empty payload for non-OK responses, but it might be better to handle specific status codes separately.
+  Fix: Handle specific status codes separately.
+
+  🧪 Test Coverage Generator
+    - Should handle network errors gracefully
+    - Should return empty payload for non-OK responses
+    - Should log errors for debugging purposes
+    - Should validate input URL to prevent potential security issues
+
+=================================================================
+  FILE: clientDebugLog.js
+  Score: 96/100   Issues: 2   Provider: nvidia   Time: 29.23s
+
+  The provided code is a client-side debug logging system that stores log entries in local storage and allows for downloading the log as a text file. The code is generally well-structured and follows best practices. However, there are a few potential issues that could be improved, such as error handling and security considerations. The score is 92 due to the lack of critical security vulnerabilities and the overall quality of the code.
+
+  [MEDIUM] error_handling -- Line 34
+  The try-catch block does not handle the error when setting the local storage item. It would be better to handle the error and provide a fallback or warning to the user.
+  Fix: Handle the error and provide a fallback or warning to the user.
+
+  [LOW] security -- Line 68
+  The text variable is not sanitized before being used to create a blob. This could potentially lead to a security vulnerability if the text contains malicious data.
+  Fix: Sanitize the text variable before using it to create a blob.
+
+  🧪 Test Coverage Generator
+    - Should handle quota exceeded error when setting local storage item
+    - Should handle private mode error when setting local storage item
+    - Should download log file with correct format and content
+
+=================================================================
+  FILE: calendarInitialCursor.js
+  Score: 100/100   Issues: 0   Provider: nvidia   Time: 33.93s
+
+  Could not parse model response.
+
+=================================================================
+  FILE: clientAssetUrl.js
+  Score: 100/100   Issues: 0   Provider: nvidia   Time: 33.69s
+
+  Could not parse model response.
+
+=================================================================
+  FILE: admissionBatchYear.js
+  Score: 95/100   Issues: 3   Provider: nvidia   Time: 29.46s
+
+  The provided code is well-structured and readable. It correctly handles admission batch years and provides useful functions for parsing and validating batch years. However, there are some potential issues that need to be addressed, such as input validation and error handling. The code score is 92 due to the lack of comprehensive input validation and potential issues with date handling.
+
+  [MEDIUM] input_validation -- Line 30
+  Input validation for raw admission batch year is missing
+  Fix: Add input validation to ensure raw is a string or number
+
+  [LOW] code_smell -- Line 54
+  Function validateAdmissionBatchYearNumber is not exported
+  Fix: Consider exporting the function or making it a private helper function
+
+  [LOW] code_smell -- Line 13
+  Variable date is not validated
+  Fix: Add input validation to ensure date is a valid Date object
+
+  🧪 Test Coverage Generator
+    - Should handle invalid input for admission batch year
+    - Should validate admission batch year range correctly
+    - Should handle edge cases for date rollover
+
+=================================================================
+  FILE: assertAuthEnv.js
+  Score: 96/100   Issues: 2   Provider: nvidia   Time: 37.95s
+
+  The provided code snippet appears to be a utility function for asserting the presence and strength of the NEXTAUTH_SECRET environment variable in production environments. It correctly checks for the variable's presence and length, throwing an error if it's missing or too short. However, there are a few potential issues and improvements that can be suggested. The code does not handle the case where the NEXTAUTH_SECRET variable is set but not a string. Additionally, the error message could be more descriptive and provide guidance on how to fix the issue.
+
+  [MEDIUM] bug -- Line 27
+  The code does not check the type of the NEXTAUTH_SECRET variable. If it's not a string, the length check will throw an error.
+  Fix: Add a type check for the NEXTAUTH_SECRET variable before checking its length.
+
+  [LOW] readability -- Line 29
+  The error message could be more descriptive and provide guidance on how to fix the issue.
+  Fix: Improve the error message to provide more context and guidance.
+
+  🧪 Test Coverage Generator
+    - Should throw an error when NEXTAUTH_SECRET is missing in production
+    - Should throw an error when NEXTAUTH_SECRET is too short in production
+    - Should not throw an error when NEXTAUTH_SECRET is set and long enough in production
+    - Should not throw an error during the build process
+
+=================================================================
+  FILE: assessmentHiringView.js
+  Score: 93/100   Issues: 3   Provider: nvidia   Time: 32.65s
+
+  The provided code is generally well-structured and follows good practices. However, there are some potential issues and improvements that can be made. The code uses parameterized queries to prevent SQL injection, which is a good practice. The functions are well-documented and easy to understand. Nevertheless, there are some areas that need attention, such as error handling, potential null pointer exceptions, and code repetition.
+
+  [MEDIUM] error_handling -- Line 21
+  The query execution does not have a try-catch block to handle potential errors.
+  Fix: Add a try-catch block to handle potential errors during query execution.
+
+  [LOW] code_smell -- Line 67
+  The query uses a LIMIT clause without an ORDER BY clause.
+  Fix: Add an ORDER BY clause to ensure consistent results.
+
+  [MEDIUM] null_pointer_exception -- Line 123
+  The function buildAssessmentSummary does not check for null or undefined values before accessing properties.
+  Fix: Add null checks to prevent potential null pointer exceptions.
+
+  🧪 Test Coverage Generator
+    - Should handle DB timeout gracefully
+    - Should prevent double-charge if retried
+    - Should return empty array if no rows are found
+    - Should throw error if query execution fails
+
+=================================================================
+  FILE: appVersion.js
+  Score: 91/100   Issues: 3   Provider: nvidia   Time: 37.56s
+
+  The provided code snippet appears to be a part of a Next.js application, responsible for generating version labels and notification icon titles. The code is well-structured and readable. However, there are a few potential issues that could be improved for better reliability and security. The score is 92 due to the lack of input validation and potential issues with environment variable handling.
+
+  [MEDIUM] security -- Line 5
+  Missing input validation for NEXT_PUBLIC_APP_VERSION environment variable
+  Fix: Add input validation to ensure the version string is in the expected format
+
+  [MEDIUM] security -- Line 6
+  Missing input validation for NEXT_PUBLIC_APP_GIT_SHA environment variable
+  Fix: Add input validation to ensure the Git SHA string is in the expected format
+
+  [MEDIUM] security -- Line 7
+  Missing input validation for NEXT_PUBLIC_VERCEL_DEPLOYMENT_ID environment variable
+  Fix: Add input validation to ensure the deployment ID string is in the expected format
+
+  🧪 Test Coverage Generator
+    - Should handle missing environment variables gracefully
+    - Should validate and sanitize environment variable inputs
+
+=================================================================
+  FILE: clientStudentDocumentUpload.js
+  Score: 91/100   Issues: 3   Provider: nvidia   Time: 35.60s
+
+  The provided code snippet appears to be a part of a student document upload functionality. It validates the uploaded file, constructs a FormData object, and sends a POST request to the server to upload the document. However, there are some potential issues that need to be addressed, such as error handling, input validation, and security concerns. The code score is 80 due to some medium-severity issues found.
+
+  [MEDIUM] error_handling -- Line 10
+  The validateStudentDocumentFile function may throw an error if the file is invalid, but it is not caught or handled.
+  Fix: Add try-catch block to handle potential errors from the validateStudentDocumentFile function.
+
+  [MEDIUM] security -- Line 22
+  The fetch request does not include any authentication or authorization headers, which may allow unauthorized access to the API endpoint.
+  Fix: Add authentication or authorization headers to the fetch request to ensure only authorized users can access the API endpoint.
+
+  [MEDIUM] error_handling -- Line 26
+  The res.json() call may throw an error if the response is not valid JSON, but it is not caught or handled.
+  Fix: Add try-catch block to handle potential errors from the res.json() call.
+
+  🧪 Test Coverage Generator
+    - Should handle invalid file types
+    - Should handle large file uploads
+    - Should handle server-side errors
+    - Should validate user input
+
+=================================================================
+  FILE: assessmentRowsDedupe.js
+  Score: 95/100   Issues: 3   Provider: nvidia   Time: 40.57s
+
+  The provided code is a set of pure helper functions for a hiring-assessment UI, designed to handle one row per student with the newest upload winning. The code appears to be well-structured and readable. However, there are a few potential issues and improvements that can be suggested. The code does not handle cases where the input 'rows' is not an array, and it does not check for potential null or undefined values in the 'row' objects. Additionally, the function 'assessmentRowStudentKey' returns 'unknown' if the 'id' property is missing, which might not be the desired behavior.
+
+  [MEDIUM] bug -- Line 14
+  The function 'pickRepresentativeAssessmentRows' does not check if the input 'rows' is an array. It should add a check to ensure 'rows' is an array to prevent potential errors.
+  Fix: Add a check to ensure 'rows' is an array before iterating over it.
+
+  [LOW] readability -- Line 17
+  The variable 'k' could be renamed to something more descriptive, such as 'studentKey'.
+  Fix: Rename the variable 'k' to 'studentKey' for better readability.
+
+  [LOW] readability -- Line 20
+  The variable 'out' could be renamed to something more descriptive, such as 'representativeRows'.
+  Fix: Rename the variable 'out' to 'representativeRows' for better readability.
+
+  🧪 Test Coverage Generator
+    - Should handle empty input array
+    - Should handle null or undefined input
+    - Should handle rows with missing 'student_profile_id', 'roll_number', or 'id' properties
+    - Should return the correct representative assessment rows for a given input
+
+=================================================================
+  FILE: auditLog.js
+  Score: 95/100   Issues: 3   Provider: nvidia   Time: 41.41s
+
+  The provided code for writing audit logs and getting client IP addresses from Next.js requests appears to be generally well-structured and secure. However, there are a few potential issues and improvements that can be suggested. The code does not handle the case where the payload's oldValues or newValues are not JSON-serializable, which could lead to errors. Additionally, the code does not validate the payload's properties, which could lead to null or undefined values being inserted into the database. The getRequestClientIp function does not handle the case where the 'x-forwarded-for' or 'x-real-ip' headers are not present or are empty.
+
+  [MEDIUM] bug -- Line 34
+  Potential JSON-serialization error for oldValues and newValues
+  Fix: Use try-catch blocks to handle JSON-serialization errors
+
+  [LOW] validation -- Line 29
+  Payload properties are not validated
+  Fix: Add validation for payload properties to prevent null or undefined values
+
+  [LOW] validation -- Line 50
+  Missing or empty 'x-forwarded-for' and 'x-real-ip' headers are not handled
+  Fix: Add checks for missing or empty headers
+
+  🧪 Test Coverage Generator
+    - Should handle JSON-serialization errors for oldValues and newValues
+    - Should validate payload properties to prevent null or undefined values
+    - Should handle missing or empty 'x-forwarded-for' and 'x-real-ip' headers
+
+=================================================================
+  FILE: collegeOffersCsvTemplate.js
+  Score: 96/100   Issues: 2   Provider: nvidia   Time: 11.82s
+
+  The provided code snippet is well-structured and readable. It defines a CSV template for college offers and a function to download the template. However, there are a few potential issues and improvements that can be suggested. The code does not handle any potential errors that may occur during the download process. Additionally, the CSV template is hardcoded as a string, which may not be ideal for larger or more complex templates.
+
+  [MEDIUM] error_handling -- Line 8
+  The code does not handle any potential errors that may occur during the download process
+  Fix: Add try-catch blocks to handle any potential errors
+
+  [LOW] code_smell -- Line 1
+  The CSV template is hardcoded as a string, which may not be ideal for larger or more complex templates
+  Fix: Consider using a more dynamic approach to generate the CSV template
+
+  🧪 Test Coverage Generator
+    - Should download the CSV template successfully
+    - Should handle errors during the download process
+    - Should allow for more flexible and dynamic CSV template generation
+
+=================================================================
+  FILE: collegeOffersListQuery.js
+  Score: 93/100   Issues: 3   Provider: nvidia   Time: 11.36s
+
+  The provided code is generally well-structured and readable. However, there are a few potential issues and improvements that can be suggested. The code does not handle errors properly in some cases, and there are some potential SQL injection vulnerabilities. Additionally, the code could benefit from more robust logging and error handling mechanisms.
+
+  [MEDIUM] error_handling -- Line 55
+  The queryWithLatestFallback function does not handle errors properly. It should catch and log any errors that occur during the query execution.
+  Fix: Add try-catch block to handle errors
+
+  [MEDIUM] error_handling -- Line 78
+  The queryCollegeOffersForTenant function does not handle errors properly. It should catch and log any errors that occur during the query execution.
+  Fix: Add try-catch block to handle errors
+
+  [LOW] sql_injection -- Line 41
+  The SQL query uses a parameterized query, which is good. However, it's still possible to inject malicious SQL code if the input is not properly sanitized.
+  Fix: Use a prepared statement or an ORM to prevent SQL injection
+
+  🧪 Test Coverage Generator
+    - Should handle DB timeout gracefully
+    - Should prevent double-charge if retried
+    - Should handle missing reported_company_name column error
+    - Should handle missing is_latest column error
+
+=================================================================
+  FILE: campusGuestConfirmation.js
+  Score: 86/100   Issues: 3   Provider: nvidia   Time: 52.44s
+
+  The provided code is well-structured and readable. However, there are some potential issues that need to be addressed, such as missing error handling and potential null pointer exceptions. The code also lacks input validation and sanitization, which could lead to security vulnerabilities. Overall, the code score is 70, with some high-severity issues that need to be fixed.
+
+  [HIGH] error_handling -- Line 17
+  The loadSystemEmailTemplate function does not handle errors or exceptions properly. It should be wrapped in a try-catch block to handle any potential errors.
+  Fix: Add a try-catch block to handle errors and exceptions in the loadSystemEmailTemplate function.
+
+  [MEDIUM] null_pointer_exception -- Line 25
+  The buildCampusGuestSubstitutionVars function does not check for null or undefined input. It should be modified to handle such scenarios.
+  Fix: Add null checks for listingRow and employer in the buildCampusGuestSubstitutionVars function.
+
+  [LOW] code_smell -- Line 41
+  The renderTemplates function does not check for null or undefined input. It should be modified to handle such scenarios.
+  Fix: Add null checks for templateRow and vars in the renderTemplates function.
+
+  🧪 Test Coverage Generator
+    - Should handle null or undefined input for listingRow and employer
+    - Should validate and sanitize input data to prevent security vulnerabilities
+    - Should handle errors and exceptions properly in the loadSystemEmailTemplate function
+    - Should test the renderTemplates function with different input scenarios
+
+=================================================================
+  FILE: auth.js
+  Score: 84/100   Issues: 3   Provider: nvidia   Time: 47.34s
+
+  The provided authentication code has several issues, including potential SQL injection vulnerabilities, missing error handling, and insecure password storage. However, it also implements some good practices, such as using parameterized queries and bcrypt for password hashing. The code score is 60 due to the identified issues.
+
+  [HIGH] security -- Line 38
+  Potential SQL injection vulnerability in the query string
+  Fix: Use a parameterized query or an ORM to prevent SQL injection
+
+  [MEDIUM] security -- Line 55
+  Missing error handling for bcrypt.compare
+  Fix: Add try-catch block to handle errors
+
+  [MEDIUM] security -- Line 79
+  Missing error handling for query
+  Fix: Add try-catch block to handle errors
+
+  🧪 Test Coverage Generator
+    - Should handle SQL errors gracefully
+    - Should prevent SQL injection attacks
+    - Should handle missing or invalid user input
+    - Should handle password hashing and verification correctly
+
+=================================================================
+  FILE: collegeStudentArchive.js
+  Score: 94/100   Issues: 2   Provider: nvidia   Time: 20.15s
+
+  The provided code is generally well-structured and readable. However, there are a few potential issues and improvements that can be suggested. The code correctly checks for missing archive columns and handles errors accordingly. It also properly updates the student profile and user records when archiving or restoring a student. The code uses parameterized queries to prevent SQL injection attacks. However, there are some areas that can be improved, such as adding more error handling and logging mechanisms. Additionally, the code can be made more efficient by reducing the number of database queries.
+
+  [MEDIUM] error_handling -- Line 53
+  The catch block for the audit log query is empty, which can make it difficult to diagnose issues. Consider adding logging or error handling mechanisms.
+  Fix: Add logging or error handling mechanisms to the catch block.
+
+  [MEDIUM] error_handling -- Line 102
+  The catch block for the audit log query is empty, which can make it difficult to diagnose issues. Consider adding logging or error handling mechanisms.
+  Fix: Add logging or error handling mechanisms to the catch block.
+
+  🧪 Test Coverage Generator
+    - Should handle missing archive column error correctly
+    - Should archive student profile successfully
+    - Should restore archived student profile successfully
+    - Should handle errors when archiving or restoring student profile
+
+=================================================================
+  FILE: collegeDrivesClient.js
+  Score: 94/100   Issues: 2   Provider: nvidia   Time: 25.66s
+
+  The provided code is generally well-structured and readable. However, there are a few potential issues and improvements that can be suggested. The code does not handle potential null or undefined values for 'd' in the mapCollegeDriveFromApi function, and it does not check for potential errors when using the '??' operator. Additionally, the isDriveStaffDirty function does not handle the case where 'drive' is null or undefined.
+
+  [MEDIUM] bug -- Line 2
+  The function mapCollegeDriveFromApi does not check if 'd' is null or undefined before trying to access its properties.
+  Fix: Add a null check at the beginning of the function to handle this case.
+
+  [MEDIUM] bug -- Line 17
+  The function isDriveStaffDirty does not check if 'drive' is null or undefined before trying to access its properties.
+  Fix: Add a null check at the beginning of the function to handle this case.
+
+  🧪 Test Coverage Generator
+    - Should handle null or undefined 'd' in mapCollegeDriveFromApi
+    - Should handle potential errors when using the '??' operator
+    - Should handle null or undefined 'drive' in isDriveStaffDirty
+
+=================================================================
+  FILE: collegeAcademicYearContext.js
+  Score: 92/100   Issues: 4   Provider: nvidia   Time: 61.53s
+
+  The provided code is generally well-structured and readable. However, there are a few potential issues and improvements that can be made. The code uses try-catch blocks to handle potential errors, but it would be better to handle specific errors instead of catching all errors. Additionally, the code uses the 'use client' directive, which is specific to Next.js, but it's not clear if this is a Next.js project. The code also uses the 'sessionStorage' API, which may not be suitable for all environments. The 'useCollegeAcademicYearApiPath' hook uses the 'useState' and 'useEffect' hooks, but it's not clear if this hook is being used correctly. The 'academicYearQueryString' function does not handle the case where 'ctx' is an empty object. The 'writeActiveAcademicYearContext' function does not check if 'ctx' is null or undefined before trying to access its properties.
+
+  [MEDIUM] error_handling -- Line 17
+  The 'JSON.parse' function may throw an error if the stored data is not a valid JSON string
+  Fix: Use a try-catch block to handle potential errors when parsing the stored data
+
+  [MEDIUM] error_handling -- Line 28
+  The 'sessionStorage.setItem' function may throw an error if the storage quota is exceeded
+  Fix: Use a try-catch block to handle potential errors when setting the stored data
+
+  [LOW] code_smell -- Line 37
+  The 'academicYearQueryString' function does not handle the case where 'ctx' is an empty object
+  Fix: Add a check to handle the case where 'ctx' is an empty object
+
+  [LOW] code_smell -- Line 26
+  The 'writeActiveAcademicYearContext' function does not check if 'ctx' is null or undefined before trying to access its properties
+  Fix: Add a check to handle the case where 'ctx' is null or undefined
+
+  🧪 Test Coverage Generator
+    - Should handle the case where 'ctx' is an empty object in 'academicYearQueryString' function
+    - Should check if 'ctx' is null or undefined before trying to access its properties in 'writeActiveAcademicYearContext' function
+    - Should handle specific errors instead of catching all errors in try-catch blocks
+    - Should consider using a more robust storage solution instead of 'sessionStorage'
+
+=================================================================
+  FILE: adminSettingsValidate.js
+  Score: 90/100   Issues: 4   Provider: nvidia   Time: 60.36s
+
+  The provided code is a validation function for admin settings, covering various fields such as platform name, marketing website URL, support email, and more. It checks for valid input formats, lengths, and ranges. The code is well-structured and readable. However, there are a few potential issues and improvements that can be suggested. The code does not handle cases where the input object is null or undefined for certain fields, which could lead to errors. Additionally, some error messages could be more descriptive. The code also lacks input validation for certain fields, such as the system notification sender name and the storage provider. Overall, the code is robust but could benefit from additional validation and error handling.
+
+  [MEDIUM] bug -- Line 22
+  Input object validation is missing for certain fields
+  Fix: Add input validation for all fields to prevent potential errors
+
+  [LOW] readability -- Line 36
+  Error message could be more descriptive
+  Fix: Improve error message to provide more context
+
+  [MEDIUM] bug -- Line 48
+  Input validation is missing for system notification sender name
+  Fix: Add input validation for system notification sender name
+
+  [MEDIUM] bug -- Line 90
+  Input validation is missing for storage provider
+  Fix: Add input validation for storage provider
+
+  🧪 Test Coverage Generator
+    - Should validate platform name with a length of 200 characters
+    - Should validate marketing website URL with a valid HTTP or HTTPS URL
+    - Should validate support email with a valid email format
+    - Should validate system notification inbox email with a valid email format
+    - Should validate session timeout value with a range of 1 to 8760
+    - Should validate remember device value with a range of 0 to 365
+    - Should validate SMTP host with a length of 255 characters
+    - Should validate SMTP port with a range of 1 to 65535
+    - Should validate from email with a valid email format
+    - Should validate storage provider with a length of 120 characters
+    - Should validate max upload size with a range of 1 to 500

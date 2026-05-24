@@ -1,0 +1,583 @@
+{
+  "job_id": "532942a612254365",
+  "batch": 5,
+  "folder_path": "C:\\Users\\sandeep\\Downloads\\Claudes\\CampusPlacement\\campus-placement",
+  "model_used": "nvidia/meta/llama-3.3-70b-instruct",
+  "saved_at": "2026-05-03T23:22:03.180748",
+  "files": [
+    {
+      "filename": "src/app/dashboard/admin/audit-reports/page.js",
+      "score": 100,
+      "summary": "This is a thin wrapper page component that delegates entirely to a shared AuditReportsPage component. The code itself is minimal and correct \u2014 it passes a scopeLabel prop and renders the child component. No security, reliability, or data integrity issues exist in this file. The primary risk is that the actual audit logic lives in the child component, which should be reviewed separately for proper tenant isolation, authorization, and data handling.",
+      "issues_count": 0
+    },
+    {
+      "filename": "src/app/api/student/program-applications/route.js",
+      "score": 91,
+      "summary": "The provided code snippet is generally well-structured and secure, with proper authentication and parameterized queries. However, there are a few areas that need improvement, such as input validation, error handling, and potential SQL injection vulnerabilities. The code also lacks comprehensive logging and monitoring, which could make it difficult to debug and identify issues in production. Overall, the code scores 82 out of 100, with some minor issues and suggestions for improvement.",
+      "issues_count": 3
+    },
+    {
+      "filename": "src/app/dashboard/admin/overview/page.js",
+      "score": 85,
+      "summary": "The admin overview page is a well-structured client component with proper loading and error states. The biggest risk is the missing tenant-scoped authorization check \u2014 this super-admin dashboard endpoint must verify the user's role server-side to prevent unauthorized access. Additionally, the fetcher lacks a timeout, which could cause the UI to hang indefinitely if the API is slow or unreachable. The code is otherwise clean with good use of skeleton loading and fallback defaults.",
+      "issues_count": 4
+    },
+    {
+      "filename": "src/app/dashboard/college/applications/page.js",
+      "score": 84,
+      "summary": "The component is a straightforward client-side data table with proper loading, error, and empty states. The primary risk is the missing tenant-scoped filter in the API call, which could leak cross-tenant data in a multi-tenant system. Additionally, the component lacks pagination, search, and sorting, which will cause performance issues with large datasets. The error handling is adequate but could be more specific.",
+      "issues_count": 5
+    },
+    {
+      "filename": "src/app/dashboard/admin/page.js",
+      "score": 96,
+      "summary": "The provided AdminDashboardHubPage component is well-structured and follows best practices for authentication and session management. However, there are some potential issues, including a lack of input validation and potential security vulnerabilities. The component uses the useSession hook from next-auth/react to manage the user session, and it checks if the user is authenticated before rendering the DashboardFullScreenHub component. The biggest risk is the potential for unauthorized access to the dashboard if the session is not properly validated.",
+      "issues_count": 2
+    },
+    {
+      "filename": "src/app/dashboard/admin/employers/page.js",
+      "score": 78,
+      "summary": "The component is a minimal admin employers list page with basic fetch-and-render logic. The biggest risk is the lack of any server-side authentication or authorization check \u2014 the client-side fetch to `/api/admin/employers` relies entirely on the API route being protected, but there is no fallback or redirect if the user is unauthorized. Additionally, the component has no pagination, search, or filtering, which will cause performance issues with large employer datasets. The error handling is basic but acceptable for a simple list view. The use of array index as key is a code smell that can cause React rendering bugs.",
+      "issues_count": 7
+    },
+    {
+      "filename": "src/app/api/student/program-opportunities/route.js",
+      "score": 22,
+      "summary": "The endpoint has a critical runtime crash risk on line 24 where `userId` is checked after it's already used to call `resolveStudentPlacementTenantIds` on line 23, meaning if `userId` is null/undefined the function will likely throw. Additionally, the query references a table `program_applications` that does not exist in the schema (only `applications` exists), which will cause a 500 error on every request. The `uuidInClause` helper is used without validation that `tenantIds` is non-empty, and the query joins on `employer_approvals` which is also not in the schema. Error handling is minimal with no structured logging or differentiation between error types. Score is capped due to the schema mismatch causing guaranteed failure.",
+      "issues_count": 8
+    },
+    {
+      "filename": "src/app/dashboard/college/audit-reports/page.js",
+      "score": 99,
+      "summary": "The provided code snippet is a simple React component that renders an AuditReportsPage with a specific scope label. There are no critical issues found in this code. However, it is worth noting that the code does not handle any potential errors that might occur when rendering the AuditReportsPage component. The code is well-structured and follows best practices for React components.",
+      "issues_count": 1
+    },
+    {
+      "filename": "src/app/api/student/profile/route.js",
+      "score": 77,
+      "summary": "The student profile API route is generally well-structured with proper authentication, parameterized queries, and transactional updates. The biggest risks are: (1) the `ensureStudentProfileRow` function silently fails if the user is not a student or the insert conflicts, leading to a 404 on GET; (2) the PUT handler does not validate `parts.skills` before iterating, causing a crash if `skills` is null/undefined; (3) the `aux_profile` migration error check is fragile and may expose internal hints; (4) no rate limiting or input size limits on skills/aux_profile could lead to abuse. Overall, the code is solid but has a few medium-severity gaps that should be addressed before production.",
+      "issues_count": 8
+    },
+    {
+      "filename": "src/app/dashboard/admin/users/page.js",
+      "score": 96,
+      "summary": "The provided code for the Admin Users Page is well-structured and follows best practices for React and error handling. However, there are a few potential issues that could be improved for better reliability and user experience. The biggest risk is a potential runtime crash when the API endpoint returns an unexpected response. Additionally, there is no input validation or sanitization on the user data displayed in the table, which could lead to XSS vulnerabilities if the data is not properly sanitized. The code also lacks a loading indicator while the data is being fetched, which could lead to a poor user experience.",
+      "issues_count": 2
+    },
+    {
+      "filename": "src/app/api/student/profile/avatar/presign/route.js",
+      "score": 100,
+      "summary": "Could not parse model response.",
+      "issues_count": 0
+    },
+    {
+      "filename": "src/app/dashboard/college/enrollment-key/page.js",
+      "score": 94,
+      "summary": "The enrollment key page is a simple, well-structured client component with proper cleanup and error handling. The primary risk is the missing tenant-scoped authentication check \u2014 the page fetches from `/api/college/enrollment-ledger` without verifying the user's college affiliation, which could expose or return the wrong key if the API doesn't enforce tenant isolation. Additionally, the clipboard API call lacks a fallback for non-HTTPS or older browsers, and the loading skeleton has a hardcoded height that may not match the actual content. Overall, the code is clean but has a medium-severity multi-tenancy concern.",
+      "issues_count": 4
+    },
+    {
+      "filename": "src/app/dashboard/college/events/page.js",
+      "score": 84,
+      "summary": "The component is a simple client-side data table with proper loading, error, and empty states. The biggest risk is the missing tenant-scoped authentication check in the API route (not shown here) and the lack of a dedicated events table in the database schema, which could cause runtime failures. The UI is functional but lacks export, search, and filtering capabilities expected in a production SaaS product.",
+      "issues_count": 5
+    },
+    {
+      "filename": "src/app/api/user/data-export/route.js",
+      "score": 81,
+      "summary": "The data export endpoint is well-structured with proper authentication, parameterized queries, and error handling that updates the export status on failure. The biggest risk is a potential crash if `ins.rows[0]?.id` is undefined (e.g., INSERT fails silently), which would cause the subsequent UPDATE to fail with a UUID cast error. Additionally, the email notification failure is silently swallowed, and the export payload could be very large, potentially causing memory pressure or slow responses. The code also lacks tenant isolation for the GET endpoint and does not validate the user's role before export.",
+      "issues_count": 6
+    },
+    {
+      "filename": "src/app/dashboard/admin/colleges/page.js",
+      "score": 73,
+      "summary": "The component is a basic admin colleges list page with proper loading, error, and empty states. The main risks are: (1) the 'View' and 'Edit' action buttons are permanently disabled with 'Coming soon' tooltips, which is a SaaS completeness gap that blocks core CRUD functionality; (2) the table lacks search, filters, sorting, pagination, and export capabilities, making it unusable at scale; (3) there is no screen tag (e.g., S-1) as required by the product spec. No security or runtime crash issues are present.",
+      "issues_count": 5
+    }
+  ],
+  "batch_score": 84,
+  "total_issues": 60,
+  "issues": [
+    {
+      "filename": "src/app/api/student/program-applications/route.js",
+      "type": "sql_injection",
+      "severity": "medium",
+      "message": "The SQL query uses a parameterized query, but the input is not validated. This could potentially lead to SQL injection vulnerabilities.",
+      "line": 26,
+      "suggestion": "Validate the input for the job ID and notes to prevent SQL injection vulnerabilities."
+    },
+    {
+      "filename": "src/app/api/student/program-applications/route.js",
+      "type": "sql_injection",
+      "severity": "medium",
+      "message": "The SQL query uses a parameterized query, but the input is not validated. This could potentially lead to SQL injection vulnerabilities.",
+      "line": 87,
+      "suggestion": "Validate the input for the job ID and tenant IDs to prevent SQL injection vulnerabilities."
+    },
+    {
+      "filename": "src/app/api/student/program-applications/route.js",
+      "type": "sql_injection",
+      "severity": "medium",
+      "message": "The SQL query uses a parameterized query, but the input is not validated. This could potentially lead to SQL injection vulnerabilities.",
+      "line": 111,
+      "suggestion": "Validate the input for the student ID, job ID, and notes to prevent SQL injection vulnerabilities."
+    },
+    {
+      "filename": "src/app/dashboard/admin/overview/page.js",
+      "type": "reliability",
+      "severity": "medium",
+      "message": "The fetcher function on line 8 uses fetch() without a timeout. If the API endpoint hangs or is slow, the UI will show a loading skeleton indefinitely until the browser's default timeout (which can be several minutes). This degrades user experience and can mask backend failures.",
+      "line": 8,
+      "suggestion": "Add an AbortController with a reasonable timeout (e.g. 15 seconds) to the fetch call."
+    },
+    {
+      "filename": "src/app/dashboard/admin/overview/page.js",
+      "type": "authentication",
+      "severity": "high",
+      "message": "The component fetches from '/api/admin/dashboard' but there is no client-side or visible server-side authorization check. If the API route does not enforce super_admin role, any authenticated user (including students or employers) could access this super-admin dashboard data. This is a privilege escalation vulnerability.",
+      "line": 15,
+      "suggestion": "Ensure the API route at /api/admin/dashboard verifies the session and checks for super_admin role before returning data. The client component should also handle 403 responses gracefully."
+    },
+    {
+      "filename": "src/app/dashboard/admin/overview/page.js",
+      "type": "uiux",
+      "severity": "low",
+      "message": "The registered colleges list on line 88 uses a hardcoded 'Active' badge for every college. If a college is inactive (is_active = false), the badge will be misleading. This is a data integrity and UX issue.",
+      "line": 88,
+      "suggestion": "Use the actual is_active field from the API response to conditionally render the badge (e.g. 'Active' vs 'Inactive' with appropriate colors)."
+    },
+    {
+      "filename": "src/app/dashboard/admin/overview/page.js",
+      "type": "best_practice",
+      "severity": "low",
+      "message": "The key on line 90 uses a fallback `c.name` when `c.id` is undefined. If two colleges have the same name (e.g. two branches of the same institution), React will reuse DOM nodes incorrectly, causing rendering bugs.",
+      "line": 90,
+      "suggestion": "Use a unique identifier. If the API always returns an id, use only `c.id`. If not, combine id and name or use index as last resort."
+    },
+    {
+      "filename": "src/app/dashboard/college/applications/page.js",
+      "type": "multi_tenancy",
+      "severity": "high",
+      "message": "The API endpoint '/api/college/applications' does not include a tenant_id filter. In a multi-tenant system, this could return applications from all colleges, causing cross-tenant data leakage. The college admin's tenant context must be included in the request.",
+      "line": 15,
+      "suggestion": "Include the tenant_id as a query parameter or derive it from the authenticated session on the server side."
+    },
+    {
+      "filename": "src/app/dashboard/college/applications/page.js",
+      "type": "performance",
+      "severity": "medium",
+      "message": "No pagination, search, or sorting parameters are sent with the API request. As the number of applications grows, this will fetch all records into memory, causing slow page loads and excessive data transfer.",
+      "line": 15,
+      "suggestion": "Add pagination (page, limit), search query, and sort parameters to the API request, and implement corresponding UI controls."
+    },
+    {
+      "filename": "src/app/dashboard/college/applications/page.js",
+      "type": "uiux",
+      "severity": "low",
+      "message": "Loading and error states are shown as plain <p> elements without any visual distinction (skeleton, card, or icon). This provides poor user experience during loading and error scenarios.",
+      "line": 32,
+      "suggestion": "Use a skeleton table for loading state and a styled error card with retry button for error state."
+    },
+    {
+      "filename": "src/app/dashboard/college/applications/page.js",
+      "type": "saas_completeness",
+      "severity": "low",
+      "message": "The table lacks interactive features expected in a production SaaS application: no row click to view details, no sorting by columns, no filters by status/department/company, and no export functionality.",
+      "line": 49,
+      "suggestion": "Add clickable rows that navigate to application detail, column sorting, filter dropdowns, and an export button."
+    },
+    {
+      "filename": "src/app/dashboard/college/applications/page.js",
+      "type": "uiux",
+      "severity": "low",
+      "message": "The empty state message 'No applications found.' is generic and provides no guidance on what the user should do next (e.g., check filters, wait for students to apply, or create a drive).",
+      "line": 60,
+      "suggestion": "Provide a contextual empty state with actionable guidance based on the user's role and current filters."
+    },
+    {
+      "filename": "src/app/dashboard/admin/page.js",
+      "type": "security",
+      "severity": "medium",
+      "message": "The component does not validate the user session data, which could lead to security vulnerabilities if the data is tampered with",
+      "line": 9,
+      "suggestion": "Add input validation to ensure the user session data is valid and secure"
+    },
+    {
+      "filename": "src/app/dashboard/admin/page.js",
+      "type": "best_practice",
+      "severity": "low",
+      "message": "The component does not handle errors and exceptions properly when rendering the dashboard",
+      "line": 22,
+      "suggestion": "Add try-catch blocks to handle errors and exceptions when rendering the dashboard"
+    },
+    {
+      "filename": "src/app/dashboard/admin/employers/page.js",
+      "type": "authentication",
+      "severity": "high",
+      "message": "No client-side auth check or redirect on 401/403. If the API route is unprotected or the session expires, the component silently shows an empty table or a generic error. This can lead to unauthorized data exposure or confusing UX.",
+      "line": 15,
+      "suggestion": "Add a check for 401/403 responses and redirect to login or show an auth error message."
+    },
+    {
+      "filename": "src/app/dashboard/admin/employers/page.js",
+      "type": "performance",
+      "severity": "medium",
+      "message": "No pagination, search, or filtering on the employer list. With hundreds or thousands of employers, this will fetch all records at once, causing slow load times and poor UX. The API endpoint likely returns all employers without pagination.",
+      "line": 39,
+      "suggestion": "Implement server-side pagination with page/limit query params, and add client-side search/filter controls."
+    },
+    {
+      "filename": "src/app/dashboard/admin/employers/page.js",
+      "type": "bug",
+      "severity": "medium",
+      "message": "Using array index as React key (`key={i}`) can cause rendering bugs when the list is filtered, sorted, or reordered. This can lead to incorrect DOM updates, focus loss, and stale state in child components.",
+      "line": 40,
+      "suggestion": "Use a unique identifier from the data, such as employer.id or employer.company_slug."
+    },
+    {
+      "filename": "src/app/dashboard/admin/employers/page.js",
+      "type": "null_check",
+      "severity": "medium",
+      "message": "Accessing `e.name`, `e.industry`, `e.hires`, and `e.verified` without null checks will crash the component if any employer object is missing these fields. A malformed API response or partial data could cause a white screen.",
+      "line": 40,
+      "suggestion": "Add optional chaining or default fallback values for each field."
+    },
+    {
+      "filename": "src/app/dashboard/admin/employers/page.js",
+      "type": "uiux",
+      "severity": "low",
+      "message": "The 'View' button is permanently disabled with 'Coming soon' title, which is a poor UX pattern. Users cannot interact with any employer record, making this page purely informational with no actionable capability.",
+      "line": 42,
+      "suggestion": "Either implement the view functionality or remove the button entirely until it's ready. Consider showing a count of total employers instead."
+    },
+    {
+      "filename": "src/app/dashboard/admin/employers/page.js",
+      "type": "uiux",
+      "severity": "low",
+      "message": "The empty state shows the error message in the same cell as 'No employers found.' This conflates an error state with an empty data state, which is confusing. Also, there is no loading skeleton or spinner for the initial load.",
+      "line": 44,
+      "suggestion": "Separate error state from empty state. Add a loading skeleton or spinner while isLoading is true."
+    },
+    {
+      "filename": "src/app/dashboard/admin/employers/page.js",
+      "type": "saas_completeness",
+      "severity": "low",
+      "message": "Missing export functionality for the employer list. As per the SaaS completeness requirements, all tabular screens must have an export option (CSV/Excel).",
+      "line": 15,
+      "suggestion": "Add an 'Export' button that calls an API endpoint to generate and download a CSV or Excel file of the current employer list."
+    },
+    {
+      "filename": "src/app/api/student/program-opportunities/route.js",
+      "type": "runtime",
+      "severity": "critical",
+      "message": "userId is used as argument to resolveStudentPlacementTenantIds on line 23 before the null check on line 24. If userId is null/undefined, the function will likely throw an unhandled error, crashing the request.",
+      "line": 23,
+      "suggestion": "Move the userId null check before calling resolveStudentPlacementTenantIds, or handle the null case inside that function."
+    },
+    {
+      "filename": "src/app/api/student/program-opportunities/route.js",
+      "type": "database",
+      "severity": "critical",
+      "message": "Query references table 'program_applications' which does not exist in the provided database schema. The schema only has an 'applications' table. This will cause a PostgreSQL error on every request, returning a 500.",
+      "line": 61,
+      "suggestion": "Replace 'program_applications' with 'applications' and adjust column names to match the schema (e.g., 'student_id' instead of 'student_id', 'job_id' exists)."
+    },
+    {
+      "filename": "src/app/api/student/program-opportunities/route.js",
+      "type": "database",
+      "severity": "high",
+      "message": "Query references table 'employer_approvals' which does not exist in the provided database schema. This will cause a PostgreSQL error on every request.",
+      "line": 59,
+      "suggestion": "Remove the join on employer_approvals or add the table to the schema if it exists elsewhere. If employer approval is tracked via another mechanism, adjust the query accordingly."
+    },
+    {
+      "filename": "src/app/api/student/program-opportunities/route.js",
+      "type": "error_handling",
+      "severity": "high",
+      "message": "uuidInClause is called with tenantIds which could be empty (checked on line 24 but after the call). If tenantIds is empty, uuidInClause may generate invalid SQL (e.g., 'IN ()') causing a database error.",
+      "line": 32,
+      "suggestion": "Move the tenantIds length check before uuidInClause call, or handle empty array in uuidInClause to return a fallback condition."
+    },
+    {
+      "filename": "src/app/api/student/program-opportunities/route.js",
+      "type": "observability",
+      "severity": "medium",
+      "message": "Error logging uses console.error with only the error object and a static string. No structured logging, no request ID, no tenant context, making it impossible to correlate errors in production.",
+      "line": 90,
+      "suggestion": "Use a structured logger that includes request ID, tenant ID, user ID, and error stack trace."
+    },
+    {
+      "filename": "src/app/api/student/program-opportunities/route.js",
+      "type": "error_handling",
+      "severity": "medium",
+      "message": "All errors return a generic 'Failed to load opportunities' message. Database errors (missing table, connection failure) and business logic errors are indistinguishable, making debugging harder.",
+      "line": 91,
+      "suggestion": "Differentiate between expected errors (e.g., validation) and unexpected errors (e.g., DB failure). Log the full error server-side but return a more specific message for validation errors."
+    },
+    {
+      "filename": "src/app/api/student/program-opportunities/route.js",
+      "type": "validation",
+      "severity": "low",
+      "message": "The kind parameter defaults to 'internship' for any value other than 'project'. This means invalid values like 'full_time' or 'xyz' silently default to 'internship' instead of returning a 400 error.",
+      "line": 29,
+      "suggestion": "Validate that kind is one of the allowed values and return a 400 if not."
+    },
+    {
+      "filename": "src/app/api/student/program-opportunities/route.js",
+      "type": "data_integrity",
+      "severity": "low",
+      "message": "The LEFT JOIN on student_profiles uses sp.user_id = $${userIdx}::uuid but the student_profiles table may have multiple rows per user if the user belongs to multiple tenants. This could cause duplicate rows in the result.",
+      "line": 60,
+      "suggestion": "Add a tenant filter to the student_profiles join to ensure only the correct tenant's profile is matched."
+    },
+    {
+      "filename": "src/app/dashboard/college/audit-reports/page.js",
+      "type": "error_handling",
+      "severity": "low",
+      "message": "The code does not handle potential errors when rendering the AuditReportsPage component",
+      "line": 6,
+      "suggestion": "Add error handling to the component to handle potential errors"
+    },
+    {
+      "filename": "src/app/api/student/profile/route.js",
+      "type": "runtime",
+      "severity": "high",
+      "message": "If `parts.skills` is null or undefined (e.g., client sends `{\"skills\": null}` or omits the field), the `for...of` loop on line 148 will throw a TypeError: `parts.skills is not iterable`, crashing the request and returning a 500 with no rollback of the preceding UPDATE.",
+      "line": 148,
+      "suggestion": "Add a guard to default `parts.skills` to an empty array before the loop, or validate it is an array."
+    },
+    {
+      "filename": "src/app/api/student/profile/route.js",
+      "type": "data_integrity",
+      "severity": "medium",
+      "message": "`ensureStudentProfileRow` silently returns null if the user is not a student or the INSERT fails (e.g., unique constraint violation). The caller on line 29 ignores the return value, so a missing profile row will cause the subsequent SELECT on line 31 to return 0 rows, resulting in a 404 with a misleading 'Student profile not found' error.",
+      "line": 7,
+      "suggestion": "After calling ensureStudentProfileRow, check if the profile exists and return a clear error if it cannot be created (e.g., user not a student)."
+    },
+    {
+      "filename": "src/app/api/student/profile/route.js",
+      "type": "security",
+      "severity": "medium",
+      "message": "The error handler exposes an internal migration hint (`Run db/migrations/010_student_profile_aux.sql on your database.`) to the client. This leaks information about the database schema and migration state, which could aid an attacker in understanding the infrastructure.",
+      "line": 60,
+      "suggestion": "Return a generic 'Service unavailable' message for migration errors and log the hint server-side only."
+    },
+    {
+      "filename": "src/app/api/student/profile/route.js",
+      "type": "input_validation",
+      "severity": "medium",
+      "message": "The PUT handler parses the request body with a `.catch(() => ({}))` which silently swallows JSON parse errors and treats the body as an empty object. This means a malformed request (e.g., invalid JSON) will proceed with an empty body, potentially updating the profile with null/undefined values without informing the user.",
+      "line": 80,
+      "suggestion": "Return a 400 error with a clear message when the request body is not valid JSON, rather than silently defaulting to an empty object."
+    },
+    {
+      "filename": "src/app/api/student/profile/route.js",
+      "type": "input_validation",
+      "severity": "low",
+      "message": "CGPA validation only checks the range 0-10 but does not validate that `parts.cgpa` is a number. If a string like '8.5' is passed, the comparison works, but non-numeric values like 'abc' would pass the range check (since 'abc' < 0 is false) and be inserted into the database, potentially causing a type error or silent truncation.",
+      "line": 84,
+      "suggestion": "Add a type check to ensure cgpa is a number before the range validation."
+    },
+    {
+      "filename": "src/app/api/student/profile/route.js",
+      "type": "data_integrity",
+      "severity": "low",
+      "message": "The `users` table update on line 142 sets `phone = $1` without validating that `parts.user_phone` is a string or within a reasonable length. An empty string or very long string could be stored, causing issues in downstream systems (e.g., SMS notifications).",
+      "line": 142,
+      "suggestion": "Add validation for phone format/length before updating, or at least trim and check for empty string."
+    },
+    {
+      "filename": "src/app/api/student/profile/route.js",
+      "type": "performance",
+      "severity": "low",
+      "message": "Skills are inserted one by one in a loop inside a transaction. For a large number of skills (e.g., 50+), this results in N individual round-trips to the database, which is slow and increases transaction duration. Consider using a bulk insert with `UNNEST` or a single multi-row INSERT.",
+      "line": 148,
+      "suggestion": "Replace the loop with a single parameterized bulk INSERT using `UNNEST` or a VALUES list."
+    },
+    {
+      "filename": "src/app/api/student/profile/route.js",
+      "type": "input_validation",
+      "severity": "low",
+      "message": "The `aux_profile` field is stored as JSONB with `JSON.stringify(parts.aux_profile)`. If `parts.aux_profile` is an extremely large object (e.g., several MB), it could cause performance degradation, memory issues, or exceed PostgreSQL JSONB column limits.",
+      "line": 117,
+      "suggestion": "Add a size limit check on the serialized JSON string before storing, or validate the depth/structure of aux_profile."
+    },
+    {
+      "filename": "src/app/dashboard/admin/users/page.js",
+      "type": "error_handling",
+      "severity": "medium",
+      "message": "The API endpoint error handling could be improved to provide more specific and user-friendly error messages",
+      "line": 15,
+      "suggestion": "Implement more specific error handling and provide user-friendly error messages"
+    },
+    {
+      "filename": "src/app/dashboard/admin/users/page.js",
+      "type": "security",
+      "severity": "low",
+      "message": "The user data displayed in the table is not properly sanitized, which could lead to XSS vulnerabilities",
+      "line": 40,
+      "suggestion": "Implement input validation and sanitization on the user data displayed in the table"
+    },
+    {
+      "filename": "src/app/dashboard/college/enrollment-key/page.js",
+      "type": "multi_tenancy",
+      "severity": "medium",
+      "message": "The fetch to '/api/college/enrollment-ledger' does not include any tenant identifier or session validation. If the API endpoint does not enforce tenant-scoped access, this could return the enrollment key for a different college or expose data across tenants.",
+      "line": 17,
+      "suggestion": "Ensure the API endpoint validates the authenticated user's tenant_id and returns only the key for that tenant. Consider adding a tenant_id query parameter or relying on server-side session data."
+    },
+    {
+      "filename": "src/app/dashboard/college/enrollment-key/page.js",
+      "type": "edge_case",
+      "severity": "low",
+      "message": "navigator.clipboard.writeText requires a secure context (HTTPS) or localhost. In production HTTP environments, this will throw and fall to the catch block, showing 'Could not copy' without a fallback method.",
+      "line": 34,
+      "suggestion": "Add a fallback using document.execCommand('copy') or a textarea selection method for non-secure contexts."
+    },
+    {
+      "filename": "src/app/dashboard/college/enrollment-key/page.js",
+      "type": "uiux",
+      "severity": "low",
+      "message": "The loading skeleton has a hardcoded height of 24px and width of 80%, which may not match the actual content dimensions (the key display has padding and border). This can cause layout shift when the content loads.",
+      "line": 58,
+      "suggestion": "Use a skeleton that matches the exact dimensions of the content container, or wrap the skeleton in a container with the same padding/border as the actual content."
+    },
+    {
+      "filename": "src/app/dashboard/college/enrollment-key/page.js",
+      "type": "uiux",
+      "severity": "low",
+      "message": "The empty state message 'No key is available for this campus.' provides no guidance on what the user should do next (e.g., contact support or generate a key).",
+      "line": 80,
+      "suggestion": "Add a call-to-action or explanation, such as a link to generate a key or contact admin support."
+    },
+    {
+      "filename": "src/app/dashboard/college/events/page.js",
+      "type": "multi_tenancy",
+      "severity": "high",
+      "message": "The API endpoint '/api/college/events' is called without any tenant context (e.g., tenant_id header or cookie). This could lead to cross-tenant data leakage if the API does not enforce tenant isolation.",
+      "line": 16,
+      "suggestion": "Ensure the API route extracts the tenant from the session or a custom header and filters events by tenant_id."
+    },
+    {
+      "filename": "src/app/dashboard/college/events/page.js",
+      "type": "error_handling",
+      "severity": "medium",
+      "message": "The fetcher function does not handle non-JSON responses (e.g., HTML error pages). If the API returns a 500 with HTML, res.json() will throw a parse error that is not caught, resulting in an unhandled promise rejection.",
+      "line": 16,
+      "suggestion": "Add a check for Content-Type before calling res.json(), or wrap in try/catch."
+    },
+    {
+      "filename": "src/app/dashboard/college/events/page.js",
+      "type": "ux_copy",
+      "severity": "low",
+      "message": "Error message 'Could not load events.' is generic and not actionable. It does not guide the user on what to do (e.g., retry, contact support).",
+      "line": 37,
+      "suggestion": "Provide a more helpful message with a retry action."
+    },
+    {
+      "filename": "src/app/dashboard/college/events/page.js",
+      "type": "saas_completeness",
+      "severity": "low",
+      "message": "The events table lacks search, filtering, sorting, pagination, and export functionality. For a production SaaS product, these are essential for usability at scale.",
+      "line": 60,
+      "suggestion": "Add search input, column filters, sortable headers, pagination controls, and an export button."
+    },
+    {
+      "filename": "src/app/dashboard/college/events/page.js",
+      "type": "uiux",
+      "severity": "low",
+      "message": "The 'Blocking' column displays 'Yes' or 'No' without any visual indicator (e.g., badge, color). This reduces scanability.",
+      "line": 65,
+      "suggestion": "Use a colored badge or icon to indicate blocking status."
+    },
+    {
+      "filename": "src/app/api/user/data-export/route.js",
+      "type": "null_pointer_exception",
+      "severity": "high",
+      "message": "If the INSERT query fails silently (e.g., FK violation, constraint error) or returns no rows, `ins.rows[0]?.id` will be undefined. The subsequent UPDATE at line 55 will then attempt to cast undefined to UUID, causing a database error and a 500 response, but the export record will be stuck in 'processing' status.",
+      "line": 43,
+      "suggestion": "Check that exportId is defined before proceeding, and throw an error if it is missing."
+    },
+    {
+      "filename": "src/app/api/user/data-export/route.js",
+      "type": "error_handling",
+      "severity": "medium",
+      "message": "The sendMail failure is silently swallowed with only a console.warn. If the email is critical for compliance (e.g., GDPR notification), this failure should be logged with more context and potentially retried or flagged for admin review.",
+      "line": 77,
+      "suggestion": "Log the export ID and user ID along with the error, and consider adding a retry mechanism or alerting."
+    },
+    {
+      "filename": "src/app/api/user/data-export/route.js",
+      "type": "multi_tenancy",
+      "severity": "medium",
+      "message": "The GET endpoint filters exports only by user_id, but does not include a tenant_id filter. In a multi-tenant system, a user could potentially see exports from another tenant if the user_id is shared across tenants (unlikely but possible with super-admin roles).",
+      "line": 18,
+      "suggestion": "Add a tenant_id filter to the query to ensure tenant isolation."
+    },
+    {
+      "filename": "src/app/api/user/data-export/route.js",
+      "type": "data_integrity",
+      "severity": "low",
+      "message": "The INSERT query does not include a tenant_id column, which means the export record is not associated with a tenant. This could cause issues with tenant-scoped data management and compliance.",
+      "line": 38,
+      "suggestion": "Add tenant_id to the INSERT query to associate the export with the user's tenant."
+    },
+    {
+      "filename": "src/app/api/user/data-export/route.js",
+      "type": "performance",
+      "severity": "low",
+      "message": "The entire export payload is loaded into memory as a JSON string and then a Buffer. For users with very large datasets (e.g., thousands of applications, offers), this could consume significant memory and cause slow responses or OOM crashes.",
+      "line": 51,
+      "suggestion": "Consider streaming the JSON response directly from the payload object using a Transform stream, or implement pagination for large exports."
+    },
+    {
+      "filename": "src/app/api/user/data-export/route.js",
+      "type": "security",
+      "severity": "low",
+      "message": "The filename uses `session.user.role` directly without sanitization. While roles are constrained by the database CHECK constraint, if a role somehow contains special characters (e.g., newline), it could lead to HTTP response splitting or header injection.",
+      "line": 62,
+      "suggestion": "Sanitize the role value or use a fixed prefix instead of the raw role."
+    },
+    {
+      "filename": "src/app/dashboard/admin/colleges/page.js",
+      "type": "saas_completeness",
+      "severity": "high",
+      "message": "View and Edit action buttons are permanently disabled with 'Coming soon' tooltips. This blocks core CRUD functionality for managing colleges, which is a critical product gap. Users cannot view college details or edit college information from this list.",
+      "line": 47,
+      "suggestion": "Implement View and Edit functionality, or remove the buttons if not yet implemented. If truly coming soon, consider hiding them or adding a clear timeline."
+    },
+    {
+      "filename": "src/app/dashboard/admin/colleges/page.js",
+      "type": "saas_completeness",
+      "severity": "high",
+      "message": "The data table lacks search, filters, sorting, pagination, column toggle, export, and bulk actions. This is a critical SaaS completeness gap \u2014 the page is unusable with more than a handful of colleges.",
+      "line": 38,
+      "suggestion": "Add search input, column filters, sortable headers, pagination controls, export button, and bulk action support. Consider using a reusable data table component."
+    },
+    {
+      "filename": "src/app/dashboard/admin/colleges/page.js",
+      "type": "saas_completeness",
+      "severity": "medium",
+      "message": "Missing screen tag (e.g., S-1) as required by the product specification. Every screen should have a unique screen tag for identification and debugging.",
+      "line": 36,
+      "suggestion": "Add a data-screen attribute or visible screen tag to the root div."
+    },
+    {
+      "filename": "src/app/dashboard/admin/colleges/page.js",
+      "type": "saas_completeness",
+      "severity": "medium",
+      "message": "Missing export functionality. The product spec requires ALL tabular screens to have an export option. Users cannot download the college list as CSV or Excel.",
+      "line": 38,
+      "suggestion": "Add an export button that triggers CSV/Excel download of the current filtered/sorted data."
+    },
+    {
+      "filename": "src/app/dashboard/admin/colleges/page.js",
+      "type": "edge_case",
+      "severity": "low",
+      "message": "The code accesses c.city, c.naac, c.students, c.placed, c.active without null/undefined checks. If the API returns a college object missing these fields, the UI will render 'undefined' or break on Math.round.",
+      "line": 43,
+      "suggestion": "Add fallback values for optional fields, e.g., c.city || '-', c.naac || 'N/A', c.students || 0, c.placed || 0, c.active !== false."
+    }
+  ]
+}

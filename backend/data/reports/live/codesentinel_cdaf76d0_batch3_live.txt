@@ -1,0 +1,342 @@
+=================================================================
+  CODESENTINEL -- BATCH 3 REPORT
+  Files 51 - 63 of 63
+  Folder : C:\Users\sandeep\Downloads\Claudes\iso\system
+  Saved  : 05/05/2026, 01:22:41
+=================================================================
+
+  Batch Score   : 81/100
+  Files Reviewed: 13
+  Total Issues  : 37
+
+=================================================================
+  FILE: src/lib/import-csv-specs.ts
+  Score: 100/100   Issues: 0   Provider: nvidia   Time: 29.63s
+
+  This file defines CSV import column headers and example rows for assets, risk registers, and compliance registers. It is a static configuration file with no runtime logic, external dependencies, or user input processing. The code is clean, well-typed, and uses `as const` for header arrays. No security, reliability, or data integrity issues are present. The only minor concern is the hardcoded example email and date, which are clearly marked as examples and pose no risk.
+
+  🧪 Test Coverage Generator
+    - Verify that all headers in ASSET_IMPORT_HEADERS are present in the generated example row
+    - Verify that the example row values match the expected format (e.g., classification, risk level, condition)
+    - Verify that RISK_REGISTER_HEADERS and COMPLIANCE_REGISTER_HEADERS are correctly typed and exported
+    - Verify that the example rows for risk and compliance have the correct number of columns matching their respective headers
+
+=================================================================
+  FILE: src/lib/server-error.ts
+  Score: 99/100   Issues: 1   Provider: nvidia   Time: 25.31s
+
+  The serverError utility is a clean, minimal helper for returning a generic 500 response while logging the full error server-side. It correctly avoids leaking implementation details to the client. The only concern is that console.error may not be sufficient for production observability (structured logging, error tracking integration), but this is a minor gap given the file's single responsibility.
+
+  [LOW] observability -- Line 3
+  console.error on line 3 logs the error but lacks structured context (request ID, tenant ID, user ID, timestamp) needed for production debugging and correlation across distributed systems.
+  Fix: Replace console.error with a structured logger (e.g., pino, winston) that includes correlation IDs and can be routed to an observability platform.
+
+  🧪 Test Coverage Generator
+    - Should return a 500 status code with a generic error message when called with an Error object
+    - Should return a 500 status code with a generic error message when called with a string
+    - Should return a 500 status code with a generic error message when called with null/undefined
+    - Should log the full error to console.error for server-side debugging
+    - Should not leak any error details (stack trace, message) in the response body
+
+=================================================================
+  FILE: src/lib/require-session.ts
+  Score: 86/100   Issues: 3   Provider: nvidia   Time: 33.33s
+
+  The session utility is concise and follows a reasonable pattern for extracting and verifying session tokens from cookies. However, it has a critical type safety issue: `verifySessionToken` can return `undefined` (when the cookie is missing or the token is invalid), but the return type of `getSession` is `SessionPayload | null`. This mismatch means callers expecting `null` may receive `undefined`, leading to potential runtime crashes or logic errors. Additionally, the error object in `requireSession` uses a non-standard `status` property that may not be handled correctly by Next.js error boundaries, which expect `digest` or `statusCode` properties. The code also lacks logging for failed authentication attempts, which is important for security monitoring.
+
+  [HIGH] type_error -- Line 10
+  `verifySessionToken` can return `undefined` when the cookie is missing or the token is invalid, but `getSession` declares its return type as `Promise<SessionPayload | null>`. This type mismatch means callers expecting `null` may receive `undefined`, leading to potential runtime crashes or logic errors.
+  Fix: Ensure `verifySessionToken` returns `null` instead of `undefined` when the token is invalid, or explicitly convert `undefined` to `null` in `getSession`.
+
+  [MEDIUM] error_handling -- Line 16
+  The error object uses a non-standard `status` property that may not be recognized by Next.js error boundaries. Next.js expects `digest` or `statusCode` for proper error handling, which could result in generic 500 errors instead of 401 responses.
+  Fix: Use Next.js's `Unauthorized` error or throw a standard `Response` with status 401 instead of a custom error object.
+
+  [LOW] observability -- Line 14
+  No logging is performed when authentication fails. In production, this makes it difficult to detect brute-force attacks or monitor failed login attempts.
+  Fix: Add structured logging for failed authentication attempts, including timestamp and request context.
+
+  🧪 Test Coverage Generator
+    - Should return null when no session cookie exists
+    - Should return null when session cookie value is empty string
+    - Should return null when session token is expired or malformed
+    - Should throw an error with status 401 when session is missing in requireSession
+    - Should return valid SessionPayload when cookie contains a valid token
+    - Should handle the case where cookies() throws an error (e.g., in edge runtime)
+    - Should verify that the error thrown by requireSession is caught by Next.js error boundary
+    - Should log a warning when an invalid or expired session token is encountered
+
+=================================================================
+  FILE: src/lib/tenant-guards.ts
+  Score: 86/100   Issues: 3   Provider: nvidia   Time: 32.29s
+
+  The tenant guard functions are well-structured and consistently enforce multi-tenant isolation via JOIN chains. The primary risk is the lack of error handling: if `getDb()` throws (e.g., connection pool exhaustion), the entire request will crash with an unhandled promise rejection. Additionally, the functions do not validate that `tenantId` is a positive integer, which could lead to subtle logic errors or wasted queries. The code is otherwise clean and follows a sound pattern.
+
+  [HIGH] error_handling -- Line 18
+  `getDb()` can throw (e.g., connection pool exhausted, database down). This unhandled promise rejection will crash the Node.js process in production.
+  Fix: Wrap the `getDb()` call and the query in a try/catch, log the error, and return false (or throw a controlled error).
+
+  [MEDIUM] input_validation -- Line 16
+  `tenantId` is typed as `number` but no validation ensures it is a positive integer. A value of 0, negative, or NaN could cause unexpected query behavior or waste database resources.
+  Fix: Add a guard clause at the top of each function to return false if tenantId is not a positive integer.
+
+  [LOW] performance -- Line 18
+  Each guard function makes a separate database query. In a loop or batch operation, this could cause N+1 query overhead. Consider a batch query or a single query with multiple IDs.
+  Fix: If these guards are called in a loop, refactor to accept an array of IDs and return a map of results.
+
+  🧪 Test Coverage Generator
+    - Should return false when database connection fails (getDb throws) — verify the error propagates or is caught by caller
+    - Should return false when tenantId is 0 or negative — guard against invalid tenant IDs
+    - Should return false when tenantId is null or undefined — guard against missing tenant context
+    - Should return true for a valid document that belongs to the given tenant
+    - Should return false for a document that belongs to a different tenant
+    - Should return false when the document does not exist
+    - Should handle concurrent calls correctly without race conditions
+    - Should handle very large tenantId values without overflow or performance degradation
+
+=================================================================
+  FILE: src/lib/tree-types.ts
+  Score: 100/100   Issues: 0   Provider: nvidia   Time: 27.03s
+
+  This is a clean, well-typed type definition file with no runtime logic, security vulnerabilities, or data integrity issues. The types are well-structured and self-documenting. No issues found.
+
+=================================================================
+  FILE: src/lib/utils.ts
+  Score: 100/100   Issues: 0   Provider: nvidia   Time: 23.11s
+
+  The file is a minimal utility module exporting a single `cn` function that combines `clsx` and `tailwind-merge`. The code is clean, well-typed, and follows the standard pattern used across Tailwind projects. No security, reliability, or correctness issues are present. The function is pure and has no side effects, making it safe for production use.
+
+  🧪 Test Coverage Generator
+    - Should merge conflicting Tailwind classes correctly (e.g., cn('px-4', 'px-6') returns 'px-6')
+    - Should handle conditional class inputs (e.g., cn('base', false && 'hidden', 'extra') returns 'base extra')
+    - Should handle undefined and null inputs gracefully (e.g., cn('a', undefined, null, 'b') returns 'a b')
+    - Should return empty string when no inputs provided
+    - Should handle array inputs (e.g., cn(['a', 'b'], 'c') returns 'a b c')
+
+=================================================================
+  FILE: src/lib/download-csv.ts
+  Score: 70/100   Issues: 4   Provider: nvidia   Time: 54.83s
+
+  The CSV download utility is functionally correct for basic use but has a critical CSV injection vulnerability (formula injection) that can execute arbitrary formulas when the CSV is opened in Excel/Sheets. Additionally, the function lacks error handling for Blob creation failures and has a minor memory leak risk if URL.revokeObjectURL is called before the download starts. The code is otherwise clean and well-structured for its purpose.
+
+  [CRITICAL] csv_injection -- Line 7
+  CSV injection vulnerability in esc() function: cells starting with =, +, -, or @ are not sanitized. When the CSV is opened in Excel, Google Sheets, or LibreOffice, these cells can execute arbitrary formulas (e.g., =CMD|'/C calc'!A0), leading to remote code execution or data exfiltration.
+  Fix: Prefix dangerous leading characters with a single quote or tab to neutralize formula execution.
+
+  [MEDIUM] error_handling -- Line 17
+  No error handling around Blob creation or URL.createObjectURL. If the dataset is extremely large or memory is constrained, Blob constructor can throw a RangeError or QuotaExceededError, crashing the page without user feedback.
+  Fix: Wrap Blob creation and download logic in a try-catch block and provide user feedback on failure.
+
+  [LOW] reliability -- Line 24
+  URL.revokeObjectURL is called immediately after a.click(), which may revoke the blob URL before the browser has started the download in some browsers (e.g., older Safari, Firefox). This can cause a failed download with a network error.
+  Fix: Delay the revokeObjectURL call slightly (e.g., setTimeout with 100ms) to ensure the download has initiated.
+
+  [LOW] edge_case -- Line 5
+  The function does not validate that headers and rows have consistent column lengths. If a row has more or fewer columns than headers, the resulting CSV will be malformed, potentially corrupting data when imported.
+  Fix: Add a validation step to ensure all rows match the header length, or pad/truncate rows to match.
+
+  🧪 Test Coverage Generator
+    - Should sanitize cells starting with =, +, -, @ to prevent CSV injection
+    - Should handle cells containing only special characters like =SUM(1+1)
+    - Should handle empty rows array gracefully
+    - Should handle null/undefined values in headers array
+    - Should handle very large datasets without crashing the browser
+    - Should handle cells with mixed quotes and commas correctly
+    - Should handle filename with .csv extension correctly
+    - Should handle filename without .csv extension correctly
+    - Should handle Blob creation failure (e.g., memory limit exceeded)
+    - Should handle rows with varying column lengths gracefully
+
+=================================================================
+  FILE: src/lib/demo-tenants.ts
+  Score: 87/100   Issues: 2   Provider: nvidia   Time: 58.56s
+
+  The provided code defines demo tenants for a campus placement system. It exports a constant password and an array of demo tenant objects. The code is generally correct but has some potential security concerns. The demo password is hardcoded and publicly visible, which could be a security risk. Additionally, the email addresses in the demo tenant objects could be used to send unwanted emails.
+
+  [HIGH] security -- Line 2
+  Hardcoded demo password is a security risk
+  Fix: Use environment variables or a secure password storage mechanism
+
+  [MEDIUM] security -- Line 11
+  Email addresses in demo tenant objects could be used to send unwanted emails
+  Fix: Use placeholder or dummy email addresses
+
+  🧪 Test Coverage Generator
+    - Should not allow unauthorized access with demo password
+    - Should validate email addresses before sending emails
+
+=================================================================
+  FILE: src/lib/build-document-tree.ts
+  Score: 83/100   Issues: 6   Provider: nvidia   Time: 62.50s
+
+  The `buildDocumentTree` function is well-structured with clear data flow and proper tenant isolation. The primary risk is the N+1 query pattern where four sequential database queries are executed, which could become a performance bottleneck for documents with many categories. Additionally, there is no error handling around database calls, which could lead to unhandled promise rejections in production. The function correctly handles the `strict` filtering mode and returns null for missing documents.
+
+  [HIGH] error_handling -- Line 20
+  No try/catch around any of the four sequential database queries (lines 22, 35, 52, 61, 67). If any query throws (e.g., connection timeout, deadlock), the entire promise will reject unhandled, crashing the Node.js process in older versions or causing an unhandled rejection warning.
+  Fix: Wrap the entire function body in a try/catch block and log the error with context (documentId, tenantId) before returning null or throwing a controlled error.
+
+  [MEDIUM] performance -- Line 22
+  Four sequential database queries (doc, categories, level1, level2, evidence) create an N+1 pattern. For a document with 50 categories, this results in 4 round trips instead of a single JOIN query. This adds latency proportional to the number of categories and could be a bottleneck under load.
+  Fix: Use a single query with JOINs to fetch all related data in one round trip, then assemble the tree in memory. Alternatively, use Drizzle's relations API with `with` to eager-load nested relations.
+
+  [LOW] logic -- Line 30
+  Line 31 checks `auditorMode && !doc.include` but `doc.include` is a boolean field. If `doc.include` is `null` (nullable), the check `!doc.include` would be true, incorrectly returning null. The schema shows `include` is not defined in the provided schema snippet, but if it's nullable, this is a bug.
+  Fix: Explicitly check `doc.include === false` instead of `!doc.include` to handle null correctly.
+
+  [LOW] code_smell -- Line 33
+  Variable `docEffective` is assigned from `doc.include` but `doc.include` is already used directly on line 31. This creates a redundant variable that could be confused with the original field.
+  Fix: Remove the `docEffective` variable and use `doc.include` directly throughout the function.
+
+  [LOW] performance -- Line 75
+  Three separate Map constructions (l2ByL1, evByL2, l1ByCat) iterate over the same arrays that were just fetched. This is acceptable for small datasets but could be optimized by building the maps during the initial iteration or using a single pass.
+  Fix: Consider building these maps during the initial fetch or using a library like lodash.groupBy for clarity.
+
+  [LOW] logic -- Line 163
+  The `filteredCats` variable filters out categories with no level1 children when `strict` is true, but this filtering is already partially done by the `.filter((n) => !strict || n.effective)` on line 161. This could result in double-filtering, though the logic is still correct.
+  Fix: Consolidate the filtering logic to avoid confusion. Either filter in the map callback or after, but not both.
+
+  🧪 Test Coverage Generator
+    - Should return null when documentId does not exist in the database
+    - Should return null when auditorMode is true and doc.include is false
+    - Should return a document with empty categories array when no categories exist
+    - Should correctly filter out excluded branches when omitExcludedBranches is true
+    - Should handle database connection failure gracefully (e.g., db.getDb() throws)
+    - Should handle empty level1 rows without crashing (l1Ids.length === 0)
+    - Should handle empty level2 rows without crashing (l2Ids.length === 0)
+    - Should handle empty evidence rows without crashing (l2Ids.length === 0)
+    - Should correctly compute effective flags through the entire tree hierarchy
+    - Should handle a document with 1000+ categories without excessive memory usage
+    - Should handle concurrent calls for different tenants without data leakage
+    - Should handle database timeout during any of the four sequential queries
+
+=================================================================
+  FILE: src/lib/scope.ts
+  Score: 97/100   Issues: 1   Provider: nvidia   Time: 54.84s
+
+  The file is a minimal utility function with no runtime failures, security vulnerabilities, or data integrity issues. The only concern is a missing null/undefined check on the input parameter, which could cause a crash if called with null or undefined. Overall, the code is clean and correct for its intended use.
+
+  [MEDIUM] null_check -- Line 1
+  The function `effectiveInScope` does not validate that `chain` is an array. If called with `null` or `undefined`, it will throw a TypeError at runtime, crashing the caller.
+  Fix: Add a guard clause to check if `chain` is an array before calling `.every()`, or default to an empty array.
+
+  🧪 Test Coverage Generator
+    - Should return true when all elements are true
+    - Should return false when any element is false
+    - Should return true for an empty array
+    - Should throw or handle gracefully when called with null or undefined
+
+=================================================================
+  FILE: src/lib/session.ts
+  Score: 45/100   Issues: 5   Provider: nvidia   Time: 64.16s
+
+  The session utility is well-structured with proper JWT handling using the jose library. The biggest risk is the hardcoded fallback secret key in development mode, which could accidentally be deployed to production, allowing session forgery. The session payload uses numeric IDs which are correctly cast on verification, but the type definition uses `number` while the database uses UUIDs, creating a type mismatch that will cause all sessions to fail verification in production. The catch block silently returns null, which is acceptable for session verification but should log the error for observability.
+
+  [CRITICAL] security -- Line 13
+  Hardcoded fallback secret 'dev-insecure-change-me-in-production' in secretKey() function. If this code is deployed without setting AUTH_SECRET environment variable, an attacker can forge valid session tokens using this known secret, leading to complete account takeover.
+  Fix: Remove the fallback and throw an error at startup if AUTH_SECRET is not set in production, or use a cryptographically random default for development only.
+
+  [CRITICAL] type_error -- Line 4
+  SessionPayload defines userId and tenantId as `number`, but the database schema uses UUIDs (type `UUID` in PostgreSQL). The verifySessionToken function casts these to Number(), which will produce NaN for UUID strings like '550e8400-e29b-41d4-a716-446655440000'. This will cause all session verifications to fail in production, effectively locking all users out of the system.
+  Fix: Change SessionPayload to use `string` for userId and tenantId to match the UUID database types, and remove the Number() casting in verifySessionToken.
+
+  [MEDIUM] observability -- Line 48
+  Empty catch block in verifySessionToken silently swallows all JWT verification errors (expired tokens, invalid signatures, malformed tokens). In production, this makes it impossible to diagnose authentication failures or detect token forgery attempts.
+  Fix: Log the error at a debug or warn level to aid in troubleshooting without exposing sensitive information.
+
+  [LOW] best_practice -- Line 30
+  Session expiration is hardcoded to 7 days. This does not allow for different session durations (e.g., shorter for admin sessions, longer for 'remember me' functionality).
+  Fix: Consider making the expiration configurable via an environment variable or function parameter.
+
+  [LOW] performance -- Line 13
+  secretKey() is called on every token creation and verification, encoding the secret each time. This is a minor performance overhead that can be optimized by caching the encoded key.
+  Fix: Cache the encoded secret key in a module-level variable to avoid repeated TextEncoder calls.
+
+  🧪 Test Coverage Generator
+    - Should reject tokens signed with a different secret key
+    - Should return null for expired tokens
+    - Should return null for malformed tokens
+    - Should handle empty string token gracefully
+    - Should handle undefined/null token gracefully
+    - Should correctly parse valid tokens with all fields
+    - Should reject tokens with missing userId field
+    - Should reject tokens with non-numeric userId
+    - Should handle tokens with extra unknown fields
+    - Should verify that token expiration time is exactly 7 days
+    - Should handle concurrent token verification under load
+    - Should not crash if AUTH_SECRET environment variable is missing
+
+=================================================================
+  FILE: src/lib/ensure-demo-users.ts
+  Score: 0/100   Issues: 10   Provider: nvidia   Time: 72.68s
+
+  The ensureDemoUsers function has several critical issues: it uses synchronous bcrypt hashing which blocks the event loop, hardcodes tenant IDs as sequential integers (1,2,3...) which will conflict with auto-generated UUIDs from the schema, and uses column names (tenantId, createdBy, updatedBy) that don't match the actual schema (tenant_id, created_by, updated_by). The function also lacks proper error handling, has a potential off-by-one bug in the asset type loop, and uses a non-existent 'name' column on the user table. These issues will cause runtime crashes, data integrity problems, and potential cross-tenant data leakage.
+
+  [HIGH] performance -- Line 21
+  bcrypt.hashSync blocks the event loop synchronously. For a seed script this is acceptable, but if this function is ever called in a request handler it will block all other requests. Consider using async bcrypt.hash instead.
+  Fix: Replace bcrypt.hashSync with await bcrypt.hash for non-blocking behavior.
+
+  [CRITICAL] data_integrity -- Line 25
+  Hardcoded sequential integer IDs (tid = i + 1) for tenants will conflict with the schema which uses UUIDs (uuid_generate_v4()). This will cause insert failures or data corruption if the database already has tenants with different IDs.
+  Fix: Use uuid_generate_v4() or let the database auto-generate UUIDs instead of hardcoding sequential integers.
+
+  [CRITICAL] runtime -- Line 43
+  Column names 'tenantId', 'createdBy', 'updatedBy', 'created_at', 'updated_at' do not match the actual schema which uses 'tenant_id', 'created_by', 'updated_by', 'created_at', 'updated_at'. This will cause runtime errors when Drizzle tries to insert into non-existent columns.
+  Fix: Use the exact column names from the schema definition.
+
+  [CRITICAL] runtime -- Line 44
+  The 'name' column does not exist on the user table. The schema has 'first_name' and 'last_name' instead. This will cause a database error.
+  Fix: Use 'first_name' and 'last_name' columns as defined in the schema.
+
+  [HIGH] data_integrity -- Line 47
+  Role value 'ADMIN' does not match the schema CHECK constraint which allows only 'super_admin', 'college_admin', 'employer', 'student'. This will cause a constraint violation error.
+  Fix: Use one of the valid role values from the schema.
+
+  [HIGH] bug -- Line 63
+  Off-by-one: the loop starts at tid=2 but DEMO_TENANTS.length may be 1, causing the loop to not execute at all. If DEMO_TENANTS has 2 items, it only processes tenant 2, skipping tenant 1. This is inconsistent with the tenant insertion loop which starts at index 0.
+  Fix: Start the loop at tid=1 to process all tenants, or clarify the intent with a comment.
+
+  [MEDIUM] error_handling -- Line 64
+  Destructuring [{ n }] from the query result assumes the array has at least one element. If the query fails or returns empty, this will throw a TypeError.
+  Fix: Add a fallback or check the array length before destructuring.
+
+  [MEDIUM] error_handling -- Line 69
+  The insert for isoAssetType may fail (e.g., unique constraint violation) and the error is not caught. If typeRow is undefined, the subsequent insert for isoAssetSubtype is skipped silently.
+  Fix: Wrap in try/catch and log the error, or use onConflictDoNothing.
+
+  [MEDIUM] error_handling -- Line 17
+  The entire function lacks a try/catch block. If any database operation fails (e.g., connection issue, constraint violation), the error will propagate up and potentially crash the caller without proper logging.
+  Fix: Wrap the function body in a try/catch block with appropriate error logging and re-throw or handle gracefully.
+
+  [LOW] best_practice -- Line 20
+  Using new Date().toISOString() for timestamps may cause issues if the server clock is skewed. Consider using database-level NOW() or a consistent time source.
+  Fix: Use db.sql`NOW()` or a database function for timestamps to ensure consistency.
+
+  🧪 Test Coverage Generator
+    - Should handle database connection failure gracefully without crashing the process
+    - Should use UUIDs for tenant IDs instead of sequential integers to match schema
+    - Should use correct column names (tenant_id, created_by, updated_by) matching the schema
+    - Should use async bcrypt.hash instead of sync bcrypt.hashSync to avoid blocking
+    - Should handle the case where DEMO_TENANTS array is empty without errors
+    - Should handle duplicate email inserts correctly with onConflictDoUpdate
+    - Should verify that asset types are only created for tenants that don't already have them
+    - Should handle the case where isoAssetType insert fails and typeRow is undefined
+    - Should properly handle the off-by-one in the asset type loop when DEMO_TENANTS.length is 1
+    - Should validate that DEMO_PASSWORD is not empty before hashing
+
+=================================================================
+  FILE: tailwind.config.ts
+  Score: 96/100   Issues: 2   Provider: nvidia   Time: 56.77s
+
+  The provided Tailwind CSS configuration file is well-structured and readable. It defines a custom theme with various color palettes, typography, and border radius settings. However, there are some potential issues that need to be addressed, such as missing error handling and potential security vulnerabilities. The score is 90 due to the overall quality of the code, but there are some areas that require improvement.
+
+  [MEDIUM] security -- Line 13
+  Potential security vulnerability due to missing input validation for CSS variables
+  Fix: Add input validation for CSS variables to prevent potential security vulnerabilities
+
+  [LOW] best_practice -- Line 64
+  Border radius settings could be simplified using a single variable
+  Fix: Simplify border radius settings using a single variable
+
+  🧪 Test Coverage Generator
+    - Should handle missing CSS variables gracefully
+    - Should prevent potential security vulnerabilities due to missing input validation

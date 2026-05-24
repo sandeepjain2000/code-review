@@ -1,0 +1,624 @@
+=================================================================
+  CODESENTINEL -- BATCH 9 REPORT
+  Files 201 - 221 of 229
+  Folder : C:\Users\sandeep\Downloads\Claudes\CampusPlacement\campus-placement
+  Saved  : 01/05/2026, 21:56:11
+=================================================================
+
+  Batch Score   : 85/100
+  Files Reviewed: 21
+  Total Issues  : 122
+
+=================================================================
+  FILE: src/lib/collegeStudentsCsv.js
+  Score: 66/100   Issues: 15
+
+  The `src/lib/collegeStudentsCsv.js` code is a well-structured CSV import/export utility with clear header definitions and normalization functions, but it has several issues. The primary high-severity risk is the lack of input sanitization for CSV injection in the export function, while medium-severity issues include the CGPA field defaulting to 0 when empty, the use of a hardcoded external service for fallback photo URLs, and potential issues with skills parsing. Additionally, there are low-severity concerns, such as the hardcoded fallback URL potentially leaking student roll numbers to a third-party service and introducing a dependency on an external service. Overall, the code appears clean with proper null handling and type coercion, but it requires improvements for better data integrity, security, and reliability, with a total of 1 high-severity, 8 medium-severity, and 6 low-severity issues identified.
+
+  [HIGH] csv_injection -- Line 80
+  studentToCsvRow does not escape or quote CSV fields that may contain formula-injection characters (e.g., '=', '+', '@', '-') or embedded commas/newlines. This can lead to CSV injection attacks when exported data is opened in spreadsheet applications.
+  Fix: Escape fields that start with '=', '+', '@', or '-' by prefixing with a tab or single quote, and quote fields containing commas, double quotes, or newlines.
+
+  [MEDIUM] data_integrity -- Line 80
+  studentToCsvRow does not handle the case where the student object 's' is null or undefined, which would cause a runtime error when accessing 's.skills' or 's.cgpa'.
+  Fix: Add a null check at the beginning of studentToCsvRow and return an empty array or throw a descriptive error.
+
+  [MEDIUM] data_integrity -- Line 147
+  When CGPA is empty, it defaults to 0, which may silently accept invalid data. A CGPA of 0 is likely invalid for a real student, and this could lead to incorrect data being imported without warning.
+  Fix: Consider treating empty CGPA as an error or requiring explicit 0 input, or at least log a warning when defaulting to 0.
+
+  [MEDIUM] reliability -- Line 192
+  The photo URL fallback uses a hardcoded external service (pravatar.cc) that may not be accessible in all environments (e.g., air-gapped networks, production behind a firewall). This could result in broken images or external dependency failures.
+  Fix: Use a local default avatar or make the fallback URL configurable via environment variable.
+
+  [LOW] edge_case -- Line 140
+  Skills parsing splits on semicolons and commas, but if the input is only delimiters (e.g., ';;;'), the filter(Boolean) will produce an empty array. This is acceptable but could be confusing if the user intended to provide skills.
+  Fix: Consider warning if the skills field is non-empty but results in an empty array after parsing.
+
+  [MEDIUM] security -- Line 199
+  The roll number is used directly in a URL without validation that it does not contain characters that could be exploited for SSRF or other injection attacks.
+  Fix: Validate and sanitize the roll number before using it in any URL, or avoid using it entirely in external URLs.
+
+  [LOW] reliability -- Line 199
+  Fallback photo URL points to a third-party service (pravatar.cc). If this service is down, slow, or blocked in certain regions, the photo will fail to load, degrading the user experience.
+  Fix: Host a default avatar image on your own infrastructure or CDN to ensure reliability and control.
+
+  [MEDIUM] reliability -- Line 199
+  Hardcoded fallback URL to pravatar.cc creates an external dependency that could fail in production, causing broken images and potential privacy concerns by exposing user data (roll number) in query parameters.
+  Fix: Use a local default avatar or a data URI instead of relying on an external service for fallback avatars.
+
+  [MEDIUM] null_pointer_exception -- Line 199
+  If 'roll' is undefined or null, encodeURIComponent(roll) will throw a TypeError, crashing the entire CSV import process.
+  Fix: Add a null check for 'roll' before using it in encodeURIComponent, or provide a default value.
+
+  [LOW] gdpr -- Line 199
+  Using the student's roll number in a query parameter to an external service could leak identifiable information to a third party, potentially violating data protection regulations.
+  Fix: Use a hash or internal identifier instead of the raw roll number, or serve avatars from your own domain.
+
+  [MEDIUM] data_integrity -- Line 192
+  The 'disabilityStatus' field defaults to 'None' if not provided, which could potentially lead to inaccurate or incomplete data in the CSV export.
+  Fix: Consider adding input validation and sanitization to ensure that the 'disabilityStatus' field is accurately represented in the CSV export.
+
+  [LOW] code_smell -- Line 194
+  The 'skills' field is not explicitly defined or validated, which could potentially lead to inconsistencies or errors in the CSV export.
+  Fix: Consider adding input validation and sanitization to ensure that the 'skills' field is accurately represented in the CSV export.
+
+  [MEDIUM] gdpr -- Line 199
+  Hardcoded fallback avatar URL uses pravatar.cc with student roll number in query parameter. This exposes potentially identifiable information (roll number) to a third-party service and creates a privacy/consent issue under GDPR. The URL is constructed even when the student has no photo, potentially leaking data on every page load.
+  Fix: Use a local default avatar or generate an identicon locally instead of relying on an external service with identifiable data in the URL.
+
+  [LOW] data_integrity -- Line 192
+  Fallback values for disabilityStatus ('None') and diversityCategory ('General') may silently mask missing or invalid data from the CSV. If the CSV column is empty or the value is not recognized, the system will store a default instead of flagging the issue, potentially leading to incorrect reporting or compliance issues.
+  Fix: Consider logging a warning when fallback values are used, or validate that the CSV contains valid values for these fields.
+
+  [LOW] data_integrity -- Line 193
+  diversityCategory defaults to 'General' without validation against allowed values. If the CSV contains an invalid or empty value, it silently defaults to 'General' which may mask data quality issues.
+  Fix: Validate the diversity category against a known list of allowed values before defaulting.
+
+=================================================================
+  FILE: src/lib/employerCompanyTypeLabels.js
+  Score: 100/100   Issues: 0
+
+  This is a low-risk configuration file that maps employer company types and sizes to display labels. The code is well-structured, handles null/empty inputs gracefully, and uses a lookup map for efficient label resolution. No security, reliability, or data integrity issues were found. The only minor concern is the lack of a fallback for unexpected values, which is already handled by returning the original string.
+
+=================================================================
+  FILE: src/lib/sessionTenant.js
+  Score: 86/100   Issues: 3
+
+  The file is small and well-structured with proper parameterized queries, but has a critical reliability issue: the catch block on line 23 swallows a specific column-missing error by checking the message string, which is fragile and could mask other errors. Additionally, the function silently falls back to a session-provided tenant ID when the DB query fails or returns no rows, which could lead to incorrect tenant isolation in edge cases. The code is otherwise clean and secure.
+
+  [HIGH] reliability -- Line 23
+  Error message string matching on 'member_tenant_id' is fragile and locale-dependent. A database error message could change between PostgreSQL versions, translations, or deployments, causing the catch to re-throw legitimate errors or swallow unrelated errors that happen to contain that substring.
+  Fix: Use a more robust detection method, such as checking the error code (e.g., '42703' for undefined_column) or querying the schema version to decide which SQL to run.
+
+  [MEDIUM] data_integrity -- Line 28
+  When the DB query returns no rows (user not found), the function falls back to sessionFallbackTenantId without logging or indicating the user was missing. This could silently return a stale or incorrect tenant ID, leading to data visibility issues.
+  Fix: Log a warning when the user is not found in the database, and consider returning null or throwing an error instead of silently falling back to the session value.
+
+  [LOW] error_handling -- Line 35
+  resolveCollegeAdminTenantId does not catch database errors. If the query fails (connection issue, timeout), the error will propagate unhandled to the caller.
+  Fix: Wrap the query in a try/catch and log the error, falling back to sessionFallbackTenantId or re-throwing with context.
+
+=================================================================
+  FILE: src/lib/demoClarifications.js
+  Score: 89/100   Issues: 5
+
+  The code is a thin client-side API wrapper with no major security or runtime issues. The main risks are the lack of request timeouts (fetch could hang indefinitely) and the absence of input validation before sending data to the server. The code is clean and well-structured for its purpose.
+
+  [MEDIUM] reliability -- Line 6
+  fetch call in loadClarifications has no timeout. If the API hangs, the promise will never resolve or reject, causing the UI to hang indefinitely.
+  Fix: Add an AbortController with a timeout (e.g., 10 seconds) to all fetch calls.
+
+  [MEDIUM] reliability -- Line 13
+  fetch call in publishClarificationBatch has no timeout. Same hang risk as loadClarifications.
+  Fix: Add AbortController with timeout to all fetch calls.
+
+  [MEDIUM] reliability -- Line 24
+  fetch call in saveAnswer has no timeout. Same hang risk as other functions.
+  Fix: Add AbortController with timeout to all fetch calls.
+
+  [LOW] error_handling -- Line 7
+  res.json() can throw if the response body is not valid JSON (e.g., HTML error page). This would result in an unhandled promise rejection.
+  Fix: Wrap res.json() in a try/catch or check Content-Type header before parsing.
+
+  [LOW] input_validation -- Line 12
+  publishClarificationBatch does not validate that questionTexts is a non-empty array before sending. The server may receive an empty batch with no meaningful error.
+  Fix: Add client-side validation to reject empty questionTexts before making the API call.
+
+=================================================================
+  FILE: src/lib/studentProfileDbMap.js
+  Score: 44/100   Issues: 41
+
+  The student profile database mapping function is generally well-structured but has several medium-severity issues, including missing null/undefined checks on the `sp` parameter and `aux` object, unvalidated URL inputs, and inconsistent handling of empty strings versus null for numeric fields. The use of `Math.random()` for temporary IDs is not cryptographically secure and could cause collisions under high concurrency, while numeric fields like CGPA and percentages lack range validation, risking data integrity. The `aux_profile` field is stored as a JSONB object without sanitization, and fields like `preferred_locations`, `skills`, and URLs are passed through without validation, potentially leading to injection vulnerabilities or runtime errors. Overall, the code is functional but lacks defensive measures for production use, with 3 high, 24 medium, and 14 low-severity issues identified.
+
+  [MEDIUM] null_check -- Line 60
+  Function profileFromDb destructures `sp` without null/undefined check. If sp is null or undefined, accessing sp.aux_profile will throw a TypeError, crashing the request.
+  Fix: Add a guard clause at the start of profileFromDb to return a default/empty profile if sp is null or undefined.
+
+  [MEDIUM] input_validation -- Line 140
+  In normalizeAuxFromPayload, profileLinks URLs are not validated for format or protocol. Malicious or malformed URLs (e.g., javascript:alert(1)) could be stored and rendered unsafely elsewhere.
+  Fix: Validate URL format using a URL constructor or regex, and reject or sanitize non-http/https protocols.
+
+  [MEDIUM] data_integrity -- Line 96
+  Numeric fields like batchYear, graduationYear, cgpa, tenthPercentage, twelfthPercentage return empty string '' when null/undefined, but expectedSalaryMin/Max return 0. This inconsistency could cause type confusion in downstream consumers expecting numbers.
+  Fix: Consistently return null or 0 for missing numeric fields, or use a sentinel value like -1, and document the contract.
+
+  [LOW] code_smell -- Line 142
+  Profile link id generation uses Math.random() which is not cryptographically secure and could theoretically collide. This is low risk for id generation but unnecessary.
+  Fix: Use a counter or uuid library for generating unique ids instead of Math.random().
+
+  [MEDIUM] security -- Line 142
+  Using Math.random() for generating temporary IDs on line 142 is not cryptographically secure and could lead to collisions under high concurrency. This is used as a fallback when l.id is empty.
+  Fix: Use crypto.randomUUID() or a proper UUID library instead of Math.random() for generating unique identifiers.
+
+  [MEDIUM] validation -- Line 168
+  No range validation for cgpa field on line 168. CGPA values outside the valid 0-10 range could be stored in the database, causing data integrity issues.
+  Fix: Add validation to clamp or reject CGPA values outside the 0-10 range before storing.
+
+  [MEDIUM] validation -- Line 169
+  No range validation for tenthPercentage and twelfthPercentage fields on lines 169-170. Percentage values outside 0-100 range could be stored.
+  Fix: Add validation to clamp or reject percentage values outside the 0-100 range.
+
+  [LOW] validation -- Line 184
+  No validation that expectedSalaryMin is less than or equal to expectedSalaryMax on lines 184-187. Storing inverted salary ranges could cause display issues.
+  Fix: Add validation to swap or reject when min salary exceeds max salary.
+
+  [LOW] performance -- Line 191
+  Skills array is sliced to 80 items on line 192, but there is no warning or truncation notification to the user. Silently dropping data could cause confusion.
+  Fix: Consider logging a warning or returning a flag indicating truncation occurred.
+
+  [HIGH] validation -- Line 214
+  The `aux_profile` object is stored as JSONB without any validation or sanitization of its fields (phones, emails, profileLinks, personalEmail). This could allow injection of malicious data or malformed JSON that could break downstream consumers or cause XSS when rendered.
+  Fix: Validate and sanitize each field in aux_profile before assignment, ensuring phones are valid phone numbers, emails are valid email addresses, and profileLinks are valid URLs.
+
+  [HIGH] validation -- Line 210
+  The `expected_salary_min` and `expected_salary_max` fields are assigned directly from `minSal` and `maxSal` without type coercion or validation. If these values are strings or NaN, the database query will fail or store incorrect data.
+  Fix: Parse and validate salary values as positive numbers before assignment, defaulting to null if invalid.
+
+  [MEDIUM] validation -- Line 212
+  The `preferred_locations` array is assigned without sanitization. If the array contains malicious strings (e.g., HTML/JS), it could lead to XSS when rendered in the UI.
+  Fix: Sanitize each element of the preferred_locations array to remove HTML/script tags.
+
+  [MEDIUM] validation -- Line 210
+  The `willing_to_relocate` field uses `Boolean(body.willingToRelocate)` which will return `true` for any truthy value including the string 'false'. This could lead to incorrect boolean assignment.
+  Fix: Use strict comparison or a more explicit conversion to handle the string 'false' correctly.
+
+  [MEDIUM] validation -- Line 220
+  The `skills` field is assigned directly without validation or sanitization. If it's an array of strings, it could contain malicious content or very long strings that could cause issues.
+  Fix: Validate that skills is an array of strings and sanitize each entry.
+
+  [LOW] validation -- Line 207
+  URL fields (linkedin_url, github_url, portfolio_url) are set to null if falsy, but no URL format validation is performed. Invalid URLs could cause issues in the frontend or when generating links.
+  Fix: Add basic URL validation to ensure the provided URLs are valid and properly formatted.
+
+  [MEDIUM] input_validation -- Line 214
+  The `aux_profile` object is constructed directly from `aux.phones`, `aux.emails`, `aux.profileLinks`, and `aux.personalEmail` without any validation or sanitization. If `aux` contains unexpected types or malicious data, this could lead to data corruption or XSS when the profile is later rendered.
+  Fix: Validate and sanitize each field in the aux object before assignment, or use a schema validation library.
+
+  [LOW] input_validation -- Line 205
+  The `gender` field is passed directly without validation. If the database has a CHECK constraint or enum, invalid values could cause a query failure.
+  Fix: Validate `gender` against a list of allowed values before assignment.
+
+  [LOW] input_validation -- Line 206
+  The `bio` field is passed directly without sanitization. If rendered in HTML, it could be an XSS vector.
+  Fix: Sanitize or strip HTML tags from `bio` before storing.
+
+  [MEDIUM] null_check -- Line 207
+  The code uses the OR operator to assign null to fields like linkedin_url, github_url, and portfolio_url if they are falsy. However, this might lead to unexpected behavior if these fields are intentionally set to empty strings or other falsy values.
+  Fix: Consider using a more explicit null check or input validation to handle these fields.
+
+  [MEDIUM] input_validation -- Line 212
+  The code uses the Boolean() function to convert the willingToRelocate field to a boolean value. However, this might not be sufficient to prevent potential security vulnerabilities.
+  Fix: Consider adding more robust input validation to ensure that the willingToRelocate field is a valid boolean value.
+
+  [MEDIUM] input_validation -- Line 207
+  URL fields (linkedin_url, github_url, portfolio_url) are not validated or sanitized. Malicious or malformed URLs could cause XSS or injection when rendered in the UI or used in redirects.
+  Fix: Validate and sanitize URLs using a library like validator.js or a custom regex to ensure they are safe and properly formatted.
+
+  [MEDIUM] data_integrity -- Line 214
+  The aux_profile object is assigned directly from aux.phones, aux.emails, aux.profileLinks, and aux.personalEmail without any validation. If aux is null or undefined, this will throw a runtime error. Additionally, these fields could contain malicious data.
+  Fix: Add a null check for aux and validate each subfield before assignment.
+
+  [LOW] validation -- Line 212
+  preferred_locations is set to null if pref is empty, but there is no validation on the contents of the pref array. Non-string or malicious values could cause issues downstream.
+  Fix: Filter the pref array to ensure all elements are valid strings before assignment.
+
+  [LOW] validation -- Line 221
+  user_phone is assigned directly from primaryPhone without validation. Invalid phone formats could cause issues in SMS or verification flows.
+  Fix: Validate phone number format (e.g., using a regex or library) before assignment.
+
+  [MEDIUM] input_validation -- Line 7
+  The `aux_profile` object is stored directly from `aux` without any validation or sanitization. If `aux` contains user-supplied data, this could lead to storing malformed or excessively large JSONB data, potentially causing database errors or injection-like issues in downstream processing.
+  Fix: Validate and sanitize each field of `aux` before storing, or at minimum ensure the object structure is as expected and fields are of the correct types.
+
+  [MEDIUM] null_check -- Line 13
+  The `skills` variable is used directly without checking if it is an array. If `skills` is null, undefined, or a non-array value, this could cause a runtime error when the database expects an array type or when the value is iterated later.
+  Fix: Add a fallback to an empty array if `skills` is not an array.
+
+  [LOW] edge_case -- Line 5
+  The check `pref.length ? pref : null` will incorrectly treat an empty array as falsy, converting it to `null`. While this may be intentional, it could cause data loss if an empty array is a valid value (e.g., user cleared all locations).
+  Fix: Use `pref && pref.length > 0 ? pref : null` to be explicit about the intent.
+
+  [MEDIUM] input_validation -- Line 209
+  portfolio_url is set directly from body without any URL validation or sanitization. If this value is later rendered in HTML or used in redirects, it could enable XSS or open redirect attacks.
+  Fix: Validate and sanitize portfolio_url using a URL parser or allowlist of allowed schemes (http, https).
+
+  [LOW] input_validation -- Line 210
+  expected_salary_min and expected_salary_max are assigned without validation that they are non-negative numbers and that min <= max. Invalid values could cause incorrect salary display or filtering.
+  Fix: Add validation to ensure both values are non-negative numbers and min <= max before assignment.
+
+  [MEDIUM] null_pointer_exception -- Line 214
+  `aux` is used to build `aux_profile` without a null/undefined check. If `aux` is null or undefined, accessing `aux.phones` will throw a TypeError and crash the function.
+  Fix: Add a null/undefined guard for `aux` before accessing its properties, or provide a default empty object.
+
+  [LOW] data_integrity -- Line 212
+  `preferred_locations` is set to `null` when `pref` is empty. This may cause issues downstream if code expects an array (e.g., for iteration or JSON serialization). Consider using an empty array instead.
+  Fix: Set `preferred_locations` to an empty array when `pref` is empty to maintain consistent data type.
+
+  [LOW] edge_case -- Line 220
+  `skills` is used directly without a default value. If `skills` is undefined or null, the resulting object will have `skills: undefined`, which may cause issues in database operations or downstream processing.
+  Fix: Provide a default empty array for `skills` to ensure consistent data type.
+
+  [MEDIUM] null_check -- Line 211
+  The variable 'maxSal' is not checked for null or undefined before being assigned to 'expected_salary_max'. This could lead to a runtime error if 'maxSal' is null or undefined.
+  Fix: Add a null check for 'maxSal' before assigning it to 'expected_salary_max'.
+
+  [MEDIUM] null_check -- Line 213
+  The variable 'body.willingToRelocate' is not checked for null or undefined before being converted to a boolean. This could lead to a runtime error if 'body.willingToRelocate' is null or undefined.
+  Fix: Add a null check for 'body.willingToRelocate' before converting it to a boolean.
+
+  [MEDIUM] null_check -- Line 220
+  The variable 'skills' is not checked for null or undefined before being assigned. This could lead to a runtime error if 'skills' is null or undefined.
+  Fix: Add a null check for 'skills' before assigning it.
+
+  [MEDIUM] null_check -- Line 212
+  Variable `pref` is used without null/undefined check. If `pref` is undefined, accessing `.length` will throw a TypeError.
+  Fix: Add a null/undefined guard before accessing .length on pref.
+
+  [MEDIUM] null_check -- Line 214
+  Variable `aux` is used without null/undefined check. If `aux` is undefined, accessing `.phones` will throw a TypeError.
+  Fix: Add a null/undefined guard for aux before accessing its properties.
+
+  [LOW] data_integrity -- Line 214
+  The `aux_profile` object is stored as JSONB. The `phones` and `emails` fields may contain arrays or objects that are not validated for type consistency, potentially causing database errors or data corruption.
+  Fix: Validate that aux.phones and aux.emails are arrays (or expected types) before storing.
+
+  [MEDIUM] input_validation -- Line 213
+  Boolean(body.willingToRelocate) will convert any truthy value to true, but may produce unexpected results for non-boolean inputs like 'false' (string) which is truthy, or undefined which becomes false. This could silently store incorrect data.
+  Fix: Use explicit comparison or a more robust boolean conversion that handles common string representations.
+
+  [HIGH] null_pointer_exception -- Line 214
+  The `aux` object is accessed without a null/undefined check. If `aux` is null or undefined, accessing `aux.phones`, `aux.emails`, `aux.profileLinks`, and `aux.personalEmail` will throw a TypeError and crash the process.
+  Fix: Add a null/undefined guard for the `aux` object before accessing its properties, or use optional chaining with default values.
+
+  [LOW] code_quality -- Line 216
+  Inconsistent naming convention: 'user_phone' uses snake_case while 'emails', 'profileLinks', 'personalEmail', and 'skills' use camelCase. This inconsistency can cause confusion and potential bugs when accessing properties.
+  Fix: Standardize on either camelCase or snake_case consistently across the returned object.
+
+=================================================================
+  FILE: src/lib/db.js
+  Score: 86/100   Issues: 3
+
+  The provided code is a PostgreSQL database connection utility with a lazy pool, query execution, and transaction management. The code is well-structured and handles errors properly. However, there are some potential issues, such as the lack of input validation for the DATABASE_URL environment variable, the use of a fixed timeout for client release, and the potential for SQL injection if the query text is not properly sanitized. Overall, the code is robust, but some improvements can be made to enhance security and reliability.
+
+  [MEDIUM] security -- Line 10
+  Lack of input validation for DATABASE_URL environment variable
+  Fix: Add input validation to ensure the DATABASE_URL is in the correct format
+
+  [LOW] performance -- Line 87
+  Fixed timeout for client release may not be suitable for all use cases
+  Fix: Consider making the timeout configurable or using a more dynamic approach
+
+  [HIGH] security -- Line 61
+  Potential SQL injection vulnerability if query text is not properly sanitized
+  Fix: Use a parameterized query or ensure the query text is properly sanitized
+
+=================================================================
+  FILE: src/lib/utils.js
+  Score: 68/100   Issues: 13
+
+  The utility file is generally well-structured with clean code, but it contains one high-severity data integrity bug in `formatCurrency` where a falsy check (`!amount`) incorrectly treats zero as falsy, returning '—' instead of formatting ₹0. A medium-severity issue exists in the debounce function, which fails to preserve the `this` context and can cause runtime failures when used as a method decorator. The `timeAgo` function has a minor edge case where future dates produce negative diffs and return 'Just now' instead of a future label. The gradient selection functions are simple and deterministic, handling null/undefined inputs gracefully, though they lack input type validation and may produce non-uniform hash distributions, which is acceptable for UI theming.
+
+  [HIGH] bug -- Line 9
+  formatCurrency treats zero as falsy: `!amount` returns '—' for amount=0, which is a valid currency value. This will display '—' for a salary of ₹0, misleading users.
+  Fix: Change the falsy check to explicitly check for null/undefined: `if (amount === null || amount === undefined) return '—'`.
+
+  [MEDIUM] edge_case -- Line 57
+  timeAgo with a future date: `now - past` produces a negative diff, causing all future dates to display 'Just now' instead of a future-relative label (e.g., 'in 2h').
+  Fix: Check if the date is in the future and return a future-relative string, or fall back to formatDate.
+
+  [MEDIUM] edge_case -- Line 21
+  formatSalaryRange treats zero min and max as falsy: `if (!min && !max)` returns 'Not disclosed' when both are 0, which is a valid salary range.
+  Fix: Explicitly check for null/undefined instead of falsy check.
+
+  [LOW] edge_case -- Line 31
+  formatLPA treats zero as falsy: `!amount` returns '—' for amount=0, which is a valid LPA value.
+  Fix: Use explicit null/undefined check.
+
+  [LOW] edge_case -- Line 150
+  slugify will throw if `text` is null or undefined because it calls `.toLowerCase()` on it. No null guard.
+  Fix: Add a null/undefined check at the start of the function.
+
+  [MEDIUM] bug -- Line 201
+  The debounce function does not preserve the `this` context of the wrapped function. When used as a method on an object (e.g., `obj.method = debounce(obj.method, 100)`), the `this` value inside `func` will be `undefined` (or the global object in non-strict mode) instead of the object, causing a runtime error when accessing `this` properties.
+  Fix: Use `func.apply(this, args)` inside the debounced wrapper to preserve the `this` context from the call site.
+
+  [MEDIUM] input_validation -- Line 236
+  The function does not validate the 'name' parameter, which could lead to an incorrect gradient being returned if it is empty or null.
+  Fix: Add input validation to ensure the 'name' parameter is not empty or null.
+
+  [LOW] code_smell -- Line 238
+  The use of a simple hash function to determine the gradient index may lead to collisions.
+  Fix: Consider using a more robust hash function or a different approach to determine the gradient index.
+
+  [LOW] edge_case -- Line 11
+  The null check on line 11 only handles falsy name values (null, undefined, empty string). If name is a non-string type (e.g., number, object), the spread operator on line 12 will fail or produce unexpected results.
+  Fix: Add a type check to ensure name is a string before using it in the hash computation.
+
+  [LOW] edge_case -- Line 236
+  The null check on line 236 only checks for falsy values (null, undefined, empty string). If a non-string value like a number or object is passed, the spread operator on line 237 will fail or produce unexpected results.
+  Fix: Add a type check to ensure name is a string before using the spread operator, or convert to string explicitly.
+
+  [LOW] edge_case -- Line 237
+  If `name` is a number or object (not a string), `[...name]` will throw a TypeError because non-iterable values cannot be spread. The guard on line 236 only checks falsy values, not type.
+  Fix: Add a type check to ensure name is a string before spreading, or convert to string explicitly.
+
+  [MEDIUM] edge_case -- Line 238
+  Potential division by zero or undefined return if GRADIENTS array is empty. The modulo operation on an empty array length (0) would result in NaN, and accessing GRADIENTS[NaN] returns undefined, which could cause rendering issues or crashes downstream.
+  Fix: Add a guard clause to handle empty GRADIENTS array with a fallback value or early return.
+
+  [LOW] edge_case -- Line 238
+  JavaScript's modulo operator with negative numbers returns a negative remainder, which could cause out-of-bounds array access if hash is negative.
+  Fix: Use a safe modulo implementation that always returns a non-negative index.
+
+=================================================================
+  FILE: src/lib/shardBinding.js
+  Score: 98/100   Issues: 2
+
+  The file is a small, well-structured utility with no runtime logic, external dependencies, or user input. The only issues are minor: the `normalizeSurfaceTokenInput` function returns an empty string for null/undefined input, which could silently mask a missing token downstream, and the function does not validate the token format (64-char hex). No security, performance, or reliability risks are present.
+
+  [LOW] edge_case -- Line 9
+  normalizeSurfaceTokenInput returns empty string for null/undefined input, which may silently mask a missing token downstream and cause confusing failures.
+  Fix: Consider throwing a TypeError or logging a warning when input is null/undefined to make missing tokens explicit.
+
+  [LOW] input_validation -- Line 10
+  normalizeSurfaceTokenInput does not validate that the output is a 64-character hex string, which could allow malformed tokens to propagate.
+  Fix: Add a validation step to ensure the token matches the expected format after normalization.
+
+=================================================================
+  FILE: src/lib/inferImageContentType.js
+  Score: 96/100   Issues: 2
+
+  The `inferImageContentType` function is well-structured and handles the common case of missing `file.type` gracefully. The primary risk is that it relies solely on file extension for fallback, which can be trivially spoofed (e.g., renaming a `.exe` to `.jpg`). This is a security concern if the returned MIME type is used for server-side validation or content-type enforcement without additional checks (e.g., magic bytes). The function also returns an empty string for unknown types, which could cause downstream issues if callers do not handle this case. Overall, the code is clean and low-risk for its intended client-side use.
+
+  [MEDIUM] security -- Line 2
+  The function relies solely on file extension for fallback MIME type inference. A malicious user can rename a non-image file (e.g., an executable) to have a .jpg extension, and this function will return 'image/jpeg'. If this MIME type is used for server-side validation or content-type enforcement without additional checks (e.g., magic bytes), it could lead to security vulnerabilities such as arbitrary file upload or XSS.
+  Fix: Add magic byte verification for server-side usage, or document that this function is only for client-side display hints and must not be used for security-critical validation.
+
+  [LOW] edge_case -- Line 11
+  Returns empty string for unknown types. Callers may not handle this case, leading to downstream issues (e.g., failed uploads, broken image previews).
+  Fix: Consider returning a default MIME type like 'application/octet-stream' or adding a fallback parameter, or ensure all callers handle the empty string explicitly.
+
+=================================================================
+  FILE: src/lib/mailer.js
+  Score: 85/100   Issues: 4
+
+  The mailer is clean and handles missing config gracefully by logging instead of crashing. The main risk is the unhandled promise rejection when `transport.sendMail` fails (network error, auth failure, rate limit), which would crash the Node.js process in older versions or silently swallow the error in newer ones. Additionally, the fallback HTML generation from plain text is naive and could produce broken HTML for special characters. The code is otherwise well-structured with clear fallback paths.
+
+  [HIGH] error_handling -- Line 40
+  Unhandled promise rejection in sendMail: transport.sendMail() can throw on network errors, auth failures, or rate limits. This will crash the Node.js process (unhandledRejection) or silently swallow the error, causing silent email delivery failures.
+  Fix: Wrap the sendMail call in a try/catch, log the error with full context, and return a structured failure response instead of crashing.
+
+  [MEDIUM] bug -- Line 45
+  Naive HTML fallback: opts.text.replace(/\n/g, '<br/>') does not escape HTML special characters (<, >, &) in the text, which can produce broken or malformed HTML output.
+  Fix: Use a proper HTML-escape function on the text before inserting <br/> tags, or require html to be explicitly provided.
+
+  [LOW] validation -- Line 26
+  No validation that `from` is a valid email address. If EMAIL_FROM or SMTP_USER contains an invalid email, the SMTP server may reject the message silently.
+  Fix: Add a simple email format validation (e.g., /^[^\s@]+@[^\s@]+\.[^\s@]+$/) and log a warning if invalid.
+
+  [LOW] validation -- Line 42
+  No validation that `opts.to` is a non-empty string or array of strings. Passing undefined, null, or an empty array will cause nodemailer to throw or send to nobody.
+  Fix: Add a guard at the top of sendMail to validate opts.to and return early with a warning if invalid.
+
+=================================================================
+  FILE: src/lib/pgSsl.js
+  Score: 95/100   Issues: 3
+
+  The `getPgSslOption` function is well-structured and handles the core SSL configuration logic correctly. The primary risk is the synchronous `fs.readFileSync` call, which could block the event loop during startup if the CA file path is invalid or the file is large, though this is a one-time startup cost. The function also lacks environment variable validation at startup, which could lead to silent misconfiguration in production. Overall, the code is production-ready with minor improvements for robustness.
+
+  [MEDIUM] reliability -- Line 31
+  Synchronous fs.readFileSync blocks the event loop during startup. While this is a one-time operation, if the CA file is large or the path is incorrect, it can delay server startup and block other initialization tasks.
+  Fix: Use fs.promises.readFile with await to avoid blocking the event loop, or wrap in a startup validation check.
+
+  [LOW] error_handling -- Line 33
+  The error message includes the raw error message from the filesystem, which could leak internal paths or system details in production logs. While this is a startup error, it's better to sanitize or log the full error separately.
+  Fix: Log the full error details server-side and provide a generic message in the thrown error.
+
+  [LOW] configuration -- Line 13
+  No validation at startup that DATABASE_SSL_CA path exists or is readable. A misconfigured env var will only fail when the function is called, potentially after the server has started.
+  Fix: Add a startup validation function that checks required SSL env vars and exits early with a clear error message.
+
+=================================================================
+  FILE: src/lib/helpFaqOpenai.js
+  Score: 84/100   Issues: 3
+
+  The code is well-structured with proper error handling for the OpenAI API call, input validation, and defense-in-depth filtering of returned IDs. The primary risk is the lack of a timeout on the fetch call, which could cause the serverless function to hang indefinitely if OpenAI is slow or unresponsive. Additionally, the error logging could leak the API key in the response body if the error text contains it, though the slice(0,500) mitigates this partially. The overall risk is low to medium.
+
+  [HIGH] reliability -- Line 79
+  The fetch call to OpenAI at line 79 has no timeout. If the OpenAI API is slow or unresponsive, this request could hang indefinitely, causing the serverless function to timeout or accumulate resource usage. This is a production reliability risk.
+  Fix: Add an AbortController with a reasonable timeout (e.g., 10 seconds) to the fetch call to prevent hanging.
+
+  [MEDIUM] security -- Line 97
+  The error response body from OpenAI is logged with `errText.slice(0, 500)`. While truncated, this could still contain sensitive information such as the API key in certain error messages (e.g., 'Incorrect API key provided: sk-...'). This is a potential secret leak in logs.
+  Fix: Sanitize the error text to remove any occurrence of the API key before logging, or log only the status code and a generic message.
+
+  [MEDIUM] error_handling -- Line 102
+  If `res.json()` fails (e.g., malformed JSON from OpenAI), `data` is set to null, and then `data?.choices?.[0]?.message?.content` will safely return undefined. However, the error is silently swallowed with `.catch(() => null)`. This could mask a transient API issue that should be logged for debugging.
+  Fix: Log a warning when the JSON parsing fails, as it may indicate an API change or transient issue.
+
+=================================================================
+  FILE: src/lib/demoLogins.js
+  Score: 96/100   Issues: 2
+
+  The codebase is well-structured and follows best practices. However, there are some potential security risks and areas for improvement. The DEMO_SEED_PASSWORD is hardcoded and should be environment-variable-based for better security. The isDemoLoginsEnabled function can be simplified for better readability. There are no critical issues found in the code.
+
+  [MEDIUM] security -- Line 3
+  Hardcoded DEMO_SEED_PASSWORD
+  Fix: Use environment variables for sensitive data
+
+  [LOW] readability -- Line 28
+  Simplify isDemoLoginsEnabled function
+  Fix: Use a simpler conditional statement
+
+=================================================================
+  FILE: src/lib/csvExport.js
+  Score: 82/100   Issues: 5
+
+  The CSV export/import utility is generally well-structured with proper RFC 4180 quoting and BOM handling. The main risks are: (1) CSV injection vulnerability in `rowsToCsv` — cells starting with `=`, `+`, `-`, `@` can execute formulas in Excel/Google Sheets, (2) the `parseCsv` function has a subtle bug where a trailing newline causes an extra empty row to be included, (3) no input validation on `headers` or `rows` arrays could cause runtime crashes. The code is clean and maintainable otherwise.
+
+  [HIGH] csv_injection -- Line 18
+  CSV injection vulnerability: cells starting with =, +, -, @ are not escaped, allowing formula execution in Excel/Google Sheets when the CSV is opened. This can lead to data exfiltration or arbitrary code execution.
+  Fix: Prefix dangerous leading characters with a tab or single quote to prevent formula interpretation.
+
+  [MEDIUM] bug -- Line 86
+  Trailing newline causes an extra empty row to be included: after the loop ends, the remaining field and row are pushed even if the input ended with a newline, resulting in an extra empty row being added to the data.
+  Fix: Check if the last row is empty before pushing it, or skip rows that are entirely empty after the loop.
+
+  [MEDIUM] validation -- Line 17
+  No validation that headers and rows arrays are non-null or that rows contain arrays. If rows is null or undefined, calling .map will throw a TypeError and crash the application.
+  Fix: Add input validation at the start of rowsToCsv to ensure headers is an array and rows is an array of arrays.
+
+  [LOW] edge_case -- Line 52
+  parseCsv does not handle fields with embedded newlines correctly when the newline is inside quotes — the current logic treats \n as a row separator even inside quoted fields, which is incorrect per RFC 4180.
+  Fix: Only treat \n as a row separator when not inside quotes.
+
+  [LOW] best_practice -- Line 30
+  Blob type string has a trailing semicolon which is technically valid but non-standard. Some browsers may handle it inconsistently.
+  Fix: Remove the trailing semicolon from the MIME type.
+
+=================================================================
+  FILE: src/lib/notificationService.js
+  Score: 80/100   Issues: 5
+
+  The notification service is well-structured with parameterized queries preventing SQL injection, optional transaction client support, and a title clipping utility. The primary risk is the unbounded `notifyUsersOneAtATime` function which performs sequential inserts without batch limits, potentially causing memory pressure and slow performance for large user lists. Additionally, there is no input validation for required fields, no error handling around database calls, and no observability (logging/metrics) for failures. The `fetchCollegeAdminUserIds` function returns an array of UUIDs but could return a very large set without pagination.
+
+  [HIGH] performance -- Line 42
+  notifyUsersOneAtATime performs sequential INSERTs for each userId without batching or concurrency limits. For large user lists (e.g., 10k students), this will create 10k sequential round-trips to the database, causing slow performance and potential connection pool exhaustion.
+  Fix: Use a single INSERT with multiple value rows or use pg-promise helpers to batch inserts in chunks of 500-1000.
+
+  [MEDIUM] error_handling -- Line 15
+  No try/catch around database calls in notifyCollegeAdminsOfTenant. If the query fails (e.g., DB down, constraint violation), the error will propagate as an unhandled promise rejection, potentially crashing the process or leaving the caller with no context.
+  Fix: Wrap the query in a try/catch, log the error with context (tenantId, type), and rethrow a meaningful error.
+
+  [MEDIUM] input_validation -- Line 15
+  No validation that required fields (title, message) are provided. If called with undefined or empty message, the INSERT will succeed with empty strings, creating useless notifications and wasting storage.
+  Fix: Add validation at the start of each function to throw if title or message is missing/empty after trimming.
+
+  [MEDIUM] performance -- Line 53
+  fetchCollegeAdminUserIds returns all matching user IDs without pagination. For tenants with thousands of college admins, this could return a large array, consuming memory and potentially causing slow downstream processing.
+  Fix: Add pagination parameters (limit/offset) or use a cursor-based approach if the caller typically processes a subset.
+
+  [LOW] observability -- Line 15
+  No logging or metrics are emitted for notification operations. In production, there is no way to track how many notifications were sent, to whom, or detect failures without adding instrumentation.
+  Fix: Add structured logging with notification count, tenantId, and type after successful inserts, and increment a metrics counter.
+
+=================================================================
+  FILE: src/lib/sqlPlaceholders.js
+  Score: 94/100   Issues: 2
+
+  The file is a small, focused utility function that generates parameterized SQL IN-clause placeholders for UUID arrays. The logic is correct and handles the intended use case of avoiding uuid[] array binding issues with some connection poolers. The main risk is the lack of input validation: if `uuids` is null or undefined, the function will throw a runtime error. Additionally, there is no guard against empty arrays, which would produce an empty IN clause and cause a SQL syntax error. The function is otherwise well-structured and uses proper parameterized placeholders.
+
+  [MEDIUM] null_check -- Line 6
+  The function does not validate that `uuids` is an array. If called with null or undefined, `uuids.map` will throw a TypeError, crashing the caller. This is a runtime failure that could occur if the caller passes an unexpected value from an API response or database query.
+  Fix: Add a guard clause to check that uuids is a non-null array before calling .map.
+
+  [MEDIUM] edge_case -- Line 7
+  If `uuids` is an empty array, `parts.join(', ')` returns an empty string, which will produce an invalid SQL IN clause (e.g., `WHERE id IN ()`). This will cause a SQL syntax error at runtime. Callers may not expect this and could pass an empty array from a filter or search result.
+  Fix: Handle the empty array case explicitly, either by returning a special marker (e.g., `WHERE 1=0`) or by throwing a clear error.
+
+=================================================================
+  FILE: src/lib/facebookPageShare.js
+  Score: 86/100   Issues: 3
+
+  The Facebook page share module is well-structured with clear configuration checks and error handling. The primary risk is the lack of a timeout on the fetch call, which could cause the request to hang indefinitely under network issues. Additionally, the error message from Facebook is passed directly to the caller, potentially exposing internal API details. The code is otherwise clean and follows best practices for server-only utilities.
+
+  [HIGH] reliability -- Line 49
+  fetch call to Facebook Graph API has no timeout. If the network is slow or the API hangs, the request will never resolve, causing the caller to hang indefinitely. This can block serverless function execution or exhaust connection pools.
+  Fix: Add an AbortController with a reasonable timeout (e.g., 10 seconds) to the fetch call.
+
+  [MEDIUM] security -- Line 57
+  The error message from Facebook API (data.error.message) is thrown directly to the caller. This could leak internal API details or sensitive information in logs or user-facing errors.
+  Fix: Log the Facebook error details server-side and throw a generic error message to the caller.
+
+  [LOW] error_handling -- Line 53
+  The .catch(() => ({})) on res.json() silently swallows JSON parse errors. If the response is not valid JSON (e.g., HTML error page), the code proceeds with an empty object, which may lead to a confusing error message later.
+  Fix: Log the parse failure and the raw response text for debugging, then throw a clear error.
+
+=================================================================
+  FILE: src/lib/tenantContext.js
+  Score: 96/100   Issues: 2
+
+  The file is a small, focused utility for tenant context extraction with proper null checks and UUID validation. The main risk is the silent fallback to null in getSessionTenantId when the user object lacks a tenant ID, which could lead to downstream failures if callers assume a tenant ID is always present. No critical security or runtime issues found.
+
+  [MEDIUM] edge_case -- Line 10
+  getSessionTenantId silently returns null when user object lacks a tenant ID, which may cause downstream code to fail with confusing errors instead of a clear authorization failure.
+  Fix: Consider logging a warning when tenant ID is missing to aid debugging, or throw a descriptive error if the caller expects a tenant ID to always be present.
+
+  [LOW] code_quality -- Line 5
+  isUuid does not trim the input before testing, so a UUID with leading/trailing whitespace will return false even though it may be valid after trimming.
+  Fix: Trim the input inside isUuid for consistency with getSessionTenantId's trimming behavior.
+
+=================================================================
+  FILE: src/lib/dataEntryAccess.js
+  Score: 96/100   Issues: 2
+
+  The code is well-structured with clear role-based access control and tenant isolation logic. The main risk is the unawaited `writeAuditLog` call on line 33, which could cause a silent failure if the audit log write throws an error. Additionally, the `resolveDataEntryTenantId` function does not validate that the `requestedTenantId` actually exists in the database, which could allow a super_admin to operate under a non-existent tenant ID. Overall, the code is production-ready with minor hardening opportunities.
+
+  [MEDIUM] error_handling -- Line 33
+  Unawaited `writeAuditLog` call on line 33: if the audit log write throws an unhandled promise rejection, it will crash the Node.js process in production. The `void` operator suppresses the promise, meaning any error is silently lost.
+  Fix: Await the audit log call or add a .catch() handler to log the failure without crashing.
+
+  [LOW] data_integrity -- Line 28
+  The `resolveDataEntryTenantId` function does not verify that the resolved tenant ID actually exists in the database. A super_admin could pass a valid UUID that does not correspond to any tenant, and the function would return it without validation, potentially leading to operations on a non-existent tenant.
+  Fix: Add a database lookup to verify the tenant exists before returning the ID, or document that callers must handle non-existent tenant IDs.
+
+=================================================================
+  FILE: src/lib/studentProfileStorage.js
+  Score: 97/100   Issues: 3
+
+  The code is a small, well-structured client-side utility for student profile defaults and localStorage caching of applied drive IDs. It has no security or runtime crash issues, handles missing email and SSR gracefully, and uses proper error handling for JSON.parse. The main risks are low-severity: the default profile returns empty strings for numeric fields (batchYear, graduationYear, cgpa) which could cause type confusion if consumed without coercion, and the localStorage cache has no TTL or invalidation mechanism, potentially serving stale data. Overall, the code is production-ready with minor maintainability concerns.
+
+  [LOW] data_integrity -- Line 18
+  Fields batchYear, graduationYear, cgpa, tenthPercentage, twelfthPercentage are initialized as empty strings ('') but represent numeric values. If consumed without coercion (e.g., parseInt or Number), they may cause type errors or incorrect comparisons downstream.
+  Fix: Initialize numeric fields as null or 0, and coerce to number when reading from API responses.
+
+  [LOW] reliability -- Line 61
+  saveAppliedDriveIds does not handle localStorage quota exceeded errors. If storage is full, localStorage.setItem throws a QuotaExceededError which will propagate uncaught, potentially crashing the caller.
+  Fix: Wrap localStorage.setItem in a try/catch to gracefully handle quota errors, e.g., by clearing old cache entries or logging a warning.
+
+  [LOW] code_smell -- Line 48
+  loadAppliedDriveIds has no cache invalidation or TTL. Stale drive IDs may persist indefinitely, causing the UI to show outdated applied status.
+  Fix: Consider adding a timestamp alongside the data and checking expiry (e.g., 1 hour) before returning cached values.
+
+=================================================================
+  FILE: src/lib/studentServer.js
+  Score: 61/100   Issues: 4
+
+  The function is concise and uses parameterized queries, avoiding SQL injection. However, it has a critical race condition: two concurrent calls for the same new user can both fail the initial SELECT, both attempt INSERT (one succeeds, one is silently ignored by ON CONFLICT DO NOTHING), and then both re-SELECT — but the second call may return null if the INSERT was skipped due to a unique violation, causing a false negative. Additionally, the function lacks error handling for database failures, which could crash the caller or leave the system in an inconsistent state. The auto-generated roll_number is also non-deterministic and may collide across tenants.
+
+  [CRITICAL] concurrency -- Line 7
+  Race condition in getOrCreateStudentProfileId: two concurrent calls for the same new user can both see no existing profile (line 8), both attempt INSERT (line 22-27), one succeeds and the other's INSERT is silently ignored by ON CONFLICT DO NOTHING. The second call then re-SELECTs (line 29) and may return null because the INSERT was a no-op, causing a false negative and breaking the caller.
+  Fix: Use a single INSERT ... ON CONFLICT ... RETURNING id query to atomically create or fetch the profile ID, eliminating the race window entirely.
+
+  [HIGH] error_handling -- Line 7
+  No try/catch around any of the three database queries. If the database is unreachable, a query times out, or a constraint is violated, the function will throw an unhandled promise rejection, crashing the caller or the request handler.
+  Fix: Wrap the entire function body in a try/catch block, log the error with context, and return null (or rethrow a typed error) so the caller can handle failures gracefully.
+
+  [MEDIUM] data_integrity -- Line 20
+  Auto-generated roll_number uses a substring of the UUID (first 10 chars after removing hyphens), which is not guaranteed to be unique across tenants. Two students in different tenants could get the same roll_number, and since there is no unique constraint on (tenant_id, roll_number), this could cause confusion in reports and searches.
+  Fix: Generate a roll_number that is unique per tenant, e.g., by appending a timestamp or using a sequence per tenant, or add a unique constraint on (tenant_id, roll_number) and handle collisions.
+
+  [LOW] performance -- Line 8
+  The function makes up to 3 database round-trips for a new user (SELECT profile, SELECT user, INSERT, SELECT profile again). This can be reduced to 2 queries by combining the user lookup and the INSERT with RETURNING.
+  Fix: Use the INSERT ... ON CONFLICT ... RETURNING pattern shown in the fixed snippet to eliminate the initial SELECT and the final re-SELECT.

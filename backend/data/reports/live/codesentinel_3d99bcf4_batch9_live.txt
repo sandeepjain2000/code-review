@@ -1,0 +1,276 @@
+=================================================================
+  CODESENTINEL -- BATCH 9 REPORT
+  Files 201 - 215 of 229
+  Folder : C:\Users\sandeep\Downloads\Claudes\CampusPlacement\campus-placement
+  Saved  : 01/05/2026, 20:50:58
+=================================================================
+
+  Batch Score   : 85/100
+  Files Reviewed: 15
+  Total Issues  : 44
+
+=================================================================
+  FILE: src/lib/employerCompanyTypeLabels.js
+  Score: 100/100   Issues: 0
+
+  This is a low-risk configuration file that maps employer company types and sizes to display labels. The code is clean, well-documented, and handles edge cases like null/empty values gracefully. No security, reliability, or correctness issues were found. The only minor improvement would be to add a JSDoc type annotation for the return type of `labelEmployerCompanyType`.
+
+=================================================================
+  FILE: src/lib/demoLogins.js
+  Score: 62/100   Issues: 3
+
+  The file exposes a hardcoded demo password and a list of demo accounts with real-looking email addresses. The primary risk is that the hardcoded password is a security vulnerability if these accounts exist in production with the same password. Additionally, the demo accounts may be shown in production by default, increasing the attack surface. The code is otherwise simple and well-structured.
+
+  [CRITICAL] security -- Line 3
+  Hardcoded demo password 'Admin@123' in source code. If this password is used for demo accounts in production, it provides a trivial attack vector for unauthorized access to those accounts.
+  Fix: Remove the hardcoded password from source code. Use environment variables or a secure secrets manager to inject demo credentials at build/deploy time.
+
+  [HIGH] security -- Line 5
+  Demo accounts with real-looking email addresses (e.g., arjun.verma@iitm.edu) are exposed in client-side code. If these accounts exist in production with the same password, they can be targeted for brute-force or credential-stuffing attacks.
+  Fix: Either disable demo logins in production via environment variables, or ensure demo accounts have unique, strong passwords that differ from the hardcoded seed password.
+
+  [MEDIUM] configuration -- Line 28
+  isDemoLoginsEnabled defaults to true, including in production. This means demo login cards are shown by default on the login page, increasing the attack surface for demo accounts.
+  Fix: Default to false in production by checking NODE_ENV, or require an explicit opt-in environment variable to show demo logins.
+
+=================================================================
+  FILE: src/lib/facebookPageShare.js
+  Score: 91/100   Issues: 3
+
+  The provided code for Facebook page sharing is generally well-structured and secure. However, there are a few potential issues and improvements that can be made. The code does not handle errors well, and there are no retries for failed requests. Additionally, the code does not validate the Facebook page ID and access token properly. The code also uses the `fetch` API without specifying the `Content-Type` header, which could lead to issues with the Facebook API. Overall, the code is good but needs some improvements to make it more robust and reliable.
+
+  [MEDIUM] error_handling -- Line 34
+  Error message does not provide enough information about the error
+  Fix: Improve error message to provide more information about the error
+
+  [MEDIUM] security -- Line 49
+  Missing Content-Type header in fetch API request
+  Fix: Specify Content-Type header in fetch API requests
+
+  [MEDIUM] error_handling -- Line 53
+  Error handling for JSON parsing is not robust
+  Fix: Improve error handling for JSON parsing
+
+=================================================================
+  FILE: src/lib/demoClarifications.js
+  Score: 88/100   Issues: 6
+
+  The file is a thin client-side API wrapper with no server-side logic, so the risk surface is limited. The main issues are missing request timeouts (causing hanging UI on network failure), no input validation before sending data, and a hardcoded maxQuestions constant that could become stale. No security or data integrity issues are present because all sensitive logic is server-side.
+
+  [MEDIUM] reliability -- Line 6
+  loadClarifications uses fetch without AbortController or timeout, so a slow/unresponsive server will cause the UI to hang indefinitely.
+  Fix: Add an AbortController with a reasonable timeout (e.g., 10s) to all fetch calls.
+
+  [MEDIUM] reliability -- Line 13
+  publishClarificationBatch uses fetch without AbortController or timeout, so a slow/unresponsive server will cause the UI to hang indefinitely.
+  Fix: Add an AbortController with a reasonable timeout (e.g., 10s) to all fetch calls.
+
+  [MEDIUM] reliability -- Line 24
+  saveAnswer uses fetch without AbortController or timeout, so a slow/unresponsive server will cause the UI to hang indefinitely.
+  Fix: Add an AbortController with a reasonable timeout (e.g., 10s) to all fetch calls.
+
+  [LOW] input_validation -- Line 13
+  publishClarificationBatch does not validate that company, postedBy, or questionTexts are non-empty before sending the request, which could result in unnecessary API calls with invalid data.
+  Fix: Add client-side validation to reject empty or invalid inputs before making the fetch call.
+
+  [LOW] input_validation -- Line 24
+  saveAnswer does not validate that batchId, questionId, answer, or answeredBy are non-empty before sending the request, which could result in unnecessary API calls with invalid data.
+  Fix: Add client-side validation to reject empty or invalid inputs before making the fetch call.
+
+  [LOW] maintainability -- Line 35
+  CLARIFICATION_RULES.maxQuestions is hardcoded to 5; if the server-side limit changes, this client constant will become stale and cause confusing errors.
+  Fix: Fetch the maxQuestions limit from the server (e.g., via a config endpoint) or derive it from the API response.
+
+=================================================================
+  FILE: src/lib/db.js
+  Score: 63/100   Issues: 6
+
+  The database module is well-structured with proper connection pooling, lazy initialization, and transaction support. The main risks are: (1) the fallback path in buildPoolConfig uses connectionString directly, which bypasses the URL-decoding fix and could cause authentication failures with Supabase; (2) the query function logs the first 80 characters of the SQL text in production error logs, which may leak sensitive query parameters; (3) the getClient timeout auto-releases the client without rolling back any in-progress transaction, potentially leaving the connection in a broken state. Overall, the code is production-ready with minor hardening needed.
+
+  [HIGH] bug -- Line 29
+  Fallback config in buildPoolConfig uses connectionString directly, bypassing the URL-decoding fix for percent-encoded passwords. This will cause authentication failures with Supabase when URL parsing fails (e.g., due to unsupported characters).
+  Fix: Log a warning when falling back, and consider parsing the connectionString manually or throwing an error to fail fast.
+
+  [HIGH] observability -- Line 71
+  Production error log on line 71 logs only error.message, but the query text (first 80 chars) is not logged. This makes debugging production query failures extremely difficult.
+  Fix: Log the truncated query text in production as well, but ensure no sensitive parameters are included (log the template, not the interpolated query).
+
+  [HIGH] bug -- Line 87
+  getClient timeout auto-releases the client without rolling back any in-progress transaction. If a transaction is left open, the client release returns it to the pool in a broken state, causing subsequent queries on that connection to fail.
+  Fix: In the timeout callback, attempt a ROLLBACK before releasing, or at minimum log a critical warning with stack trace.
+
+  [MEDIUM] observability -- Line 63
+  Query logging in development includes the first 80 characters of the SQL text. If the SQL contains sensitive data (e.g., passwords in WHERE clauses), this could leak into logs.
+  Fix: Strip or mask sensitive values from the logged query text, or log only the query template with parameter placeholders.
+
+  [MEDIUM] observability -- Line 68
+  Error logging in development includes the query text, but in production only the error message is logged. This inconsistency makes it harder to correlate errors across environments.
+  Fix: Log the truncated query text in both environments, but ensure no sensitive parameters are included.
+
+  [LOW] best_practice -- Line 58
+  The query function does not have a timeout for individual queries. A slow query could block the pool indefinitely, especially under load.
+  Fix: Consider using pg's query_timeout option in the pool config, or implement a per-query timeout using AbortController.
+
+=================================================================
+  FILE: src/lib/inferImageContentType.js
+  Score: 87/100   Issues: 2
+
+  The function is concise and handles the common case of missing file.type by falling back to file extension inference. The primary risk is that the extension-based inference can be trivially spoofed (e.g. renaming a malicious .exe to .jpg), which is a security concern for upload validation. Additionally, the function returns an empty string for unknown types, which may cause downstream issues if callers expect a valid MIME type. No runtime crashes are expected, but the security and edge-case handling warrant attention.
+
+  [HIGH] security -- Line 2
+  Extension-based MIME inference is trivially spoofable. An attacker can rename a malicious .exe to .jpg and bypass content-type checks. This function should not be the sole validation for upload security.
+  Fix: Use a library like 'file-type' to read the actual file magic bytes, or validate the content server-side after upload.
+
+  [MEDIUM] edge_case -- Line 11
+  Returning empty string for unknown types may cause downstream crashes or silent failures if callers assume a valid MIME type is always returned.
+  Fix: Consider returning a default like 'application/octet-stream' or throwing a descriptive error for unsupported types.
+
+=================================================================
+  FILE: src/lib/csvExport.js
+  Score: 76/100   Issues: 4
+
+  The CSV export utility is generally well-structured with proper RFC 4180 quoting and UTF-8 BOM handling. The primary risk is a CSV injection vulnerability in `escapeCsvField` — cells starting with `=`, `+`, `-`, or `@` are not sanitized, which can lead to formula execution when opened in Excel/Google Sheets. Additionally, the `parseCsv` function has a potential infinite loop on malformed input with unmatched quotes, and the `downloadCsv` function lacks a memory leak guard if called rapidly. Score is reduced due to the security issue and edge-case reliability concerns.
+
+  [HIGH] security -- Line 5
+  CSV injection vulnerability: `escapeCsvField` does not sanitize cells starting with `=`, `+`, `-`, or `@`. When opened in Excel/Google Sheets, these cells can execute arbitrary formulas, leading to data exfiltration or code execution.
+  Fix: Prefix dangerous leading characters with a single quote or tab to neutralize formula execution.
+
+  [HIGH] bug -- Line 59
+  Potential infinite loop in `parseCsv` when input contains an unmatched double quote (e.g., a single `"` at end of file). The loop will never exit `inQuotes` state, causing a hang or crash.
+  Fix: Add a maximum iteration guard or handle unmatched quotes by treating end-of-file as closing quote.
+
+  [MEDIUM] memory -- Line 28
+  `downloadCsv` creates a Blob and object URL but does not clean up the anchor element if `a.click()` throws (e.g., in a sandboxed iframe). This can leak memory on rapid calls.
+  Fix: Wrap the click in a try-finally block to ensure cleanup even on error.
+
+  [LOW] edge_case -- Line 79
+  Line 79 filters out empty rows during parsing, but this may discard legitimate rows that contain only whitespace or zero-length strings. This could cause data loss if a user intentionally has an empty row.
+  Fix: Consider not filtering rows during parse; let the caller decide. Or document the behavior clearly.
+
+=================================================================
+  FILE: src/lib/csvParse.js
+  Score: 96/100   Issues: 2
+
+  The provided CSV parsing function is generally sound but lacks input validation and error handling. It correctly handles RFC4180-style quoted fields and commas inside quotes. However, it does not check for invalid input, such as null or undefined lines, and does not handle errors that may occur during parsing. Additionally, the function does not provide any feedback to the user in case of errors, which could lead to silent failures. The score is deducted due to the lack of input validation and error handling.
+
+  [MEDIUM] error_handling -- Line 4
+  The function does not check for invalid input, such as null or undefined lines, and does not handle errors that may occur during parsing.
+  Fix: Add input validation and error handling to the function to ensure it can handle invalid input and provide feedback to the user in case of errors.
+
+  [LOW] code_smell -- Line 9
+  The function uses a simple for loop to iterate over the characters in the line, which could be replaced with a more efficient and modern approach, such as using the split() method or a regex.
+  Fix: Consider replacing the simple for loop with a more efficient and modern approach, such as using the split() method or a regex.
+
+=================================================================
+  FILE: src/lib/demoHiringAssessment.js
+  Score: 100/100   Issues: 0
+
+  This file is a simple constant definition with no runtime logic, external dependencies, or user input. It poses no security, reliability, or performance risks. The code is clean and well-structured.
+
+=================================================================
+  FILE: src/lib/mailer.js
+  Score: 38/100   Issues: 7
+
+  The mailer is a thin wrapper around nodemailer with reasonable fallback-to-log behavior, but it has several critical gaps: no error handling around transport.sendMail (unhandled promise rejection will crash the process), no TLS validation configuration (MITM risk), no connection timeout, and no verification that the transport is ready before sending. The fallback logging also risks leaking PII (email addresses, subject, text) to logs in production. Score is capped at 40 due to the unhandled rejection crash risk.
+
+  [CRITICAL] error_handling -- Line 40
+  transport.sendMail is called without try/catch or .catch handler. If SMTP is unreachable, credentials are wrong, or any other nodemailer error occurs, this will throw an unhandled promise rejection, crashing the Node.js process in environments without a global unhandledRejection handler.
+  Fix: Wrap the sendMail call in a try/catch block, log the error with a correlation ID, and return a structured error response instead of crashing.
+
+  [HIGH] security -- Line 14
+  No TLS options are configured in the nodemailer transport. In production, this means the connection may not validate the SMTP server certificate, making it vulnerable to man-in-the-middle attacks. The secure flag only sets the port protocol, not certificate validation.
+  Fix: Add tls: { rejectUnauthorized: true } to the transport options, and allow configuration via environment variable for self-signed certs in dev.
+
+  [HIGH] gdpr -- Line 28
+  When SMTP is not configured, the fallback logs the full recipient list, subject, and first 200 characters of email body to console. In production, this leaks PII (email addresses, potentially sensitive content) to stdout, which may be captured by log aggregation systems.
+  Fix: Remove the detailed logging or gate it behind a debug flag that is disabled in production. Log only that an email was skipped, without PII.
+
+  [HIGH] gdpr -- Line 35
+  Same PII leak as above: when SMTP credentials are missing, the fallback logs recipient, subject, and text snippet to console.
+  Fix: Same fix: remove PII from production logs or gate behind a debug flag.
+
+  [MEDIUM] reliability -- Line 40
+  No connection timeout is set on the transport. If the SMTP server is slow or unreachable, the sendMail call may hang indefinitely, causing the request to timeout or the connection pool to exhaust.
+  Fix: Add connectionTimeout and greetingTimeout options to the transport configuration.
+
+  [MEDIUM] reliability -- Line 33
+  The transport is created fresh on every sendMail call, but there is no verification that the transport is ready (e.g., via transport.verify()). If credentials are invalid, the error will only surface during sendMail, which is currently unhandled.
+  Fix: Call transport.verify() once at startup or lazily, and cache the verified transport to avoid creating a new connection per email.
+
+  [LOW] code_smell -- Line 45
+  The fallback html generation from text (opts.text.replace(/\n/g, '<br/>')) is naive and does not escape HTML entities in the text, potentially producing broken or unsafe HTML if the text contains '<' or '&'.
+  Fix: Use a proper HTML escape function or require html to be explicitly provided instead of auto-generating it.
+
+=================================================================
+  FILE: src/lib/shardBinding.js
+  Score: 99/100   Issues: 1
+
+  The file is minimal and functionally correct, with no runtime failures, security vulnerabilities, or performance issues. The two exported functions are well-defined and handle edge cases appropriately. The only minor concern is the lack of input length validation in normalizeSurfaceTokenInput, which could lead to unexpected behavior if very long strings are passed, but this is a low-severity issue given the expected usage.
+
+  [LOW] input_validation -- Line 10
+  normalizeSurfaceTokenInput does not validate or limit the length of the input string, which could allow excessively long strings to be processed and potentially cause downstream issues.
+  Fix: Add a maximum length check to prevent processing of overly long input strings.
+
+=================================================================
+  FILE: src/lib/notificationService.js
+  Score: 96/100   Issues: 2
+
+  The notification service is well-structured with parameterized queries and optional transaction support. The primary risk is the unbounded `notifyUsersOneAtATime` function which performs sequential individual INSERTs without batch limits, potentially causing performance issues or connection timeouts for large user lists. The `clipTitle` function has a minor off-by-one issue. No security vulnerabilities or data leakage risks were identified.
+
+  [MEDIUM] performance -- Line 42
+  notifyUsersOneAtATime performs sequential individual INSERTs for each userId, which can cause performance degradation and connection timeouts for large arrays (e.g., 10000+ users). This also increases database round-trips and transaction duration.
+  Fix: Batch the INSERTs using a single multi-row INSERT or use a batch size limit (e.g., 500) with Promise.all or a helper to insert in chunks.
+
+  [LOW] bug -- Line 8
+  clipTitle has an off-by-one: when t.length === MAX_TITLE, it returns the full string, but when t.length === MAX_TITLE + 1, it slices to MAX_TITLE - 1 (249 chars) plus ellipsis, resulting in 250 chars total. This is acceptable but the slice should be MAX_TITLE - 1 to keep total length at MAX_TITLE when truncated.
+  Fix: Change slice to MAX_TITLE - 1 to ensure total length including ellipsis is exactly MAX_TITLE.
+
+=================================================================
+  FILE: src/lib/sqlPlaceholders.js
+  Score: 93/100   Issues: 3
+
+  The function is simple and well-documented, but lacks input validation for the `uuids` array and `startIndex` parameter. If `uuids` is null, undefined, or not an array, the code will throw a runtime error. Additionally, there is no validation that `startIndex` is a positive integer, which could lead to incorrect SQL generation. The function also does not handle empty arrays gracefully, which could result in an empty `IN ()` clause that is invalid SQL. These are low-severity issues in isolation but could cause production failures if the function is called with unexpected inputs.
+
+  [MEDIUM] null_check -- Line 7
+  No null/undefined check on `uuids` parameter. If `uuids` is null or undefined, calling `uuids.map` will throw a TypeError, crashing the caller.
+  Fix: Add a guard clause to validate that `uuids` is an array before calling `.map`.
+
+  [MEDIUM] edge_case -- Line 7
+  Empty `uuids` array produces an empty `sql` string, which would result in invalid SQL like `WHERE id IN ()`. This will cause a database error at runtime.
+  Fix: Handle the empty array case explicitly, either by returning a special marker or throwing a descriptive error.
+
+  [LOW] input_validation -- Line 7
+  No validation that `startIndex` is a positive integer. If a caller passes 0 or a negative number, the generated placeholders will be incorrect (e.g., `$0::uuid`), which is invalid SQL syntax.
+  Fix: Add a guard clause to ensure `startIndex` is a positive integer.
+
+=================================================================
+  FILE: src/lib/studentServer.js
+  Score: 83/100   Issues: 4
+
+  The function is concise and uses parameterized queries, avoiding SQL injection. The primary risk is a TOCTOU race condition between the initial SELECT and the INSERT, which could cause the INSERT to fail silently (ON CONFLICT DO NOTHING) and the final SELECT to return null, leading to a transient failure under concurrent registration. Additionally, the auto-generated roll_number is not unique and may collide across tenants. The function lacks input validation and error handling for database failures.
+
+  [HIGH] concurrency -- Line 7
+  TOCTOU race condition: Between the initial SELECT (line 8) and the INSERT (line 22-27), another concurrent request may also find no existing profile and attempt the INSERT. The ON CONFLICT DO NOTHING prevents a duplicate, but the final SELECT (line 29) may return null if the concurrent request's INSERT wins and this request's INSERT is a no-op, causing a transient null return.
+  Fix: Use a single INSERT ... ON CONFLICT ... RETURNING id query to atomically create or retrieve the profile id, eliminating the race window.
+
+  [MEDIUM] data_integrity -- Line 20
+  Auto-generated roll_number is not unique and may collide across tenants. The column roll_number in student_profiles has no unique constraint, so duplicate values are allowed, but this could cause confusion in reports or UI that assume roll numbers are unique within a tenant.
+  Fix: Consider making roll_number unique per tenant (composite unique constraint on tenant_id, roll_number) or generate a truly unique value (e.g., UUID prefix).
+
+  [MEDIUM] error_handling -- Line 7
+  No try/catch around database queries. If any query throws (e.g., connection failure, constraint violation), the error will propagate as an unhandled promise rejection, potentially crashing the process or returning a 500 without context.
+  Fix: Wrap the function body in a try/catch, log the error, and either rethrow a sanitized error or return null with logging.
+
+  [LOW] edge_case -- Line 20
+  The roll_number is truncated to 10 characters after removing hyphens. If the userId is very short (e.g., a short UUID), the resulting roll_number could be less than 10 characters, which is acceptable but may look inconsistent.
+  Fix: Pad the roll_number to a fixed length or use a more descriptive prefix to ensure consistency.
+
+=================================================================
+  FILE: src/lib/tenantContext.js
+  Score: 99/100   Issues: 1
+
+  The file is minimal and functionally correct with no runtime failures, security vulnerabilities, or performance issues. The UUID validation and tenant ID extraction are sound. The only minor concern is the lack of input type narrowing in `getSessionTenantId`, but this is a low-severity code smell.
+
+  [LOW] code_smell -- Line 12
+  getSessionTenantId: The nullish coalescing chain does not guard against non-string types (e.g., numbers, objects) that would pass the truthy check but produce unexpected results when trimmed. In practice, tenant IDs are UUID strings, so this is unlikely to cause issues, but it is a minor robustness gap.
+  Fix: Add an explicit type check to ensure the value is a string before trimming, or rely on the UUID validation downstream if applicable.

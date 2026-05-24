@@ -1,0 +1,451 @@
+{
+  "job_id": "a0f347156f174b8d",
+  "batch": 1,
+  "folder_path": "C:\\Users\\sandeep\\Downloads\\Claudes\\CampusPlacement\\campus-placement",
+  "model_used": "nvidia/meta/llama-3.3-70b-instruct",
+  "saved_at": "2026-05-01T09:59:05.646225",
+  "files": [
+    {
+      "filename": "src/app/api/audit/logs/route.js",
+      "score": 96,
+      "summary": "The provided code is a well-structured API route for retrieving audit logs. It handles authentication and authorization properly, and it also handles errors. However, there are some potential issues that need to be addressed, such as input validation, error handling, and database query optimization. The code score is 85 due to some minor issues and suggestions for improvement.",
+      "issues_count": 2
+    },
+    {
+      "filename": "src/app/api/admin/settings/route.js",
+      "score": 86,
+      "summary": "The provided code is a well-structured API route for admin settings. It handles authentication, authorization, and error handling properly. However, there are some potential issues that need to be addressed, such as missing input validation, potential SQL injection vulnerabilities, and lack of logging for certain actions. The code also uses some deprecated functions and has some areas that can be improved for better performance and security.",
+      "issues_count": 3
+    },
+    {
+      "filename": "src/app/api/admin/users/route.js",
+      "score": 93,
+      "summary": "The provided code is a well-structured API route for the admin dashboard. It handles authentication and authorization properly, and it also handles errors. However, there are some potential issues that need to be addressed, such as input validation, error handling, and potential SQL injection vulnerabilities. The code score is 85 due to the lack of input validation and potential SQL injection vulnerabilities.",
+      "issues_count": 3
+    },
+    {
+      "filename": "src/app/api/audit/reports/export/route.js",
+      "score": 92,
+      "summary": "The provided code is a well-structured API route for exporting audit reports. It handles authentication, authorization, and error handling properly. However, there are some potential issues that require attention, such as missing input validation, potential SQL injection vulnerabilities, and unhandled errors. The code also lacks logging and monitoring, which can make it difficult to debug and troubleshoot issues. Overall, the code is well-organized, but it requires some improvements to ensure security, reliability, and maintainability.",
+      "issues_count": 4
+    },
+    {
+      "filename": "src/app/api/audit/reports/route.js",
+      "score": 93,
+      "summary": "The provided code is a well-structured API route for audit reports. It handles authentication and authorization properly, and it also handles errors. However, there are some potential issues that require attention to improve the code's reliability and security. The code does not validate the 'limit' parameter properly, which could lead to potential SQL injection vulnerabilities. Additionally, the code does not handle the case where the 'tenantId' parameter is not a valid UUID. The error handling mechanism is also not robust, as it returns a generic error message for all types of errors.",
+      "issues_count": 3
+    },
+    {
+      "filename": "src/app/api/auth/[...nextauth]/route.js",
+      "score": 96,
+      "summary": "The provided code is a simple NextAuth handler for authentication routes. It imports the authentication options and creates a NextAuth instance. However, there are potential security and reliability issues due to the lack of error handling and input validation. The code does not handle potential errors that may occur during the authentication process, which could lead to crashes or unexpected behavior. Additionally, the code does not validate the authentication options, which could lead to security vulnerabilities if the options are not properly sanitized.",
+      "issues_count": 2
+    },
+    {
+      "filename": "src/app/api/clarifications/route.js",
+      "score": 61,
+      "summary": "The provided code is a well-structured API route for clarifications. It handles authentication and authorization properly, and it also handles errors and edge cases. However, there are some potential issues with data validation, error handling, and database queries. The code is generally well-organized, but there are some areas that require attention to improve its reliability and security.",
+      "issues_count": 6
+    },
+    {
+      "filename": "src/app/api/college/dashboard/route.js",
+      "score": 84,
+      "summary": "The provided code is a well-structured API route for the college dashboard. It handles authentication and authorization properly, and it also handles errors. However, there are some potential issues with database queries and error handling that need to be addressed. The code score is 85 due to some minor issues with database query efficiency and error handling.",
+      "issues_count": 3
+    },
+    {
+      "filename": "src/app/api/college/applications/route.js",
+      "score": 95,
+      "summary": "The provided API route for college applications is well-structured and handles authentication, authorization, and error handling properly. However, there are some areas that require attention to improve the code's reliability, security, and performance. The code uses parameterized queries, which is good for preventing SQL injection attacks. The route also handles errors and returns informative error messages. Nevertheless, there are some potential issues, such as the lack of input validation for the tenant ID and the potential for a large amount of data being returned from the database.",
+      "issues_count": 3
+    },
+    {
+      "filename": "src/app/api/college/drives/[id]/facebook-post/route.js",
+      "score": 93,
+      "summary": "The provided code is a well-structured API route for publishing a placement drive summary to a Facebook page. However, there are some areas that require attention to improve security, reliability, and performance. The code lacks input validation for the driveId parameter, and it does not handle errors properly in the postToFacebookPageFeed function. Additionally, the code uses a try-catch block to handle errors, but it does not provide specific error messages, which can make debugging difficult.",
+      "issues_count": 3
+    },
+    {
+      "filename": "src/app/api/college/drives/[id]/report/route.js",
+      "score": 81,
+      "summary": "The provided API route for generating a drive report is well-structured and handles authentication, authorization, and error handling properly. However, there are some potential issues with database queries, error handling, and data processing. The code is generally readable and maintainable, but some improvements can be made to enhance its reliability and performance.",
+      "issues_count": 4
+    },
+    {
+      "filename": "src/app/api/college/drives/route.js",
+      "score": 90,
+      "summary": "The provided code is a well-structured API route for college drives, handling authentication, authorization, and error handling properly. However, there are some areas that require improvement, such as input validation, error handling, and potential SQL injection vulnerabilities. The code also lacks logging and monitoring, which is crucial for a production-ready application.",
+      "issues_count": 4
+    },
+    {
+      "filename": "src/app/api/college/drives/[id]/route.js",
+      "score": 87,
+      "summary": "The provided code is a well-structured API route for updating placement drive fields for a college. It handles authentication, authorization, and error handling properly. However, there are some areas that require improvement, such as input validation, error handling, and potential SQL injection vulnerabilities. The code score is 85 due to the identified issues.",
+      "issues_count": 5
+    }
+  ],
+  "batch_score": 88,
+  "total_issues": 45,
+  "issues": [
+    {
+      "filename": "src/app/api/audit/logs/route.js",
+      "type": "input_validation",
+      "severity": "medium",
+      "message": "The parseDate function does not handle invalid date formats robustly. It should throw an error or return a default value instead of returning the original value.",
+      "line": 7,
+      "suggestion": "Use a more robust date parsing library or add additional error handling to the parseDate function."
+    },
+    {
+      "filename": "src/app/api/audit/logs/route.js",
+      "type": "code_smell",
+      "severity": "low",
+      "message": "The code uses multiple variables to store query parameters. It would be more efficient to use a single object to store all query parameters.",
+      "line": 20,
+      "suggestion": "Use a single object to store all query parameters."
+    },
+    {
+      "filename": "src/app/api/admin/settings/route.js",
+      "type": "security",
+      "severity": "medium",
+      "message": "Missing input validation for admin settings",
+      "line": 75,
+      "suggestion": "Add input validation for admin settings to prevent potential security vulnerabilities"
+    },
+    {
+      "filename": "src/app/api/admin/settings/route.js",
+      "type": "security",
+      "severity": "high",
+      "message": "Potential SQL injection vulnerability",
+      "line": 102,
+      "suggestion": "Use parameterized queries to prevent SQL injection attacks"
+    },
+    {
+      "filename": "src/app/api/admin/settings/route.js",
+      "type": "best_practice",
+      "severity": "low",
+      "message": "Missing logging for admin settings update",
+      "line": 108,
+      "suggestion": "Add logging for admin settings update to track changes"
+    },
+    {
+      "filename": "src/app/api/admin/users/route.js",
+      "type": "security",
+      "severity": "medium",
+      "message": "The code does not validate the session object before accessing its properties. This could lead to a null pointer exception if the session object is null or undefined.",
+      "line": 9,
+      "suggestion": "Add a null check for the session object before accessing its properties."
+    },
+    {
+      "filename": "src/app/api/admin/users/route.js",
+      "type": "best_practice",
+      "severity": "low",
+      "message": "The SQL query is not parameterized, which could lead to SQL injection vulnerabilities.",
+      "line": 14,
+      "suggestion": "Use a parameterized query to prevent SQL injection vulnerabilities."
+    },
+    {
+      "filename": "src/app/api/admin/users/route.js",
+      "type": "error_handling",
+      "severity": "medium",
+      "message": "The error handling is not robust, as it only logs the error and returns a generic 500 error message.",
+      "line": 29,
+      "suggestion": "Improve the error handling by logging more details about the error and returning a more informative error message."
+    },
+    {
+      "filename": "src/app/api/audit/reports/export/route.js",
+      "type": "security",
+      "severity": "medium",
+      "message": "Missing input validation for request body",
+      "line": 27,
+      "suggestion": "Add input validation for request body using a library like Joi or express-validator"
+    },
+    {
+      "filename": "src/app/api/audit/reports/export/route.js",
+      "type": "security",
+      "severity": "low",
+      "message": "Potential SQL injection vulnerability",
+      "line": 48,
+      "suggestion": "Use parameterized queries or an ORM to prevent SQL injection"
+    },
+    {
+      "filename": "src/app/api/audit/reports/export/route.js",
+      "type": "security",
+      "severity": "low",
+      "message": "Potential SQL injection vulnerability",
+      "line": 57,
+      "suggestion": "Use parameterized queries or an ORM to prevent SQL injection"
+    },
+    {
+      "filename": "src/app/api/audit/reports/export/route.js",
+      "type": "error_handling",
+      "severity": "medium",
+      "message": "Unhandled error in inner catch block",
+      "line": 117,
+      "suggestion": "Handle the error properly, e.g., log it and return a meaningful error message"
+    },
+    {
+      "filename": "src/app/api/audit/reports/route.js",
+      "type": "security",
+      "severity": "medium",
+      "message": "The 'limit' parameter is not validated properly, which could lead to potential SQL injection vulnerabilities.",
+      "line": 25,
+      "suggestion": "Validate the 'limit' parameter to ensure it is a positive integer."
+    },
+    {
+      "filename": "src/app/api/audit/reports/route.js",
+      "type": "security",
+      "severity": "medium",
+      "message": "The 'tenantId' parameter is not validated properly, which could lead to potential SQL injection vulnerabilities.",
+      "line": 19,
+      "suggestion": "Validate the 'tenantId' parameter to ensure it is a valid UUID."
+    },
+    {
+      "filename": "src/app/api/audit/reports/route.js",
+      "type": "error_handling",
+      "severity": "low",
+      "message": "The error handling mechanism is not robust, as it returns a generic error message for all types of errors.",
+      "line": 36,
+      "suggestion": "Improve the error handling mechanism to return more specific error messages."
+    },
+    {
+      "filename": "src/app/api/auth/[...nextauth]/route.js",
+      "type": "error_handling",
+      "severity": "medium",
+      "message": "The code does not handle potential errors that may occur during the authentication process",
+      "line": 4,
+      "suggestion": "Add try-catch blocks to handle potential errors"
+    },
+    {
+      "filename": "src/app/api/auth/[...nextauth]/route.js",
+      "type": "input_validation",
+      "severity": "low",
+      "message": "The code does not validate the authentication options",
+      "line": 1,
+      "suggestion": "Add input validation to ensure the authentication options are properly sanitized"
+    },
+    {
+      "filename": "src/app/api/clarifications/route.js",
+      "type": "validation",
+      "severity": "medium",
+      "message": "The MAX_QUESTIONS constant is not validated",
+      "line": 17,
+      "suggestion": "Add validation for MAX_QUESTIONS"
+    },
+    {
+      "filename": "src/app/api/clarifications/route.js",
+      "type": "error_handling",
+      "severity": "high",
+      "message": "The GET function does not handle errors properly",
+      "line": 63,
+      "suggestion": "Add proper error handling for the GET function"
+    },
+    {
+      "filename": "src/app/api/clarifications/route.js",
+      "type": "error_handling",
+      "severity": "high",
+      "message": "The POST function does not handle errors properly",
+      "line": 81,
+      "suggestion": "Add proper error handling for the POST function"
+    },
+    {
+      "filename": "src/app/api/clarifications/route.js",
+      "type": "error_handling",
+      "severity": "high",
+      "message": "The PATCH function does not handle errors properly",
+      "line": 123,
+      "suggestion": "Add proper error handling for the PATCH function"
+    },
+    {
+      "filename": "src/app/api/clarifications/route.js",
+      "type": "validation",
+      "severity": "medium",
+      "message": "The company and postedBy fields are not validated",
+      "line": 99,
+      "suggestion": "Add validation for company and postedBy fields"
+    },
+    {
+      "filename": "src/app/api/clarifications/route.js",
+      "type": "validation",
+      "severity": "medium",
+      "message": "The batchId and questionId fields are not validated",
+      "line": 141,
+      "suggestion": "Add validation for batchId and questionId fields"
+    },
+    {
+      "filename": "src/app/api/college/dashboard/route.js",
+      "type": "performance",
+      "severity": "medium",
+      "message": "The database query is not optimized for performance. It uses multiple subqueries which can lead to slow performance.",
+      "line": 17,
+      "suggestion": "Optimize the database query to use joins instead of subqueries."
+    },
+    {
+      "filename": "src/app/api/college/dashboard/route.js",
+      "type": "performance",
+      "severity": "medium",
+      "message": "The database query is not optimized for performance. It uses multiple subqueries which can lead to slow performance.",
+      "line": 43,
+      "suggestion": "Optimize the database query to use joins instead of subqueries."
+    },
+    {
+      "filename": "src/app/api/college/dashboard/route.js",
+      "type": "error_handling",
+      "severity": "high",
+      "message": "The error handling is not robust. It only logs the error and returns a generic 500 error message.",
+      "line": 76,
+      "suggestion": "Improve the error handling to provide more detailed error messages and logging."
+    },
+    {
+      "filename": "src/app/api/college/applications/route.js",
+      "type": "validation",
+      "severity": "medium",
+      "message": "The tenant ID is not validated before being used in the database query. This could potentially lead to a SQL injection attack if the tenant ID is not properly sanitized.",
+      "line": 13,
+      "suggestion": "Validate the tenant ID to ensure it is a valid UUID."
+    },
+    {
+      "filename": "src/app/api/college/applications/route.js",
+      "type": "performance",
+      "severity": "low",
+      "message": "The database query returns a large amount of data, which could potentially lead to performance issues. Consider implementing pagination or limiting the amount of data returned.",
+      "line": 18,
+      "suggestion": "Implement pagination or limit the amount of data returned from the database query."
+    },
+    {
+      "filename": "src/app/api/college/applications/route.js",
+      "type": "security",
+      "severity": "low",
+      "message": "The error message returned in the case of a database error could potentially reveal sensitive information about the database or the application. Consider returning a more generic error message.",
+      "line": 40,
+      "suggestion": "Return a more generic error message in the case of a database error."
+    },
+    {
+      "filename": "src/app/api/college/drives/[id]/facebook-post/route.js",
+      "type": "input_validation",
+      "severity": "medium",
+      "message": "The driveId parameter is not validated for invalid or malicious input",
+      "line": 40,
+      "suggestion": "Add input validation for the driveId parameter to prevent potential security vulnerabilities"
+    },
+    {
+      "filename": "src/app/api/college/drives/[id]/facebook-post/route.js",
+      "type": "error_handling",
+      "severity": "medium",
+      "message": "The postToFacebookPageFeed function does not handle errors properly",
+      "line": 87,
+      "suggestion": "Add error handling for the postToFacebookPageFeed function to prevent unexpected errors"
+    },
+    {
+      "filename": "src/app/api/college/drives/[id]/facebook-post/route.js",
+      "type": "error_handling",
+      "severity": "low",
+      "message": "The try-catch block does not provide specific error messages for debugging",
+      "line": 94,
+      "suggestion": "Add specific error messages for debugging to improve error handling"
+    },
+    {
+      "filename": "src/app/api/college/drives/[id]/report/route.js",
+      "type": "database",
+      "severity": "medium",
+      "message": "The drive query uses a LEFT JOIN, which may not be necessary and could impact performance. Consider using an INNER JOIN if the joined tables have a one-to-one relationship.",
+      "line": 20,
+      "suggestion": "Review the database schema and adjust the query accordingly."
+    },
+    {
+      "filename": "src/app/api/college/drives/[id]/report/route.js",
+      "type": "database",
+      "severity": "medium",
+      "message": "The stats query uses a GROUP BY clause, which may not be necessary and could impact performance. Consider using a simpler query if the statistics can be calculated in the application code.",
+      "line": 36,
+      "suggestion": "Review the database schema and adjust the query accordingly."
+    },
+    {
+      "filename": "src/app/api/college/drives/[id]/report/route.js",
+      "type": "database",
+      "severity": "medium",
+      "message": "The selected query uses a JOIN clause, which may not be necessary and could impact performance. Consider using a simpler query if the selected students can be retrieved in a single query.",
+      "line": 60,
+      "suggestion": "Review the database schema and adjust the query accordingly."
+    },
+    {
+      "filename": "src/app/api/college/drives/[id]/report/route.js",
+      "type": "error_handling",
+      "severity": "high",
+      "message": "The error handling in the catch block is not robust and may not handle all possible error scenarios. Consider adding more specific error handling and logging.",
+      "line": 84,
+      "suggestion": "Review the error handling and add more specific error handling and logging as needed."
+    },
+    {
+      "filename": "src/app/api/college/drives/route.js",
+      "type": "sql_injection",
+      "severity": "medium",
+      "message": "Potential SQL injection vulnerability in query parameter $1::uuid",
+      "line": 23,
+      "suggestion": "Use parameterized queries or prepared statements to prevent SQL injection"
+    },
+    {
+      "filename": "src/app/api/college/drives/route.js",
+      "type": "sql_injection",
+      "severity": "medium",
+      "message": "Potential SQL injection vulnerability in query parameter $1::uuid",
+      "line": 42,
+      "suggestion": "Use parameterized queries or prepared statements to prevent SQL injection"
+    },
+    {
+      "filename": "src/app/api/college/drives/route.js",
+      "type": "sql_injection",
+      "severity": "medium",
+      "message": "Potential SQL injection vulnerability in query parameter $1",
+      "line": 88,
+      "suggestion": "Use parameterized queries or prepared statements to prevent SQL injection"
+    },
+    {
+      "filename": "src/app/api/college/drives/route.js",
+      "type": "input_validation",
+      "severity": "low",
+      "message": "Missing input validation for driveId and action",
+      "line": 83,
+      "suggestion": "Add input validation to ensure driveId and action are valid"
+    },
+    {
+      "filename": "src/app/api/college/drives/[id]/route.js",
+      "type": "error_handling",
+      "severity": "medium",
+      "message": "Error handling for getServerSession can be improved",
+      "line": 15,
+      "suggestion": "Add more specific error handling for getServerSession"
+    },
+    {
+      "filename": "src/app/api/college/drives/[id]/route.js",
+      "type": "input_validation",
+      "severity": "medium",
+      "message": "Drive id validation can be improved",
+      "line": 25,
+      "suggestion": "Add more specific validation for drive id"
+    },
+    {
+      "filename": "src/app/api/college/drives/[id]/route.js",
+      "type": "input_validation",
+      "severity": "medium",
+      "message": "Request body validation can be improved",
+      "line": 30,
+      "suggestion": "Add more specific validation for request body"
+    },
+    {
+      "filename": "src/app/api/college/drives/[id]/route.js",
+      "type": "sql_injection",
+      "severity": "low",
+      "message": "SQL query uses parameterized placeholders, which is good practice",
+      "line": 39,
+      "suggestion": "No changes needed"
+    },
+    {
+      "filename": "src/app/api/college/drives/[id]/route.js",
+      "type": "error_handling",
+      "severity": "medium",
+      "message": "Error handling for drive not found can be improved",
+      "line": 49,
+      "suggestion": "Add more specific error handling for drive not found"
+    }
+  ]
+}

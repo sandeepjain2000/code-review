@@ -1,0 +1,815 @@
+{
+  "job_id": "af96c01b52e742b2",
+  "batch": 3,
+  "folder_path": "C:\\Users\\sandeep\\Downloads\\Claudes\\CampusPlacement\\campus-placement\\src\\lib",
+  "model_used": "nvidia/meta/llama-3.3-70b-instruct",
+  "saved_at": "2026-05-24T20:52:11.429962",
+  "files": [
+    {
+      "filename": "helpFaqOpenai.js",
+      "score": 93,
+      "summary": "The provided code snippet for ranking FAQs with OpenAI appears to be generally well-structured and secure. However, there are a few potential issues and improvements that can be suggested. The code lacks input validation for the user question and FAQ rows, and it does not handle errors properly. Additionally, the code uses a hardcoded API key and model, which may not be suitable for production environments. The code also lacks logging and monitoring, which can make it difficult to debug and optimize. Overall, the code score is 80, with deductions for security, reliability, and maintainability concerns.",
+      "issues_count": 3,
+      "test_cases": [
+        "Should handle invalid user question input",
+        "Should handle invalid FAQ rows input",
+        "Should handle OpenAI API errors",
+        "Should handle JSON parsing errors",
+        "Should validate and sanitize user input"
+      ],
+      "time_taken": 21.16,
+      "provider": "nvidia"
+    },
+    {
+      "filename": "inferImageContentType.js",
+      "score": 86,
+      "summary": "The function is concise and handles the common case of missing MIME types from browsers. The biggest risk is that it trusts the file extension without validating the actual file bytes, which could allow a malicious user to upload a non-image file (e.g., a script) with a renamed extension. This is a security concern if the returned type is used for server-side validation or content-type headers. Additionally, the function returns an empty string for unknown types, which may cause downstream failures if callers expect a valid MIME type. The code is otherwise clean and well-structured.",
+      "issues_count": 3,
+      "test_cases": [
+        "Should return 'image/jpeg' for a file with .jpg extension and empty type",
+        "Should return 'image/png' for a file with .png extension and empty type",
+        "Should return the original type if it starts with 'image/'",
+        "Should return empty string for a file with .txt extension",
+        "Should handle null/undefined file object gracefully",
+        "Should handle file.type with extra whitespace",
+        "Should handle file.name with mixed case",
+        "Should return empty string for a file with no name and no type",
+        "Should not trust extension alone for security (e.g., .jpg.js file)",
+        "Should handle HEIC/HEIF extensions correctly"
+      ],
+      "time_taken": 39.08,
+      "provider": "nvidia"
+    },
+    {
+      "filename": "offerReportedColumn.js",
+      "score": 96,
+      "summary": "The provided code snippet for checking if the 'reported_company_name' column is missing in the 'offers' table appears to be generally well-structured and readable. However, there are a few potential issues and improvements that can be suggested. The function 'isMissingReportedCompanyColumnError' checks if the error code is '42703' and if the error message includes 'reported_company_name'. This approach may not be foolproof as error messages can change. A more robust approach would be to check the error code and the specific column name in the error message. Additionally, the function does not handle cases where the error object is null or undefined.",
+      "issues_count": 2,
+      "test_cases": [
+        "Should return true when Postgres rejects SQL because 'reported_company_name' column is missing",
+        "Should return false when Postgres rejects SQL for other reasons",
+        "Should handle cases where the error object is null or undefined"
+      ],
+      "time_taken": 18.25,
+      "provider": "nvidia"
+    },
+    {
+      "filename": "notificationService.js",
+      "score": 88,
+      "summary": "The notification service is clean, well-structured, and uses parameterized queries throughout, preventing SQL injection. The main risks are: (1) unbounded batch inserts that could cause memory/performance issues for tenants with thousands of users, (2) no input validation on message length which could lead to oversized rows, and (3) missing error handling that could silently fail in production. The code is otherwise solid with good use of optional transaction clients and consistent patterns.",
+      "issues_count": 6,
+      "test_cases": [
+        "Should handle tenant with 50,000 active students without timing out or OOM",
+        "Should rollback all notifications when called within a transaction that fails",
+        "Should clip title at 250 chars and handle null/undefined title gracefully",
+        "Should handle empty userIds array in notifyUsersOneAtATime without error",
+        "Should handle database connection failure with proper error propagation",
+        "Should verify that only active college_admin users receive notifications",
+        "Should handle very long message strings (>10KB) without truncation or error",
+        "Should handle concurrent calls for the same tenant without deadlocks",
+        "Should handle UUID format validation for tenantId parameter",
+        "Should handle null client parameter by using default query function"
+      ],
+      "time_taken": 36.43,
+      "provider": "nvidia"
+    },
+    {
+      "filename": "offerStatusNormalize.js",
+      "score": 94,
+      "summary": "The code is generally well-structured with clear normalization logic and helper functions. The primary risk is a potential logic error in `canStudentRespondToOffer` where an expired status is checked before the deadline check, but the function still returns `false` for expired offers regardless of deadline. Additionally, the `OFFER_PENDING_STATUS_SQL` fragment includes statuses like 'offered', 'sent', 'awaiting_response', 'awaiting' that are normalized to 'pending' in the JS function, but the SQL fragment is used directly in queries and may not match the normalized values if the database stores different raw values. The code lacks input validation for the `application` object in `findPendingOfferForApplication`, which could lead to accessing properties on undefined. Overall, the code is reliable for typical use cases but has minor edge-case and maintainability concerns.",
+      "issues_count": 4,
+      "test_cases": [
+        "Should return 'pending' for null/undefined/empty input",
+        "Should return 'rejected' for 'declined', 'decline', 'reject'",
+        "Should return 'pending' for 'offered', 'sent', 'awaiting_response', 'awaiting'",
+        "Should return the original status if it is in the VALID set",
+        "Should return the original status if it is not recognized (e.g., 'unknown')",
+        "Should return null if offers is not an array or application is null/undefined",
+        "Should match by drive_id when application has drive_id and offer has matching driveId",
+        "Should match by application id when drive_id is missing",
+        "Should match by company and role when both drive_id and application id are missing",
+        "Should return null if no pending offers exist",
+        "Should return false for canStudentRespondToOffer when offer is null",
+        "Should return false for expired status regardless of deadline",
+        "Should return false for pending status when deadline is passed",
+        "Should return true for pending status when deadline is not passed",
+        "Should handle case where application object has missing properties (e.g., no drive_id, no id, no company)",
+        "Should handle offers with mixed camelCase and snake_case property names",
+        "Should handle empty string company or role in findPendingOfferForApplication",
+        "Should verify OFFER_PENDING_STATUS_SQL matches the normalization logic for all statuses"
+      ],
+      "time_taken": 16.83,
+      "provider": "nvidia"
+    },
+    {
+      "filename": "pgSsl.js",
+      "score": 95,
+      "summary": "The function is well-structured with clear documentation and handles the common TLS scenarios for PostgreSQL connections. The primary risk is the synchronous fs.readFileSync call on the main thread, which could block the event loop during startup if the CA file path is invalid or the filesystem is slow. Additionally, the warning for insecure TLS is only logged once per process lifetime, which may hide repeated configuration issues in long-running environments. The code is otherwise correct and follows security best practices by defaulting to rejectUnauthorized: true for remote hosts.",
+      "issues_count": 3,
+      "test_cases": [
+        "Should return false for localhost, 127.0.0.1, and ::1 hostnames",
+        "Should return { rejectUnauthorized: false } when DATABASE_SSL_REJECT_UNAUTHORIZED is false in production and log a warning",
+        "Should not log warning on subsequent calls when insecure TLS is already warned",
+        "Should return { rejectUnauthorized: true } with CA cert when DATABASE_SSL_CA is set and file exists",
+        "Should throw an error with descriptive message when DATABASE_SSL_CA path is invalid or unreadable",
+        "Should handle empty or undefined hostname gracefully by treating it as non-local",
+        "Should handle DATABASE_SSL_CA with leading/trailing whitespace via .trim()",
+        "Should handle NODE_ENV being undefined or empty string without crashing",
+        "Should handle very large CA certificate file without memory issues",
+        "Should handle symlink or special files in DATABASE_SSL_CA path"
+      ],
+      "time_taken": 14.82,
+      "provider": "nvidia"
+    },
+    {
+      "filename": "offerDeadline.js",
+      "score": 96,
+      "summary": "The provided code for parsing and checking offer deadlines is generally well-structured and readable. However, there are a few potential issues and improvements that can be made. The code correctly handles date-only values and treats them as valid through the end of the calendar day. It also properly checks for invalid or null deadlines. One potential issue is that the code does not account for timezone differences when comparing deadlines. Additionally, the code could benefit from more robust error handling and input validation.",
+      "issues_count": 2,
+      "test_cases": [
+        "Should handle date-only values correctly",
+        "Should treat date-only values as valid through end of calendar day",
+        "Should return null for invalid or null deadlines",
+        "Should correctly compare deadlines with different timezones"
+      ],
+      "time_taken": 40.9,
+      "provider": "nvidia"
+    },
+    {
+      "filename": "marketingWebsiteUrl.js",
+      "score": 95,
+      "summary": "The provided code snippet for normalizing marketing website URLs is generally well-structured and readable. However, there are a few potential issues and improvements that can be suggested. The code properly trims and checks the protocol of the input URL, but it does not handle cases where the URL is too long or contains invalid characters. Additionally, the code does not provide any feedback to the user if the input URL is invalid.",
+      "issues_count": 3,
+      "test_cases": [
+        "Should return empty string for empty input",
+        "Should return empty string for invalid protocol",
+        "Should return empty string for URL longer than MAX_LEN",
+        "Should return trimmed https URL for valid input"
+      ],
+      "time_taken": 64.69,
+      "provider": "nvidia"
+    },
+    {
+      "filename": "messageTemplateUtils.js",
+      "score": 96,
+      "summary": "The provided code snippet for message template utilities appears to be well-structured and readable. However, there are a few potential issues and improvements that can be suggested. The code does not handle potential errors that may occur during the parsing of variables. Additionally, the code does not validate the input variables to ensure they are in the expected format.",
+      "issues_count": 2,
+      "test_cases": [
+        "Should handle empty input variables",
+        "Should handle variables as an array",
+        "Should handle variables as a string",
+        "Should handle variables with leading and trailing whitespace",
+        "Should handle variables with commas and newlines",
+        "Should handle variables with quotes",
+        "Should handle variables with empty values"
+      ],
+      "time_taken": 58.71,
+      "provider": "nvidia"
+    },
+    {
+      "filename": "fetchJson.js",
+      "score": 93,
+      "summary": "The provided code is generally well-structured and handles JSON parsing from fetch responses correctly. However, there are a few potential issues that need to be addressed, such as error handling and input validation. The code does not check for potential security vulnerabilities like CORS or timing attacks. The score is 85 due to the lack of comprehensive error handling and security considerations.",
+      "issues_count": 3,
+      "test_cases": [
+        "Should handle JSON parsing from fetch responses correctly",
+        "Should throw an error when the response is not OK",
+        "Should handle non-JSON error bodies correctly",
+        "Should validate input to prevent potential security vulnerabilities"
+      ],
+      "time_taken": 78.92,
+      "provider": "nvidia"
+    },
+    {
+      "filename": "loginSupportDelivery.js",
+      "score": 86,
+      "summary": "The provided code is generally well-structured and readable. However, there are a few potential issues and improvements that can be suggested. The code does not handle errors properly in some cases, and there are some potential security vulnerabilities. The code also lacks input validation and sanitization in some areas.",
+      "issues_count": 3,
+      "test_cases": [
+        "Should handle DB timeout gracefully",
+        "Should prevent double-charge if retried",
+        "Should validate user input to prevent SQL injection",
+        "Should sanitize user input to prevent XSS"
+      ],
+      "time_taken": 70.88,
+      "provider": "nvidia"
+    },
+    {
+      "filename": "platformSettings.js",
+      "score": 90,
+      "summary": "The platform settings module is clean and well-structured with a sensible caching strategy and graceful fallback to defaults. The primary risk is the hardcoded `id = 1` assumption for the platform settings row, which will silently return defaults if the row doesn't exist or has a different ID. The in-memory cache is not tenant-scoped, which is acceptable for global platform settings but should be documented. The empty catch block swallows all errors without logging, making production debugging difficult. Overall, the code is production-ready with minor improvements needed for observability and robustness.",
+      "issues_count": 6,
+      "test_cases": [
+        "Should return merged defaults when platform_settings table is empty or row id=1 does not exist",
+        "Should return cached data within TTL without hitting the database",
+        "Should invalidate cache and re-fetch when invalidatePlatformSettingsCache is called",
+        "Should handle database connection failure gracefully by returning defaults",
+        "Should canonicalize timezone ID from stored settings",
+        "Should merge stored settings over defaults, with stored values taking precedence",
+        "Should handle stored settings that are null, empty object, or non-object types gracefully",
+        "Should handle concurrent calls during cache refresh without race conditions",
+        "Should log database errors when query fails (currently silent)",
+        "Should handle extremely large settings JSONB payload without performance degradation"
+      ],
+      "time_taken": 32.61,
+      "provider": "nvidia"
+    },
+    {
+      "filename": "registrationJobAid.js",
+      "score": 96,
+      "summary": "The code is generally well-structured and readable. However, there are a few potential issues and improvements that can be made. The primary risk is the potential for incorrect or missing environment variables, which could lead to unexpected behavior. Additionally, the code could benefit from more robust error handling and input validation.",
+      "issues_count": 2,
+      "test_cases": [
+        "Should handle missing or incorrect environment variables",
+        "Should validate input to the sampleForCollegeSlug function",
+        "Should handle errors when accessing the REGISTRATION_JOB_AID_SAMPLES array"
+      ],
+      "time_taken": 19.66,
+      "provider": "nvidia"
+    },
+    {
+      "filename": "offersAssessmentStarterCsv.js",
+      "score": 93,
+      "summary": "The provided code for generating CSV files for college and employer offers is generally well-structured and readable. However, there are a few potential issues and improvements that can be made. The code does not handle errors well and does not validate the input data. Additionally, the code uses the `??` operator which may not be supported in all environments. The code also uses the `Map` data structure which may not be the best choice for this use case. The code does not handle the case where the `assessmentByProfileId` map is empty or null. The code also does not handle the case where the `flatRows` array is empty or null.",
+      "issues_count": 3,
+      "test_cases": [
+        "Should handle empty input data",
+        "Should handle invalid input data",
+        "Should handle errors when generating CSV files",
+        "Should validate input data before generating CSV files"
+      ],
+      "time_taken": 73.57,
+      "provider": "nvidia"
+    },
+    {
+      "filename": "phoneDialCodes.js",
+      "score": 98,
+      "summary": "The provided code is a simple and well-structured list of common ITU-T E.164 calling codes for signup and profile purposes. The code does not contain any major security vulnerabilities or performance issues. However, it could benefit from additional error handling and input validation. The score is 95 due to the lack of potential issues and the simplicity of the code.",
+      "issues_count": 2,
+      "test_cases": [
+        "Should handle invalid input for phone dial codes",
+        "Should validate user input for phone numbers"
+      ],
+      "time_taken": 57.33,
+      "provider": "nvidia"
+    },
+    {
+      "filename": "offerStatusTimestamps.js",
+      "score": 96,
+      "summary": "The provided code snippet for offer decision timestamps appears to be generally well-structured and secure. However, there are a few potential issues and improvements that can be made. The function does not handle cases where the status is not one of the expected terminal statuses. Additionally, the function does not validate the input status to prevent potential errors.",
+      "issues_count": 2,
+      "test_cases": [
+        "Should handle valid terminal statuses (accepted, rejected) correctly",
+        "Should handle non-terminal statuses (pending) correctly",
+        "Should handle invalid or missing status input correctly"
+      ],
+      "time_taken": 69.38,
+      "provider": "nvidia"
+    },
+    {
+      "filename": "offersLatestFlag.js",
+      "score": 95,
+      "summary": "The provided code for refreshing offer latest flags for a student appears to be generally well-structured and secure. However, there are a few potential issues that need to be addressed, such as error handling and potential SQL injection vulnerabilities. The code uses parameterized queries, which is good for preventing SQL injection. The error handling is also robust, with checks for specific error codes and messages. Overall, the code seems to be reliable and maintainable, but some improvements can be made to enhance its security and performance.",
+      "issues_count": 3,
+      "test_cases": [
+        "Should handle missing studentId input",
+        "Should handle SQL query errors",
+        "Should handle missing reported_company_name column",
+        "Should handle missing is_latest column"
+      ],
+      "time_taken": 71.88,
+      "provider": "nvidia"
+    },
+    {
+      "filename": "postRegistrationRedirect.js",
+      "score": 96,
+      "summary": "The provided code snippet for post-registration redirect logic appears to be generally well-structured and clear in its purpose. However, there are a few potential issues and improvements that can be suggested. The primary risk is the lack of input validation for the 'nextUrl' parameter, which could potentially lead to security vulnerabilities if not properly sanitized. Additionally, the use of 'window.location.replace' may not be the best approach for navigation, as it can cause issues with browser history and may not be suitable for all types of applications.",
+      "issues_count": 2,
+      "test_cases": [
+        "Should handle invalid 'nextUrl' parameter",
+        "Should handle 'pendingPlatformApproval' flag correctly",
+        "Should navigate to correct login path after registration"
+      ],
+      "time_taken": 57.72,
+      "provider": "nvidia"
+    },
+    {
+      "filename": "resolveAcademicYearFromRequest.js",
+      "score": 95,
+      "summary": "The provided code for resolving academic years from requests is generally well-structured and readable. However, there are a few potential issues and improvements that can be suggested. The code does not handle potential SQL query errors and does not validate the input parameters. Additionally, the code assumes that the `findAcademicYearForDate` function will always return a valid academic year, which may not be the case. The code also does not handle the case where the `academicYearId` or `academicYearLabel` parameters are not provided.",
+      "issues_count": 3,
+      "test_cases": [
+        "Should handle SQL query errors",
+        "Should validate input parameters",
+        "Should handle case where academicYearId or academicYearLabel parameters are not provided",
+        "Should handle case where findAcademicYearForDate function returns null"
+      ],
+      "time_taken": 49.34,
+      "provider": "nvidia"
+    },
+    {
+      "filename": "publicApiError.js",
+      "score": 95,
+      "summary": "The file is a well-structured utility module for safe API error handling. The main risks are: (1) `isDev()` reads `process.env.NODE_ENV` at call time, which could be overridden or undefined in some environments, leading to accidental leakage of internal details in production. (2) `clientSafeMessageFromBody` exposes `hint` in dev mode, which is acceptable but should be noted. (3) No structured logging or correlation IDs are included, limiting observability. Overall, the code is clean and follows good practices for separating public vs internal error details.",
+      "issues_count": 3,
+      "test_cases": [
+        "Should return GENERIC_API_ERROR when NODE_ENV is production and body has error/hint",
+        "Should return concatenated error and hint when NODE_ENV is development",
+        "Should return fallback when body is null or undefined",
+        "Should return fallback when body.error is not a string",
+        "Should correctly identify Postgres relation missing error by code 42P01",
+        "Should correctly identify Postgres relation missing error by message text",
+        "Should strip internal fields (hint, stack, helpAi, detail, internal) in production",
+        "Should preserve hint and detail in dev mode when stripping internal fields",
+        "Should return the same primitive value when stripInternalApiFields receives non-object",
+        "Should log full error details server-side without exposing them to the client"
+      ],
+      "time_taken": 100.04,
+      "provider": "nvidia"
+    }
+  ],
+  "batch_score": 94,
+  "total_issues": 60,
+  "issues": [
+    {
+      "filename": "helpFaqOpenai.js",
+      "type": "security",
+      "severity": "medium",
+      "message": "Hardcoded API key and model",
+      "line": 57,
+      "suggestion": "Use environment variables or a secure secrets management system"
+    },
+    {
+      "filename": "helpFaqOpenai.js",
+      "type": "reliability",
+      "severity": "medium",
+      "message": "Lack of error handling for OpenAI API calls",
+      "line": 79,
+      "suggestion": "Implement try-catch blocks and log errors"
+    },
+    {
+      "filename": "helpFaqOpenai.js",
+      "type": "maintainability",
+      "severity": "low",
+      "message": "Lack of logging and monitoring",
+      "line": 101,
+      "suggestion": "Implement logging and monitoring for API calls and errors"
+    },
+    {
+      "filename": "inferImageContentType.js",
+      "type": "security",
+      "severity": "high",
+      "message": "The function infers content type solely from the file extension, which is trivially spoofed. A malicious user could upload a JavaScript file renamed to 'script.jpg' and the function would return 'image/jpeg', potentially bypassing server-side image validation or causing incorrect Content-Type headers.",
+      "line": 2,
+      "suggestion": "Add magic byte validation (e.g., using a library like 'file-type' or reading the first few bytes) to confirm the actual file content matches the expected image format."
+    },
+    {
+      "filename": "inferImageContentType.js",
+      "type": "error_handling",
+      "severity": "medium",
+      "message": "Returning an empty string for unknown types may cause downstream code to fail silently or produce incorrect behavior (e.g., setting an empty Content-Type header). Callers should handle this case explicitly.",
+      "line": 11,
+      "suggestion": "Consider returning a default MIME type like 'application/octet-stream' or throwing a descriptive error so callers can handle unknown types appropriately."
+    },
+    {
+      "filename": "inferImageContentType.js",
+      "type": "null_check",
+      "severity": "low",
+      "message": "The optional chaining on `file?.type` and `file?.name` is good, but if `file` is null or undefined, the function will return an empty string. This is acceptable but could be made more explicit.",
+      "line": 3,
+      "suggestion": "No change needed, but consider adding a guard clause at the top if the function should never receive null/undefined."
+    },
+    {
+      "filename": "offerReportedColumn.js",
+      "type": "readability",
+      "severity": "medium",
+      "message": "The error message check is case-sensitive and may not work if the column name is mentioned in a different case in the error message",
+      "line": 4,
+      "suggestion": "Use a case-insensitive check for the column name in the error message"
+    },
+    {
+      "filename": "offerReportedColumn.js",
+      "type": "null_check",
+      "severity": "low",
+      "message": "The function does not handle cases where the error object is null or undefined",
+      "line": 3,
+      "suggestion": "Add a null check for the error object"
+    },
+    {
+      "filename": "notificationService.js",
+      "type": "performance",
+      "severity": "medium",
+      "message": "notifyCollegeAdminsOfTenant performs an unbounded INSERT...SELECT that could insert millions of rows in a single query for large tenants, potentially causing memory pressure and long-running transactions.",
+      "line": 15,
+      "suggestion": "Add pagination or batch limits to the INSERT...SELECT to process users in chunks of 1000-5000."
+    },
+    {
+      "filename": "notificationService.js",
+      "type": "performance",
+      "severity": "medium",
+      "message": "notifyStudentsOfTenant has the same unbounded batch insert issue as notifyCollegeAdminsOfTenant, which could be catastrophic for large universities with 50k+ students.",
+      "line": 27,
+      "suggestion": "Apply the same batching pattern as suggested for notifyCollegeAdminsOfTenant."
+    },
+    {
+      "filename": "notificationService.js",
+      "type": "performance",
+      "severity": "medium",
+      "message": "notifyUsersOneAtATime performs N sequential INSERT queries for N users, which will be extremely slow for large batches (e.g., 10k users = 10k round trips).",
+      "line": 42,
+      "suggestion": "Use a single multi-row INSERT or batch the inserts into groups of 100-500 using UNNEST or multiple VALUES clauses."
+    },
+    {
+      "filename": "notificationService.js",
+      "type": "error_handling",
+      "severity": "low",
+      "message": "No error handling or logging around the database insert \u2014 if the query fails (e.g., constraint violation, connection drop), the error propagates unhandled and could crash the caller without context.",
+      "line": 15,
+      "suggestion": "Wrap the query in a try-catch with structured logging of the notification details and re-throw or handle gracefully."
+    },
+    {
+      "filename": "notificationService.js",
+      "type": "input_validation",
+      "severity": "low",
+      "message": "No validation that message is a non-empty string \u2014 if message is null/undefined/empty, the notification will be stored with an empty message, which is likely a bug in the caller.",
+      "line": 15,
+      "suggestion": "Add validation at the top of each function to ensure title and message are non-empty strings, throwing a descriptive error if not."
+    },
+    {
+      "filename": "notificationService.js",
+      "type": "performance",
+      "severity": "low",
+      "message": "fetchCollegeAdminUserIds loads all admin user IDs into memory \u2014 for tenants with thousands of admins this could be a large array that is never paginated.",
+      "line": 53,
+      "suggestion": "Add pagination or a LIMIT clause if the caller only needs a subset, or use a cursor-based approach."
+    },
+    {
+      "filename": "offerStatusNormalize.js",
+      "type": "data_integrity",
+      "severity": "medium",
+      "message": "OFFER_PENDING_STATUS_SQL includes statuses like 'offered', 'sent', 'awaiting_response', 'awaiting' that are normalized to 'pending' in normalizeOfferStatus. If the database stores these raw values, the SQL fragment will match them, but if the database already stores normalized values (e.g., 'pending'), the SQL may miss records or include duplicates. This creates a mismatch between the SQL filter and the JS normalization logic.",
+      "line": 6,
+      "suggestion": "Ensure the database stores only normalized statuses (pending, accepted, rejected, expired, revoked) and update the SQL fragment to only check for 'pending', or keep the SQL fragment in sync with the normalization mapping."
+    },
+    {
+      "filename": "offerStatusNormalize.js",
+      "type": "logic",
+      "severity": "low",
+      "message": "In canStudentRespondToOffer, the check for 'expired' status on line 65 is redundant because line 66 already returns false if status is 'pending' and deadline is passed. However, if the status is 'expired' but the deadline is not passed (unlikely but possible with manual status changes), the function returns false correctly. The logic is correct but the early return for 'expired' is unnecessary and could be simplified.",
+      "line": 62,
+      "suggestion": "Remove the early return for 'expired' status and rely on the deadline check and final status check, or keep it for clarity but add a comment explaining the intent."
+    },
+    {
+      "filename": "offerStatusNormalize.js",
+      "type": "edge_case",
+      "severity": "low",
+      "message": "findPendingOfferForApplication does not validate that the application object has the expected shape. If application is an object but missing all relevant properties (drive_id, id, company, role), the function will return null, which is safe. However, if application has unexpected types (e.g., drive_id is a number but offers have string driveId), the comparison on line 28 may fail silently.",
+      "line": 22,
+      "suggestion": "Add a type check or coerce all comparison values to strings to avoid type mismatches, which is already partially done with String() on line 28."
+    },
+    {
+      "filename": "offerStatusNormalize.js",
+      "type": "code_smell",
+      "severity": "low",
+      "message": "The default value for raw is 'pending' when raw is null or undefined. This means that if a caller passes null or undefined, the function returns 'pending' instead of the original null/undefined. This may mask bugs where the caller expects to handle null/undefined separately.",
+      "line": 13,
+      "suggestion": "Consider returning null or undefined for null/undefined input, or document this behavior clearly in the JSDoc."
+    },
+    {
+      "filename": "pgSsl.js",
+      "type": "performance",
+      "severity": "medium",
+      "message": "fs.readFileSync on line 44 blocks the event loop during startup. If the CA file is large or the filesystem is slow (e.g., network mount), this could delay server startup and block other initialization tasks.",
+      "line": 44,
+      "suggestion": "Use fs.promises.readFile with await in an async startup function, or read the file lazily when the first connection is created."
+    },
+    {
+      "filename": "pgSsl.js",
+      "type": "observability",
+      "severity": "low",
+      "message": "The insecure TLS warning is only logged once per process lifetime via the warnedInsecureTls flag. In long-running environments where configuration changes dynamically (e.g., Kubernetes configmap reload), repeated warnings would be suppressed, hiding potential misconfiguration.",
+      "line": 30,
+      "suggestion": "Remove the once-per-process guard or log at a higher severity (e.g., console.error) so it appears in every invocation, or add a rate-limited logger."
+    },
+    {
+      "filename": "pgSsl.js",
+      "type": "error_handling",
+      "severity": "low",
+      "message": "The error message includes e.message which may contain filesystem path details. In production, this could leak internal filesystem structure in error logs or responses if the error propagates uncaught.",
+      "line": 46,
+      "suggestion": "Log the full error server-side but throw a sanitized message without the path details, or include the path only in a structured log field."
+    },
+    {
+      "filename": "offerDeadline.js",
+      "type": "bug",
+      "severity": "medium",
+      "message": "Potential issue with timezone differences when comparing deadlines",
+      "line": 21,
+      "suggestion": "Consider using a library like moment-timezone to handle timezone differences"
+    },
+    {
+      "filename": "offerDeadline.js",
+      "type": "readability",
+      "severity": "low",
+      "message": "Consider adding more robust error handling and input validation",
+      "line": 12,
+      "suggestion": "Add try-catch blocks and input validation to handle potential errors"
+    },
+    {
+      "filename": "marketingWebsiteUrl.js",
+      "type": "security",
+      "severity": "medium",
+      "message": "Potential security issue: the code assumes that the input URL is safe and does not contain any malicious characters. However, it does not perform any validation or sanitization on the input URL.",
+      "line": 12,
+      "suggestion": "Consider using a library like url-parse to parse and validate the input URL."
+    },
+    {
+      "filename": "marketingWebsiteUrl.js",
+      "type": "readability",
+      "severity": "low",
+      "message": "The variable name 'u' is not very descriptive. Consider renaming it to something more meaningful.",
+      "line": 14,
+      "suggestion": "Rename the variable 'u' to something like 'url' or 'parsedUrl'."
+    },
+    {
+      "filename": "marketingWebsiteUrl.js",
+      "type": "error_handling",
+      "severity": "low",
+      "message": "The catch block is too broad and does not provide any information about the error that occurred. Consider logging the error or providing more feedback to the user.",
+      "line": 19,
+      "suggestion": "Consider logging the error or providing more feedback to the user."
+    },
+    {
+      "filename": "messageTemplateUtils.js",
+      "type": "error_handling",
+      "severity": "medium",
+      "message": "The code does not handle potential errors that may occur during the parsing of variables.",
+      "line": 3,
+      "suggestion": "Add try-catch blocks to handle potential errors."
+    },
+    {
+      "filename": "messageTemplateUtils.js",
+      "type": "code_smell",
+      "severity": "low",
+      "message": "The code uses the 'trim' method to remove whitespace from the variables. However, this may not be sufficient to handle all cases.",
+      "line": 7,
+      "suggestion": "Consider using a more robust method to remove whitespace, such as a regular expression."
+    },
+    {
+      "filename": "fetchJson.js",
+      "type": "error_handling",
+      "severity": "medium",
+      "message": "The fetch call does not handle potential network errors or timeouts",
+      "line": 7,
+      "suggestion": "Add a try-catch block around the fetch call to handle potential network errors or timeouts"
+    },
+    {
+      "filename": "fetchJson.js",
+      "type": "input_validation",
+      "severity": "low",
+      "message": "The errorData object is not validated before accessing its properties",
+      "line": 11,
+      "suggestion": "Add input validation to ensure the errorData object is not null or undefined before accessing its properties"
+    },
+    {
+      "filename": "fetchJson.js",
+      "type": "security",
+      "severity": "medium",
+      "message": "The swrFetcher function does not validate the input URL to prevent potential security vulnerabilities like CORS or timing attacks",
+      "line": 23,
+      "suggestion": "Add input validation to ensure the URL is same-origin and does not contain any malicious characters"
+    },
+    {
+      "filename": "loginSupportDelivery.js",
+      "type": "security",
+      "severity": "high",
+      "message": "The code does not validate user input before inserting it into the database, which could lead to SQL injection attacks.",
+      "line": 29,
+      "suggestion": "Validate user input using a whitelist approach and use parameterized queries to prevent SQL injection."
+    },
+    {
+      "filename": "loginSupportDelivery.js",
+      "type": "security",
+      "severity": "medium",
+      "message": "The code does not validate user input before sending it as an email, which could lead to XSS attacks.",
+      "line": 52,
+      "suggestion": "Sanitize user input using a whitelist approach to prevent XSS attacks."
+    },
+    {
+      "filename": "loginSupportDelivery.js",
+      "type": "error_handling",
+      "severity": "low",
+      "message": "The code does not handle errors properly in some cases, which could lead to unexpected behavior.",
+      "line": 63,
+      "suggestion": "Improve error handling by logging errors and providing user-friendly error messages."
+    },
+    {
+      "filename": "platformSettings.js",
+      "type": "bug",
+      "severity": "medium",
+      "message": "Hardcoded `id = 1` assumes the platform settings row always has ID 1. If the row is deleted, has a different ID, or the table is empty, the query returns no rows and defaults are used silently with no indication to the admin.",
+      "line": 41,
+      "suggestion": "Use a unique constraint on a known column (e.g., `key = 'global'`) or fetch the first row without assuming ID. Alternatively, ensure the row is created on first access."
+    },
+    {
+      "filename": "platformSettings.js",
+      "type": "observability",
+      "severity": "medium",
+      "message": "Empty catch block swallows all database errors silently. In production, a transient DB failure or schema change will silently return defaults with no log entry, making debugging extremely difficult.",
+      "line": 47,
+      "suggestion": "Log the error with a structured logger before falling back to defaults. Include correlation ID if available."
+    },
+    {
+      "filename": "platformSettings.js",
+      "type": "reliability",
+      "severity": "low",
+      "message": "In-memory cache is not invalidated when settings are updated via admin API unless `invalidatePlatformSettingsCache()` is explicitly called. If the admin updates settings and forgets to invalidate, stale settings will be served for up to 30 seconds.",
+      "line": 30,
+      "suggestion": "Ensure the admin settings update endpoint always calls `invalidatePlatformSettingsCache()` after a successful update. Consider adding a comment or hook to enforce this."
+    },
+    {
+      "filename": "platformSettings.js",
+      "type": "concurrency",
+      "severity": "low",
+      "message": "Race condition: if two concurrent calls find the cache expired, both will execute the query simultaneously. This is a minor issue for a low-traffic settings endpoint but could cause a brief spike in DB connections under high concurrency.",
+      "line": 37,
+      "suggestion": "Use a simple mutex or deduplication pattern to ensure only one query runs when cache is stale."
+    },
+    {
+      "filename": "platformSettings.js",
+      "type": "edge_case",
+      "severity": "low",
+      "message": "If `canonicalizeTimezoneId` throws an error (e.g., invalid timezone string), the entire function will throw and fall back to defaults, losing the merged settings. This is unlikely but possible with malformed stored data.",
+      "line": 45,
+      "suggestion": "Wrap the timezone canonicalization in a try-catch and fall back to the original value or a safe default."
+    },
+    {
+      "filename": "platformSettings.js",
+      "type": "code_smell",
+      "severity": "low",
+      "message": "`invalidatePlatformSettingsCache` sets `cache.at = 0` which is a magic number. While functionally correct, using `null` or a negative sentinel would be clearer.",
+      "line": 54,
+      "suggestion": "Use `cache.at = null` or a negative timestamp for clarity."
+    },
+    {
+      "filename": "registrationJobAid.js",
+      "type": "configuration",
+      "severity": "medium",
+      "message": "The NEXT_PUBLIC_HIDE_REGISTRATION_JOB_AID environment variable is not validated or checked for existence before being used.",
+      "line": 30,
+      "suggestion": "Add validation and error handling for environment variables."
+    },
+    {
+      "filename": "registrationJobAid.js",
+      "type": "readability",
+      "severity": "low",
+      "message": "The sampleForCollegeSlug function does not validate its input.",
+      "line": 37,
+      "suggestion": "Add input validation to the sampleForCollegeSlug function."
+    },
+    {
+      "filename": "offersAssessmentStarterCsv.js",
+      "type": "error_handling",
+      "severity": "medium",
+      "message": "The code does not handle the case where the `assessmentByProfileId` map is empty or null.",
+      "line": 21,
+      "suggestion": "Add a check to handle the case where the `assessmentByProfileId` map is empty or null."
+    },
+    {
+      "filename": "offersAssessmentStarterCsv.js",
+      "type": "error_handling",
+      "severity": "medium",
+      "message": "The code does not handle the case where the `flatRows` array is empty or null.",
+      "line": 45,
+      "suggestion": "Add a check to handle the case where the `flatRows` array is empty or null."
+    },
+    {
+      "filename": "offersAssessmentStarterCsv.js",
+      "type": "code_smell",
+      "severity": "low",
+      "message": "The code uses the `??` operator which may not be supported in all environments.",
+      "line": 8,
+      "suggestion": "Use a more compatible way to handle null or undefined values."
+    },
+    {
+      "filename": "phoneDialCodes.js",
+      "type": "readability",
+      "severity": "low",
+      "message": "The list of phone dial codes is quite long and could be maintained in a separate file or database for easier management and updates.",
+      "line": 6,
+      "suggestion": "Consider moving the list of phone dial codes to a separate file or database."
+    },
+    {
+      "filename": "phoneDialCodes.js",
+      "type": "best_practice",
+      "severity": "low",
+      "message": "The '__full__' code is used as a fallback for other regions, but it could be more descriptive or follow a specific standard.",
+      "line": 35,
+      "suggestion": "Consider using a more descriptive or standardized code for the '__full__' fallback."
+    },
+    {
+      "filename": "offerStatusTimestamps.js",
+      "type": "validation",
+      "severity": "medium",
+      "message": "The function does not validate the input status to prevent potential errors.",
+      "line": 6,
+      "suggestion": "Add input validation to ensure the status is one of the expected values."
+    },
+    {
+      "filename": "offerStatusTimestamps.js",
+      "type": "readability",
+      "severity": "low",
+      "message": "The function uses a ternary operator to set the timestamps, which may be less readable than using an if-else statement.",
+      "line": 9,
+      "suggestion": "Consider using an if-else statement to improve readability."
+    },
+    {
+      "filename": "offersLatestFlag.js",
+      "type": "bug",
+      "severity": "low",
+      "message": "The function does not check if the studentId is a valid UUID",
+      "line": 52,
+      "suggestion": "Add a check to ensure the studentId is a valid UUID"
+    },
+    {
+      "filename": "offersLatestFlag.js",
+      "type": "error_handling",
+      "severity": "medium",
+      "message": "The function does not handle errors that may occur during the SQL query execution",
+      "line": 54,
+      "suggestion": "Add a try-catch block to handle potential errors"
+    },
+    {
+      "filename": "offersLatestFlag.js",
+      "type": "code_smell",
+      "severity": "low",
+      "message": "The function uses a nested try-catch block, which can make the code harder to read",
+      "line": 57,
+      "suggestion": "Consider flattening the try-catch blocks"
+    },
+    {
+      "filename": "postRegistrationRedirect.js",
+      "type": "security",
+      "severity": "medium",
+      "message": "Missing input validation for 'nextUrl' parameter",
+      "line": 17,
+      "suggestion": "Add input validation to ensure 'nextUrl' is a valid and sanitized URL"
+    },
+    {
+      "filename": "postRegistrationRedirect.js",
+      "type": "best_practice",
+      "severity": "low",
+      "message": "Use of 'window.location.replace' may not be suitable for all types of applications",
+      "line": 24,
+      "suggestion": "Consider using a more modern navigation approach, such as the 'history' API"
+    },
+    {
+      "filename": "resolveAcademicYearFromRequest.js",
+      "type": "error_handling",
+      "severity": "medium",
+      "message": "The code does not handle potential SQL query errors",
+      "line": 12,
+      "suggestion": "Add try-catch block to handle SQL query errors"
+    },
+    {
+      "filename": "resolveAcademicYearFromRequest.js",
+      "type": "input_validation",
+      "severity": "low",
+      "message": "The code does not validate the input parameters",
+      "line": 9,
+      "suggestion": "Add input validation to ensure that the parameters are valid"
+    },
+    {
+      "filename": "resolveAcademicYearFromRequest.js",
+      "type": "null_check",
+      "severity": "low",
+      "message": "The code assumes that the findAcademicYearForDate function will always return a valid academic year",
+      "line": 23,
+      "suggestion": "Add null check to handle the case where the findAcademicYearForDate function returns null"
+    },
+    {
+      "filename": "publicApiError.js",
+      "type": "environment_drift",
+      "severity": "medium",
+      "message": "`isDev()` reads `process.env.NODE_ENV` at call time. If the environment variable is unset or overridden, the function may return false in development or true in production, causing internal details to leak or be hidden incorrectly.",
+      "line": 6,
+      "suggestion": "Cache the environment check at module load time to avoid runtime variability, or validate NODE_ENV at startup."
+    },
+    {
+      "filename": "publicApiError.js",
+      "type": "observability",
+      "severity": "low",
+      "message": "`console.error` is used for logging. In production, this may not be captured by structured logging systems, making it hard to search, filter, or correlate logs.",
+      "line": 25,
+      "suggestion": "Replace with a structured logger that includes a correlation ID, timestamp, and log level."
+    },
+    {
+      "filename": "publicApiError.js",
+      "type": "code_smell",
+      "severity": "low",
+      "message": "`clientSafeMessageFromBody` exposes `hint` in dev mode. While intentional, this could leak internal guidance if a developer accidentally runs a production-like environment with NODE_ENV=development.",
+      "line": 34,
+      "suggestion": "Consider making hint exposure conditional on an explicit debug flag rather than NODE_ENV alone."
+    }
+  ]
+}

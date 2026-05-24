@@ -1,0 +1,300 @@
+=================================================================
+  CODESENTINEL -- BATCH 10 REPORT
+  Files 226 - 240 of 262
+  Folder : C:\Users\sandeep\Downloads\Claudes\CampusPlacement\campus-placement
+  Saved  : 03/05/2026, 23:34:54
+=================================================================
+
+  Batch Score   : 84/100
+  Files Reviewed: 15
+  Total Issues  : 50
+
+=================================================================
+  FILE: src/lib/dataEntryAccess.js
+  Score: 83/100   Issues: 4
+
+  The file is well-structured with clear role-based access control and tenant resolution logic. The primary risk is a missing null/undefined check on `session.user.role` in `requireDataEntrySession`, which could cause a runtime crash if the session object is malformed. Additionally, the `resolveDataEntryTenantId` function has a potential issue where a super_admin with no session tenant and no valid requested tenant ID returns `undefined`, which could lead to downstream failures. The audit logging for super_admin tenant access is a good practice but lacks error handling for the async write.
+
+  [HIGH] null_pointer_exception -- Line 18
+  Potential runtime crash: `session.user.role` is accessed without a null/undefined check. If the session object exists but `user.role` is undefined (e.g., malformed session, partial user object), the `DATA_ENTRY_ROLES.has()` call will not crash (it returns false for undefined), but the subsequent logic may behave unexpectedly. More critically, if `session.user` itself is null (though line 15 checks `session?.user?.id`, a session with `user: {}` would pass the id check but fail on role access). The real risk is if `session.user` is an empty object, `session.user.role` is undefined, and the function returns `{ ok: false, response: 403 }` which is acceptable, but the code path is fragile.
+  Fix: Add an explicit check for `session.user.role` being a non-null string before the set membership test.
+
+  [MEDIUM] error_handling -- Line 33
+  Unhandled promise rejection: `writeAuditLog` is called with `void` which suppresses the promise but does not catch errors. If the audit log write fails (e.g., database connection issue, constraint violation), the error will be an unhandled promise rejection, potentially crashing the Node.js process in future versions or causing silent data loss.
+  Fix: Await the audit log write or add a .catch() handler to log the failure without crashing.
+
+  [MEDIUM] edge_case -- Line 43
+  Potential undefined return value: If `session.user.role` is 'super_admin' and `requestedTenantId` is null/empty/invalid AND `getSessionTenantId(session.user)` returns undefined (e.g., super_admin user has no tenant association), the function returns `undefined`. This can cause downstream crashes when the caller tries to use the tenant ID (e.g., in database queries).
+  Fix: Add a fallback or throw an error when no tenant ID can be resolved for a super_admin.
+
+  [LOW] null_check -- Line 15
+  The null check `!session?.user?.id` is good but could be more explicit. If `session` is an empty object `{}`, the optional chaining returns `undefined` and the check passes, returning 401. This is acceptable behavior but the error message 'Unauthorized' is generic and could be more helpful for debugging.
+  Fix: Consider adding a more specific error message or logging the reason for the 401 to aid debugging.
+
+=================================================================
+  FILE: src/lib/demoHiringAssessment.js
+  Score: 99/100   Issues: 1
+
+  This file is a minimal, low-risk constant definition file with no logic, no I/O, and no user input. It contains no bugs, security issues, or runtime failure paths. The only minor concern is that the constant is exported as a mutable array, which could theoretically be mutated at runtime, but this is a code smell rather than a production risk.
+
+  [LOW] code_smell -- Line 5
+  HIRING_ROUNDS is exported as a mutable array. If any consumer mutates it (e.g., push, splice), the change will affect all modules importing the same reference, potentially causing unexpected behavior in hiring pipeline logic.
+  Fix: Freeze the array with Object.freeze to prevent accidental mutation.
+
+=================================================================
+  FILE: src/lib/employerCompanyTypeLabels.js
+  Score: 100/100   Issues: 0
+
+  This file is a clean, well-structured utility for mapping employer company types and sizes to labels. The code is simple, correct, and handles null/empty input gracefully. No security, reliability, or data integrity issues were found. The only minor improvement would be to add a JSDoc type annotation for the `value` parameter to improve maintainability.
+
+=================================================================
+  FILE: src/lib/demoClarifications.js
+  Score: 91/100   Issues: 3
+
+  The provided code snippet appears to be a well-structured and concise utility module for handling clarifications. However, there are some potential issues that need to be addressed, such as error handling, input validation, and security concerns. The code score is 80 due to the lack of comprehensive error handling and potential security vulnerabilities.
+
+  [MEDIUM] error_handling -- Line 6
+  The fetch call does not handle potential network errors or timeouts
+  Fix: Add try-catch block to handle potential network errors or timeouts
+
+  [MEDIUM] security -- Line 13
+  The publishClarificationBatch function does not validate user input
+  Fix: Add input validation to prevent potential security vulnerabilities
+
+  [MEDIUM] security -- Line 23
+  The saveAnswer function does not validate user input
+  Fix: Add input validation to prevent potential security vulnerabilities
+
+=================================================================
+  FILE: src/lib/demoLogins.js
+  Score: 68/100   Issues: 4
+
+  This file defines demo login credentials and a feature flag for displaying them. The primary risk is that the hardcoded seed password and demo account emails are exposed in the client bundle (via NEXT_PUBLIC_*), which is a security concern for production deployments. Additionally, the feature flag logic has a subtle bug where both env vars being set to conflicting values could lead to unexpected behavior. The file is otherwise simple and low-risk, but the password exposure is a critical issue that must be addressed before production use.
+
+  [CRITICAL] security -- Line 3
+  DEMO_SEED_PASSWORD is hardcoded and exported. If this file is imported in any client component (which is likely since it's in src/lib/), the password will be bundled into the client-side JavaScript, exposing it to all users. This is a credential leak that could allow unauthorized access to demo accounts or be used as a known password for brute-force attacks.
+  Fix: Remove the hardcoded password from client-accessible code. Use a server-only environment variable or API endpoint to provide the password only when needed for seed flows.
+
+  [MEDIUM] logic -- Line 28
+  The isDemoLoginsEnabled function has a logic issue: if both NEXT_PUBLIC_HIDE_DEMO_LOGINS=true and NEXT_PUBLIC_SHOW_DEMO_LOGINS=true are set, it returns false (due to the first check). But if NEXT_PUBLIC_HIDE_DEMO_LOGINS=false and NEXT_PUBLIC_SHOW_DEMO_LOGINS=false, it also returns false. The intent is unclear when both are set to conflicting values. Additionally, the function doesn't validate that the env vars are set to 'true' or 'false' — any non-'true' value for HIDE or non-'false' value for SHOW will fall through to return true.
+  Fix: Simplify to a single env var (e.g., NEXT_PUBLIC_ENABLE_DEMO_LOGINS) with a clear default. Or add explicit validation and logging for conflicting configurations.
+
+  [MEDIUM] security -- Line 5
+  Demo account emails are hardcoded and exported. If this file is imported client-side, these emails are exposed in the JavaScript bundle. While less critical than passwords, this information can be used for targeted phishing attacks or to enumerate valid user accounts in the system.
+  Fix: Move demo account data to a server-only configuration or API endpoint. If client-side display is required, fetch from an API that can be disabled in production.
+
+  [LOW] best_practice -- Line 29
+  The function uses process.env.NEXT_PUBLIC_* variables which are available client-side, but the function itself could be called from server components too. The naming convention is correct for client-side access, but the security implications of exposing demo login data should be considered.
+  Fix: Consider using a server-only environment variable (without NEXT_PUBLIC_ prefix) for the actual demo login data, and only expose a boolean flag client-side.
+
+=================================================================
+  FILE: src/lib/offersLatestFlag.js
+  Score: 84/100   Issues: 3
+
+  The code is generally well-structured, but there are some potential issues with error handling, SQL queries, and database schema assumptions. The primary risks are related to missing error handling, potential SQL injection vulnerabilities, and database schema assumptions. The code score is 80 due to the identified issues.
+
+  [MEDIUM] error_handling -- Line 52
+  Missing input validation for studentId
+  Fix: Add input validation for studentId to prevent potential errors
+
+  [HIGH] sql_injection -- Line 54
+  Potential SQL injection vulnerability in RANK_UNIFIED_SQL query
+  Fix: Use parameterized queries to prevent SQL injection vulnerabilities
+
+  [MEDIUM] error_handling -- Line 68
+  Missing error handling for database schema assumptions
+  Fix: Add error handling for database schema assumptions to prevent potential errors
+
+=================================================================
+  FILE: src/lib/downloadCsvFromApi.js
+  Score: 33/100   Issues: 6
+
+  The function is concise and handles the basic download flow, but has several critical reliability and security gaps. The most severe issue is the lack of authentication credentials in the fetch call, which will cause all authenticated API routes to return 401/403 in production. Additionally, there is no error handling for blob creation failures, no timeout on the fetch, and the Content-Disposition regex is fragile and could be exploited for CSV injection via filename. The immediate revokeObjectURL before the download completes is a race condition that will break the download in most browsers. Score is heavily penalized by the missing auth and race condition.
+
+  [CRITICAL] authentication -- Line 7
+  fetch(url) does not include credentials: 'include' or authorization headers. In a Next.js App Router context, authenticated API routes require session cookies or tokens. This will fail for all protected routes in production, returning 401/403 errors.
+  Fix: Add credentials: 'include' to include cookies, or pass an auth token via Authorization header.
+
+  [HIGH] reliability -- Line 12
+  res.blob() can throw if the response body is malformed or too large (memory pressure). No try/catch around this call will crash the calling component with an unhandled promise rejection.
+  Fix: Wrap the blob creation in a try/catch and throw a user-friendly error.
+
+  [CRITICAL] runtime -- Line 22
+  URL.revokeObjectURL(u) is called immediately after a.click(), but the browser may not have started the download yet. This creates a race condition where the blob URL is revoked before the download begins, causing the download to fail silently in most browsers (Chrome, Firefox, Safari).
+  Fix: Use a short setTimeout or listen for the anchor's click event to complete before revoking.
+
+  [MEDIUM] security -- Line 15
+  The Content-Disposition filename regex is permissive and does not sanitize the filename. An attacker-controlled server response could inject a filename like '=HYPERLINK(...).csv' leading to CSV injection when the file is opened in Excel. Also, the regex does not handle RFC 5987 encoded filenames (filename*=UTF-8''...).
+  Fix: Sanitize the filename by stripping dangerous characters and prefer filename* encoding if available.
+
+  [MEDIUM] reliability -- Line 7
+  No timeout is set on the fetch call. If the server hangs or the network is slow, the download will hang indefinitely, blocking the UI and potentially leaking resources.
+  Fix: Use AbortController with a reasonable timeout (e.g., 30 seconds).
+
+  [LOW] error_handling -- Line 9
+  If the error response is not valid JSON (e.g., HTML error page), the catch returns an empty object and the error message becomes 'Download failed (status)'. This is acceptable but could be improved by checking Content-Type before parsing JSON.
+  Fix: Check Content-Type header before attempting JSON parse, or use res.text() as fallback.
+
+=================================================================
+  FILE: src/lib/pgSsl.js
+  Score: 93/100   Issues: 3
+
+  The file is a focused, well-structured utility for configuring PostgreSQL SSL options. The logic is correct and handles the local vs remote distinction properly. The primary risk is the synchronous `fs.readFileSync` call on line 31, which blocks the event loop during module initialization or first call, and the missing `NODE_ENV` check to prevent accidental TLS downgrade in production. Additionally, the error message on line 33 leaks the file path, which could expose internal infrastructure details. The code is otherwise clean and follows security best practices.
+
+  [MEDIUM] performance -- Line 31
+  fs.readFileSync on line 31 blocks the event loop. If DATABASE_SSL_CA is set, this synchronous I/O will block all other requests during module initialization or the first call to getPgSslOption. In a high-traffic serverless or Node.js environment, this can cause latency spikes or cold start delays.
+  Fix: Use fs.promises.readFile with async/await, or read the CA file once at startup and cache it.
+
+  [LOW] security -- Line 33
+  Error message on line 33 includes the full caPath, which may leak internal file system paths or infrastructure details in production error logs or responses.
+  Fix: Omit the path from the error message, or log it separately at debug level.
+
+  [MEDIUM] configuration -- Line 18
+  No NODE_ENV guard prevents disabling TLS verification in production. If DATABASE_SSL_REJECT_UNAUTHORIZED is accidentally set to 'false' in production, the connection will be vulnerable to MITM attacks with no warning.
+  Fix: Add a check that throws or logs a warning if rejectUnauthorized is disabled in production (NODE_ENV=production).
+
+=================================================================
+  FILE: src/lib/offersAssessmentStarterCsv.js
+  Score: 89/100   Issues: 5
+
+  The CSV generation functions are simple and well-structured, with proper escaping via csvEscapeCell. The primary risk is a CSV injection vulnerability: the `company` field from assessment data is not escaped for Excel formula injection (cells starting with =, +, -, @). Additionally, there is no input validation on `masterRows` or `flatRows` arrays, which could cause runtime crashes if null/undefined is passed. The code lacks error handling for edge cases like empty arrays or missing required fields. Overall, the code is clean but has a medium-severity security issue and minor robustness concerns.
+
+  [MEDIUM] csv_injection -- Line 22
+  CSV injection vulnerability: The `company` field from `a?.employer_company` is not sanitized for Excel formula injection. If the company name starts with '=', '+', '-', or '@', Excel/Google Sheets will interpret it as a formula, potentially executing arbitrary commands or exfiltrating data when the CSV is opened.
+  Fix: Prefix the company value with a single quote or tab to prevent formula interpretation, or strip leading formula characters.
+
+  [MEDIUM] null_pointer_exception -- Line 20
+  No null/undefined check on `masterRows` parameter. If `masterRows` is null or undefined, the `for...of` loop will throw a TypeError, crashing the caller. This is a runtime failure that could occur if the upstream data fetch fails.
+  Fix: Add a guard clause at the start of the function to return header-only CSV if masterRows is null/undefined or empty.
+
+  [MEDIUM] null_pointer_exception -- Line 44
+  No null/undefined check on `flatRows` parameter. Same crash risk as the college variant. If flatRows is null/undefined, the for loop will throw a TypeError.
+  Fix: Add a guard clause at the start of the function to return header-only CSV if flatRows is null/undefined or empty.
+
+  [LOW] null_check -- Line 21
+  Missing null check on `s.student_profile_id` before calling `assessmentByProfileId.get()`. If a masterRow entry has a null/undefined student_profile_id, the Map lookup will return undefined, which is handled gracefully by the optional chaining on line 22, but it could indicate upstream data corruption that should be logged or skipped explicitly.
+  Fix: Add a guard to skip rows with missing student_profile_id, optionally logging a warning.
+
+  [LOW] edge_case -- Line 45
+  The `upload_drive_id` field is cast to String without checking if it's already a string. If it's a number or object, String() will produce a valid string, but if it's an array or complex object, the result may be '[object Object]' which is not a valid UUID. This could produce malformed CSV data.
+  Fix: Validate that upload_drive_id is a string or UUID before casting, or skip if it's not a valid format.
+
+=================================================================
+  FILE: src/lib/sessionTenant.js
+  Score: 95/100   Issues: 3
+
+  The file is well-structured with proper parameterized queries and a graceful fallback for schema drift. The primary risk is the silent fallback to sessionFallbackTenantId when the DB query returns no rows, which could cause incorrect tenant isolation for deleted or orphaned users. The error handling for the missing member_tenant_id column is a good pattern but could be more explicit about the expected column name.
+
+  [MEDIUM] data_integrity -- Line 28
+  When row is null (user not found), the function silently falls back to sessionFallbackTenantId. This could cause a deleted or orphaned user to see data from a wrong tenant, breaking multi-tenant isolation.
+  Fix: Consider logging a warning when the user is not found in the DB, and optionally return an empty array instead of blindly trusting the session fallback.
+
+  [LOW] error_handling -- Line 23
+  The error message check for 'member_tenant_id' is fragile and may fail if PostgreSQL error message format changes or is localized. This could cause unnecessary failures in production.
+  Fix: Use a more robust check, such as inspecting the error code (e.g., e.code === '42703' for undefined column) or checking the column existence via information_schema.
+
+  [LOW] data_integrity -- Line 36
+  resolveCollegeAdminTenantId returns null when both DB and session fallback are missing, which could propagate as an undefined tenant_id downstream and cause unexpected behavior.
+  Fix: Consider throwing an error or returning a sentinel value when no tenant can be resolved, rather than silently returning null.
+
+=================================================================
+  FILE: src/lib/helpFaqOpenai.js
+  Score: 86/100   Issues: 3
+
+  The file is well-structured with proper error handling for OpenAI API failures and input validation. The primary risk is the absence of a request timeout on the fetch call, which could cause the serverless function to hang indefinitely under network issues. Additionally, the error logging on line 98 could leak sensitive API response details in production logs. The overall risk is low to medium.
+
+  [HIGH] reliability -- Line 79
+  The fetch call to OpenAI API on line 79 has no timeout configured. If the OpenAI API hangs or is slow, the serverless function may exceed its timeout limit, causing a 504 error or unnecessary resource consumption. This is critical for production reliability.
+  Fix: Add an AbortController with a reasonable timeout (e.g., 10 seconds) to the fetch call.
+
+  [MEDIUM] observability -- Line 98
+  Error logging on line 98 logs the OpenAI API response body (errText) which may contain sensitive information or internal error details. In production, this could leak API internals or expose data in logs.
+  Fix: Log only the status code and a sanitized error message, or log the full error at debug level only.
+
+  [LOW] error_handling -- Line 102
+  If res.json() fails (e.g., malformed JSON), data is set to null and the code proceeds. The subsequent access to data?.choices?.[0]?.message?.content will safely return undefined, but the error is silently swallowed. This could mask API response format changes.
+  Fix: Log a warning when JSON parsing fails to aid debugging.
+
+=================================================================
+  FILE: src/lib/mailer.js
+  Score: 82/100   Issues: 5
+
+  The mailer module is well-structured with proper fallback logging and environment-based overrides. The primary risk is the lack of error handling around the `transport.sendMail()` call, which will cause an unhandled promise rejection if SMTP fails. Additionally, the `resolveRecipients` function returns a string for the override/inbox case but may return an array from `originalTo`, causing a type inconsistency. The `formatFrom` function has a potential null pointer access on `platform` if it is undefined. No security vulnerabilities were found.
+
+  [HIGH] error_handling -- Line 66
+  transport.sendMail() is called without try/catch. If SMTP fails (timeout, auth error, connection refused), the promise rejection will be unhandled, crashing the process in Node.js 15+ or causing a warning in older versions.
+  Fix: Wrap the sendMail call in a try/catch block, log the error, and return a failure object instead of crashing.
+
+  [MEDIUM] type_error -- Line 65
+  resolveRecipients returns a string when envOverride or inbox is set, but returns originalTo which can be string | string[]. nodemailer's to field accepts both, but the type inconsistency could cause confusion and potential issues if the caller expects a consistent type.
+  Fix: Normalize originalTo to a string by joining array elements with comma before returning.
+
+  [MEDIUM] null_pointer_exception -- Line 38
+  formatFrom accesses platform?.systemNotificationSenderName and platform?.platformName, but if platform is undefined (e.g., getPlatformSettings returns undefined), the optional chaining will return undefined, and the fallback 'PlacementHub' will be used. However, the function signature does not indicate that platform can be undefined, and the caller passes the result of getPlatformSettings() which could be null/undefined.
+  Fix: Add a default empty object fallback for platform in formatFrom or ensure getPlatformSettings always returns an object.
+
+  [LOW] edge_case -- Line 71
+  If opts.text is undefined or null, opts.text.replace will throw a TypeError. This can happen if the caller omits the text field.
+  Fix: Add a fallback for opts.text before calling .replace().
+
+  [LOW] performance -- Line 50
+  getPlatformSettings() is called on every sendMail invocation. If this function performs a database query or external API call, it could become a bottleneck under high email volume.
+  Fix: Consider caching the platform settings with a short TTL or passing them as a parameter if already fetched by the caller.
+
+=================================================================
+  FILE: src/lib/facebookPageShare.js
+  Score: 85/100   Issues: 4
+
+  The file is well-structured with clear separation of concerns and proper environment variable handling. The primary risk is the lack of a timeout on the fetch call to the Facebook Graph API, which could cause the serverless function to hang indefinitely under network failures. Additionally, the error message from Facebook is passed directly to the caller, potentially exposing internal API details. The CSV injection and other security concerns are not applicable here.
+
+  [HIGH] reliability -- Line 49
+  The fetch call to Facebook Graph API has no timeout. If the API hangs (e.g., network partition, DNS failure), the serverless function will wait indefinitely, potentially causing a timeout at the platform level (e.g., Vercel 10s limit) and wasting resources.
+  Fix: Add an AbortController with a timeout (e.g., 10 seconds) to the fetch call.
+
+  [MEDIUM] error_handling -- Line 56
+  The error message from Facebook (data.error.message) is thrown directly to the caller. This may expose internal API details (e.g., 'Invalid OAuth 2.0 Access Token', '(#100) ...') to the user or logs, which could aid an attacker or leak sensitive information.
+  Fix: Log the full error details server-side and throw a generic error message to the caller.
+
+  [LOW] error_handling -- Line 53
+  The catch on res.json() returns an empty object, which is fine, but if the response is not JSON (e.g., HTML error page), the error will be silently swallowed and the code will proceed to check data.error which will be undefined, potentially leading to a misleading success path.
+  Fix: Log a warning when JSON parsing fails to aid debugging.
+
+  [LOW] edge_case -- Line 60
+  If Facebook returns a 200 OK with an empty body or a body without an 'id' field, the error message 'Facebook did not return a post id' is clear but could be more helpful for debugging.
+  Fix: Log the full response body when id is missing to aid debugging.
+
+=================================================================
+  FILE: src/lib/inferImageContentType.js
+  Score: 87/100   Issues: 2
+
+  The function is concise and handles the common case of missing file.type by falling back to file extension. The primary risk is that it trusts the file extension entirely, which is trivially spoofed (e.g. a .exe renamed to .png). This could allow an attacker to upload a malicious file that passes a content-type check. Additionally, the function returns an empty string for unknown types, which may cause downstream code to fail if it expects a valid MIME type. The code is otherwise clean and well-commented.
+
+  [HIGH] security -- Line 2
+  The function trusts the file extension entirely to determine the content type. An attacker can rename a malicious file (e.g. virus.exe) to 'image.png' and the function will return 'image/png', bypassing any server-side content-type validation that relies solely on this function. This is a classic MIME-type spoofing vulnerability.
+  Fix: Do not rely solely on file extension for security-critical content-type decisions. Use a library like 'file-type' to read the actual file magic bytes, or validate the content on the server after upload.
+
+  [MEDIUM] edge_case -- Line 11
+  Returning an empty string for unknown types may cause downstream code to fail if it expects a valid MIME type (e.g. when setting Content-Type header or validating uploads). This could lead to broken uploads or silent failures.
+  Fix: Consider returning a default MIME type like 'application/octet-stream' for unknown files, or throw a specific error that the caller can handle gracefully.
+
+=================================================================
+  FILE: src/lib/platformSettings.js
+  Score: 85/100   Issues: 4
+
+  The file is well-structured with a clear caching strategy and graceful fallback to defaults. The primary risk is the missing database table `platform_settings` which will cause a crash on first access if it doesn't exist. Additionally, the cache is module-scoped and not tenant-aware, which is acceptable for global platform settings but should be documented. The error handling silently swallows all exceptions, which could mask transient DB failures. Overall, the code is production-ready with minor hardening opportunities.
+
+  [HIGH] runtime -- Line 35
+  The query assumes the `platform_settings` table exists with an `id = 1` row. If the table is missing or the row doesn't exist, `r.rows[0]` will be undefined, and accessing `.settings` on undefined will throw a TypeError that is caught by the catch block, returning defaults. However, if the table exists but has no rows, the catch block will mask this as a transient error, which could hide a configuration issue.
+  Fix: Add a migration check or ensure the table is created before this code runs. Consider logging a warning when the row is missing.
+
+  [MEDIUM] error_handling -- Line 39
+  The catch block silently swallows all exceptions, including transient DB failures (connection timeout, pool exhaustion) and structural errors (missing table). This makes debugging difficult in production because no error is logged. The system will silently fall back to defaults, potentially masking a serious issue.
+  Fix: Log the error with a structured logger or at least console.error to aid debugging, while still returning defaults for resilience.
+
+  [LOW] code_smell -- Line 24
+  The cache is a module-level mutable variable. While acceptable for singleton platform settings, it makes unit testing harder (state persists across tests) and could cause issues if the module is hot-reloaded in development.
+  Fix: Consider exporting a factory function or using a dependency injection pattern for testability, or document that this is a singleton cache.
+
+  [LOW] concurrency -- Line 31
+  There is a potential race condition: if multiple concurrent calls to getPlatformSettings() occur when the cache is expired, all of them will execute the DB query simultaneously instead of one waiting for the other. This could cause a thundering herd problem on the database.
+  Fix: Use a promise-based lock or deduplication pattern so only one query is in flight at a time.

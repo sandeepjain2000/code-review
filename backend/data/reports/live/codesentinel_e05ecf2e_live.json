@@ -1,0 +1,693 @@
+{
+  "job_id": "e05ecf2e1e3047c1",
+  "status": "in_progress",
+  "folder_path": "C:\\Users\\sandeep\\Downloads\\Claudes\\CampusPlacement\\campus-placement",
+  "model_used": "nvidia/meta/llama-3.3-70b-instruct",
+  "updated_at": "2026-05-01T21:30:51.320146",
+  "files_done": 20,
+  "total_files": 229,
+  "files": [
+    {
+      "filename": "scripts/run-migration-002.js",
+      "score": 84,
+      "summary": "The provided code is a migration script for a PostgreSQL database. It reads environment variables from a .env.local file, checks for the existence of a migration file, and applies the migration to the database. The script has some potential issues, such as not handling errors properly and not validating user input. The score is 80 due to some minor issues and potential security vulnerabilities.",
+      "issues": [
+        {
+          "type": "error_handling",
+          "severity": "medium",
+          "message": "The script does not handle errors properly when reading the .env.local file.",
+          "line": 11,
+          "suggestion": "Add try-catch blocks to handle potential errors when reading the file.",
+          "code_snippet": "const raw = fs.readFileSync(envPath, 'utf8');",
+          "fixed_snippet": "try { const raw = fs.readFileSync(envPath, 'utf8'); } catch (err) { console.error('Error reading .env.local file:', err); process.exit(1); }"
+        },
+        {
+          "type": "validation",
+          "severity": "medium",
+          "message": "The script does not validate the NODE_ENV environment variable.",
+          "line": 43,
+          "suggestion": "Add validation to ensure the NODE_ENV variable is one of the allowed values.",
+          "code_snippet": "const currentEnv = (process.env.NODE_ENV || '').toLowerCase();",
+          "fixed_snippet": "const allowedEnvs = ['development', 'test', 'local']; const currentEnv = (process.env.NODE_ENV || '').toLowerCase(); if (!allowedEnvs.includes(currentEnv)) { console.error('Invalid NODE_ENV:', currentEnv); process.exit(1); }"
+        },
+        {
+          "type": "security",
+          "severity": "high",
+          "message": "The script uses the rejectUnauthorized option for SSL connections, which can be a security risk if not handled properly.",
+          "line": 73,
+          "suggestion": "Ensure that the rejectUnauthorized option is set to true and that the CA certificate is properly configured.",
+          "code_snippet": "const ssl = { rejectUnauthorized: false };",
+          "fixed_snippet": "const ssl = { rejectUnauthorized: true, ca: fs.readFileSync(caPath, 'utf8') };"
+        }
+      ]
+    },
+    {
+      "filename": "generate_docs.py",
+      "score": 91,
+      "summary": "The provided Python script generates a user documentation document for a Campus Placement System using the python-docx library. The script is well-structured and readable. However, there are some potential issues and improvements that can be made. The script does not handle errors well, and it does not check if the required package is installed before trying to import it. Additionally, the script does not validate the file path provided as a command-line argument. The script also uses a try-except block to catch all exceptions, which can make it difficult to diagnose issues. The script can be improved by adding more error handling and validation, and by using more specific exception handling.",
+      "issues": [
+        {
+          "type": "error_handling",
+          "severity": "medium",
+          "message": "The script does not check if the required package is installed before trying to import it. It should check if the package is installed and provide a meaningful error message if it is not.",
+          "line": 8,
+          "suggestion": "Use a try-except block to catch the ImportError exception and provide a meaningful error message.",
+          "code_snippet": "except ImportError:\n    print(\"Error: python-docx package is required. Install it with: pip install python-docx\")",
+          "fixed_snippet": "try:\n    from docx import Document\nexcept ImportError as e:\n    print(f\"Error: {e}. Install the python-docx package with: pip install python-docx\")"
+        },
+        {
+          "type": "validation",
+          "severity": "medium",
+          "message": "The script does not validate the file path provided as a command-line argument. It should check if the file path is valid and provide a meaningful error message if it is not.",
+          "line": 103,
+          "suggestion": "Use the os.path module to validate the file path.",
+          "code_snippet": "file_path = sys.argv[1] if len(sys.argv) > 1 else 'Campus_Placement_System_User_Document.docx'",
+          "fixed_snippet": "import os\nfile_path = sys.argv[1] if len(sys.argv) > 1 else 'Campus_Placement_System_User_Document.docx'\nif not os.path.exists(os.path.dirname(file_path)):\n    print(f\"Error: The directory {os.path.dirname(file_path)} does not exist.\")"
+        },
+        {
+          "type": "error_handling",
+          "severity": "medium",
+          "message": "The script uses a try-except block to catch all exceptions, which can make it difficult to diagnose issues. It should use more specific exception handling.",
+          "line": 107,
+          "suggestion": "Use a try-except block to catch the specific exception that may be raised.",
+          "code_snippet": "except OSError as e:\n    print(f\"Error saving document to {file_path}: {e}\")",
+          "fixed_snippet": "try:\n    doc.save(file_path)\nexcept OSError as e:\n    if e.errno == 13:\n        print(f\"Error: Permission denied when trying to save the document to {file_path}.\")\n    else:\n        print(f\"Error saving document to {file_path}: {e}\")"
+        }
+      ]
+    },
+    {
+      "filename": "src/app/api/admin/colleges/route.js",
+      "score": 96,
+      "summary": "The provided code is a Next.js API route for retrieving a list of colleges. It has proper authentication and authorization checks, and it uses parameterized queries to prevent SQL injection. However, there are some potential issues with error handling and logging. The code also lacks input validation for the 'page' and 'limit' query parameters, which could lead to potential security vulnerabilities.",
+      "issues": [
+        {
+          "type": "security",
+          "severity": "medium",
+          "message": "Input validation is missing for 'page' and 'limit' query parameters",
+          "line": 14,
+          "suggestion": "Add input validation to ensure 'page' and 'limit' are positive integers",
+          "code_snippet": "const page = Math.max(1, Number.parseInt(searchParams.get('page') || '1', 10));\nconst limit = Math.min(100, Math.max(1, Number.parseInt(searchParams.get('limit') || '50', 10)));",
+          "fixed_snippet": "const page = parseInt(searchParams.get('page'), 10);\nif (isNaN(page) || page < 1) {\n  return NextResponse.json({ error: 'Invalid page' }, { status: 400 });\n}\nconst limit = parseInt(searchParams.get('limit'), 10);\nif (isNaN(limit) || limit < 1 || limit > 100) {\n  return NextResponse.json({ error: 'Invalid limit' }, { status: 400 });\n}"
+        },
+        {
+          "type": "error_handling",
+          "severity": "low",
+          "message": "Error message is not very informative",
+          "line": 54,
+          "suggestion": "Log the full error object instead of just the error message",
+          "code_snippet": "console.error('Failed to load admin colleges:', error.message);",
+          "fixed_snippet": "console.error('Failed to load admin colleges:', error);"
+        }
+      ]
+    },
+    {
+      "filename": "fix_emojis.js",
+      "score": 93,
+      "summary": "The provided code is a JavaScript script that replaces emojis in a file with corresponding component names. The script reads a file, replaces the emojis, and writes the updated content back to the file. The code is generally well-structured, but there are some potential issues and improvements that can be suggested. The biggest risk is the lack of error handling and validation, which could lead to unexpected behavior or data loss. The code also uses synchronous file I/O, which can be a performance bottleneck. Overall, the code is functional, but it can be improved for better reliability, performance, and maintainability.",
+      "issues": [
+        {
+          "type": "performance",
+          "severity": "medium",
+          "message": "Using synchronous file I/O can be a performance bottleneck",
+          "line": 12,
+          "suggestion": "Use asynchronous file I/O instead",
+          "code_snippet": "content = fs.readFileSync(filePath, 'utf8');",
+          "fixed_snippet": "fs.readFile(filePath, 'utf8', (err, content) => { ... });"
+        },
+        {
+          "type": "readability",
+          "severity": "low",
+          "message": "Using `Object.entries` and `for...of` loop can be less readable than using a traditional `for` loop",
+          "line": 45,
+          "suggestion": "Use a traditional `for` loop instead",
+          "code_snippet": "for (const [emoji, comp] of Object.entries(replacements)) {",
+          "fixed_snippet": "for (let i = 0; i < replacements.length; i++) {"
+        },
+        {
+          "type": "error_handling",
+          "severity": "medium",
+          "message": "Not checking if the backup file already exists before overwriting it",
+          "line": 55,
+          "suggestion": "Check if the backup file already exists and handle it accordingly",
+          "code_snippet": "fs.copyFileSync(filePath, `${filePath}.bak`);",
+          "fixed_snippet": "if (fs.existsSync(`${filePath}.bak`)) { ... } else { fs.copyFileSync(filePath, `${filePath}.bak`); }"
+        }
+      ]
+    },
+    {
+      "filename": "scripts/seed_email_marketing_sqlite.py",
+      "score": 96,
+      "summary": "The provided Python script is used to create and update a SQLite database for email marketing website sources. It creates a table if it does not exist and inserts or updates records based on a list of URLs. The script is well-structured and follows good practices. However, there are some potential issues that need to be addressed, such as error handling and potential SQL injection vulnerabilities. The script does not handle errors that may occur during database operations, and it uses parameterized queries to prevent SQL injection. The score is 85 due to the lack of error handling and potential issues with the database connection.",
+      "issues": [
+        {
+          "type": "error_handling",
+          "severity": "medium",
+          "message": "The script does not handle errors that may occur during database operations",
+          "line": 56,
+          "suggestion": "Add try-except blocks to handle potential errors",
+          "code_snippet": "conn = sqlite3.connect(db_path)",
+          "fixed_snippet": "try: conn = sqlite3.connect(db_path) except sqlite3.Error as e: print(f'Error: {e}')"
+        },
+        {
+          "type": "sql_injection",
+          "severity": "low",
+          "message": "The script uses parameterized queries to prevent SQL injection, but it's still important to ensure that the input data is validated and sanitized",
+          "line": 75,
+          "suggestion": "Validate and sanitize the input data before using it in the SQL query",
+          "code_snippet": "conn.execute(..., (url,))",
+          "fixed_snippet": "url = validate_and_sanitize_url(url); conn.execute(..., (url,))"
+        }
+      ]
+    },
+    {
+      "filename": "src/app/api/admin/dashboard/route.js",
+      "score": 93,
+      "summary": "The provided code is generally well-structured and secure, but there are a few potential issues that need to be addressed. The code does not handle database query errors properly, and it does not validate the session user role correctly. Additionally, the code does not handle the case where the database queries return null or undefined values. The score is 80 due to these potential issues.",
+      "issues": [
+        {
+          "type": "error_handling",
+          "severity": "medium",
+          "message": "The database query does not handle errors properly. If the query fails, it will return null or undefined, which can cause errors in the subsequent code.",
+          "line": 14,
+          "suggestion": "Add error handling for the database query to handle potential errors.",
+          "code_snippet": "const statsQuery = await query(`SELECT ...`);",
+          "fixed_snippet": "try { const statsQuery = await query(`SELECT ...`); } catch (error) { console.error('Error fetching stats:', error); }"
+        },
+        {
+          "type": "authentication",
+          "severity": "medium",
+          "message": "The session user role is not validated correctly. If the user role is not 'super_admin', it will return a 401 error, but it does not check if the user is authenticated.",
+          "line": 10,
+          "suggestion": "Add authentication check to ensure the user is authenticated before checking the user role.",
+          "code_snippet": "if (!session?.user || session.user.role !== 'super_admin') {",
+          "fixed_snippet": "if (!session || !session.user || session.user.role !== 'super_admin') {"
+        },
+        {
+          "type": "null_check",
+          "severity": "low",
+          "message": "The code does not handle null or undefined values from the database queries. If the queries return null or undefined, it can cause errors in the subsequent code.",
+          "line": 30,
+          "suggestion": "Add null checks for the database query results to handle potential null or undefined values.",
+          "code_snippet": "const stats = statsQuery?.rows?.[0] || {};",
+          "fixed_snippet": "const stats = statsQuery?.rows?.[0] || { colleges: 0, employers: 0, students: 0, totalUsers: 0 };"
+        }
+      ]
+    },
+    {
+      "filename": "run-sql.js",
+      "score": 88,
+      "summary": "The provided code is a PostgreSQL database setup and schema reset script. It has some potential issues, including the use of synchronous I/O for reading environment files and SQL scripts, and the lack of input validation for the database connection string. Additionally, the script does not handle errors well, and it does not provide any feedback to the user in case of an error. However, the script does use a secure way to connect to the database, and it uses a transaction to ensure that the schema reset is atomic.",
+      "issues": [
+        {
+          "type": "bug",
+          "severity": "medium",
+          "message": "The readEnvLocal function uses synchronous I/O to read the environment file, which can block the event loop.",
+          "line": 11,
+          "suggestion": "Use asynchronous I/O to read the environment file.",
+          "code_snippet": "const raw = fs.readFileSync(envPath, 'utf8');",
+          "fixed_snippet": "const raw = await fs.promises.readFile(envPath, 'utf8');"
+        },
+        {
+          "type": "bug",
+          "severity": "medium",
+          "message": "The schemaSql variable is read using synchronous I/O, which can block the event loop.",
+          "line": 93,
+          "suggestion": "Use asynchronous I/O to read the schema SQL file.",
+          "code_snippet": "const schemaSql = fs.readFileSync(schemaPath, 'utf8');",
+          "fixed_snippet": "const schemaSql = await fs.promises.readFile(schemaPath, 'utf8');"
+        },
+        {
+          "type": "bug",
+          "severity": "medium",
+          "message": "The seedSql variable is read using synchronous I/O, which can block the event loop.",
+          "line": 97,
+          "suggestion": "Use asynchronous I/O to read the seed SQL file.",
+          "code_snippet": "const seedSql = fs.readFileSync(seedPath, 'utf8');",
+          "fixed_snippet": "const seedSql = await fs.promises.readFile(seedPath, 'utf8');"
+        },
+        {
+          "type": "bug",
+          "severity": "medium",
+          "message": "The error handling in the catch block does not provide any feedback to the user.",
+          "line": 104,
+          "suggestion": "Add feedback to the user in case of an error.",
+          "code_snippet": "console.error('Error running SQL:', err.message);",
+          "fixed_snippet": "console.error('Error running SQL:', err.message); console.log('Please check the database connection and try again.');"
+        }
+      ]
+    },
+    {
+      "filename": "run_tests.js",
+      "score": 93,
+      "summary": "The provided code is a test runner that updates HTML files with test results. It uses the `cheerio` library to parse and modify the HTML. The code is generally well-structured, but there are some potential issues with error handling and file system operations. The code also uses synchronous file system operations, which can be a performance bottleneck. The biggest risk is the potential for file corruption or data loss if the code fails to write the updated HTML file correctly.",
+      "issues": [
+        {
+          "type": "error_handling",
+          "severity": "medium",
+          "message": "The code catches file read errors, but it throws the error again without providing any additional context. This can make it difficult to diagnose the issue.",
+          "line": 11,
+          "suggestion": "Consider logging the error with more context before throwing it again.",
+          "code_snippet": "try { html = fs.readFileSync(filePath, 'utf8'); } catch (err) { console.error(`Failed to read file: ${filePath}: ${err.message}`); throw err; }",
+          "fixed_snippet": "try { html = fs.readFileSync(filePath, 'utf8'); } catch (err) { console.error(`Failed to read file: ${filePath}: ${err.message}`); throw new Error(`Failed to read file: ${filePath}: ${err.message}`); }"
+        },
+        {
+          "type": "performance",
+          "severity": "medium",
+          "message": "The code uses synchronous file system operations, which can be a performance bottleneck.",
+          "line": 67,
+          "suggestion": "Consider using asynchronous file system operations instead.",
+          "code_snippet": "fs.writeFileSync(tmpPath, $.html(), 'utf8'); fs.renameSync(tmpPath, filePath);",
+          "fixed_snippet": "fs.promises.writeFile(tmpPath, $.html(), 'utf8').then(() => fs.promises.rename(tmpPath, filePath));"
+        },
+        {
+          "type": "error_handling",
+          "severity": "low",
+          "message": "The code catches any errors that occur during the execution of the `processHtml` function, but it only logs the error and sets the process exit code. This can make it difficult to diagnose the issue.",
+          "line": 86,
+          "suggestion": "Consider providing more context when logging the error.",
+          "code_snippet": "try { processHtml(beFile, knownResults); processHtml(feFile, knownResults); } catch (e) { console.error(e); process.exitCode = 1; }",
+          "fixed_snippet": "try { processHtml(beFile, knownResults); processHtml(feFile, knownResults); } catch (e) { console.error(`Error processing HTML files: ${e.message}`); process.exitCode = 1; }"
+        }
+      ]
+    },
+    {
+      "filename": "src/app/api/admin/pending-registrations/route.js",
+      "score": 91,
+      "summary": "The provided code is a migration script for a PostgreSQL database and handles pending registrations. It has proper authentication and authorization checks, but there are some potential issues with error handling, database queries, and input validation. The code score is 82 due to some medium-severity issues.",
+      "issues": [
+        {
+          "type": "database",
+          "severity": "medium",
+          "message": "The database query for pending registrations does not have a limit or pagination, which could lead to performance issues if there are many pending registrations.",
+          "line": 17,
+          "suggestion": "Add a limit or pagination to the database query for pending registrations.",
+          "code_snippet": "const result = await query(`SELECT ...`);",
+          "fixed_snippet": "const result = await query(`SELECT ... LIMIT 100`);"
+        },
+        {
+          "type": "input_validation",
+          "severity": "medium",
+          "message": "The input validation for the userId and action parameters is not robust and could lead to errors if the input is not valid.",
+          "line": 67,
+          "suggestion": "Add more robust input validation for the userId and action parameters.",
+          "code_snippet": "const userId = body.userId; const action = body.action;",
+          "fixed_snippet": "const userId = parseInt(body.userId); const action = body.action.trim();"
+        },
+        {
+          "type": "database",
+          "severity": "medium",
+          "message": "The database query for rejecting a pending registration does not check if the registration has already been rejected.",
+          "line": 93,
+          "suggestion": "Add a check to see if the registration has already been rejected before updating the database.",
+          "code_snippet": "await query(`UPDATE users ...`);",
+          "fixed_snippet": "const row = await query(`SELECT * FROM users WHERE id = $1::uuid AND registration_rejected_at IS NULL`, [userId]); if (row.rows.length) { await query(`UPDATE users ...`); }"
+        }
+      ]
+    },
+    {
+      "filename": "src/app/api/admin/users/route.js",
+      "score": 97,
+      "summary": "The code is clean and well-structured with proper authentication, error handling, and parameterized queries. The main risk is the lack of tenant isolation for super_admin queries, which is acceptable given the role's scope. No critical or high-severity issues found.",
+      "issues": [
+        {
+          "type": "best_practice",
+          "severity": "low",
+          "message": "Session user role check assumes session.user.role exists. If session is valid but user object is malformed, this will throw a TypeError.",
+          "line": 9,
+          "suggestion": "Add optional chaining or a check for session.user?.role before comparison.",
+          "code_snippet": "if (!session || session.user.role !== 'super_admin') {",
+          "fixed_snippet": "if (!session || session.user?.role !== 'super_admin') {"
+        },
+        {
+          "type": "data_integrity",
+          "severity": "low",
+          "message": "Query selects all users across all tenants. For a super_admin this is acceptable, but if this endpoint is ever reused for tenant-scoped admins, it would leak cross-tenant data.",
+          "line": 14,
+          "suggestion": "Consider adding a WHERE tenant_id = $1 clause if this endpoint is extended to non-super-admin roles.",
+          "code_snippet": "SELECT id, first_name, last_name, email, role, is_active FROM users ORDER BY created_at DESC",
+          "fixed_snippet": "SELECT id, first_name, last_name, email, role, is_active FROM users ORDER BY created_at DESC"
+        },
+        {
+          "type": "observability",
+          "severity": "low",
+          "message": "Error is logged with console.error but lacks structured context (request ID, tenant ID, user ID) making it hard to correlate in production log aggregation.",
+          "line": 29,
+          "suggestion": "Use a structured logger that includes request context.",
+          "code_snippet": "console.error('Failed to load admin users:', error);",
+          "fixed_snippet": "logger.error({ message: 'Failed to load admin users', error: error.message, stack: error.stack });"
+        }
+      ]
+    },
+    {
+      "filename": "src/app/api/audit/logs/route.js",
+      "score": 83,
+      "summary": "The audit log retrieval endpoint is well-structured with parameterized queries and proper authorization. The main risk is the absence of a database-level index on `audit_logs.tenant_id` and `created_at`, which will cause full table scans under load. Additionally, the `old_values` and `new_values` columns may contain PII that is exposed in API responses without restriction. The error handling is adequate but lacks structured logging.",
+      "issues": [
+        {
+          "type": "database",
+          "severity": "high",
+          "message": "Missing index on audit_logs.tenant_id and created_at. The query filters by tenant_id and orders by created_at DESC. Without a composite index on (tenant_id, created_at), this query will perform a full table scan on the audit_logs table, causing severe performance degradation as the table grows.",
+          "line": 50,
+          "suggestion": "Add a composite index on audit_logs(tenant_id, created_at DESC) to support the WHERE and ORDER BY clauses efficiently.",
+          "code_snippet": "const res = await query(\n  `SELECT id, user_id, tenant_id, action, entity_type, entity_id, old_values, new_values, ip_address, created_at\n   FROM audit_logs\n   WHERE ${where.join(' AND ')}\n   ORDER BY created_at DESC\n   LIMIT $${params.length}`,\n  params,\n);",
+          "fixed_snippet": "-- Add this migration:\nCREATE INDEX IF NOT EXISTS idx_audit_logs_tenant_created ON audit_logs(tenant_id, created_at DESC);"
+        },
+        {
+          "type": "data_integrity",
+          "severity": "medium",
+          "message": "The query selects old_values and new_values which may contain PII (personally identifiable information) such as email addresses, phone numbers, or other sensitive data. These are returned to the client without any filtering or redaction, potentially exposing sensitive data to college_admin users who may not need full visibility.",
+          "line": 50,
+          "suggestion": "Either omit old_values/new_values from the response for non-super-admin roles, or implement a redaction function that masks sensitive fields before returning.",
+          "code_snippet": "SELECT id, user_id, tenant_id, action, entity_type, entity_id, old_values, new_values, ip_address, created_at",
+          "fixed_snippet": "// For non-super-admin, exclude old_values/new_values or redact them\nconst selectFields = session.user.role === 'super_admin'\n  ? 'id, user_id, tenant_id, action, entity_type, entity_id, old_values, new_values, ip_address, created_at'\n  : 'id, user_id, tenant_id, action, entity_type, entity_id, ip_address, created_at';\nconst res = await query(\n  `SELECT ${selectFields}\n   FROM audit_logs\n   WHERE ${where.join(' AND ')}\n   ORDER BY created_at DESC\n   LIMIT $${params.length}`,\n  params,\n);"
+        },
+        {
+          "type": "observability",
+          "severity": "medium",
+          "message": "Error logging uses console.error with a generic message. In production, this lacks structured context (request ID, tenant ID, user ID, query parameters) making it difficult to correlate errors with specific requests or debug issues.",
+          "line": 60,
+          "suggestion": "Use a structured logger that includes request context (correlation ID, tenant ID, user ID, query params) and stack trace.",
+          "code_snippet": "console.error('GET /api/audit/logs failed:', error);\nreturn NextResponse.json({ error: 'Failed to load audit logs' }, { status: 500 });",
+          "fixed_snippet": "import { logger } from '@/lib/logger';\n// ... inside catch:\nlogger.error('GET /api/audit/logs failed', {\n  error: error.message,\n  stack: error.stack,\n  userId: session?.user?.id,\n  tenantId,\n  query: { from, to, action, entityType, limit },\n});\nreturn NextResponse.json({ error: 'Failed to load audit logs' }, { status: 500 });"
+        },
+        {
+          "type": "edge_case",
+          "severity": "low",
+          "message": "If limit query parameter is not a valid integer, Number.parseInt returns NaN, and Math.max(1, NaN) returns NaN, causing the query to fail with a PostgreSQL error. This is partially mitigated by Math.min(1000, NaN) which returns NaN, but the query will still fail.",
+          "line": 25,
+          "suggestion": "Add a fallback for NaN after parseInt, e.g., use Number.isNaN to default to 300.",
+          "code_snippet": "const limit = Math.min(1000, Math.max(1, Number.parseInt(url.searchParams.get('limit') || '300', 10)));",
+          "fixed_snippet": "const limitParam = Number.parseInt(url.searchParams.get('limit') || '300', 10);\nconst limit = Number.isNaN(limitParam) ? 300 : Math.min(1000, Math.max(1, limitParam));"
+        }
+      ]
+    },
+    {
+      "filename": "src/app/api/admin/settings/route.js",
+      "score": 93,
+      "summary": "The provided code is a Next.js API route for handling admin settings. It has proper authentication and authorization checks, and it validates user input. However, there are some potential issues with error handling, database queries, and security. The code score is 82 due to some medium-severity issues found.",
+      "issues": [
+        {
+          "type": "database",
+          "severity": "medium",
+          "message": "The database query is not using a transaction, which could lead to inconsistent data in case of an error",
+          "line": 54,
+          "suggestion": "Use a transaction to ensure data consistency",
+          "code_snippet": "const res = await query(`SELECT settings FROM tenants WHERE id = $1::uuid`, [tenantId]);",
+          "fixed_snippet": "const res = await query(`BEGIN; SELECT settings FROM tenants WHERE id = $1::uuid; COMMIT;`, [tenantId]);"
+        },
+        {
+          "type": "database",
+          "severity": "medium",
+          "message": "The database query is using JSON.stringify, which could lead to a SQL injection vulnerability",
+          "line": 101,
+          "suggestion": "Use a parameterized query to prevent SQL injection",
+          "code_snippet": "await query(`UPDATE tenants SET settings = $1::jsonb, updated_at = NOW() WHERE id = $2::uuid`, [JSON.stringify(merged), tenantId]);",
+          "fixed_snippet": "await query(`UPDATE tenants SET settings = $1::jsonb, updated_at = NOW() WHERE id = $2::uuid`, [merged, tenantId]);"
+        },
+        {
+          "type": "error_handling",
+          "severity": "low",
+          "message": "The error handling is logging the error to the console, but it's not providing any additional information",
+          "line": 58,
+          "suggestion": "Provide more information about the error, such as the error message and stack trace",
+          "code_snippet": "console.error('Failed to load admin settings:', error);",
+          "fixed_snippet": "console.error('Failed to load admin settings:', error.message, error.stack);"
+        }
+      ]
+    },
+    {
+      "filename": "src/app/api/audit/reports/export/route.js",
+      "score": 94,
+      "summary": "The provided code is a Next.js API route for exporting audit reports. It has proper authentication and authorization checks, and it uses parameterized queries to prevent SQL injection. However, there are some potential issues with error handling and logging. The code does not handle all possible error scenarios, and it logs errors to the console instead of using a logging library. Additionally, the code does not validate user input properly, which could lead to security vulnerabilities.",
+      "issues": [
+        {
+          "type": "error_handling",
+          "severity": "medium",
+          "message": "The code does not handle all possible error scenarios. It only catches errors that occur during the execution of the query, but it does not handle errors that may occur during the execution of the putObjectText or sendMail functions.",
+          "line": 27,
+          "suggestion": "Add try-catch blocks to handle errors that may occur during the execution of the putObjectText or sendMail functions.",
+          "code_snippet": "try { ... } catch (innerError) { ... }",
+          "fixed_snippet": "try { ... } catch (innerError) { ... } catch (error) { ... }"
+        },
+        {
+          "type": "input_validation",
+          "severity": "medium",
+          "message": "The code does not validate user input properly. It only trims the input, but it does not check if the input is valid.",
+          "line": 31,
+          "suggestion": "Add input validation to check if the input is valid.",
+          "code_snippet": "const requestedTenant = String(body?.tenantId || '').trim();",
+          "fixed_snippet": "const requestedTenant = validateInput(body?.tenantId);"
+        }
+      ]
+    },
+    {
+      "filename": "src/app/api/college/applications/route.js",
+      "score": 85,
+      "summary": "The code is generally well-structured with proper authentication, parameterized queries, and error handling. The main risks are the hardcoded LIMIT 1000 which could cause performance issues or data loss for large datasets, and the lack of pagination/filtering which limits usability. No critical security vulnerabilities were found.",
+      "issues": [
+        {
+          "type": "scalability",
+          "severity": "high",
+          "message": "Hardcoded LIMIT 1000 without pagination or offset will silently truncate results for tenants with more than 1000 applications, causing data loss and incomplete UI. This also risks memory pressure if the result set is large.",
+          "line": 36,
+          "suggestion": "Implement cursor-based or offset pagination with a configurable limit, or remove the limit and add proper pagination parameters.",
+          "code_snippet": "        LIMIT 1000`,",
+          "fixed_snippet": "        LIMIT $2 OFFSET $3`,\n      [tenantId, limit || 100, offset || 0],"
+        },
+        {
+          "type": "performance",
+          "severity": "medium",
+          "message": "The query fetches all applications for a tenant without any filtering (by status, date range, search) or pagination parameters. This will become a performance bottleneck as data grows and forces the client to handle filtering client-side.",
+          "line": 18,
+          "suggestion": "Add optional query parameters for status filter, date range, search term, and pagination to reduce data transfer and database load.",
+          "code_snippet": "    const res = await query(\n      `SELECT a.id,\n              a.status,\n              a.current_round,\n              a.applied_at,\n              d.id AS drive_id,\n              d.title AS drive_title,\n              ep.company_name,\n              sp.department,\n              sp.roll_number,\n              COALESCE(TRIM(CONCAT(u.first_name, ' ', u.last_name)), u.email, 'Unknown Student') AS student_name\n       FROM applications a\n       JOIN placement_drives d ON d.id = a.drive_id\n       JOIN student_profiles sp ON sp.id = a.student_id\n       LEFT JOIN users u ON u.id = sp.user_id\n       LEFT JOIN employer_profiles ep ON ep.id = d.employer_id\n       WHERE d.tenant_id = $1::uuid\n       ORDER BY a.applied_at DESC\n       LIMIT 1000`,\n      [tenantId],\n    );",
+          "fixed_snippet": "    const { searchParams } = new URL(request.url);\n    const status = searchParams.get('status');\n    const limit = parseInt(searchParams.get('limit') || '100', 10);\n    const offset = parseInt(searchParams.get('offset') || '0', 10);\n\n    let whereClause = 'WHERE d.tenant_id = $1::uuid';\n    const params = [tenantId];\n    if (status) {\n      whereClause += ` AND a.status = $${params.length + 1}`;\n      params.push(status);\n    }\n    params.push(limit, offset);\n\n    const res = await query(\n      `SELECT a.id,\n              a.status,\n              a.current_round,\n              a.applied_at,\n              d.id AS drive_id,\n              d.title AS drive_title,\n              ep.company_name,\n              sp.department,\n              sp.roll_number,\n              COALESCE(TRIM(CONCAT(u.first_name, ' ', u.last_name)), u.email, 'Unknown Student') AS student_name\n       FROM applications a\n       JOIN placement_drives d ON d.id = a.drive_id\n       JOIN student_profiles sp ON sp.id = a.student_id\n       LEFT JOIN users u ON u.id = sp.user_id\n       LEFT JOIN employer_profiles ep ON ep.id = d.employer_id\n       ${whereClause}\n       ORDER BY a.applied_at DESC\n       LIMIT $${params.length - 1} OFFSET $${params.length}`,\n      params,\n    );"
+        },
+        {
+          "type": "code_quality",
+          "severity": "low",
+          "message": "The GET function does not accept a request parameter, making it impossible to read query parameters for filtering or pagination. This limits the API's flexibility.",
+          "line": 6,
+          "suggestion": "Add the standard Next.js request parameter to the function signature to allow reading query parameters.",
+          "code_snippet": "export async function GET() {",
+          "fixed_snippet": "export async function GET(request) {"
+        },
+        {
+          "type": "observability",
+          "severity": "low",
+          "message": "Error logging uses console.error with the error object but does not include structured context like tenantId, making it harder to correlate errors in production log aggregation systems.",
+          "line": 42,
+          "suggestion": "Use a structured logger or include tenantId and request metadata in the error log.",
+          "code_snippet": "    console.error('GET /api/college/applications', error);",
+          "fixed_snippet": "    console.error({ message: 'GET /api/college/applications failed', tenantId, error: error.message, stack: error.stack });"
+        }
+      ]
+    },
+    {
+      "filename": "src/app/api/audit/reports/route.js",
+      "score": 94,
+      "summary": "The provided code is generally well-structured and secure. It properly handles authentication and authorization, and it uses parameterized queries to prevent SQL injection. However, there are a few potential issues that need to be addressed, such as input validation and error handling. The code also lacks logging and monitoring, which is crucial for a production-ready system.",
+      "issues": [
+        {
+          "type": "input_validation",
+          "severity": "medium",
+          "message": "The code does not validate the tenantId query parameter. It should check if the parameter is a valid UUID.",
+          "line": 15,
+          "suggestion": "Use a UUID validation library to check the tenantId parameter.",
+          "code_snippet": "const requestedTenant = String(url.searchParams.get('tenantId') || '').trim();",
+          "fixed_snippet": "const requestedTenant = String(url.searchParams.get('tenantId') || '').trim(); if (!isUuid(requestedTenant)) { return NextResponse.json({ error: 'Invalid tenantId' }, { status: 400 }); }"
+        },
+        {
+          "type": "input_validation",
+          "severity": "medium",
+          "message": "The code does not validate the limit query parameter. It should check if the parameter is a positive integer.",
+          "line": 25,
+          "suggestion": "Use a validation library to check the limit parameter.",
+          "code_snippet": "const limit = Math.min(100, Math.max(1, Number.parseInt(url.searchParams.get('limit') || '30', 10)));",
+          "fixed_snippet": "const limit = Math.min(100, Math.max(1, Number.parseInt(url.searchParams.get('limit') || '30', 10))); if (isNaN(limit) || limit <= 0) { return NextResponse.json({ error: 'Invalid limit' }, { status: 400 }); }"
+        }
+      ]
+    },
+    {
+      "filename": "src/app/api/auth/[...nextauth]/route.js",
+      "score": 96,
+      "summary": "The provided code is a Next.js API route for authentication using NextAuth. It imports the authentication options from another file and creates a handler for the authentication process. The code is well-structured and secure, but there are a few potential issues that need to be addressed. The code does not handle errors explicitly, and it does not validate the authentication options. However, the code is simple and does not seem to have any major security vulnerabilities. The score is 90 due to the lack of error handling and validation.",
+      "issues": [
+        {
+          "type": "error_handling",
+          "severity": "medium",
+          "message": "The code does not handle errors explicitly during the authentication process",
+          "line": 4,
+          "suggestion": "Add try-catch blocks to handle errors during the authentication process",
+          "code_snippet": "const handler = NextAuth(authOptions);",
+          "fixed_snippet": "try { const handler = NextAuth(authOptions); } catch (error) { console.error(error); }"
+        },
+        {
+          "type": "validation",
+          "severity": "low",
+          "message": "The code does not validate the authentication options",
+          "line": 1,
+          "suggestion": "Add validation for the authentication options to ensure they are valid",
+          "code_snippet": "import { authOptions } from '@/lib/auth';",
+          "fixed_snippet": "import { authOptions } from '@/lib/auth'; if (!authOptions) { throw new Error('Authentication options are not defined'); }"
+        }
+      ]
+    },
+    {
+      "filename": "src/app/api/admin/employers/route.js",
+      "score": 94,
+      "summary": "The provided code is generally well-structured and secure, but there are a few areas that need improvement. The code is vulnerable to potential SQL injection attacks, although the current implementation uses parameterized queries which mitigates this risk. However, there are some issues with error handling and logging. The code also lacks input validation for the 'page' and 'limit' query parameters. Additionally, the code does not handle cases where the 'searchParams' object is null or undefined.",
+      "issues": [
+        {
+          "type": "input_validation",
+          "severity": "medium",
+          "message": "The 'page' and 'limit' query parameters are not validated properly. This could lead to potential security vulnerabilities or errors.",
+          "line": 14,
+          "suggestion": "Add input validation for the 'page' and 'limit' query parameters to ensure they are valid numbers.",
+          "code_snippet": "const page = Math.max(1, Number.parseInt(searchParams.get('page') || '1', 10));\nconst limit = Math.min(100, Math.max(1, Number.parseInt(searchParams.get('limit') || '50', 10)));",
+          "fixed_snippet": "const page = parseInt(searchParams.get('page'), 10);\nif (isNaN(page) || page < 1) {\n  return NextResponse.json({ error: 'Invalid page number' }, { status: 400 });\n}\nconst limit = parseInt(searchParams.get('limit'), 10);\nif (isNaN(limit) || limit < 1 || limit > 100) {\n  return NextResponse.json({ error: 'Invalid limit' }, { status: 400 });\n}"
+        },
+        {
+          "type": "error_handling",
+          "severity": "medium",
+          "message": "The error message is not very informative. It would be better to log the entire error object instead of just the error message.",
+          "line": 46,
+          "suggestion": "Log the entire error object instead of just the error message.",
+          "code_snippet": "console.error('Failed to load admin employers:', error.message);",
+          "fixed_snippet": "console.error('Failed to load admin employers:', error);"
+        }
+      ]
+    },
+    {
+      "filename": "src/app/api/college/drives/[id]/facebook-post/route.js",
+      "score": 83,
+      "summary": "The endpoint is well-structured with parameterized queries and proper authorization. The main risk is the lack of a database-level uniqueness constraint on the Facebook post to prevent duplicate posts for the same drive, and the absence of a timeout on the external Facebook API call, which could hang the request. Additionally, the error message for a 503 is overly specific and exposes configuration details.",
+      "issues": [
+        {
+          "type": "security",
+          "severity": "medium",
+          "message": "The 503 error message exposes internal configuration details (FACEBOOK_PAGE_ID, FACEBOOK_PAGE_ACCESS_TOKEN) to the client, which could aid an attacker in understanding the system's dependencies.",
+          "line": 20,
+          "suggestion": "Return a generic error message like 'Facebook posting is not configured' without listing environment variable names.",
+          "code_snippet": "error: 'Facebook Page posting is not configured. Set FACEBOOK_PAGE_ID and FACEBOOK_PAGE_ACCESS_TOKEN on the server.'",
+          "fixed_snippet": "error: 'Facebook Page posting is not configured. Please contact the administrator.'"
+        },
+        {
+          "type": "reliability",
+          "severity": "high",
+          "message": "The call to postToFacebookPageFeed has no timeout. If the Facebook API is slow or hangs, the request will hang indefinitely, potentially exhausting server resources and blocking other requests.",
+          "line": 87,
+          "suggestion": "Add a timeout (e.g., 10 seconds) to the Facebook API call, either via AbortController or a timeout wrapper.",
+          "code_snippet": "const { postId } = await postToFacebookPageFeed({\n      message,\n      link: link || undefined,\n    });",
+          "fixed_snippet": "const controller = new AbortController();\n    const timeoutId = setTimeout(() => controller.abort(), 10000);\n    try {\n      const { postId } = await postToFacebookPageFeed({\n        message,\n        link: link || undefined,\n        signal: controller.signal,\n      });\n    } finally {\n      clearTimeout(timeoutId);\n    }"
+        },
+        {
+          "type": "idempotency",
+          "severity": "medium",
+          "message": "No idempotency check is performed before posting to Facebook. If the request is retried (e.g., due to network issues), the same drive could be posted multiple times, causing duplicate Facebook posts.",
+          "line": 87,
+          "suggestion": "Add a database column (e.g., facebook_post_id) to placement_drives and check if it is already set before posting. Alternatively, use a unique constraint on (drive_id, facebook_post_id) in a separate table.",
+          "code_snippet": "const { postId } = await postToFacebookPageFeed({\n      message,\n      link: link || undefined,\n    });",
+          "fixed_snippet": "// Check if already posted\n    const existing = await query('SELECT facebook_post_id FROM placement_drives WHERE id = $1', [driveId]);\n    if (existing.rows[0]?.facebook_post_id) {\n      return NextResponse.json({ success: true, postId: existing.rows[0].facebook_post_id, messagePreview: message });\n    }\n    const { postId } = await postToFacebookPageFeed({\n      message,\n      link: link || undefined,\n    });\n    // Save postId to drive\n    await query('UPDATE placement_drives SET facebook_post_id = $1 WHERE id = $2', [postId, driveId]);"
+        },
+        {
+          "type": "observability",
+          "severity": "low",
+          "message": "The error is logged with console.error, which may not include structured context (e.g., driveId, tenantId) needed for debugging in production.",
+          "line": 94,
+          "suggestion": "Use a structured logger that includes request-specific metadata like driveId and tenantId.",
+          "code_snippet": "console.error('Facebook post error:', error);",
+          "fixed_snippet": "logger.error({ message: 'Facebook post error', error, driveId, tenantId });"
+        }
+      ]
+    },
+    {
+      "filename": "src/app/api/college/drives/[id]/route.js",
+      "score": 95,
+      "summary": "The PATCH endpoint for college drives is generally well-structured with proper authentication, tenant isolation, and parameterized queries. The main risk is the lack of input validation for the drive ID (UUID format) and the social_shared array elements, which could lead to unexpected behavior or database errors. Additionally, the error handling is adequate but could benefit from more specific error messages for validation failures. Overall, the code is production-ready with minor improvements needed.",
+      "issues": [
+        {
+          "type": "input_validation",
+          "severity": "medium",
+          "message": "The driveId is validated as a non-empty string but not as a valid UUID. Passing an invalid UUID (e.g., 'abc') will cause the database query to return 0 rows, resulting in a misleading 404 error instead of a 400 Bad Request.",
+          "line": 25,
+          "suggestion": "Add UUID format validation for driveId to return a 400 error for invalid UUIDs before querying the database.",
+          "code_snippet": "const { id: driveId } = await params;\nif (!driveId || typeof driveId !== 'string') {\n  return NextResponse.json({ error: 'Drive id required' }, { status: 400 });\n}",
+          "fixed_snippet": "const { id: driveId } = await params;\nif (!driveId || typeof driveId !== 'string') {\n  return NextResponse.json({ error: 'Drive id required' }, { status: 400 });\n}\nconst uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;\nif (!uuidRegex.test(driveId)) {\n  return NextResponse.json({ error: 'Invalid drive id format' }, { status: 400 });\n}"
+        },
+        {
+          "type": "input_validation",
+          "severity": "low",
+          "message": "The socialShared array elements are converted to strings via String(p).toLowerCase(), but if an element is an object or null, it will become '[object Object]' or 'null', which will be filtered out by the ALLOWED_PLATFORMS check. This is safe but could silently ignore unexpected input types.",
+          "line": 35,
+          "suggestion": "Add a type check to skip or warn about non-string elements in the socialShared array.",
+          "code_snippet": "const cleaned = [...new Set(body.socialShared.map((p) => String(p).toLowerCase()))].filter((p) =>\n  ALLOWED_PLATFORMS.has(p),\n);",
+          "fixed_snippet": "const cleaned = [...new Set(body.socialShared\n  .filter((p) => typeof p === 'string')\n  .map((p) => p.toLowerCase())\n)].filter((p) => ALLOWED_PLATFORMS.has(p));"
+        },
+        {
+          "type": "observability",
+          "severity": "low",
+          "message": "The catch block logs the error but does not include the driveId or tenantId in the log message, making it harder to correlate errors in production logs.",
+          "line": 61,
+          "suggestion": "Include contextual information (driveId, tenantId) in the error log for better debugging.",
+          "code_snippet": "console.error('Failed to patch drive:', error);\nreturn NextResponse.json({ error: 'Failed to update drive' }, { status: 500 });",
+          "fixed_snippet": "console.error('Failed to patch drive', { driveId, tenantId, error: error.message });\nreturn NextResponse.json({ error: 'Failed to update drive' }, { status: 500 });"
+        }
+      ]
+    },
+    {
+      "filename": "src/app/api/college/drives/[id]/report/route.js",
+      "score": 36,
+      "summary": "The endpoint is generally well-structured with parameterized queries and proper authentication. However, it has a critical multi-tenancy vulnerability: the statistics and selected students queries do not filter by tenant_id, allowing a college_admin from one tenant to access application data from another tenant's drive if they know the drive ID. Additionally, the async params destructuring is incorrect for Next.js App Router (params is already a resolved object in route handlers), which will cause a runtime error. The error message is generic and lacks observability details.",
+      "issues": [
+        {
+          "type": "runtime",
+          "severity": "high",
+          "message": "Incorrect async destructuring of params. In Next.js App Router route handlers, params is already a resolved object, not a Promise. Using `await params` will cause a runtime error or return undefined, breaking the endpoint.",
+          "line": 13,
+          "suggestion": "Remove the await keyword and destructure params directly.",
+          "code_snippet": "const { id: driveId } = await params;",
+          "fixed_snippet": "const { id: driveId } = params;"
+        },
+        {
+          "type": "multi_tenancy",
+          "severity": "critical",
+          "message": "The statistics query (line 36-41) and selected students query (line 60-66) do not filter by tenant_id. A college_admin from tenant A can access application data for a drive belonging to tenant B by providing a valid drive ID, leading to cross-tenant data leakage.",
+          "line": 36,
+          "suggestion": "Add a tenant_id filter to both queries by joining with placement_drives or student_profiles to ensure only data from the same tenant is returned.",
+          "code_snippet": "const statsQuery = await query(`\n      SELECT status, COUNT(*) as count\n      FROM applications\n      WHERE drive_id = $1\n      GROUP BY status\n    `, [driveId]);",
+          "fixed_snippet": "const statsQuery = await query(`\n      SELECT a.status, COUNT(*) as count\n      FROM applications a\n      JOIN placement_drives pd ON a.drive_id = pd.id\n      WHERE a.drive_id = $1 AND pd.tenant_id = $2\n      GROUP BY a.status\n    `, [driveId, tenantId]);"
+        },
+        {
+          "type": "multi_tenancy",
+          "severity": "critical",
+          "message": "The selected students query does not filter by tenant_id, allowing cross-tenant data access. A college_admin from tenant A can retrieve student profile details (name, roll number, department, CGPA) from tenant B's drive.",
+          "line": 60,
+          "suggestion": "Add a tenant_id filter by joining with placement_drives or student_profiles to restrict results to the current tenant.",
+          "code_snippet": "const selectedQuery = await query(`\n      SELECT sp.roll_number, sp.department, sp.branch, sp.cgpa, u.first_name, u.last_name\n      FROM applications a\n      JOIN student_profiles sp ON a.student_id = sp.id\n      JOIN users u ON sp.user_id = u.id\n      WHERE a.drive_id = $1 AND a.status = 'selected'\n    `, [driveId]);",
+          "fixed_snippet": "const selectedQuery = await query(`\n      SELECT sp.roll_number, sp.department, sp.branch, sp.cgpa, u.first_name, u.last_name\n      FROM applications a\n      JOIN student_profiles sp ON a.student_id = sp.id\n      JOIN users u ON sp.user_id = u.id\n      JOIN placement_drives pd ON a.drive_id = pd.id\n      WHERE a.drive_id = $1 AND a.status = 'selected' AND pd.tenant_id = $2\n    `, [driveId, tenantId]);"
+        },
+        {
+          "type": "observability",
+          "severity": "medium",
+          "message": "The error log only logs the error object without structured context (driveId, tenantId, request path). In production, this makes debugging failures difficult as there is no correlation ID or request metadata.",
+          "line": 84,
+          "suggestion": "Use structured logging with context fields such as driveId, tenantId, and a request correlation ID.",
+          "code_snippet": "console.error('Report Generation Error:', error);",
+          "fixed_snippet": "console.error({ message: 'Report Generation Error', error: error.message, stack: error.stack, driveId, tenantId, path: req.url });"
+        },
+        {
+          "type": "ux_copy",
+          "severity": "low",
+          "message": "The error message 'Failed to generate drive report' is generic and does not provide any actionable information to the user. For 5xx errors, this is acceptable, but the server-side logging should be more detailed.",
+          "line": 85,
+          "suggestion": "No change needed for the client-facing message, but ensure server-side logging captures the root cause.",
+          "code_snippet": "return NextResponse.json(\n      { error: 'Failed to generate drive report' },\n      { status: 500 },\n    );",
+          "fixed_snippet": "return NextResponse.json(\n      { error: 'Failed to generate drive report' },\n      { status: 500 },\n    );"
+        }
+      ]
+    }
+  ],
+  "total_issues": 60,
+  "overall_score": 89
+}

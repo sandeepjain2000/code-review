@@ -1,0 +1,56 @@
+=================================================================
+  CODESENTINEL -- BATCH 10 REPORT
+  Files 226 - 228 of 229
+  Folder : C:\Users\sandeep\Downloads\Claudes\CampusPlacement\campus-placement
+  Saved  : 01/05/2026, 11:19:54
+=================================================================
+
+  Batch Score   : 79/100
+  Files Reviewed: 3
+  Total Issues  : 7
+
+=================================================================
+  FILE: src/lib/validators.js
+  Score: 100/100   Issues: 0
+
+  Could not parse model response.
+
+=================================================================
+  FILE: test-db.js
+  Score: 87/100   Issues: 2
+
+  The provided code snippet is a simple test script to verify the connection to a PostgreSQL database. It uses the `pg` module to create a pool and execute a query to select the current server time. The biggest risk in this code is the hardcoded connection string, which poses a security risk if the script is used in a production environment or if the connection string is not properly secured. Additionally, the script does not handle errors robustly, as it exits the process immediately if an error occurs, which might not be desirable in all scenarios.
+
+  [HIGH] security -- Line 4
+  Hardcoded connection string with plaintext password
+  Fix: Use environment variables or a secure secrets management system to store sensitive connection information
+
+  [MEDIUM] error_handling -- Line 14
+  Error handling could be improved to provide more informative error messages and to handle specific error cases
+  Fix: Implement more robust error handling mechanisms, such as logging errors and providing user-friendly error messages
+
+=================================================================
+  FILE: src/middleware.js
+  Score: 51/100   Issues: 5
+
+  The middleware is concise and correctly implements role-based redirects for authenticated users. The primary risk is that the matcher only covers /login and /data-entry, leaving all other routes unprotected — any authenticated route (e.g., /dashboard/student) is accessible without a token check, which is a significant security gap. Additionally, the middleware does not validate the token's expiration or tenant context, and the secret is read from process.env at runtime without a fallback, which could cause a crash if the env var is missing. The code is otherwise clean and well-structured.
+
+  [CRITICAL] security -- Line 54
+  The matcher only covers /login and /data-entry, leaving all other routes (e.g., /dashboard/*, /api/*) unprotected. Any authenticated route is accessible without a token check, which means unauthenticated users can access protected pages directly.
+  Fix: Expand the matcher to cover all protected routes, or implement a catch-all pattern and use conditional logic to skip public routes.
+
+  [HIGH] configuration -- Line 22
+  process.env.NEXTAUTH_SECRET is read at runtime without validation. If this env var is missing or undefined, getToken will throw or return null, causing a redirect loop or crash.
+  Fix: Validate NEXTAUTH_SECRET at startup or provide a fallback that logs a clear error and returns a 500 response.
+
+  [HIGH] security -- Line 36
+  The middleware returns NextResponse.next() for all paths that are not /login, without any token validation. This means any authenticated route (e.g., /dashboard/student, /api/placement-drives) is accessible without authentication, bypassing the intended protection.
+  Fix: Add a token check for all protected routes, redirecting unauthenticated users to /login.
+
+  [MEDIUM] logic -- Line 45
+  The check `if (!token?.role)` allows unauthenticated users to access /login, but it also allows users with a valid token but no role (e.g., a malformed token) to access /login, which could be confusing. The token should be fully validated.
+  Fix: Check for the existence of the token itself, not just the role, to ensure the token is valid and not expired.
+
+  [LOW] maintainability -- Line 49
+  The fallback '/dashboard' in ROLE_HOME_PATHS lookup is duplicated on line 30 and 49. If a new role is added, both locations must be updated.
+  Fix: Extract the fallback logic into a helper function to ensure consistency.

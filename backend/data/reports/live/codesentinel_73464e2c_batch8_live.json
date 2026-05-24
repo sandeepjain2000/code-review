@@ -1,0 +1,599 @@
+{
+  "job_id": "73464e2c565e4ef2",
+  "batch": 8,
+  "folder_path": "C:\\Users\\sandeep\\Downloads\\Claudes\\CampusPlacement\\campus-placement",
+  "model_used": "nvidia/meta/llama-3.3-70b-instruct",
+  "saved_at": "2026-05-01T21:55:11.625126",
+  "files": [
+    {
+      "filename": "src/components/NotificationDropdown.jsx",
+      "score": 56,
+      "summary": "The NotificationDropdown component has a critical security issue with silent error swallowing in both `markAllRead` and `markOneRead` functions, which could mask API failures and lead to data inconsistency, while also violating observability best practices. There is a potential runtime crash if `list` is undefined or not an array, and the `timeAgo` function could fail if `n.created_at` is null or invalid, with the `iconForType` function also at risk if `n.type` is unexpected. The component lacks a global error boundary, uses a fixed 90-second refresh interval that may not suit all users, and has inline styles and hardcoded colors that raise maintainability concerns. Overall, the review identified 2 high, 14 medium, and 6 low severity issues.",
+      "issues_count": 22
+    },
+    {
+      "filename": "src/components/SocialIcons.jsx",
+      "score": 89,
+      "summary": "The SocialIcons component is a clean, well-structured collection of SVG icon components and a static platform order configuration, with no runtime logic, external dependencies, or user input. The primary issues are low-severity accessibility concerns, including inconsistent use of `aria-hidden` (e.g., `aria-hidden` instead of `aria-hidden=\"true\"`) and missing `aria-label` attributes on decorative icons, which may affect screen reader support. Additionally, there is a potential runtime crash risk if the referenced icon components (IconTwitter, IconFacebook, etc.) are undefined due to missing imports, though this depends on the full file context. Overall, the code is low-risk and production-ready, with 11 low-severity and 1 medium-severity issue identified.",
+      "issues_count": 12
+    },
+    {
+      "filename": "src/components/EntityLogo.js",
+      "score": 97,
+      "summary": "The EntityLogo component is well-structured and handles the primary fallback case (no logo URL) correctly. The main risk is a potential infinite re-render loop when the single logo URL fails to load, as the handleError callback updates state but has no remaining candidates to fall back to, causing React to re-render and the image to attempt loading again. This is a medium-severity runtime issue that could degrade performance or cause a soft lock. No security, data integrity, or multi-tenancy concerns exist in this isolated UI component.",
+      "issues_count": 1
+    },
+    {
+      "filename": "src/components/employer/EmployerCalendarGrid.jsx",
+      "score": 93,
+      "summary": "The component is well-structured with proper memoization and null-safe iteration. The main risk is a potential runtime crash if `items` is not an array (e.g., null/undefined from API), which would throw in the `for...of` loop. Additionally, the `ev.id` used as a React key could be undefined or non-unique, causing rendering issues. The component lacks a fallback for empty items and has no error boundary. Overall, it is low-risk but has a medium-severity crash path.",
+      "issues_count": 3
+    },
+    {
+      "filename": "src/components/messaging/ConvBubble.jsx",
+      "score": 99,
+      "summary": "The ConvBubble and ConvThread components are minimal presentational components with no runtime logic, external dependencies, or user input handling. The only risk is a potential null-pointer crash if `side` is not provided, but this is a low-severity edge case. No security, performance, or data integrity issues are present. The code is clean and well-structured.",
+      "issues_count": 1
+    },
+    {
+      "filename": "src/instrumentation.js",
+      "score": 96,
+      "summary": "The instrumentation.js file is minimal and well-structured, performing a single startup validation check. The main risk is that the assertNextAuthSecretIfProduction function could throw an unhandled error during module initialization, which would crash the server process on startup. Additionally, there is no error handling or logging around the assertion call, making debugging difficult if the environment variable is misconfigured. The code is otherwise clean and follows Next.js instrumentation best practices.",
+      "issues_count": 2
+    },
+    {
+      "filename": "src/config/devScreenIds.js",
+      "score": 99,
+      "summary": "This is a low-risk configuration file that maps route paths to dev screen IDs. The code is well-structured and handles edge cases like trailing slashes and query strings. The only notable issue is a minor performance concern where `Object.keys` is called on every invocation of `getDevScreenId` instead of being cached, but this is negligible for a dev-only utility. No security, reliability, or data integrity issues are present.",
+      "issues_count": 1
+    },
+    {
+      "filename": "src/components/SessionAdBanner.jsx",
+      "score": 88,
+      "summary": "The component is well-structured with proper cleanup and accessibility considerations. The main risk is a potential runtime crash if `ADS` array is empty, causing `ADS[0]` to be undefined and accessing `.accent` on undefined. Additionally, the `showSessionAds` function returns a boolean but is named like a hook, which is a code smell. The component has no security, data integrity, or multi-tenancy issues.",
+      "issues_count": 3
+    },
+    {
+      "filename": "src/components/import/ImportCsvSplitButton.jsx",
+      "score": 83,
+      "summary": "The ImportCsvSplitButton component is well-structured with proper accessibility attributes and event cleanup. The primary risk is the unhandled promise rejection in the onChange handler when onFileSelected throws an async error, which could crash the client-side rendering. Additionally, the hidden file input lacks a proper label association for screen readers, and the menu does not trap focus or manage active descendant for keyboard navigation. Overall, the component is production-ready with minor improvements needed.",
+      "issues_count": 4
+    },
+    {
+      "filename": "src/components/ProfileLinkKindIcon.jsx",
+      "score": 98,
+      "summary": "This is a small, well-structured SVG icon component with no runtime logic, external dependencies, or user input. The only issues are minor: the `className` prop is spread into SVG attributes as `{className}` instead of the standard `className` attribute, which may not render correctly in React, and the `box` constant is defined at module scope but only used inside this component. No security, reliability, or data integrity risks exist.",
+      "issues_count": 2
+    },
+    {
+      "filename": "src/lib/auditLog.js",
+      "score": 93,
+      "summary": "The audit log module is well-structured with proper error handling and input sanitization. The main risk is the missing `audit_logs` table in the database schema, which would cause silent failures in production. Additionally, the error logging lacks stack traces for debugging. Overall, the code is clean and follows best practices for a non-critical logging function.",
+      "issues_count": 3
+    },
+    {
+      "filename": "src/lib/assertAuthEnv.js",
+      "score": 96,
+      "summary": "The file is a small, focused utility that performs a critical startup validation for production deployments. The logic is correct and handles the build-process skip correctly. The only notable risk is that the function is never called anywhere in the provided codebase context, meaning the validation is dead code and will not prevent a production startup with a weak secret. Additionally, the check for `VERCEL_ENV` is a good practice but may miss other production-like environments (e.g., custom Docker, AWS ECS) where `NODE_ENV` is not set to 'production'.",
+      "issues_count": 2
+    },
+    {
+      "filename": "src/lib/adminSettingsValidate.js",
+      "score": 86,
+      "summary": "The validation logic is generally sound with proper type coercion and range checks. The main risks are: (1) the `fromEmail` field is not required but passes validation when empty, which could lead to silent SMTP misconfiguration; (2) the `adminSettingsAuditSummary` function lacks null-safety on the input parameter, which will crash if called with null/undefined; (3) the `smtpConfigured` heuristic is weak \u2014 a non-empty host with port 0 would be considered configured. No critical security or data integrity issues found.",
+      "issues_count": 3
+    },
+    {
+      "filename": "src/lib/appVersion.js",
+      "score": 100,
+      "summary": "This file is a minimal utility module with no runtime dependencies, external I/O, or user input handling. The code is clean, deterministic, and has no security, reliability, or performance risks. The only minor concern is that the version label could be empty if both environment variables are unset, but the fallback to '0.1.0' handles that gracefully. No issues found.",
+      "issues_count": 0
+    },
+    {
+      "filename": "src/lib/academicYear.js",
+      "score": 91,
+      "summary": "The provided code is generally well-structured and handles academic year calculations correctly. However, there are some potential issues with input validation and error handling. The code does not check if the input date is valid, and it assumes that the center year is always in the correct format. Additionally, the code does not handle cases where the count is not a positive integer.",
+      "issues_count": 3
+    }
+  ],
+  "batch_score": 91,
+  "total_issues": 62,
+  "issues": [
+    {
+      "filename": "src/components/NotificationDropdown.jsx",
+      "type": "error_handling",
+      "severity": "medium",
+      "message": "The catch block in the markAllRead function ignores any errors that may occur",
+      "line": 77,
+      "suggestion": "Log the error or display an error message to the user"
+    },
+    {
+      "filename": "src/components/NotificationDropdown.jsx",
+      "type": "performance",
+      "severity": "low",
+      "message": "The refresh interval of 90 seconds may not be suitable for all users",
+      "line": 51,
+      "suggestion": "Consider making the refresh interval configurable or using a more adaptive approach"
+    },
+    {
+      "filename": "src/components/NotificationDropdown.jsx",
+      "type": "logic",
+      "severity": "low",
+      "message": "The timeAgo function does not handle cases where the input is not a valid ISO date string",
+      "line": 16,
+      "suggestion": "Add a check to handle invalid input"
+    },
+    {
+      "filename": "src/components/NotificationDropdown.jsx",
+      "type": "error_handling",
+      "severity": "high",
+      "message": "Empty catch block in markAllRead silently swallows all fetch errors, including network failures, 4xx/5xx responses, and JSON parse errors. This can lead to data inconsistency where the UI shows notifications as read but the server state is unchanged, and the user receives no feedback.",
+      "line": 76,
+      "suggestion": "Log the error server-side and show a user-facing toast or notification on failure."
+    },
+    {
+      "filename": "src/components/NotificationDropdown.jsx",
+      "type": "error_handling",
+      "severity": "high",
+      "message": "Empty catch block in markOneRead silently swallows all fetch errors, same impact as markAllRead. User gets no feedback if marking a single notification as read fails.",
+      "line": 90,
+      "suggestion": "Log the error and optionally show a user-facing notification."
+    },
+    {
+      "filename": "src/components/NotificationDropdown.jsx",
+      "type": "null_check",
+      "severity": "medium",
+      "message": "The component assumes `list` is always an array. If `list` is undefined or null (e.g., due to a data fetch returning unexpected shape), `list.map` will throw a TypeError and crash the component.",
+      "line": 88,
+      "suggestion": "Add a guard to ensure list is an array before calling .map, or default to empty array."
+    },
+    {
+      "filename": "src/components/NotificationDropdown.jsx",
+      "type": "runtime",
+      "severity": "medium",
+      "message": "The `iconForType(n.type)` function could throw a runtime error if `n.type` is undefined or an unexpected value, causing the entire notification list to fail to render.",
+      "line": 114,
+      "suggestion": "Ensure iconForType handles unknown or missing types gracefully, returning a default icon."
+    },
+    {
+      "filename": "src/components/NotificationDropdown.jsx",
+      "type": "runtime",
+      "severity": "medium",
+      "message": "The `timeAgo(n.created_at)` function could throw if `n.created_at` is undefined, null, or an invalid date string, causing the notification item to crash.",
+      "line": 119,
+      "suggestion": "Add a fallback or guard in timeAgo to handle missing/invalid dates."
+    },
+    {
+      "filename": "src/components/NotificationDropdown.jsx",
+      "type": "best_practice",
+      "severity": "low",
+      "message": "The onClick handler calls markOneRead and router.push without awaiting the fetch. If the fetch fails, the navigation still occurs, potentially navigating to a link without marking the notification as read.",
+      "line": 96,
+      "suggestion": "Consider awaiting markOneRead before navigating, or handle the failure gracefully."
+    },
+    {
+      "filename": "src/components/NotificationDropdown.jsx",
+      "type": "runtime",
+      "severity": "medium",
+      "message": "Potential runtime crash if n.title is null or undefined",
+      "line": 180,
+      "suggestion": "Add null check for n.title before rendering"
+    },
+    {
+      "filename": "src/components/NotificationDropdown.jsx",
+      "type": "runtime",
+      "severity": "medium",
+      "message": "Potential runtime crash if n.message is null or undefined",
+      "line": 181,
+      "suggestion": "Add null check for n.message before rendering"
+    },
+    {
+      "filename": "src/components/NotificationDropdown.jsx",
+      "type": "runtime",
+      "severity": "medium",
+      "message": "Potential runtime crash if n.created_at is null or undefined",
+      "line": 182,
+      "suggestion": "Add null check for n.created_at before passing to timeAgo function"
+    },
+    {
+      "filename": "src/components/NotificationDropdown.jsx",
+      "type": "null_check",
+      "severity": "medium",
+      "message": "Missing null/undefined checks on n.title, n.message, and n.created_at. If any notification object has missing or null fields, accessing .title, .message, or .created_at will throw a runtime TypeError, crashing the component and breaking the dropdown.",
+      "line": 180,
+      "suggestion": "Add optional chaining or fallback values for each property to prevent crashes on malformed data."
+    },
+    {
+      "filename": "src/components/NotificationDropdown.jsx",
+      "type": "maintainability",
+      "severity": "low",
+      "message": "Inline styles and hardcoded border color ('var(--border-default)') are used instead of CSS classes. This reduces maintainability and consistency with the rest of the component.",
+      "line": 187,
+      "suggestion": "Replace inline styles with CSS classes defined in the component's stylesheet or module."
+    },
+    {
+      "filename": "src/components/NotificationDropdown.jsx",
+      "type": "null_pointer_exception",
+      "severity": "medium",
+      "message": "n.created_at may be null or undefined, causing timeAgo() to throw a runtime error and crash the component.",
+      "line": 182,
+      "suggestion": "Add a fallback or guard for n.created_at before passing to timeAgo."
+    },
+    {
+      "filename": "src/components/NotificationDropdown.jsx",
+      "type": "null_check",
+      "severity": "medium",
+      "message": "The `timeAgo` function is called with `n.created_at` without a null/undefined check. If `n.created_at` is null or undefined, `timeAgo` may throw an error or produce incorrect output, causing the notification to render incorrectly or crash.",
+      "line": 182,
+      "suggestion": "Add a fallback or guard for null/undefined `n.created_at` before passing to `timeAgo`."
+    },
+    {
+      "filename": "src/components/NotificationDropdown.jsx",
+      "type": "uiux",
+      "severity": "medium",
+      "message": "The 'Open alerts inbox' link uses inline styles and a generic div container instead of proper semantic HTML and CSS classes. This may cause styling inconsistencies and accessibility issues.",
+      "line": 187,
+      "suggestion": "Replace inline styles with CSS module or styled component classes, and use a proper footer element with semantic HTML."
+    },
+    {
+      "filename": "src/components/NotificationDropdown.jsx",
+      "type": "uiux",
+      "severity": "medium",
+      "message": "The notification list (line 185) does not show an empty state when there are no notifications. Users will see a blank dropdown with only the footer link, which is confusing.",
+      "line": 185,
+      "suggestion": "Add a conditional empty state message when the notifications array is empty or undefined."
+    },
+    {
+      "filename": "src/components/NotificationDropdown.jsx",
+      "type": "error_handling",
+      "severity": "medium",
+      "message": "The Link component's onClick event does not handle potential errors when setting the setOpen state",
+      "line": 188,
+      "suggestion": "Add try-catch blocks to handle potential errors when setting the state"
+    },
+    {
+      "filename": "src/components/NotificationDropdown.jsx",
+      "type": "code_smell",
+      "severity": "low",
+      "message": "The code uses inline styles, which can make the code harder to read and maintain",
+      "line": 193,
+      "suggestion": "Consider extracting the styles into a separate CSS file or using a CSS-in-JS solution"
+    },
+    {
+      "filename": "src/components/NotificationDropdown.jsx",
+      "type": "uiux",
+      "severity": "low",
+      "message": "The 'Open alerts inbox' link lacks an aria-label attribute, which may reduce accessibility for screen reader users.",
+      "line": 188,
+      "suggestion": "Add an aria-label to the link for better screen reader support."
+    },
+    {
+      "filename": "src/components/NotificationDropdown.jsx",
+      "type": "maintainability",
+      "severity": "medium",
+      "message": "The code snippet is a partial file and lacks context, making it difficult to review thoroughly.",
+      "line": 188,
+      "suggestion": "Provide the full file or more context to ensure a thorough review."
+    },
+    {
+      "filename": "src/components/SocialIcons.jsx",
+      "type": "uiux",
+      "severity": "low",
+      "message": "IconFacebook SVG uses `aria-hidden` without an `aria-label` or accessible name. If the icon is used as a standalone link (e.g., wrapped in an <a>), screen readers will have no accessible name.",
+      "line": 6,
+      "suggestion": "Add an `aria-label` prop or ensure the parent element provides an accessible name."
+    },
+    {
+      "filename": "src/components/SocialIcons.jsx",
+      "type": "uiux",
+      "severity": "low",
+      "message": "IconInstagram SVG uses `aria-hidden` without an `aria-label` or accessible name. Same accessibility concern as IconFacebook.",
+      "line": 14,
+      "suggestion": "Add an `aria-label` prop or ensure the parent element provides an accessible name."
+    },
+    {
+      "filename": "src/components/SocialIcons.jsx",
+      "type": "uiux",
+      "severity": "low",
+      "message": "IconFacebook: The SVG has `aria-hidden` but no `aria-label` or `role=\"img\"` with a descriptive title. If these icons are used as interactive elements (e.g., links), they will be inaccessible to screen readers.",
+      "line": 2,
+      "suggestion": "Add a descriptive `<title>` inside the SVG and set `role=\"img\"` for better accessibility."
+    },
+    {
+      "filename": "src/components/SocialIcons.jsx",
+      "type": "uiux",
+      "severity": "low",
+      "message": "IconInstagram: Same accessibility issue as IconFacebook \u2014 missing descriptive label for screen readers.",
+      "line": 10,
+      "suggestion": "Add a descriptive `<title>` and `role=\"img\"`."
+    },
+    {
+      "filename": "src/components/SocialIcons.jsx",
+      "type": "uiux",
+      "severity": "low",
+      "message": "IconLinkedIn: Same accessibility issue as IconFacebook \u2014 missing descriptive label for screen readers.",
+      "line": 18,
+      "suggestion": "Add a descriptive `<title>` and `role=\"img\"`."
+    },
+    {
+      "filename": "src/components/SocialIcons.jsx",
+      "type": "best_practice",
+      "severity": "low",
+      "message": "The `aria-hidden` attribute is set without a value, which is technically valid but less explicit. Using `aria-hidden={true}` would be clearer and more consistent with React conventions.",
+      "line": 1,
+      "suggestion": "Use `aria-hidden={true}` instead of just `aria-hidden` for clarity and consistency."
+    },
+    {
+      "filename": "src/components/SocialIcons.jsx",
+      "type": "code_smell",
+      "severity": "low",
+      "message": "Inline SVGs could be extracted into separate components for better reusability",
+      "line": 29,
+      "suggestion": "Extract the SVGs into separate components"
+    },
+    {
+      "filename": "src/components/SocialIcons.jsx",
+      "type": "code_smell",
+      "severity": "low",
+      "message": "The SOCIAL_PLATFORM_ORDER array could be defined as a constant outside of the component for easier modification and access",
+      "line": 37,
+      "suggestion": "Define the SOCIAL_PLATFORM_ORDER array as a constant outside of the component"
+    },
+    {
+      "filename": "src/components/SocialIcons.jsx",
+      "type": "uiux",
+      "severity": "low",
+      "message": "The SVG element uses `aria-hidden` but lacks a `role=\"img\"` and a descriptive `<title>` or `aria-label`. This may cause screen readers to ignore the icon entirely, which is acceptable for purely decorative icons but should be intentional.",
+      "line": 5,
+      "suggestion": "If the icon is decorative, keep `aria-hidden` and remove `role=\"img\"`. If it conveys information, add a `<title>` or `aria-label` and remove `aria-hidden`."
+    },
+    {
+      "filename": "src/components/SocialIcons.jsx",
+      "type": "maintainability",
+      "severity": "medium",
+      "message": "The SOCIAL_PLATFORM_ORDER array is defined with a fixed set of social media platforms, which might not be scalable if more platforms need to be added in the future.",
+      "line": 37,
+      "suggestion": "Consider using a more dynamic approach to define the social media platforms, such as using an external configuration file or a database."
+    },
+    {
+      "filename": "src/components/SocialIcons.jsx",
+      "type": "best_practice",
+      "severity": "low",
+      "message": "SOCIAL_PLATFORM_ORDER is exported as a mutable array reference. Consumers could accidentally push/pop/splice the array, causing side effects across the application.",
+      "line": 37,
+      "suggestion": "Use Object.freeze() on the array to prevent accidental mutation, or use a readonly tuple type if using TypeScript."
+    },
+    {
+      "filename": "src/components/SocialIcons.jsx",
+      "type": "reliability",
+      "severity": "low",
+      "message": "SOCIAL_PLATFORM_ORDER references Icon components (IconTwitter, IconFacebook, IconInstagram, IconLinkedIn) that are not defined in this chunk. If any of these components fail to import or are undefined, the entire module will throw at load time, crashing any component that imports SOCIAL_PLATFORM_ORDER.",
+      "line": 37,
+      "suggestion": "Ensure all Icon components are properly imported and exported in the parent module, or add a runtime check to gracefully handle missing icons."
+    },
+    {
+      "filename": "src/components/EntityLogo.js",
+      "type": "bug",
+      "severity": "medium",
+      "message": "handleError updates state (setIdx) when the image fails, but with only one candidate (idx=0, candidates.length=1), the condition idx + 1 < candidates.length is false, so idx remains 0. This causes React to re-render, the img element to attempt loading the same broken URL again, triggering another onError, leading to an infinite re-render loop until React's error boundary or max update depth is hit.",
+      "line": 21,
+      "suggestion": "Prevent re-rendering on error when there are no remaining candidates by either not calling setIdx or by tracking the error state separately to avoid re-mounting the img element."
+    },
+    {
+      "filename": "src/components/employer/EmployerCalendarGrid.jsx",
+      "type": "runtime",
+      "severity": "medium",
+      "message": "The for...of loop on line 21 will throw a TypeError if `items` is null or undefined, which can happen if the parent component passes an API response that is not an array.",
+      "line": 21,
+      "suggestion": "Add a guard to default items to an empty array if it is null or undefined."
+    },
+    {
+      "filename": "src/components/employer/EmployerCalendarGrid.jsx",
+      "type": "bug",
+      "severity": "medium",
+      "message": "Using `ev.id` as the React key without a fallback can cause duplicate key warnings or rendering bugs if two events have the same id (e.g., undefined or null).",
+      "line": 101,
+      "suggestion": "Use a composite key like `${ev.id}-${ev.title}` or fall back to index if id is missing."
+    },
+    {
+      "filename": "src/components/employer/EmployerCalendarGrid.jsx",
+      "type": "uiux",
+      "severity": "low",
+      "message": "The calendar limits displayed events to 4 per day with no visual indicator that more events exist. Users may miss events.",
+      "line": 99,
+      "suggestion": "Add a '+N more' chip when events exceed the limit to indicate overflow."
+    },
+    {
+      "filename": "src/components/messaging/ConvBubble.jsx",
+      "type": "edge_case",
+      "severity": "low",
+      "message": "If `side` is undefined or null, `isRight` will be false, defaulting to left alignment. This is acceptable but could be made explicit with a default prop or validation.",
+      "line": 6,
+      "suggestion": "Add a default value for `side` or validate it to avoid unexpected layout behavior."
+    },
+    {
+      "filename": "src/instrumentation.js",
+      "type": "error_handling",
+      "severity": "medium",
+      "message": "Unhandled error from assertNextAuthSecretIfProduction() will crash the server process on startup if NEXTAUTH_SECRET is missing or misconfigured. This provides no graceful degradation or helpful error message to operators.",
+      "line": 4,
+      "suggestion": "Wrap the assertion call in a try-catch block with a descriptive error message and process.exit(1) to ensure clean shutdown with actionable feedback."
+    },
+    {
+      "filename": "src/instrumentation.js",
+      "type": "observability",
+      "severity": "low",
+      "message": "No logging or instrumentation around the dynamic import or assertion call, making it difficult to diagnose startup failures in production.",
+      "line": 3,
+      "suggestion": "Add a startup log message to indicate the validation check is running, which helps operators confirm the instrumentation hook executed."
+    },
+    {
+      "filename": "src/config/devScreenIds.js",
+      "type": "performance",
+      "severity": "low",
+      "message": "Object.keys(DEV_SCREEN_BY_PATH) is called on every invocation of getDevScreenId, creating a new sorted array each time. For a dev-only utility this is negligible, but it could be cached outside the function for consistency.",
+      "line": 92,
+      "suggestion": "Cache the sorted keys array outside the function to avoid recomputation on every call."
+    },
+    {
+      "filename": "src/components/SessionAdBanner.jsx",
+      "type": "runtime",
+      "severity": "high",
+      "message": "If ADS array is empty (e.g., due to build-time error or misconfiguration), `ADS[0]` returns undefined, and accessing `ad.accent` on line 82 will throw a TypeError, crashing the component.",
+      "line": 70,
+      "suggestion": "Add a guard to return null if ADS is empty before accessing ad properties."
+    },
+    {
+      "filename": "src/components/SessionAdBanner.jsx",
+      "type": "code_smell",
+      "severity": "low",
+      "message": "Function `showSessionAds` is named with a verb prefix suggesting it's a hook or side-effect function, but it's a pure boolean getter. This can confuse maintainers.",
+      "line": 10,
+      "suggestion": "Rename to `shouldShowSessionAds` or `isSessionAdsEnabled` for clarity."
+    },
+    {
+      "filename": "src/components/SessionAdBanner.jsx",
+      "type": "code_smell",
+      "severity": "low",
+      "message": "The call to `showSessionAds()` is not updated if the function is renamed, but this is a minor consistency issue.",
+      "line": 113,
+      "suggestion": "Update the call site to match the renamed function."
+    },
+    {
+      "filename": "src/components/import/ImportCsvSplitButton.jsx",
+      "type": "error_handling",
+      "severity": "high",
+      "message": "Unhandled promise rejection in onChange handler: if onFileSelected throws an async error, the promise is not caught, causing an unhandled rejection that could crash the client-side rendering in Next.js.",
+      "line": 58,
+      "suggestion": "Wrap the await in a try/catch block and optionally notify the user of the failure."
+    },
+    {
+      "filename": "src/components/import/ImportCsvSplitButton.jsx",
+      "type": "uiux",
+      "severity": "medium",
+      "message": "Hidden file input lacks an associated label or aria-label, making it inaccessible to screen readers. The aria-hidden attribute hides it entirely, but the input should still be programmatically associated with the visible button.",
+      "line": 67,
+      "suggestion": "Add an aria-label to the input or use aria-labelledby pointing to the button."
+    },
+    {
+      "filename": "src/components/import/ImportCsvSplitButton.jsx",
+      "type": "uiux",
+      "severity": "medium",
+      "message": "The dropdown menu does not implement focus trapping or active descendant management, which can cause keyboard navigation issues for screen reader users after the menu opens.",
+      "line": 97,
+      "suggestion": "Use a proper menu pattern with aria-activedescendant or manual focus management, and trap focus within the menu while open."
+    },
+    {
+      "filename": "src/components/import/ImportCsvSplitButton.jsx",
+      "type": "performance",
+      "severity": "low",
+      "message": "The useEffect adds and removes event listeners on every menuOpen change, which is acceptable but could be optimized by using a stable callback reference to avoid unnecessary cleanup and re-registration.",
+      "line": 29,
+      "suggestion": "Use useCallback for the event handlers and keep them stable, or use a ref to track menuOpen inside the listener."
+    },
+    {
+      "filename": "src/components/ProfileLinkKindIcon.jsx",
+      "type": "bug",
+      "severity": "low",
+      "message": "The `className` prop is spread into SVG attributes as `{className}` instead of the standard `className` attribute. In React, SVG elements accept `className` as a prop, but spreading an object with a `className` key may not work as expected in all environments (e.g., if the SVG element's props are not spread correctly). This could cause custom class names to be silently ignored.",
+      "line": 9,
+      "suggestion": "Pass className directly as a prop to the SVG element instead of spreading it from an object."
+    },
+    {
+      "filename": "src/components/ProfileLinkKindIcon.jsx",
+      "type": "code_smell",
+      "severity": "low",
+      "message": "The `box` constant is defined at module scope but is only used inside this single component. This is a minor code smell; it could be moved inside the component or inlined for better encapsulation.",
+      "line": 3,
+      "suggestion": "Move the `box` object inside the component function or define it as a constant within the component scope."
+    },
+    {
+      "filename": "src/lib/auditLog.js",
+      "type": "observability",
+      "severity": "medium",
+      "message": "Error logging on line 40 only logs e.message, missing the stack trace. In production, this makes debugging audit log failures difficult as the context of the error (e.g., which query failed, what parameters were used) is lost.",
+      "line": 40,
+      "suggestion": "Log the full error object including stack trace to aid debugging."
+    },
+    {
+      "filename": "src/lib/auditLog.js",
+      "type": "database",
+      "severity": "medium",
+      "message": "The `audit_logs` table referenced in the INSERT query does not exist in the provided database schema. This will cause a silent failure (caught by the try/catch) in production, meaning audit logs will never be persisted.",
+      "line": 1,
+      "suggestion": "Add the `audit_logs` table to the database schema or verify it exists in the target environment."
+    },
+    {
+      "filename": "src/lib/auditLog.js",
+      "type": "edge_case",
+      "severity": "low",
+      "message": "JSON.stringify on oldValues/newValues can throw if the object contains circular references (e.g., from a complex ORM model). This would cause the entire audit log write to fail silently.",
+      "line": 34,
+      "suggestion": "Wrap JSON.stringify in a try/catch or use a safe stringify library to handle circular references gracefully."
+    },
+    {
+      "filename": "src/lib/assertAuthEnv.js",
+      "type": "dead_code",
+      "severity": "medium",
+      "message": "The function `assertNextAuthSecretIfProduction` is defined but never imported or called anywhere in the provided codebase context. This means the validation is dead code and will not prevent a production startup with a weak or missing NEXTAUTH_SECRET.",
+      "line": 22,
+      "suggestion": "Call `assertNextAuthSecretIfProduction()` at the top of the application entry point (e.g., `src/app/layout.js` or `src/middleware.js`) to ensure it runs before any request is handled."
+    },
+    {
+      "filename": "src/lib/assertAuthEnv.js",
+      "type": "configuration",
+      "severity": "low",
+      "message": "The `isProductionDeploy` function only checks `NODE_ENV === 'production'` or `VERCEL_ENV === 'production'`. In custom production environments (e.g., Docker, AWS ECS, on-premise) where neither is set to 'production', the validation will be skipped, potentially allowing a weak secret.",
+      "line": 11,
+      "suggestion": "Add a more robust production detection, such as checking for a custom env var (e.g., `APP_ENV === 'production'`) or treat any non-development/test environment as production."
+    },
+    {
+      "filename": "src/lib/adminSettingsValidate.js",
+      "type": "null_pointer_exception",
+      "severity": "high",
+      "message": "adminSettingsAuditSummary accesses properties on parameter `n` without null/undefined check. If called with null or undefined, it will throw a TypeError and crash the request.",
+      "line": 78,
+      "suggestion": "Add a guard clause returning an empty object or a safe default when n is null/undefined."
+    },
+    {
+      "filename": "src/lib/adminSettingsValidate.js",
+      "type": "validation",
+      "severity": "medium",
+      "message": "fromEmail is optional (no required check) but if empty, SMTP may be misconfigured silently. The validation allows empty string, but the SMTP configuration will likely fail at runtime without a valid from address.",
+      "line": 56,
+      "suggestion": "Consider making fromEmail required when smtpHost is provided, or add a warning log."
+    },
+    {
+      "filename": "src/lib/adminSettingsValidate.js",
+      "type": "logic",
+      "severity": "low",
+      "message": "smtpConfigured heuristic uses `Number(n.smtpPort) > 0` which would return true for port 0. Port 0 is invalid for SMTP, so this is a false positive.",
+      "line": 88,
+      "suggestion": "Change the check to `Number(n.smtpPort) >= 1` to exclude port 0."
+    },
+    {
+      "filename": "src/lib/academicYear.js",
+      "type": "input_validation",
+      "severity": "medium",
+      "message": "The function does not check if the input date is valid",
+      "line": 1,
+      "suggestion": "Add input validation to check if the date is valid"
+    },
+    {
+      "filename": "src/lib/academicYear.js",
+      "type": "input_validation",
+      "severity": "medium",
+      "message": "The function does not check if the center year is in the correct format",
+      "line": 10,
+      "suggestion": "Add input validation to check if the center year is in the correct format"
+    },
+    {
+      "filename": "src/lib/academicYear.js",
+      "type": "input_validation",
+      "severity": "medium",
+      "message": "The function does not check if the count is a positive integer",
+      "line": 14,
+      "suggestion": "Add input validation to check if the count is a positive integer"
+    }
+  ]
+}

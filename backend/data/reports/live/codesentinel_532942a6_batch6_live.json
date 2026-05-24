@@ -1,0 +1,79 @@
+{
+  "job_id": "532942a612254365",
+  "batch": 6,
+  "folder_path": "C:\\Users\\sandeep\\Downloads\\Claudes\\CampusPlacement\\campus-placement",
+  "model_used": "nvidia/meta/llama-3.3-70b-instruct",
+  "saved_at": "2026-05-03T23:25:00.531229",
+  "files": [
+    {
+      "filename": "src/app/dashboard/college/offers-upload/page.js",
+      "score": 86,
+      "summary": "The component is well-structured with proper loading states and error handling. The main risk is the lack of a screen tag (S-*) and missing export functionality for the offers table, which are critical SaaS completeness requirements. No security or runtime crash issues were found in this client component.",
+      "issues_count": 3
+    },
+    {
+      "filename": "src/app/dashboard/college/page.js",
+      "score": 96,
+      "summary": "The CollegeDashboardHubPage component is minimal and delegates all logic to DashboardFullScreenHub. The only risk is a potential runtime crash if session.user exists but session.user.role is undefined, which would cause DashboardFullScreenHub to receive an undefined role prop. Additionally, the skeleton loading state lacks a meaningful aria-label for accessibility. No critical security, data, or multi-tenancy issues are present in this thin wrapper component.",
+      "issues_count": 2
+    },
+    {
+      "filename": "src/app/dashboard/employer/assessment-summary/page.js",
+      "score": 99,
+      "summary": "This is a static documentation/navigation page with no data fetching, state management, or user input. The code is clean, well-structured, and accessible. The primary risk is the absence of a screen tag (S-*) for SaaS completeness and missing export functionality on a page that is purely informational. No security, runtime, or data integrity issues exist.",
+      "issues_count": 1
+    }
+  ],
+  "batch_score": 94,
+  "total_issues": 6,
+  "issues": [
+    {
+      "filename": "src/app/dashboard/college/offers-upload/page.js",
+      "type": "saas_completeness",
+      "severity": "high",
+      "message": "Screen tag (S-*) is missing. All screens must have a unique screen tag like S-1 for identification and traceability.",
+      "line": 1,
+      "suggestion": "Add a screen tag constant or comment at the top of the component, e.g., const SCREEN_TAG = 'S-1'; and optionally render it in a hidden element or data attribute."
+    },
+    {
+      "filename": "src/app/dashboard/college/offers-upload/page.js",
+      "type": "saas_completeness",
+      "severity": "medium",
+      "message": "No export functionality is provided for the offers data table. All tabular screens must have an export option (CSV/Excel).",
+      "line": 50,
+      "suggestion": "Add an export button that calls an API endpoint to download the offers data as CSV or Excel, similar to the existing downloadCsvFromApi pattern."
+    },
+    {
+      "filename": "src/app/dashboard/college/offers-upload/page.js",
+      "type": "error_handling",
+      "severity": "low",
+      "message": "The downloadCollegeOffersTemplate function is called without a try-catch, so if it throws, the error will be unhandled and may crash the page or leave the user without feedback.",
+      "line": 80,
+      "suggestion": "Wrap the downloadCollegeOffersTemplate call in a try-catch block and show an error toast on failure, similar to downloadAssessmentStarter."
+    },
+    {
+      "filename": "src/app/dashboard/college/page.js",
+      "type": "runtime",
+      "severity": "medium",
+      "message": "session.user.role may be undefined if the session object is incomplete or malformed, causing DashboardFullScreenHub to receive an undefined role prop. This could lead to a crash or incorrect rendering in the child component.",
+      "line": 22,
+      "suggestion": "Add a fallback or guard for session.user.role before passing it to DashboardFullScreenHub, or handle undefined role inside DashboardFullScreenHub."
+    },
+    {
+      "filename": "src/app/dashboard/college/page.js",
+      "type": "uiux",
+      "severity": "low",
+      "message": "The skeleton loading state has no aria-label or role='status' for screen readers, making the loading state inaccessible to users relying on assistive technology.",
+      "line": 11,
+      "suggestion": "Add aria-label='Loading dashboard' and role='status' to the skeleton container for accessibility."
+    },
+    {
+      "filename": "src/app/dashboard/employer/assessment-summary/page.js",
+      "type": "saas_completeness",
+      "severity": "low",
+      "message": "Missing screen tag (S-*) on the page. All screens should have a unique identifier for navigation and debugging.",
+      "line": 1,
+      "suggestion": "Add a screen tag comment or data attribute, e.g., <!-- S-EMP-ASSESSMENT-SUMMARY --> or a hidden span with id='screen-tag'."
+    }
+  ]
+}

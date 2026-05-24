@@ -1,0 +1,241 @@
+=================================================================
+  CODESENTINEL -- LIVE SCAN REPORT (auto-saved per file)
+=================================================================
+  Started   : 29/04/2026, 06:35:15
+  Folder    : C:\Users\sandeep\Downloads\Claudes\CampusPlacement\campus-placement
+  Total     : 214 files
+  Report ID : a04ddc8d
+  NOTE: This file updates after each file completes.
+        If the scan stops, this contains results so far.
+=================================================================
+
+=================================================================
+  FILE 1/214: fix_emojis.js
+  Score: 93/100   Issues: 3
+
+  The provided code is a JavaScript script that replaces emojis in a file with corresponding component names. The code is generally well-structured and readable. However, there are some potential issues and improvements that can be suggested. The code does not handle asynchronous operations, which could lead to performance issues. Additionally, the code does not validate the file path or the replacements object, which could lead to errors. The code also uses synchronous file operations, which could block the event loop. The biggest risk is the potential for data loss if the file cannot be written or if the replacements object is invalid. The code has a score of 80 due to these potential issues.
+
+  [MEDIUM] performance -- Line 12
+  The code uses synchronous file operations, which could block the event loop.
+  Fix: Use asynchronous file operations instead.
+
+  [LOW] readability -- Line 43
+  The code uses a for loop to iterate over the replacements object, which could be replaced with a more functional approach.
+  Fix: Use Object.keys() or Object.entries() to iterate over the object.
+
+  [MEDIUM] performance -- Line 55
+  The code uses synchronous file operations, which could block the event loop.
+  Fix: Use asynchronous file operations instead.
+
+=================================================================
+  FILE 2/214: generate_docs.py
+  Score: 94/100   Issues: 2
+
+  The provided Python script generates a user documentation document for the Campus Placement System. The code is generally well-structured and readable. However, there are some potential issues and improvements that can be made, such as error handling, input validation, and code organization. The script uses the python-docx library to create a Word document, which is a good choice for this task. Overall, the script is functional and produces the desired output, but it can be improved with some refinements.
+
+  [MEDIUM] error_handling -- Line 3
+  The script does not handle the case where the python-docx package is not installed. While it does print an error message and exit, it would be better to provide more detailed instructions on how to install the package.
+  Fix: Add more detailed instructions on how to install the python-docx package.
+
+  [MEDIUM] error_handling -- Line 103
+  The script does not handle the case where the file path provided as an argument is invalid or the file cannot be saved. While it does print an error message and exit, it would be better to provide more detailed instructions on how to fix the issue.
+  Fix: Add more detailed instructions on how to fix the issue with the file path.
+
+=================================================================
+  FILE 3/214: generate_faqs.js
+  Score: 81/100   Issues: 4
+
+  The provided JavaScript code generates FAQs for various routes in the Campus Placement System. The code is generally well-structured, but there are some areas that need improvement, such as error handling, code organization, and potential security vulnerabilities. The score is 80 due to the lack of input validation, potential null pointer exceptions, and missing error handling in certain cases.
+
+  [MEDIUM] bug -- Line 78
+  Potential null pointer exception when accessing parts[parts.length - 1] or parts[1] if the routePath is empty or does not contain a '/' character.
+  Fix: Add null checks for parts[parts.length - 1] and parts[1] to prevent null pointer exceptions.
+
+  [MEDIUM] performance -- Line 135
+  The buildHTML function is not optimized for performance. It uses string concatenation to build the HTML, which can be slow for large inputs.
+  Fix: Use a template engine or a more efficient string building method to improve performance.
+
+  [HIGH] security -- Line 169
+  The code uses process.argv[2] to get the output path, which can be a security vulnerability if the input is not validated.
+  Fix: Validate the input path to prevent potential security vulnerabilities.
+
+  [MEDIUM] error_handling -- Line 170
+  The code does not handle errors properly when creating the output directory or writing to the file.
+  Fix: Add try-catch blocks to handle errors when creating the output directory or writing to the file.
+
+=================================================================
+  FILE 4/214: run-sql.js
+  Score: 71/100   Issues: 5
+
+  The provided JavaScript script is generally well-structured and readable. However, there are several potential issues that need to be addressed, including the lack of input validation, potential SQL injection vulnerabilities, and missing error handling. The script also uses a hardcoded database connection string and does not handle connection timeouts or idle timeouts properly. Additionally, the script does not check for the existence of the 'db/schema.sql' and 'db/seed.sql' files before attempting to read them, which could lead to errors if these files do not exist.
+
+  [HIGH] security -- Line 23
+  The script uses a hardcoded database connection string, which is a security risk. The connection string should be stored in an environment variable or a secure configuration file.
+  Fix: Store the database connection string in an environment variable or a secure configuration file.
+
+  [MEDIUM] security -- Line 36
+  The script sets the 'rejectUnauthorized' option to 'false', which can make the connection vulnerable to man-in-the-middle attacks. This option should be set to 'true' in production environments.
+  Fix: Set the 'rejectUnauthorized' option to 'true' in production environments.
+
+  [MEDIUM] error_handling -- Line 57
+  The script does not check for the existence of the 'db/schema.sql' and 'db/seed.sql' files before attempting to read them. This could lead to errors if these files do not exist.
+  Fix: Check for the existence of the 'db/schema.sql' and 'db/seed.sql' files before attempting to read them.
+
+  [HIGH] security -- Line 64
+  The script uses a raw SQL query to drop the public schema, which can be vulnerable to SQL injection attacks. This query should be parameterized or use a prepared statement.
+  Fix: Use a parameterized query or a prepared statement to drop the public schema.
+
+  [MEDIUM] error_handling -- Line 67
+  The script does not handle errors that may occur when reading the 'db/schema.sql' file. This could lead to unexpected behavior if an error occurs.
+  Fix: Handle errors that may occur when reading the 'db/schema.sql' file.
+
+=================================================================
+  FILE 5/214: run_tests.js
+  Score: 86/100   Issues: 3
+
+  The provided JavaScript code is generally well-structured and readable. However, there are several potential issues that need to be addressed, including missing error handling, potential security vulnerabilities, and performance concerns. The code score is 80 due to the identified issues. The biggest risk is the lack of proper error handling, which can lead to unexpected behavior or crashes. There are also some security concerns, such as the use of synchronous file operations and the potential for cross-site scripting (XSS) attacks.
+
+  [HIGH] error_handling -- Line 11
+  The code does not handle errors properly, which can lead to unexpected behavior or crashes. The error is caught and logged, but the program continues to run, which can cause further issues.
+  Fix: Implement proper error handling, such as retrying the operation or exiting the program with a non-zero exit code.
+
+  [MEDIUM] performance -- Line 67
+  The code uses synchronous file operations, which can block the event loop and cause performance issues.
+  Fix: Use asynchronous file operations instead, such as fs.promises.readFile() and fs.promises.rename().
+
+  [LOW] security -- Line 19
+  The code appends a new style element to the HTML document without proper sanitization, which can lead to cross-site scripting (XSS) attacks.
+  Fix: Use a library like DOMPurify to sanitize the HTML content before appending it to the document.
+
+=================================================================
+  FILE 6/214: scripts/run-migration-002.js
+  Score: 71/100   Issues: 5
+
+  The provided JavaScript script for running database migrations is generally well-structured and readable. However, there are several potential issues that need to be addressed, including missing error handling, potential SQL injection vulnerabilities, and lack of input validation. The script also assumes that the .env.local file exists and contains the required environment variables, which could lead to errors if this is not the case. The biggest risk is the potential for data corruption or security breaches due to the lack of proper error handling and input validation. The issue breakdown by severity is: high (5), medium (3), low (2). One positive aspect is that the script uses a parameterized query to execute the SQL migration, which helps prevent SQL injection attacks.
+
+  [MEDIUM] security -- Line 15
+  The script reads the .env.local file and extracts the database URL, but it does not validate the input. This could lead to errors or security vulnerabilities if the file is not in the expected format.
+  Fix: Add input validation to ensure that the database URL is in the expected format.
+
+  [HIGH] security -- Line 23
+  The script uses the database URL from the environment variables or the .env.local file, but it does not check if the URL is valid or if the database connection is secure.
+  Fix: Add checks to ensure that the database URL is valid and that the connection is secure.
+
+  [MEDIUM] error_handling -- Line 42
+  The script catches errors during the migration process, but it does not provide detailed error messages or logging. This could make it difficult to diagnose and fix issues.
+  Fix: Add detailed error messages and logging to help diagnose and fix issues.
+
+  [HIGH] security -- Line 54
+  The script creates a new Client instance with the database URL, but it does not check if the URL is valid or if the connection is secure.
+  Fix: Add checks to ensure that the database URL is valid and that the connection is secure.
+
+  [MEDIUM] error_handling -- Line 61
+  The script catches errors during the migration process, but it does not provide detailed error messages or logging. This could make it difficult to diagnose and fix issues.
+  Fix: Add detailed error messages and logging to help diagnose and fix issues.
+
+=================================================================
+  FILE 7/214: scripts/seed_email_marketing_sqlite.py
+  Score: 93/100   Issues: 3
+
+  The provided Python script for seeding email marketing data into a SQLite database is generally well-structured and readable. However, there are some potential issues that need to be addressed, including missing error handling, potential SQL injection vulnerabilities, and lack of input validation. The script assumes that the database and table already exist, and does not handle cases where they may not. Additionally, the script uses a hardcoded list of URLs, which may not be desirable in a production environment. Overall, the script appears to be functional, but could benefit from additional error handling and input validation to make it more robust.
+
+  [MEDIUM] error_handling -- Line 56
+  The script does not handle potential errors that may occur when connecting to the database.
+  Fix: Add try-except blocks to handle potential errors when connecting to the database.
+
+  [LOW] security -- Line 75
+  The script uses a hardcoded list of URLs, which may not be desirable in a production environment.
+  Fix: Consider using a more secure method to store and retrieve the list of URLs, such as using environment variables or a secure configuration file.
+
+  [MEDIUM] error_handling -- Line 90
+  The script does not handle potential errors that may occur when committing changes to the database.
+  Fix: Add try-except blocks to handle potential errors when committing changes to the database.
+
+=================================================================
+  FILE 8/214: src/app/api/admin/colleges/route.js
+  Score: 83/100   Issues: 4
+
+  The provided code is generally well-structured and readable. However, there are several potential issues that need to be addressed, including missing error handling for database queries, potential SQL injection vulnerabilities, and lack of input validation for pagination parameters. The code also lacks logging and monitoring for errors and performance issues. Overall, the code score is 80, with deductions for security and reliability concerns.
+
+  [HIGH] security -- Line 18
+  Potential SQL injection vulnerability in database query
+  Fix: Use parameterized queries or prepared statements to prevent SQL injection
+
+  [MEDIUM] validation -- Line 14
+  Missing input validation for pagination parameters
+  Fix: Validate pagination parameters to prevent potential errors or security issues
+
+  [MEDIUM] error_handling -- Line 53
+  Missing error handling for database queries
+  Fix: Implement error handling for database queries to prevent crashes or unexpected behavior
+
+  [LOW] readability -- Line 38
+  Code can be refactored for better readability and maintainability
+  Fix: Refactor code to improve readability and maintainability
+
+=================================================================
+  FILE 9/214: src/app/api/admin/dashboard/route.js
+  Score: 90/100   Issues: 4
+
+  The provided code is generally well-structured and readable. However, there are several potential issues that need to be addressed, including missing error handling, potential SQL injection vulnerabilities, and inconsistent data parsing. The code also lacks input validation and does not handle cases where the database queries return null or empty results. The score is 70 due to the presence of these issues, which could lead to security vulnerabilities, data corruption, or crashes in production.
+
+  [MEDIUM] security -- Line 14
+  The SQL query is vulnerable to SQL injection attacks because it uses string concatenation to build the query. Although the query is currently safe, it's recommended to use parameterized queries to prevent potential SQL injection attacks.
+  Fix: Use parameterized queries to prevent SQL injection attacks.
+
+  [MEDIUM] security -- Line 22
+  The SQL query is vulnerable to SQL injection attacks because it uses string concatenation to build the query. Although the query is currently safe, it's recommended to use parameterized queries to prevent potential SQL injection attacks.
+  Fix: Use parameterized queries to prevent SQL injection attacks.
+
+  [LOW] readability -- Line 30
+  The variable 'stats' is assigned a default value of an empty object if 'statsQuery?.rows?.[0]' is null or undefined. Consider adding a null check to handle this case explicitly.
+  Fix: Add a null check to handle the case where 'statsQuery?.rows?.[0]' is null or undefined.
+
+  [MEDIUM] error_handling -- Line 31
+  The code does not handle cases where the database queries return null or empty results. Consider adding error handling to handle these cases.
+  Fix: Add error handling to handle cases where the database queries return null or empty results.
+
+=================================================================
+  FILE 10/214: src/app/api/admin/employers/route.js
+  Score: 90/100   Issues: 4
+
+  The provided code is generally well-structured and readable. However, there are several potential issues that need to be addressed, including missing error handling, potential SQL injection vulnerabilities, and lack of input validation. The code also lacks proper logging and monitoring, which can make it difficult to debug and troubleshoot issues. Overall, the code score is 80, with several medium-severity issues that need to be addressed.
+
+  [MEDIUM] security -- Line 9
+  Missing input validation for session user role
+  Fix: Add input validation to ensure the session user role is valid and authorized
+
+  [MEDIUM] security -- Line 14
+  Potential SQL injection vulnerability in query parameters
+  Fix: Use parameterized queries or prepared statements to prevent SQL injection
+
+  [LOW] performance -- Line 18
+  Missing indexing on query columns
+  Fix: Add indexing on query columns to improve query performance
+
+  [MEDIUM] error_handling -- Line 32
+  Missing error handling for query results
+  Fix: Add error handling to handle query result errors
+
+=================================================================
+  FILE 11/214: src/app/api/admin/pending-registrations/route.js
+  Score: 90/100   Issues: 4
+
+  The provided code is generally well-structured and readable. However, there are several potential issues that need to be addressed, including missing error handling, potential SQL injection vulnerabilities, and inconsistent coding practices. The code score is 82, with deductions for security and reliability concerns.
+
+  [MEDIUM] security -- Line 17
+  Potential SQL injection vulnerability in the SELECT query. Although the query uses parameterized placeholders, it's essential to ensure that the input data is properly sanitized.
+  Fix: Validate and sanitize the input data to prevent potential SQL injection attacks.
+
+  [LOW] readability -- Line 67
+  Inconsistent coding practice: the code uses both single and double quotes for string literals.
+  Fix: Use consistent quoting throughout the code.
+
+  [MEDIUM] error_handling -- Line 92
+  Missing error handling for the UPDATE query. If the query fails, the error will not be properly handled.
+  Fix: Add try-catch blocks to handle potential errors.
+
+  [MEDIUM] security -- Line 128
+  Potential security vulnerability: the code assumes that the tenant_id is always present, but it may be null or undefined.
+  Fix: Add null checks to ensure that the tenant_id is present before using it.
+

@@ -1,0 +1,841 @@
+=================================================================
+  CODESENTINEL -- LIVE SCAN REPORT (auto-saved per file)
+=================================================================
+  Started   : 23/05/2026, 14:01:13
+  Folder    : C:\Users\sandeep\Downloads\Claudes\CampusPlacement\campus-placement
+  Total     : 1208 files
+  Report ID : dad5a400
+  NOTE: This file updates after each file completes.
+        If the scan stops, this contains results so far.
+=================================================================
+
+=================================================================
+  FILE 23/1208: .agents/skills/docx/scripts/office/helpers/__init__.py
+  Score: 100/100   Issues: 0   Provider: nvidia   Time: 9.82s
+
+  No code provided for review. The file appears to be empty.
+
+=================================================================
+  FILE 20/1208: .agents/skills/docx/scripts/__init__.py
+  Score: 100/100   Issues: 0   Provider: nvidia   Time: 7.93s
+
+  No code provided for review. Cannot assess security, reliability, or performance.
+
+=================================================================
+  FILE 1/1208: .agents/skills/algorithmic-art/templates/generator_template.js
+  Score: 92/100   Issues: 4   Provider: nvidia   Time: 41.81s
+
+  The provided code is a well-structured template for generative art using p5.js, following best practices for parameter organization, seeded randomness, and performance considerations. However, there are some areas that need improvement, such as adding more comments and documentation, handling potential errors, and considering security vulnerabilities. The code score is 85, with some minor issues and suggestions for improvement.
+
+  [MEDIUM] readability -- Line 24
+  The params object is not fully defined, consider adding more parameters or documenting the existing ones
+  Fix: Add more parameters or comments to explain the purpose of each parameter
+
+  [LOW] best_practice -- Line 43
+  The initializeSeed function is not checking for errors
+  Fix: Add error handling to the initializeSeed function
+
+  [MEDIUM] performance -- Line 53
+  The setup function is not optimized for performance
+  Fix: Consider using p5 vectors efficiently and limiting expensive operations
+
+  [LOW] security -- Line 131
+  The hexToRgb function is not validating user input
+  Fix: Add input validation to the hexToRgb function
+
+  🧪 Test Coverage Generator
+    - Test parameter updates and regeneration
+    - Test performance with large numbers of elements
+    - Test seeded randomness for reproducibility
+
+=================================================================
+  FILE 14/1208: .agents/skills/ckm-design-system/scripts/slide-token-validator.py
+  Score: 93/100   Issues: 3   Provider: nvidia   Time: 60.49s
+
+  The provided Python script is a legacy wrapper that delegates to another script for unified HTML validation. It appears to be well-structured and follows best practices. However, there are some potential issues and improvements that can be suggested. The script uses the subprocess module to run another Python script, which could potentially lead to security issues if not used carefully. Additionally, the script does not handle any exceptions that may occur during the execution of the subprocess. The script also uses the sys.argv to parse command-line arguments, which could be improved by using a more robust argument parsing library.
+
+  [MEDIUM] security -- Line 30
+  The script uses the subprocess module to run another Python script, which could potentially lead to security issues if not used carefully.
+  Fix: Consider using a more secure way to run the subprocess, such as using the run function from the subprocess module with the check argument set to True.
+
+  [MEDIUM] error_handling -- Line 30
+  The script does not handle any exceptions that may occur during the execution of the subprocess.
+  Fix: Consider adding a try-except block to handle any exceptions that may occur during the execution of the subprocess.
+
+  [LOW] best_practice -- Line 22
+  The script uses the sys.argv to parse command-line arguments, which could be improved by using a more robust argument parsing library.
+  Fix: Consider using a library such as argparse to parse command-line arguments.
+
+  🧪 Test Coverage Generator
+    - Should handle invalid command-line arguments
+    - Should handle exceptions during subprocess execution
+    - Should validate the existence of the unified validator script before running it
+
+=================================================================
+  FILE 25/1208: .agents/skills/docx/scripts/office/helpers/simplify_redlines.py
+  Score: 86/100   Issues: 3   Provider: nvidia   Time: 51.55s
+
+  The provided Python code appears to be well-structured and readable. However, there are some potential issues and improvements that can be suggested. The code seems to be handling XML parsing and manipulation, which can be error-prone if not handled correctly. There are also some potential security concerns, such as the use of `defusedxml.minidom` which may not be the most secure way to parse XML. Additionally, there are some areas where the code can be improved for better performance and readability.
+
+  [MEDIUM] security -- Line 29
+  Using `defusedxml.minidom` may not be the most secure way to parse XML. Consider using a more secure library.
+  Fix: Use a more secure XML parsing library, such as `xml.etree.ElementTree`
+
+  [HIGH] error_handling -- Line 44
+  The code does not handle exceptions correctly. It catches all exceptions and returns a generic error message.
+  Fix: Handle specific exceptions and provide more informative error messages
+
+  [LOW] readability -- Line 51
+  The variable name `tracked` is not very descriptive. Consider using a more descriptive name.
+  Fix: Use a more descriptive variable name, such as `tracked_changes`
+
+  🧪 Test Coverage Generator
+    - Should handle XML parsing errors correctly
+    - Should handle invalid XML input correctly
+    - Should handle large XML files correctly
+    - Should handle concurrent access to XML files correctly
+
+=================================================================
+  FILE 7/1208: .agents/skills/ckm-design/scripts/logo/core.py
+  Score: 100/100   Issues: 0   Provider: nvidia   Time: 53.60s
+
+  Could not parse model response.
+
+=================================================================
+  FILE 5/1208: .agents/skills/ckm-design/scripts/cip/search.py
+  Score: 93/100   Issues: 3   Provider: nvidia   Time: 52.18s
+
+  The provided Python script for searching CIP design guidelines appears to be well-structured and readable. However, there are some potential issues and improvements that can be suggested. The script lacks error handling for cases like invalid user input, database connection issues, or file not found errors. Additionally, the script uses hardcoded values and magic numbers in some places, which can make it less maintainable. The script also does not follow the principle of separation of concerns, as it mixes the concerns of parsing command-line arguments, searching the database, and formatting the output. The script can be improved by adding more comments and docstrings to explain its functionality and by using more descriptive variable names. The script can also be made more robust by adding try-except blocks to handle potential errors and exceptions.
+
+  [MEDIUM] error_handling -- Line 100
+  The script does not handle potential errors when generating the CIP brief
+  Fix: Add try-except blocks to handle potential errors and exceptions
+
+  [MEDIUM] error_handling -- Line 116
+  The script does not handle potential errors when searching the database
+  Fix: Add try-except blocks to handle potential errors and exceptions
+
+  [LOW] code_smell -- Line 13
+  The script uses a hardcoded value for the parent directory
+  Fix: Consider using a more dynamic approach to determine the parent directory
+
+  🧪 Test Coverage Generator
+    - Should handle invalid user input gracefully
+    - Should handle database connection issues
+    - Should handle file not found errors
+    - Should validate user input for security
+    - Should use parameterized queries to prevent SQL injection
+    - Should follow the principle of separation of concerns
+
+=================================================================
+  FILE 24/1208: .agents/skills/docx/scripts/office/helpers/merge_runs.py
+  Score: 93/100   Issues: 3   Provider: nvidia   Time: 58.21s
+
+  The provided Python script appears to be well-structured and readable. It effectively merges adjacent runs with identical formatting in DOCX files. However, there are some potential issues and improvements that can be suggested. The script does not handle exceptions well, and it does not check for potential XML parsing errors. Additionally, the script assumes that the input directory exists and that the 'document.xml' file is present in the 'word' directory. The script also does not validate the input directory path. The script uses the 'defusedxml' library to parse XML, which is a good practice to prevent XML-based attacks.
+
+  [MEDIUM] error_handling -- Line 23
+  The script does not handle exceptions well when parsing XML files.
+  Fix: Add try-except blocks to handle potential XML parsing errors.
+
+  [LOW] input_validation -- Line 17
+  The script assumes that the input directory exists and that the 'document.xml' file is present in the 'word' directory.
+  Fix: Add input validation to check if the input directory exists and if the 'document.xml' file is present.
+
+  [MEDIUM] error_handling -- Line 39
+  The script does not handle exceptions well when writing the modified XML file.
+  Fix: Add try-except blocks to handle potential errors when writing the modified XML file.
+
+  🧪 Test Coverage Generator
+    - Test case 1: Merge adjacent runs with identical formatting in a DOCX file.
+    - Test case 2: Handle exceptions when parsing XML files.
+    - Test case 3: Validate input directory path and check for the presence of 'document.xml' file.
+
+=================================================================
+  FILE 30/1208: .agents/skills/docx/scripts/office/validators/__init__.py
+  Score: 100/100   Issues: 0   Provider: nvidia   Time: 5.35s
+
+  The provided Python code is an empty __init__.py file for the validators module, which appears to be well-structured and readable. However, there are no significant issues or improvements to suggest as the file only contains import statements and an __all__ declaration. The score is high due to the lack of any potential security, reliability, or performance issues.
+
+=================================================================
+  FILE 9/1208: .agents/skills/ckm-design/scripts/logo/search.py
+  Score: 87/100   Issues: 5   Provider: nvidia   Time: 78.81s
+
+  The provided Python script for logo design search has a good structure and clear documentation. However, there are some potential issues and improvements that can be suggested. The script lacks error handling for cases like invalid query, domain, or max results. Additionally, the script does not validate the input for the brand name. The script also uses a simple CSV configuration which might not be suitable for large-scale applications. The script does not have any logging or monitoring mechanism which can make it difficult to debug and monitor the application.
+
+  [MEDIUM] error_handling -- Line 97
+  The script does not handle invalid query input
+  Fix: Add try-except block to handle invalid query input
+
+  [MEDIUM] error_handling -- Line 98
+  The script does not handle invalid domain input
+  Fix: Add try-except block to handle invalid domain input
+
+  [MEDIUM] error_handling -- Line 99
+  The script does not handle invalid max results input
+  Fix: Add try-except block to handle invalid max results input
+
+  [MEDIUM] input_validation -- Line 101
+  The script does not validate the brand name input
+  Fix: Add input validation for brand name
+
+  [LOW] code_smell -- Line 112
+  The script uses a simple CSV configuration which might not be suitable for large-scale applications
+  Fix: Consider using a more robust configuration management system
+
+  🧪 Test Coverage Generator
+    - Should handle invalid query input
+    - Should handle invalid domain input
+    - Should handle invalid max results input
+    - Should validate brand name input
+    - Should handle CSV configuration errors
+    - Should implement logging and monitoring mechanism
+
+=================================================================
+  FILE 28/1208: .agents/skills/docx/scripts/office/unpack.py
+  Score: 93/100   Issues: 3   Provider: nvidia   Time: 37.04s
+
+  The provided Python script for unpacking Office files (DOCX, PPTX, XLSX) is well-structured and follows best practices for parameter organization and error handling. However, there are some potential issues with file handling, XML parsing, and exception handling that need to be addressed. The script lacks input validation for the output directory, which could lead to security vulnerabilities if not properly sanitized. Additionally, the script uses a broad exception handler that could mask important error messages, making it difficult to diagnose issues.
+
+  [MEDIUM] security -- Line 44
+  Input validation for output directory is missing, which could lead to security vulnerabilities if not properly sanitized
+  Fix: Add input validation for output directory to prevent potential security vulnerabilities
+
+  [MEDIUM] error_handling -- Line 77
+  Broad exception handler could mask important error messages, making it difficult to diagnose issues
+  Fix: Use more specific exception handlers to catch and handle specific exceptions
+
+  [LOW] code_smell -- Line 88
+  Empty except block could be removed or replaced with a more specific exception handler
+  Fix: Remove or replace the empty except block with a more specific exception handler
+
+  🧪 Test Coverage Generator
+    - Should handle invalid input file paths
+    - Should handle non-Office file types
+    - Should handle corrupted or invalid ZIP archives
+    - Should handle XML parsing errors
+    - Should handle file system errors during output directory creation
+
+=================================================================
+  FILE 26/1208: .agents/skills/docx/scripts/office/pack.py
+  Score: 88/100   Issues: 4   Provider: nvidia   Time: 89.48s
+
+  The provided Python script appears to be well-structured and readable. However, there are some potential issues that need to be addressed, such as error handling, input validation, and potential security vulnerabilities. The script uses the `defusedxml` library to parse XML files, which is a good practice to prevent XML-based attacks. The script also uses the `argparse` library to handle command-line arguments, which is a good practice to make the script more user-friendly. The script has a good separation of concerns, with different functions handling different tasks, such as validation, XML condensing, and packing. However, there are some areas that need improvement, such as adding more error handling and input validation to prevent potential issues.
+
+  [MEDIUM] error_handling -- Line 35
+  The script does not handle the case where the input directory does not exist.
+  Fix: Add error handling to check if the input directory exists before attempting to pack it.
+
+  [MEDIUM] error_handling -- Line 42
+  The script does not handle the case where the original file does not exist.
+  Fix: Add error handling to check if the original file exists before attempting to validate it.
+
+  [MEDIUM] error_handling -- Line 110
+  The script does not handle the case where the XML file cannot be parsed.
+  Fix: Add error handling to catch any exceptions that occur during XML parsing.
+
+  [MEDIUM] error_handling -- Line 127
+  The script does not handle the case where an exception occurs during XML condensing.
+  Fix: Add error handling to catch any exceptions that occur during XML condensing.
+
+  🧪 Test Coverage Generator
+    - Test packing a directory into a DOCX file
+    - Test packing a directory into a PPTX file
+    - Test packing a directory into an XLSX file
+    - Test validation with auto-repair
+    - Test XML condensing
+    - Test error handling for invalid input
+    - Test error handling for XML parsing errors
+
+=================================================================
+  FILE 29/1208: .agents/skills/docx/scripts/office/validate.py
+  Score: 93/100   Issues: 3   Provider: nvidia   Time: 57.11s
+
+  The provided Python script is a command-line tool for validating Office document XML files against XSD schemas and tracked changes. It appears to be well-structured and follows best practices for parameter organization and error handling. However, there are some potential issues with file path handling, temporary directory creation, and validation logic. The script also lacks input validation and sanitization, which could lead to security vulnerabilities. The score is 80 due to the presence of some potential issues, but overall the script is well-organized and maintainable.
+
+  [MEDIUM] error_handling -- Line 56
+  The script does not handle the case where the file path does not exist, but the error message is not very informative
+  Fix: Improve the error message to provide more context
+
+  [MEDIUM] security -- Line 72
+  The script uses a temporary directory to extract the Office file, but it does not check for potential security vulnerabilities like directory traversal
+  Fix: Use a more secure way to create and manage temporary directories
+
+  [LOW] code_smell -- Line 97
+  The script uses a magic number (1) as the exit code for failure, but it would be better to use a named constant
+  Fix: Define a named constant for the exit code
+
+  🧪 Test Coverage Generator
+    - Should handle invalid file paths and extensions
+    - Should validate XML files against XSD schemas correctly
+    - Should handle tracked changes and redlining validation
+    - Should auto-repair common issues like hex IDs and whitespace preservation
+    - Should handle temporary directory creation and cleanup
+
+=================================================================
+  FILE 27/1208: .agents/skills/docx/scripts/office/soffice.py
+  Score: 93/100   Issues: 3   Provider: nvidia   Time: 98.58s
+
+  The provided Python code appears to be a helper for running LibreOffice (soffice) in environments where AF_UNIX sockets may be blocked. It detects the restriction at runtime and applies an LD_PRELOAD shim if needed. The code seems to be well-structured, but there are some potential issues that need to be addressed. The biggest risk is the use of a temporary file to store the shim source code, which could be a security risk if not properly cleaned up. Additionally, the code uses the `subprocess` module to run the `gcc` compiler, which could be a security risk if not properly validated. The code also uses the `os` and `socket` modules, which could be a security risk if not properly validated. The score is 80 due to these potential security risks.
+
+  [MEDIUM] security -- Line 54
+  The temporary file used to store the shim source code is not properly cleaned up, which could be a security risk.
+  Fix: Use a secure way to create and clean up the temporary file, such as using the `tempfile` module with the `delete` parameter set to `True`.
+
+  [MEDIUM] security -- Line 59
+  The `subprocess` module is used to run the `gcc` compiler, which could be a security risk if not properly validated.
+  Fix: Use a secure way to run the `gcc` compiler, such as using the `subprocess` module with the `shell` parameter set to `False` and the `check` parameter set to `True`.
+
+  [LOW] readability -- Line 17
+  The imports are not properly organized, which could make the code harder to read.
+  Fix: Organize the imports in a consistent way, such as using the `import` statement with the module name and then the specific functions or classes needed.
+
+  🧪 Test Coverage Generator
+    - Should handle the case where the AF_UNIX socket is blocked
+    - Should handle the case where the LD_PRELOAD shim is not needed
+    - Should handle the case where the temporary file cannot be created
+    - Should handle the case where the gcc compiler is not available
+    - Should handle the case where the soffice command fails
+
+=================================================================
+  FILE 51/1208: .agents/skills/pptx/scripts/office/helpers/__init__.py
+  Score: 100/100   Issues: 0   Provider: nvidia   Time: 7.53s
+
+  No code was provided for review. The submission is empty.
+
+=================================================================
+  FILE 42/1208: .agents/skills/pdf/scripts/convert_pdf_to_images.py
+  Score: 100/100   Issues: 0   Provider: nvidia   Time: 31.92s
+
+  Could not parse model response.
+
+=================================================================
+  FILE 43/1208: .agents/skills/pdf/scripts/create_validation_image.py
+  Score: 93/100   Issues: 3   Provider: nvidia   Time: 31.42s
+
+  The provided Python script for creating validation images has a clear structure and is well-readable. However, there are some potential issues that need to be addressed, such as error handling and input validation. The script assumes that the input JSON file and image paths are valid, which could lead to errors if they are not. Additionally, the script does not check if the page number is within the valid range of the PDF document.
+
+  [MEDIUM] error_handling -- Line 10
+  The script does not handle potential errors when opening the JSON file, such as file not found or invalid JSON format.
+  Fix: Add try-except block to handle potential errors when opening the JSON file.
+
+  [MEDIUM] error_handling -- Line 13
+  The script does not handle potential errors when opening the input image, such as file not found or invalid image format.
+  Fix: Add try-except block to handle potential errors when opening the input image.
+
+  [LOW] input_validation -- Line 30
+  The script does not validate the input page number, which could lead to errors if it is not a valid integer.
+  Fix: Add input validation to ensure the page number is a valid integer.
+
+  🧪 Test Coverage Generator
+    - Should handle invalid JSON input
+    - Should handle non-existent input image path
+    - Should handle invalid page number
+    - Should handle missing required fields in JSON input
+
+=================================================================
+  FILE 46/1208: .agents/skills/pdf/scripts/fill_fillable_fields.py
+  Score: 91/100   Issues: 3   Provider: nvidia   Time: 29.10s
+
+  The provided Python script for filling fillable PDF fields has a good structure and clear documentation. However, there are some potential issues and improvements that can be made, such as error handling, validation, and security. The script uses the pypdf library to read and write PDF files, and it includes a monkeypatch to fix an issue with the library. The script also includes a validation function to check the values of the fields. Overall, the script is well-organized and readable, but it can be improved with additional error handling and security measures.
+
+  [MEDIUM] error_handling -- Line 12
+  The script does not handle errors when opening the fields JSON file. It should add a try-except block to handle potential errors.
+  Fix: Add a try-except block to handle errors when opening the fields JSON file.
+
+  [MEDIUM] error_handling -- Line 23
+  The script does not handle errors when reading the input PDF file. It should add a try-except block to handle potential errors.
+  Fix: Add a try-except block to handle errors when reading the input PDF file.
+
+  [MEDIUM] error_handling -- Line 51
+  The script does not handle errors when writing to the output PDF file. It should add a try-except block to handle potential errors.
+  Fix: Add a try-except block to handle errors when writing to the output PDF file.
+
+  🧪 Test Coverage Generator
+    - Should handle invalid input PDF file
+    - Should handle invalid field values JSON file
+    - Should handle invalid output PDF file path
+    - Should validate field values correctly
+    - Should handle errors when writing to output PDF file
+
+=================================================================
+  FILE 38/1208: .agents/skills/mcp-builder/scripts/connections.py
+  Score: 93/100   Issues: 3   Provider: nvidia   Time: 113.12s
+
+  The provided Python code for MCP connection handling is well-structured and readable. However, there are some potential issues and improvements that can be made, such as adding error handling for unsupported transport types, improving the documentation for the create_connection function, and considering the use of a more robust way to handle the creation of MCP connections. The code score is 85 due to the lack of error handling and potential security vulnerabilities.
+
+  [MEDIUM] error_handling -- Line 151
+  The create_connection function does not handle errors when creating the MCP connection context
+  Fix: Add try-except blocks to handle potential errors when creating the MCP connection context
+
+  [LOW] code_smell -- Line 133
+  The transport type is converted to lowercase using the lower() method, which may not be necessary
+  Fix: Consider removing the lower() method call if it is not necessary
+
+  [MEDIUM] error_handling -- Line 135
+  The create_connection function does not handle errors when the command is not provided for stdio transport
+  Fix: Add a check to ensure that the command is provided for stdio transport
+
+  🧪 Test Coverage Generator
+    - Should handle unsupported transport types gracefully
+    - Should raise an error when command is not provided for stdio transport
+    - Should raise an error when URL is not provided for sse and http transports
+    - Should create the appropriate MCP connection based on the transport type
+    - Should handle errors when creating the MCP connection context
+
+=================================================================
+  FILE 52/1208: .agents/skills/pptx/scripts/office/helpers/merge_runs.py
+  Score: 94/100   Issues: 2   Provider: nvidia   Time: 48.58s
+
+  The provided Python script for merging adjacent runs with identical formatting in DOCX files appears to be well-structured and readable. However, there are some potential issues that need to be addressed, such as error handling and potential XML parsing vulnerabilities. The script uses defusedxml.minidom to parse the XML, which is a good practice to prevent XML-based attacks. The script also removes rsid attributes from runs and proofErr elements, which is a good practice to reduce the file size and improve performance. The merge_runs function is the main entry point of the script, and it takes an input directory as an argument. It returns a tuple containing the number of merged runs and a message indicating the result of the operation.
+
+  [MEDIUM] error_handling -- Line 23
+  The script does not handle XML parsing errors explicitly. It relies on the defusedxml.minidom parser to raise an exception if the XML is malformed. However, it would be better to handle this exception explicitly and provide a more informative error message.
+  Fix: Add a try-except block around the XML parsing code to handle parsing errors explicitly.
+
+  [MEDIUM] error_handling -- Line 39
+  The script catches all exceptions and returns a generic error message. It would be better to catch specific exceptions and provide more informative error messages.
+  Fix: Catch specific exceptions instead of catching all exceptions.
+
+  🧪 Test Coverage Generator
+    - Should handle XML parsing errors gracefully
+    - Should merge adjacent runs with identical formatting correctly
+    - Should remove rsid attributes and proofErr elements correctly
+    - Should handle cases where the input directory does not exist or is not a valid DOCX file
+
+=================================================================
+  FILE 58/1208: .agents/skills/pptx/scripts/office/validators/__init__.py
+  Score: 100/100   Issues: 0   Provider: nvidia   Time: 31.93s
+
+  The provided Python script is an initialization file for validation modules in the context of Word document processing. It imports and exports various schema validators without containing any executable code or complex logic. The code is well-structured, readable, and follows best practices for import and export statements. However, there are no significant issues or improvements suggested as the code snippet is minimal and primarily serves as a module initializer.
+
+=================================================================
+  FILE 48/1208: .agents/skills/pptx/scripts/__init__.py
+  Score: 100/100   Issues: 0   Provider: nvidia   Time: 69.38s
+
+  The file is empty, containing no code to review. This is not a bug or security issue, but it may indicate an incomplete implementation or a placeholder that should be removed or populated. No runtime failures, security vulnerabilities, or other issues are present because there is no executable code.
+
+=================================================================
+  FILE 41/1208: .agents/skills/pdf/scripts/check_fillable_fields.py
+  Score: 94/100   Issues: 2   Provider: nvidia   Time: 96.28s
+
+  The provided Python script checks if a PDF has fillable form fields. It uses the pypdf library and takes the PDF file path as a command-line argument. The script is straightforward but lacks error handling and input validation. The code is readable, but there are potential issues with file path handling and exception management. Score: 80
+
+  [MEDIUM] error_handling -- Line 7
+  The script does not handle the case where the PDF file is not found or cannot be opened.
+  Fix: Add try-except block to handle exceptions when opening the PDF file.
+
+  [MEDIUM] input_validation -- Line 7
+  The script does not validate the input PDF file path.
+  Fix: Add input validation to check if the PDF file path is valid and exists.
+
+  🧪 Test Coverage Generator
+    - Should handle PDF file not found error
+    - Should handle PDF file with invalid format
+    - Should handle PDF file with fillable form fields
+    - Should handle PDF file without fillable form fields
+
+=================================================================
+  FILE 53/1208: .agents/skills/pptx/scripts/office/helpers/simplify_redlines.py
+  Score: 88/100   Issues: 4   Provider: nvidia   Time: 86.51s
+
+  The provided Python script for simplifying tracked changes in Word documents appears to be well-structured and readable. However, there are some potential issues that need to be addressed, such as error handling and input validation. The script uses defusedxml to parse XML files, which is a good practice to prevent XML-based attacks. The script also uses a consistent naming convention and follows PEP 8 guidelines. Overall, the script is well-organized, but some improvements can be made to enhance its reliability and security.
+
+  [MEDIUM] error_handling -- Line 23
+  The function simplify_redlines does not check if the input directory is a valid directory before attempting to read the document.xml file.
+  Fix: Add a check to ensure the input directory is a valid directory before attempting to read the document.xml file.
+
+  [MEDIUM] error_handling -- Line 29
+  The function simplify_redlines does not handle parsing errors in the XML file.
+  Fix: Add a try-except block to handle parsing errors in the XML file.
+
+  [MEDIUM] error_handling -- Line 44
+  The function simplify_redlines catches all exceptions, which can mask other issues.
+  Fix: Catch specific exceptions instead of catching all exceptions.
+
+  [MEDIUM] error_handling -- Line 173
+  The function infer_author does not check if the modified directory is a valid directory before attempting to read the document.xml file.
+  Fix: Add a check to ensure the modified directory is a valid directory before attempting to read the document.xml file.
+
+  🧪 Test Coverage Generator
+    - Should handle invalid input directories
+    - Should handle missing document.xml files
+    - Should handle parsing errors in XML files
+    - Should handle multiple authors with new changes
+    - Should handle empty tracked change lists
+
+=================================================================
+  FILE 40/1208: .agents/skills/pdf/scripts/check_bounding_boxes.py
+  Score: 95/100   Issues: 3   Provider: nvidia   Time: 148.67s
+
+  The provided Python script for checking bounding boxes in PDF fields has a good structure and clear documentation. However, there are some potential issues and improvements that can be made, such as adding error handling for file operations and improving the intersection detection logic. The script also lacks input validation and does not handle cases where the input JSON file is malformed or missing required fields.
+
+  [MEDIUM] error_handling -- Line 17
+  The script does not handle errors that may occur when loading the input JSON file. It assumes that the file is always valid and does not contain any syntax errors.
+  Fix: Add try-except block to handle JSONDecodeError and other potential exceptions when loading the input JSON file.
+
+  [LOW] logic -- Line 35
+  The intersection detection logic only checks for horizontal and vertical disjointness, but does not consider cases where the rectangles overlap diagonally.
+  Fix: Improve the intersection detection logic to handle diagonal overlaps.
+
+  [LOW] input_validation -- Line 60
+  The script does not validate the input command-line argument. It assumes that the argument is always a valid file path.
+  Fix: Add input validation to check if the command-line argument is a valid file path.
+
+  🧪 Test Coverage Generator
+    - Should handle valid input JSON file with no intersecting bounding boxes
+    - Should handle valid input JSON file with intersecting bounding boxes
+    - Should handle invalid input JSON file with missing required fields
+    - Should handle file operation errors when reading the input JSON file
+
+=================================================================
+  FILE 77/1208: .agents/skills/slack-gif-creator/core/validators.py
+  Score: 93/100   Issues: 3   Provider: nvidia   Time: 39.38s
+
+  The provided Python script for validating GIFs for Slack has a clear structure and documentation. However, there are some potential issues and improvements that can be made. The script does not handle all possible exceptions that may occur when opening or processing the GIF file. Additionally, the script does not check for the maximum allowed frame count or duration for Slack GIFs. The script also does not provide any feedback or logging for errors that may occur during validation.
+
+  [MEDIUM] error_handling -- Line 29
+  The script does not handle the case where the GIF file does not exist
+  Fix: Add a try-except block to handle the FileNotFoundError exception
+
+  [MEDIUM] error_handling -- Line 39
+  The script does not handle exceptions that may occur when opening the GIF file
+  Fix: Add a try-except block to handle exceptions that may occur when opening the GIF file
+
+  [LOW] code_smell -- Line 64
+  The script uses magic numbers for the optimal and acceptable dimensions
+  Fix: Define constants for the optimal and acceptable dimensions
+
+  🧪 Test Coverage Generator
+    - Should handle invalid GIF file paths
+    - Should handle GIF files with invalid dimensions
+    - Should handle GIF files with too many frames
+    - Should handle GIF files with too long duration
+    - Should provide feedback for invalid GIF files
+
+=================================================================
+  FILE 73/1208: .agents/skills/skill-creator/scripts/utils.py
+  Score: 93/100   Issues: 3   Provider: nvidia   Time: 136.55s
+
+  The provided Python script for parsing SKILL.md files appears to be well-structured and readable. However, there are some potential issues with error handling and input validation. The script assumes that the SKILL.md file exists and has a specific format, but it does not handle cases where the file is missing or has an incorrect format. Additionally, the script uses string manipulation to extract the name and description from the frontmatter, which may not be robust if the frontmatter has a complex structure.
+
+  [MEDIUM] error_handling -- Line 9
+  The script does not handle the case where the SKILL.md file is missing or cannot be read.
+  Fix: Add try-except block to handle FileNotFoundError and other exceptions.
+
+  [MEDIUM] input_validation -- Line 13
+  The script assumes that the first line of the SKILL.md file is the frontmatter opening marker, but it does not handle cases where this is not true.
+  Fix: Add input validation to check that the first line is the frontmatter opening marker.
+
+  [LOW] code_smell -- Line 31
+  The script uses string manipulation to extract the name and description from the frontmatter, which may not be robust if the frontmatter has a complex structure.
+  Fix: Consider using a YAML parser to extract the name and description from the frontmatter.
+
+  🧪 Test Coverage Generator
+    - Should handle missing SKILL.md file
+    - Should handle SKILL.md file with incorrect format
+    - Should handle frontmatter with complex structure
+
+=================================================================
+  FILE 75/1208: .agents/skills/slack-gif-creator/core/frame_composer.py
+  Score: 93/100   Issues: 3   Provider: nvidia   Time: 109.72s
+
+  The provided Python script for frame composition utilities appears to be well-structured and readable. However, there are some potential issues and improvements that can be suggested. The script lacks error handling and input validation, which can lead to runtime errors or unexpected behavior. Additionally, some functions can be optimized for better performance. The script also uses the Pillow library, which is a potential security risk if not used properly. Overall, the script is well-organized, but it requires some improvements to make it more robust and secure.
+
+  [MEDIUM] error_handling -- Line 16
+  The create_blank_frame function does not validate its input parameters, which can lead to runtime errors.
+  Fix: Add input validation to ensure that the width, height, and color are valid.
+
+  [LOW] performance -- Line 55
+  The draw_circle function uses the ImageDraw.Draw method, which can be slow for large frames or complex compositions.
+  Fix: Consider using a more efficient drawing method, such as using NumPy arrays to manipulate pixel values.
+
+  [MEDIUM] security -- Line 121
+  The create_gradient_background function uses the Pillow library, which can be a security risk if not used properly.
+  Fix: Ensure that the Pillow library is used securely, such as by validating user input and using secure protocols for image processing.
+
+  🧪 Test Coverage Generator
+    - Should handle invalid input for frame size and color
+    - Should handle errors when drawing shapes or text on the frame
+    - Should optimize performance for large frame sizes or complex compositions
+
+=================================================================
+  FILE 86/1208: .agents/skills/xlsx/scripts/office/soffice.py
+  Score: 86/100   Issues: 3   Provider: nvidia   Time: 52.18s
+
+  The provided Python script for running LibreOffice (soffice) in environments where AF_UNIX sockets may be blocked appears to be well-structured and readable. However, there are some potential issues and improvements that can be made. The script uses a shim to detect and apply an LD_PRELOAD shim if needed, which may pose a security risk if not properly validated. Additionally, the script uses subprocess calls to run soffice, which may lead to security vulnerabilities if not properly sanitized. The script also uses a temporary file to store the shim source code, which may pose a security risk if not properly cleaned up.
+
+  [HIGH] security -- Line 29
+  The shim source code is stored in a temporary file, which may pose a security risk if not properly cleaned up.
+  Fix: Use a secure method to store and clean up the shim source code, such as using a secure temporary file or a secure storage mechanism.
+
+  [MEDIUM] security -- Line 60
+  The subprocess call to run soffice may lead to security vulnerabilities if not properly sanitized.
+  Fix: Use a secure method to sanitize the arguments passed to soffice, such as using a whitelist or a secure argument parsing mechanism.
+
+  [LOW] readability -- Line 181
+  The script uses a simple sys.exit call to exit the program, which may not provide enough information about the exit status.
+  Fix: Use a more informative method to exit the program, such as using a logging mechanism or a more descriptive exit message.
+
+  🧪 Test Coverage Generator
+    - Should handle soffice execution with valid arguments
+    - Should handle soffice execution with invalid arguments
+    - Should handle shim detection and application correctly
+    - Should handle subprocess calls securely
+
+=================================================================
+  FILE 94/1208: .agents/skills/xlsx/scripts/recalc.py
+  Score: 86/100   Issues: 3   Provider: nvidia   Time: 31.38s
+
+  The provided Python script for recalculating Excel formulas using LibreOffice has a good structure and clear documentation. However, there are some potential issues with error handling, security, and performance. The script uses subprocess to run LibreOffice commands, which can be a security risk if not properly sanitized. Additionally, the script does not handle errors well, and can crash if LibreOffice is not installed or configured properly. The script also uses a fixed timeout for LibreOffice commands, which can cause issues if the commands take longer than expected to complete.
+
+  [HIGH] security -- Line 93
+  The script uses subprocess to run LibreOffice commands, which can be a security risk if not properly sanitized
+  Fix: Use a more secure way to run LibreOffice commands, such as using a library that provides a safer interface
+
+  [MEDIUM] error_handling -- Line 161
+  The script does not handle errors well, and can crash if an exception occurs
+  Fix: Add better error handling to prevent the script from crashing
+
+  [LOW] performance -- Line 90
+  The script uses a fixed timeout for LibreOffice commands, which can cause issues if the commands take longer than expected to complete
+  Fix: Use a more dynamic way to set the timeout, such as based on the size of the Excel file
+
+  🧪 Test Coverage Generator
+    - Should handle LibreOffice not installed or configured properly
+    - Should handle errors when running LibreOffice commands
+    - Should handle timeouts when running LibreOffice commands
+    - Should sanitize input to prevent security risks
+
+=================================================================
+  FILE 102/1208: backups/src_backup_20260506_153937/app/api/audit/reports/export/route.js
+  Score: 86/100   Issues: 3   Provider: nvidia   Time: 71.37s
+
+  The provided JavaScript code for exporting audit reports has a good structure and clear documentation. However, there are some potential issues and improvements that can be made. The code lacks input validation for the 'tenantId' and 'email' fields, which could lead to security vulnerabilities. Additionally, the code does not handle errors properly, and the error messages are not specific enough. The code also uses a try-catch block to handle errors, but it does not provide any feedback to the user in case of an error. The code uses the 'console.error' function to log errors, but it does not provide any additional information about the error. The code also lacks a circuit breaker pattern for external API calls, which could lead to cascading failures. The code uses the 'randomUUID' function to generate a unique ID, but it does not check if the generated ID is already in use. The code also lacks a mechanism for handling retries and timeouts for external API calls.
+
+  [HIGH] security -- Line 27
+  Lack of input validation for 'tenantId' and 'email' fields
+  Fix: Add input validation for 'tenantId' and 'email' fields to prevent security vulnerabilities
+
+  [MEDIUM] error_handling -- Line 48
+  Error handling is not proper and does not provide specific error messages
+  Fix: Improve error handling to provide specific error messages and feedback to the user
+
+  [LOW] code_smell -- Line 89
+  The 'randomUUID' function is used to generate a unique ID, but it does not check if the generated ID is already in use
+  Fix: Add a check to ensure the generated ID is not already in use
+
+  🧪 Test Coverage Generator
+    - Should handle invalid input for 'from' and 'to' dates
+    - Should handle invalid input for 'tenantId' and 'email' fields
+    - Should handle errors properly and provide specific error messages
+    - Should implement a circuit breaker pattern for external API calls
+    - Should handle retries and timeouts for external API calls
+
+=================================================================
+  FILE 101/1208: backups/src_backup_20260506_153937/app/api/audit/logs/route.js
+  Score: 93/100   Issues: 3   Provider: nvidia   Time: 93.13s
+
+  The provided JavaScript code for handling GET requests to the /api/audit/logs endpoint has a good structure and clear authentication checks. However, there are some potential issues and improvements that can be made, such as input validation, error handling, and SQL query construction. The code score is 85 due to some medium-severity issues found.
+
+  [MEDIUM] input_validation -- Line 20
+  Input validation for query parameters is missing
+  Fix: Add input validation for query parameters to prevent potential security issues
+
+  [MEDIUM] sql_injection -- Line 38
+  SQL query construction is vulnerable to SQL injection attacks
+  Fix: Use parameterized queries or prepared statements to prevent SQL injection attacks
+
+  [LOW] error_handling -- Line 59
+  Error handling can be improved to provide more informative error messages
+  Fix: Improve error handling to provide more informative error messages
+
+  🧪 Test Coverage Generator
+    - Should handle invalid date formats in query parameters
+    - Should prevent SQL injection attacks through user input
+    - Should return a 401 error for unauthorized users
+    - Should return a 400 error for missing or invalid tenant context
+    - Should return a 500 error for database query failures
+
+=================================================================
+  FILE 108/1208: backups/src_backup_20260506_153937/app/api/college/dashboard/route.js
+  Score: 81/100   Issues: 4   Provider: nvidia   Time: 100.50s
+
+  The provided code is a Next.js API route for the college dashboard. It fetches various statistics and pending actions for a college admin. The code is well-structured, but there are some potential issues and improvements that can be made. The biggest risk is the lack of input validation and error handling, which can lead to security vulnerabilities and data corruption. The code also uses multiple database queries, which can impact performance. Overall, the code is good, but it needs some improvements to make it more robust and secure.
+
+  [MEDIUM] security -- Line 10
+  Unauthorized access is not handled properly. The error message should be more specific and not reveal sensitive information.
+  Fix: Return a more specific error message and consider logging the error for further investigation.
+
+  [MEDIUM] performance -- Line 17
+  The database query is not optimized. It uses multiple subqueries, which can impact performance.
+  Fix: Consider using a single query with joins or optimizing the subqueries.
+
+  [MEDIUM] performance -- Line 43
+  The database query is not optimized. It uses multiple subqueries, which can impact performance.
+  Fix: Consider using a single query with joins or optimizing the subqueries.
+
+  [HIGH] error_handling -- Line 76
+  The error handling is not proper. It logs the error, but does not provide any useful information.
+  Fix: Consider logging the error with more context and providing a more specific error message.
+
+  🧪 Test Coverage Generator
+    - Should handle database query errors
+    - Should validate user input
+    - Should handle unauthorized access
+    - Should fetch statistics correctly
+    - Should fetch pending actions correctly
+
+=================================================================
+  FILE 128/1208: backups/src_backup_20260506_153937/app/api/college/offers/upload/route.js
+  Score: 84/100   Issues: 3   Provider: nvidia   Time: 57.34s
+
+  The provided code is a Next.js API route for uploading college offers via CSV. It has a good structure and clear authentication checks. However, there are some potential issues and improvements that can be made. The code does not handle errors well, and there are some potential SQL injection vulnerabilities. The code also does not validate the CSV file properly, which can lead to errors. The code uses a try-catch block to handle errors, but it does not provide much information about the error. The code also uses a generic error message, which can make it difficult to diagnose issues. The code does not check if the student_id exists before inserting a new offer, which can lead to errors if the student_id does not exist. The code also does not check if the employer_id exists before inserting a new offer, which can lead to errors if the employer_id does not exist.
+
+  [HIGH] security -- Line 61
+  Potential SQL injection vulnerability in the INSERT INTO offers query
+  Fix: Use parameterized queries or prepared statements to prevent SQL injection
+
+  [MEDIUM] error_handling -- Line 94
+  Error handling can be improved by providing more information about the error
+  Fix: Use a more specific error message and log the error with more context
+
+  [MEDIUM] error_handling -- Line 101
+  Error handling can be improved by providing more information about the error
+  Fix: Use a more specific error message and log the error with more context
+
+  🧪 Test Coverage Generator
+    - Should handle CSV file with missing header row
+    - Should handle CSV file with missing data rows
+    - Should handle CSV file with invalid data
+    - Should handle errors when inserting offers into the database
+    - Should handle errors when refreshing offer latest flags for students
+
+=================================================================
+  FILE 141/1208: backups/src_backup_20260506_153937/app/api/data-entry/options/route.js
+  Score: 84/100   Issues: 3   Provider: nvidia   Time: 95.96s
+
+  The provided code is a Next.js API route for fetching data-entry options. It has a good structure and clear authentication checks. However, there are some potential issues and improvements that can be made. The code is vulnerable to SQL injection attacks if the tenantId is not properly sanitized. Additionally, the error handling can be improved to provide more specific error messages. The code also lacks input validation and sanitization for the tenantId parameter.
+
+  [HIGH] security -- Line 10
+  The tenantId parameter is not properly sanitized, making the code vulnerable to SQL injection attacks
+  Fix: Use a parameterized query or sanitize the tenantId parameter to prevent SQL injection attacks
+
+  [MEDIUM] error_handling -- Line 65
+  The error handling can be improved to provide more specific error messages
+  Fix: Use a more specific error message to help with debugging and error handling
+
+  [MEDIUM] input_validation -- Line 10
+  The tenantId parameter is not validated or sanitized, making the code vulnerable to potential security vulnerabilities
+  Fix: Validate and sanitize the tenantId parameter to prevent potential security vulnerabilities
+
+  🧪 Test Coverage Generator
+    - Should handle SQL injection attacks by sanitizing the tenantId parameter
+    - Should provide specific error messages for different error scenarios
+    - Should validate and sanitize the tenantId parameter to prevent potential security vulnerabilities
+
+=================================================================
+  FILE 150/1208: backups/src_backup_20260506_153937/app/api/employer/assessments/template/route.js
+  Score: 95/100   Issues: 3   Provider: nvidia   Time: 130.49s
+
+  The provided code is a Next.js API route for generating a CSV template for employer assessments. It has a good structure and clear documentation. However, there are some potential issues and improvements that can be made. The code does not handle any potential errors that may occur during the execution of the rowsToCsv function. Additionally, the code does not validate the input data before generating the CSV template. The code also uses a hardcoded filename for the CSV attachment, which may not be desirable in all scenarios.
+
+  [MEDIUM] error_handling -- Line 20
+  The code does not handle any potential errors that may occur during the execution of the rowsToCsv function
+  Fix: Add try-catch block to handle potential errors
+
+  [LOW] code_smell -- Line 17
+  The sample data is hardcoded, which may not be desirable in all scenarios
+  Fix: Consider making the sample data configurable or dynamic
+
+  [LOW] code_smell -- Line 25
+  The filename for the CSV attachment is hardcoded, which may not be desirable in all scenarios
+  Fix: Consider making the filename configurable or dynamic
+
+  🧪 Test Coverage Generator
+    - Should generate a valid CSV template with the correct headers and sample data
+    - Should handle errors that occur during the execution of the rowsToCsv function
+    - Should validate the input data before generating the CSV template
+    - Should allow for customizable filename for the CSV attachment
+
+=================================================================
+  FILE 166/1208: backups/src_backup_20260506_153937/app/api/employer/profile/logo/presign/route.js
+  Score: 94/100   Issues: 2   Provider: nvidia   Time: 85.39s
+
+  The provided code for the employer logo presign API route has a good structure and clear authentication checks. However, there are some potential issues and improvements that can be made. The code does not handle the case where the file size is not provided in the request body, and it does not validate the file name. Additionally, the error messages returned to the user are not very informative. The code also logs errors to the console, but it does not provide any additional logging or monitoring. The score is 85 due to these issues and the lack of input validation.
+
+  [MEDIUM] input_validation -- Line 20
+  The file name is not validated
+  Fix: Add validation for the file name
+
+  [MEDIUM] input_validation -- Line 23
+  The file size is not validated if it is not provided
+  Fix: Add validation for the file size
+
+  🧪 Test Coverage Generator
+    - Should return 401 if the user is not authenticated
+    - Should return 401 if the user is not an employer
+    - Should return 503 if S3 is not configured
+    - Should return 400 if the file size is too large
+    - Should return 400 if the content type is not allowed
+    - Should return 500 if there is an error creating the presign
+    - Should handle the case where the file size is not provided in the request body
+    - Should validate the file name
+
+=================================================================
+  FILE 193/1208: backups/src_backup_20260506_153937/app/dashboard/admin/colleges/page.js
+  Score: 96/100   Issues: 2   Provider: nvidia   Time: 83.93s
+
+  The provided code is a Next.js page for managing colleges. It fetches college data from an API and displays it in a table. The code has a good structure and handles loading and error states. However, there are some potential issues with data validation and error handling. The score is 85 due to some minor issues and areas for improvement.
+
+  [MEDIUM] error_handling -- Line 17
+  The API error is not handled specifically, it just throws a generic error
+  Fix: Handle API error specifically and display a user-friendly error message
+
+  [LOW] code_smell -- Line 38
+  The college data is not validated before rendering
+  Fix: Add data validation to ensure that the college data is in the expected format
+
+  🧪 Test Coverage Generator
+    - Should handle API error when fetching college data
+    - Should display error message when no colleges are found
+    - Should validate college data before rendering
+
+=================================================================
+  FILE 211/1208: backups/src_backup_20260506_153937/app/dashboard/college/events/page.js
+  Score: 96/100   Issues: 2   Provider: nvidia   Time: 123.13s
+
+  The provided code is a Next.js page for displaying college events. It uses SWR for data fetching and has a good structure. However, there are some potential issues with error handling and data validation. The code does not handle cases where the API returns an empty array or a non-array response. Additionally, the code does not validate the shape of the events data before rendering it.
+
+  [MEDIUM] bug -- Line 17
+  The code does not handle cases where the API returns an empty array or a non-array response.
+  Fix: Add a check to ensure that the events data is an array before rendering it.
+
+  [LOW] code_smell -- Line 61
+  The code uses the '||' operator to provide default values for event properties. This can lead to unexpected behavior if the properties are intentionally set to false or 0.
+  Fix: Use the nullish coalescing operator (??) instead of the '||' operator to provide default values.
+
+  🧪 Test Coverage Generator
+    - Should handle API error when fetching events
+    - Should handle empty events array
+    - Should handle non-array events response
+    - Should validate events data shape before rendering
+
+=================================================================
+  FILE 323/1208: backups/src_backup_20260506_153937/lib/employerOffersCsvTemplate.js
+  Score: 96/100   Issues: 2   Provider: nvidia   Time: 84.83s
+
+  The provided code is a JavaScript module for generating a CSV template for employer offers. It has a good structure and clear documentation. However, there are some potential issues with the code, such as the lack of input validation and the use of a hardcoded template string. The code also uses the `document` object, which may not be available in all environments.
+
+  [MEDIUM] security -- Line 1
+  The template string is hardcoded and may be vulnerable to CSV injection attacks
+  Fix: Use a parameterized template string or validate the input data to prevent CSV injection attacks
+
+  [LOW] readability -- Line 8
+  The blob creation code is not wrapped in a try-catch block
+  Fix: Add a try-catch block to handle any errors that may occur during blob creation
+
+  🧪 Test Coverage Generator
+    - Should generate a valid CSV template with the correct headers and data
+    - Should handle cases where the template string is empty or null
+    - Should handle cases where the blob creation fails
+

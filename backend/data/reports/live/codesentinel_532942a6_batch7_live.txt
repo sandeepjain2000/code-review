@@ -1,0 +1,132 @@
+=================================================================
+  CODESENTINEL -- BATCH 7 REPORT
+  Files 151 - 157 of 262
+  Folder : C:\Users\sandeep\Downloads\Claudes\CampusPlacement\campus-placement
+  Saved  : 03/05/2026, 23:27:50
+=================================================================
+
+  Batch Score   : 88/100
+  Files Reviewed: 7
+  Total Issues  : 20
+
+=================================================================
+  FILE: src/app/dashboard/employer/page.js
+  Score: 94/100   Issues: 2
+
+  The EmployerDashboardHubPage component is well-structured and properly handles loading states. However, there are some potential issues with authentication and authorization. The component assumes that the session object will always be available, which may not be the case in all scenarios. Additionally, the component does not perform any explicit checks for the user's role or permissions, which could lead to unauthorized access to certain features or data.
+
+  [MEDIUM] authentication -- Line 9
+  The component assumes that the session object will always be available, which may not be the case in all scenarios.
+  Fix: Add explicit checks for the session object and handle cases where it is not available.
+
+  [MEDIUM] authorization -- Line 22
+  The component does not perform any explicit checks for the user's role or permissions.
+  Fix: Add explicit checks for the user's role and permissions before rendering the DashboardFullScreenHub component.
+
+=================================================================
+  FILE: src/app/dashboard/page.js
+  Score: 86/100   Issues: 3
+
+  The dashboard redirect page is minimal and functional, but has a critical race condition where the redirect may fire before the session is fully loaded, causing a flash of the skeleton or a redirect to an undefined path. Additionally, there is no fallback for unauthenticated users, which could leave them on a blank page. The code is otherwise clean and well-structured.
+
+  [HIGH] bug -- Line 12
+  The useEffect redirects as soon as session?.user?.role is truthy, but during session loading, session may be null or undefined, causing no redirect. If the session never loads (e.g., network error), the user is stuck on a blank skeleton page with no fallback.
+  Fix: Add a check for session loading status using useSession's status field, and redirect unauthenticated users to the login page.
+
+  [MEDIUM] edge_case -- Line 13
+  getDashboardPath(session.user.role) could return undefined or null if the role is unknown or not mapped, causing router.replace(undefined) which may navigate to a broken page or throw an error.
+  Fix: Add a guard to check the return value of getDashboardPath before calling router.replace.
+
+  [LOW] uiux -- Line 18
+  The skeleton loader has no aria-label or role attribute, which is an accessibility concern for screen readers during the loading state.
+  Fix: Add aria-label and role attributes to the skeleton div for better accessibility.
+
+=================================================================
+  FILE: src/app/dashboard/student/calendar/page.js
+  Score: 72/100   Issues: 6
+
+  The StudentPlacementCalendarPage component is a lightweight read-only calendar view with proper loading/error delegation via SWR. The main risks are: (1) no error or loading state is rendered when the API call fails or is pending, leading to a blank calendar with no user feedback; (2) the fetcher does not include credentials (cookies), so the API call will fail silently in production if the session cookie is not sent; (3) the calendar grid uses array index as React key, which can cause rendering bugs when navigating months; (4) no empty state is shown when there are no events, leaving users confused. The component is otherwise simple and well-structured.
+
+  [HIGH] authentication -- Line 17
+  The fetcher function on line 8-13 does not include credentials: 'include' in the fetch call. In a Next.js App Router client component, the session cookie is not automatically sent with fetch. This will cause the /api/student/calendar endpoint to receive an unauthenticated request and return a 401, resulting in a blank calendar with no user feedback.
+  Fix: Add credentials: 'include' to the fetch call so the session cookie is sent with the request.
+
+  [HIGH] uiux -- Line 17
+  The component destructures only 'data' from useSWR and ignores 'error' and 'isLoading'. This means when the API is loading or fails, the user sees a blank calendar with no indication of what is happening. In production, this is a poor user experience — users will think the page is broken.
+  Fix: Destructure 'error' and 'isLoading' from useSWR and render appropriate loading and error states.
+
+  [MEDIUM] bug -- Line 61
+  The calendar cells use the array index 'i' as the React key. When navigating between months, the cells array changes length and content, but React uses the index as the key, which can cause incorrect DOM reconciliation — events may appear on wrong days or fail to animate properly.
+  Fix: Use a stable unique key combining the month and day, e.g. `${currentMonth.getMonth()}-${currentMonth.getFullYear()}-${day || 'empty'}-${i}`.
+
+  [MEDIUM] edge_case -- Line 62
+  The event filtering on line 63-67 creates a new Date from e.date. If e.date is an invalid date string (e.g. '2024-13-01' or 'not-a-date'), the Date constructor returns an Invalid Date, and calling getFullYear() on it will return NaN. The comparison NaN === number will always be false, so the event is silently dropped. This is acceptable but could be improved with a validation check.
+  Fix: Add a check that the parsed date is valid before comparing, e.g. if (isNaN(d.getTime())) return false.
+
+  [LOW] uiux -- Line 80
+  The event title is rendered directly inside a div without any truncation or overflow handling. If an event title is very long, it will break the calendar grid layout by expanding the cell width.
+  Fix: Add CSS classes like 'truncate' or 'overflow-hidden text-ellipsis whitespace-nowrap' to the calendar-event div.
+
+  [LOW] saas_completeness -- Line 93
+  The tip text references 'Browse drives' but there is no link or button to navigate to the drives page. Users have to manually find the page, which is a poor UX pattern.
+  Fix: Wrap 'Browse drives' in a Next.js Link component pointing to the drives page.
+
+=================================================================
+  FILE: src/app/dashboard/student/clarifications/page.js
+  Score: 97/100   Issues: 1
+
+  The component is a simple read-only view with no user input, API calls, or complex state. The main risk is a silent failure in the catch block that swallows errors without logging or user feedback, making debugging difficult. The code is otherwise clean and well-structured for its purpose.
+
+  [MEDIUM] error_handling -- Line 14
+  The catch block on line 14 silently swallows all errors from loadClarifications. In production, if the data source fails, there is no logging, no user-facing error message, and no retry mechanism. This makes debugging failures impossible and leaves the user with an empty page and no indication of a problem.
+  Fix: Log the error to the console or an error reporting service, and optionally show a user-friendly error message or retry button.
+
+=================================================================
+  FILE: src/app/dashboard/student/interviews/page.js
+  Score: 79/100   Issues: 6
+
+  The student interviews page is generally well-structured with proper loading, error, and empty states. The main risks are: (1) the status badge logic assumes only 'Completed' vs non-completed, which will break for other statuses like 'Scheduled', 'Cancelled', etc.; (2) the calendar view uses hardcoded initialYear/initialMonth (2026/8) which will be outdated quickly and ignores the actual interview dates; (3) the fetcher lacks a timeout, risking hanging requests; (4) no authentication check or redirect for unauthenticated users. Overall a solid component with minor production-readiness gaps.
+
+  [HIGH] bug -- Line 78
+  Status badge logic only handles 'Completed' vs everything else. Any other status (e.g., 'Scheduled', 'Cancelled', 'Rescheduled', 'No-show') will incorrectly show a blue badge. This misleads students about interview status.
+  Fix: Use a mapping object to assign appropriate badge colors for each possible status value.
+
+  [MEDIUM] bug -- Line 51
+  Hardcoded initialYear=2026 and initialMonth=8 in EmployerCalendarGrid. This will be outdated after August 2026 and ignores the actual interview dates. Users will always see August 2026 regardless of their interview schedule.
+  Fix: Compute initialYear and initialMonth from the earliest interview date in calItems, or default to current month if no interviews exist.
+
+  [MEDIUM] error_handling -- Line 7
+  fetcher function has no timeout. If the API endpoint hangs (e.g., DB slow, network issue), the request will hang indefinitely, leaving the user with a perpetual loading state.
+  Fix: Add an AbortController with a timeout (e.g., 15 seconds) to the fetch call.
+
+  [MEDIUM] authentication -- Line 16
+  No authentication check or redirect for unauthenticated users. If a student is not logged in, the API will likely return 401, but the page will still render with an error message instead of redirecting to login.
+  Fix: Add a session check (e.g., useSession from next-auth) and redirect to login if unauthenticated.
+
+  [LOW] null_check -- Line 67
+  The code assumes every interview object has all fields (company, round, date, time, mode, location, status). If the API returns an interview missing any of these fields (e.g., time is null), the page will render 'null' or crash on formatDate if date is missing.
+  Fix: Add fallback values or optional chaining for each field in the map.
+
+  [LOW] uiux -- Line 82
+  Empty state shows error message when there is an error, but when there is no error and no interviews, it shows 'No interview schedule found.' This is acceptable but could be more helpful (e.g., 'No interviews scheduled yet. Check back later.').
+  Fix: Provide a more descriptive empty state message with guidance.
+
+=================================================================
+  FILE: src/app/dashboard/student/internships/page.js
+  Score: 87/100   Issues: 2
+
+  The code is generally well-structured and handles loading states, errors, and empty states properly. However, there are some potential issues with authentication, authorization, and data validation. The code also lacks input validation and sanitization, which could lead to security vulnerabilities. Additionally, the code does not handle cases where the API returns an error or an empty response.
+
+  [HIGH] security -- Line 25
+  The apply function does not validate or sanitize the jobId parameter, which could lead to security vulnerabilities.
+  Fix: Add input validation and sanitization to the apply function.
+
+  [MEDIUM] error_handling -- Line 59
+  The error handling in the component does not provide enough information to the user.
+  Fix: Improve the error handling to provide more informative error messages to the user.
+
+=================================================================
+  FILE: src/app/dashboard/student/page.js
+  Score: 100/100   Issues: 0
+
+  Could not parse model response.

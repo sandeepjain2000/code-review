@@ -1,0 +1,52 @@
+=================================================================
+  CODESENTINEL -- BATCH 6 REPORT
+  Files 126 - 128 of 262
+  Folder : C:\Users\sandeep\Downloads\Claudes\CampusPlacement\campus-placement
+  Saved  : 03/05/2026, 23:25:00
+=================================================================
+
+  Batch Score   : 94/100
+  Files Reviewed: 3
+  Total Issues  : 6
+
+=================================================================
+  FILE: src/app/dashboard/college/offers-upload/page.js
+  Score: 86/100   Issues: 3
+
+  The component is well-structured with proper loading states and error handling. The main risk is the lack of a screen tag (S-*) and missing export functionality for the offers table, which are critical SaaS completeness requirements. No security or runtime crash issues were found in this client component.
+
+  [HIGH] saas_completeness -- Line 1
+  Screen tag (S-*) is missing. All screens must have a unique screen tag like S-1 for identification and traceability.
+  Fix: Add a screen tag constant or comment at the top of the component, e.g., const SCREEN_TAG = 'S-1'; and optionally render it in a hidden element or data attribute.
+
+  [MEDIUM] saas_completeness -- Line 50
+  No export functionality is provided for the offers data table. All tabular screens must have an export option (CSV/Excel).
+  Fix: Add an export button that calls an API endpoint to download the offers data as CSV or Excel, similar to the existing downloadCsvFromApi pattern.
+
+  [LOW] error_handling -- Line 80
+  The downloadCollegeOffersTemplate function is called without a try-catch, so if it throws, the error will be unhandled and may crash the page or leave the user without feedback.
+  Fix: Wrap the downloadCollegeOffersTemplate call in a try-catch block and show an error toast on failure, similar to downloadAssessmentStarter.
+
+=================================================================
+  FILE: src/app/dashboard/college/page.js
+  Score: 96/100   Issues: 2
+
+  The CollegeDashboardHubPage component is minimal and delegates all logic to DashboardFullScreenHub. The only risk is a potential runtime crash if session.user exists but session.user.role is undefined, which would cause DashboardFullScreenHub to receive an undefined role prop. Additionally, the skeleton loading state lacks a meaningful aria-label for accessibility. No critical security, data, or multi-tenancy issues are present in this thin wrapper component.
+
+  [MEDIUM] runtime -- Line 22
+  session.user.role may be undefined if the session object is incomplete or malformed, causing DashboardFullScreenHub to receive an undefined role prop. This could lead to a crash or incorrect rendering in the child component.
+  Fix: Add a fallback or guard for session.user.role before passing it to DashboardFullScreenHub, or handle undefined role inside DashboardFullScreenHub.
+
+  [LOW] uiux -- Line 11
+  The skeleton loading state has no aria-label or role='status' for screen readers, making the loading state inaccessible to users relying on assistive technology.
+  Fix: Add aria-label='Loading dashboard' and role='status' to the skeleton container for accessibility.
+
+=================================================================
+  FILE: src/app/dashboard/employer/assessment-summary/page.js
+  Score: 99/100   Issues: 1
+
+  This is a static documentation/navigation page with no data fetching, state management, or user input. The code is clean, well-structured, and accessible. The primary risk is the absence of a screen tag (S-*) for SaaS completeness and missing export functionality on a page that is purely informational. No security, runtime, or data integrity issues exist.
+
+  [LOW] saas_completeness -- Line 1
+  Missing screen tag (S-*) on the page. All screens should have a unique identifier for navigation and debugging.
+  Fix: Add a screen tag comment or data attribute, e.g., <!-- S-EMP-ASSESSMENT-SUMMARY --> or a hidden span with id='screen-tag'.

@@ -1,0 +1,106 @@
+=================================================================
+  CODESENTINEL -- BATCH 6 REPORT
+  Files 126 - 129 of 262
+  Folder : C:\Users\sandeep\Downloads\Claudes\CampusPlacement\campus-placement
+  Saved  : 04/05/2026, 12:48:51
+=================================================================
+
+  Batch Score   : 88/100
+  Files Reviewed: 4
+  Total Issues  : 18
+
+=================================================================
+  FILE: src/app/dashboard/college/page.js
+  Score: 87/100   Issues: 2
+
+  The component is minimal and delegates all logic to DashboardFullScreenHub. The main risk is that it only checks for session existence, not for the correct role (college_admin), which could allow users with other roles to access the college dashboard. Additionally, there is no error boundary or fallback if DashboardFullScreenHub throws. The skeleton loading state is a good UX touch.
+
+  [HIGH] authorization -- Line 22
+  No role check before rendering DashboardFullScreenHub. A user with role 'student' or 'employer' could access the college dashboard if they have a valid session, leading to unauthorized access and potential data leakage.
+  Fix: Add a role guard that checks if session.user.role === 'college_admin' before rendering the dashboard, and redirect or show an unauthorized message otherwise.
+
+  [MEDIUM] error_handling -- Line 22
+  No error boundary around DashboardFullScreenHub. If the component throws (e.g., due to missing data or a bug), the entire page will crash with a white screen, providing a poor user experience.
+  Fix: Wrap DashboardFullScreenHub in an error boundary component to catch rendering errors and display a fallback UI.
+
+=================================================================
+  FILE: src/app/dashboard/college/offers-upload/page.js
+  Score: 80/100   Issues: 7
+
+  The page is a straightforward CSV upload UI with template download and file upload functionality. The biggest risk is the lack of any server-side authentication or tenant isolation check on the client side — the page assumes the user is a college admin but has no fallback if the session is invalid. Additionally, the upload handler does not validate file size or type on the client side before sending, which could lead to large file uploads or unexpected file types reaching the server. The error handling is basic but functional, though it could expose internal error messages to users. Overall, the code is clean but lacks defensive checks for production use.
+
+  [HIGH] validation -- Line 32
+  No client-side file size or type validation before sending to server. A user could upload a very large file (>100MB) or a non-CSV file (e.g., .exe, .pdf) causing server resource exhaustion or unexpected parsing errors.
+  Fix: Add client-side validation for file size (e.g., max 10MB) and MIME type before appending to FormData.
+
+  [MEDIUM] error_handling -- Line 33
+  The response JSON parsing silently swallows parse errors with .catch(() => ({})), which could hide server errors that return non-JSON responses (e.g., HTML error pages). This would cause the upload to appear successful when it actually failed.
+  Fix: Remove the catch and let JSON.parse throw naturally, or check Content-Type header before parsing.
+
+  [MEDIUM] observability -- Line 44
+  Error messages from the server are passed directly to the user via addToast. If the server returns internal error details (e.g., stack traces, SQL errors), these could be exposed to the user.
+  Fix: Log the full error server-side and only show a generic message to the user. On the client, sanitize the error message before displaying.
+
+  [LOW] uiux -- Line 100
+  The file input is hidden inside a label, which is acceptable for styling but lacks an accessible description. Screen readers may not announce the purpose of the file input clearly.
+  Fix: Add an aria-label to the label or use a visually hidden span with descriptive text.
+
+  [LOW] error_handling -- Line 80
+  The downloadCollegeOffersTemplate function is called without error handling. If the template download fails (e.g., network error, missing file), the user gets no feedback.
+  Fix: Wrap the call in a try/catch block and show a toast on failure.
+
+  [LOW] uiux -- Line 41
+  Upload errors are shown as a single toast with up to 5 errors joined by '·'. If there are many errors, the toast text could be very long and hard to read. Also, errors beyond the first 5 are silently dropped.
+  Fix: Show a summary count in the toast and provide a separate error list component or expandable section.
+
+  [LOW] code_quality -- Line 17
+  The downloadAssessmentStarter function uses a hardcoded API path '/api/college/offers/assessment-starter'. If the API route changes, this will silently break.
+  Fix: Define the API path as a constant or environment variable.
+
+=================================================================
+  FILE: src/app/dashboard/employer/calendar/page.js
+  Score: 87/100   Issues: 7
+
+  The employer calendar page is a straightforward client component with proper loading, error, and empty states. The main risks are: (1) the fetcher throws a generic error without logging the response body for debugging, (2) the CSV export accesses potentially undefined properties (e.time, e.type, e.mode) without null checks, (3) the calendar grid is hardcoded to 2026/September, which will be stale in production, and (4) the 'Add Event' button is permanently disabled with no explanation. No critical security or data integrity issues were found.
+
+  [MEDIUM] error_handling -- Line 8
+  fetcher function at line 8-13: The error message is extracted from json.error but the response body is not logged server-side. In production, when the API returns a 500 with a generic message, the client shows 'Failed to load calendar' with no way to debug the actual cause. The raw response body should be logged on the server or the fetcher should include more context.
+  Fix: Log the full response body server-side before returning the error, or include the HTTP status in the thrown error message for better debugging.
+
+  [MEDIUM] null_check -- Line 23
+  getCalendarCsv at line 23: The rows mapping accesses e.title, e.date, e.time, e.type, e.mode without null checks. If any event object is missing these properties (e.g., time is null for an all-day event), the CSV export will produce 'undefined' strings or throw if the property access chain fails.
+  Fix: Add fallback values (e.g., e.time || '', e.type || '', e.mode || '') to ensure CSV cells are always strings.
+
+  [MEDIUM] configuration -- Line 76
+  EmployerCalendarGrid at line 76: Hardcoded initialYear={2026} and initialMonth={9} will be stale after September 2026. In production, this will show an outdated default view, confusing users. The component should default to the current month/year.
+  Fix: Use new Date() to dynamically compute the current year and month as defaults.
+
+  [LOW] uiux -- Line 50
+  Add Event button at line 50: The button is permanently disabled with no tooltip or explanation. Users will not know why they cannot add events, leading to confusion and potential support tickets.
+  Fix: Add a title attribute or tooltip explaining the feature is coming soon, or remove the button if the feature is not planned.
+
+  [LOW] null_check -- Line 28
+  calItems mapping at lines 28-34: Similar to the CSV export, the mapping accesses e.id, e.date, e.title, e.time, e.type, e.mode without null checks. If any event is missing these fields, the calendar grid may render broken items or throw.
+  Fix: Add fallback values or filter out events with missing required fields (id, date, title).
+
+  [LOW] error_handling -- Line 74
+  Error display at line 74: The error message is rendered directly using error.message. If the error object is not an instance of Error (e.g., thrown as a string), accessing .message will be undefined and the user will see nothing.
+  Fix: Use a safe access pattern like error?.message || 'Could not load events.'
+
+  [LOW] saas_completeness -- Line 67
+  Event count display at line 67-69: The count shows total events but there is no search, filter, or sort functionality for the list view. As the number of events grows, users will struggle to find specific events.
+  Fix: Add a search input and filter controls (by type, mode, date range) to improve usability at scale.
+
+=================================================================
+  FILE: src/app/dashboard/employer/assessment-summary/page.js
+  Score: 98/100   Issues: 2
+
+  This is a static informational page with no data fetching, user input, or state management. It contains no runtime failures, security vulnerabilities, or performance issues. The only concerns are minor accessibility and maintainability items: the page lacks a screen tag (S-XXX) and uses inline styles instead of utility classes. Overall, the code is safe for production as a documentation page.
+
+  [LOW] saas_completeness -- Line 8
+  Page is missing a screen tag (e.g., S-XXX) as required by the SaaS completeness guidelines for all screens.
+  Fix: Add a screen tag comment or visible identifier for tracking and navigation.
+
+  [LOW] maintainability -- Line 10
+  Inline styles (style={{ maxWidth: 720, gap: '1.25rem', etc.}) are used instead of utility classes, reducing consistency and maintainability.
+  Fix: Replace inline styles with Tailwind utility classes or CSS module classes for consistency with the rest of the codebase.

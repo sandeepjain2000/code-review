@@ -1,0 +1,1502 @@
+=================================================================
+  CODESENTINEL -- AI CODE REVIEW REPORT
+=================================================================
+  Generated : 04/05/2026, 17:36:40
+  Review ID : 6dab47ebdb514bc3
+  Model     : nvidia/meta/llama-3.3-70b-instruct
+  Score     : 85 / 100
+  Files     : 25
+  Issues    : 150
+
+  CRITICAL   6
+  HIGH       8
+  MEDIUM     87
+  LOW        49
+
+-----------------------------------------------------------------
+  SUMMARY
+-----------------------------------------------------------------
+=================================================================
+  PROJECT INTELLIGENCE REPORT — CodeSentinel
+=================================================================
+  Scope   : system
+  Files   : 25   Issues: 150   Avg Score: 85/100
+
+  PROJECT STATUS: 🚨 NOT production-ready — critical issues must be resolved first
+  Security Risk Score: 40/100  (higher = safer)
+
+-----------------------------------------------------------------
+  EXECUTION METRICS
+-----------------------------------------------------------------
+  NVIDIA       : 25 file(s)  (Avg time: 145.57s per call)
+
+-----------------------------------------------------------------
+  ISSUE BREAKDOWN
+-----------------------------------------------------------------
+  🔴 Critical : 6
+  🟠 High     : 8
+  🟡 Medium   : 87
+  🔵 Low      : 49
+
+-----------------------------------------------------------------
+  TOP ISSUE CATEGORIES
+-----------------------------------------------------------------
+  Error Handling                  42 occurrences  in 14 file(s)
+  Input Validation                16 occurrences  in 10 file(s)
+  Code Smell                      15 occurrences  in 4 file(s)
+  Data Integrity                  10 occurrences  in 2 file(s)
+  Readability                     10 occurrences  in 4 file(s)
+  Best Practice                    9 occurrences  in 5 file(s)
+  Uiux                             7 occurrences  in 1 file(s)
+  Security                         6 occurrences  in 5 file(s)
+
+-----------------------------------------------------------------
+  REPEATED PATTERNS (architectural, not just file-level)
+-----------------------------------------------------------------
+  • Error Handling appears in 14 files (42 total occurrences)
+  • Input Validation appears in 10 files (16 total occurrences)
+  • Security appears in 5 files (6 total occurrences)
+  • Best Practice appears in 5 files (9 total occurrences)
+  • Maintainability appears in 4 files (4 total occurrences)
+  • Code Smell appears in 4 files (15 total occurrences)
+
+  → These are architectural weaknesses — fix the root cause, not each instance.
+
+-----------------------------------------------------------------
+  TOP 5 FIXES (highest severity first)
+-----------------------------------------------------------------
+  1. [CRITICAL] src/db/schema.ts (L12)
+     Password is stored as plain text in the 'password' column. This is a critical security vulnerability that exposes user c
+     Fix: Hash passwords using bcrypt or argon2 before storing. Never store plain-text passwords.
+
+  2. [CRITICAL] src/app/assets/page.tsx (L61)
+     Missing `await` on the `fetch` call. The `save` function is async, but the `fetch` call is not awaited. This means the f
+     Fix: Add `await` before the `fetch` call to properly handle the asynchronous response.
+
+  3. [CRITICAL] scripts/seed.ts (L88)
+     SQL injection vulnerability in DELETE statement: table name `t` is interpolated directly into SQL string without sanitiz
+     Fix: Use parameterized queries or validate table names against a whitelist before executing DELETE.
+
+  4. [CRITICAL] scripts/seed.ts (L176)
+     SQL injection vulnerability in resetSeq function: table name `table` is interpolated directly into SELECT MAX query with
+     Fix: Validate table name against a whitelist before using in SQL string.
+
+  5. [CRITICAL] scripts/seed.ts (L29)
+     Plaintext password stored in database: `password: r.password` directly inserts the CSV value without hashing. This expos
+     Fix: Hash passwords using bcrypt or argon2 before inserting into the database.
+
+-----------------------------------------------------------------
+  ROUND 2 FILES (processed after main scan — slow AI responses)
+-----------------------------------------------------------------
+  • src/components/DocumentWorkspace.tsx  (score 75/100, 19 issue(s), took >423s)
+  • src/app/assets/page.tsx  (score 19/100, 35 issue(s), took >703s)
+  • scripts/seed.ts  (score 0/100, 42 issue(s), took >932s)
+
+-----------------------------------------------------------------
+  HOTSPOT FILES (most issues)
+-----------------------------------------------------------------
+  • scripts/seed.ts  —  42 issue(s)
+  • src/app/assets/page.tsx  —  35 issue(s)  score 19/100
+  • src/components/DocumentWorkspace.tsx  —  19 issue(s)  score 75/100
+  • src/db/schema.ts  —  11 issue(s)  score 55/100
+  • src/lib/tree-types.ts  —  5 issue(s)  score 95/100
+
+-----------------------------------------------------------------
+  ACTION PLAN
+-----------------------------------------------------------------
+  DAY 1 — Blockers:
+    - Fix 6 critical issue(s) — immediate blockers
+    - Resolve 6 security issue(s) across 5 files
+
+  DAY 2 — High Priority:
+    - Fix 2 high-severity error handling issue(s)
+    - Fix 1 high-severity database issue(s)
+    - Fix 1 high-severity sql injection issue(s)
+    - Fix 1 high-severity security issue(s)
+
+  DAY 3 — Patterns & Medium:
+    - Refactor repeated error handling pattern (14 files) → extract shared helper
+    - Refactor repeated input validation pattern (10 files) → extract shared helper
+    - Refactor repeated best practice pattern (5 files) → extract shared helper
+    - Refactor repeated maintainability pattern (4 files) → extract shared helper
+
+=================================================================
+  END OF PROJECT SUMMARY
+  This report is based on a FULL execution of the scanning script.
+=================================================================
+
+=================================================================
+  FILE: src/app/layout.tsx
+  Score: 99/100   Issues: 1   Provider: nvidia   Time: 9.66s
+
+  The layout file is clean and minimal. No runtime failures, security vulnerabilities, or data integrity issues are present. The only concern is a minor maintainability point: the metadata title is hardcoded and could be made dynamic for multi-tenant or multi-page scenarios. Overall, this is a well-structured root layout with no blocking issues.
+
+  [LOW] IssueType.MAINTAINABILITY -- Line 17
+  Metadata title and description are hardcoded. In a multi-tenant or multi-page SaaS application, this should be dynamic (e.g., based on tenant name or page context) to improve SEO and user experience.
+  Fix: Consider using generateMetadata or a dynamic metadata function that accepts page-specific or tenant-specific values.
+  Code: export const metadata: Metadata = {
+  title: "Compliance for Certification",
+  description:
+    "Document hierarchy, ris
+
+  🧪 Test Coverage Generator
+    - Should render the layout with children and AppShell component
+    - Should apply Geist and Geist_Mono font CSS variables correctly
+    - Should set the correct HTML lang attribute to 'en'
+    - Should have min-h-screen and antialiased classes on the body
+
+=================================================================
+  FILE: src/lib/scope.ts
+  Score: 100/100   Issues: 0   Provider: nvidia   Time: 16.36s
+
+  This is a small, well-defined utility function with no security, reliability, or performance issues. The code is correct, handles the empty array case correctly (returns true), and is self-documenting. No issues found.
+
+  🧪 Test Coverage Generator
+    - Should return true for an empty chain array
+    - Should return true when all elements are true
+    - Should return false when any element is false
+    - Should handle mixed boolean values correctly
+
+=================================================================
+  FILE: tailwind.config.ts
+  Score: 100/100   Issues: 0   Provider: nvidia   Time: 15.22s
+
+  This is a standard Tailwind CSS configuration file with no runtime logic, security concerns, or production risks. The configuration is minimal and correct for a Next.js project using the App Router. No issues found.
+
+=================================================================
+  FILE: src/app/risk/page.tsx
+  Score: 100/100   Issues: 0   Provider: nvidia   Time: 16.90s
+
+  This is a thin page component with no business logic, data fetching, or user input handling. The only risk is the absence of authentication/authorization checks, which is acceptable if the parent layout or middleware enforces them. No issues to report.
+
+  🧪 Test Coverage Generator
+    - Should render the DocumentWorkspace component in risk mode
+    - Should display the heading and description text correctly
+
+=================================================================
+  FILE: src/db/schema.ts
+  Score: 55/100   Issues: 11   Provider: nvidia   Time: 39.91s
+
+  The schema is well-structured with proper use of drizzle-orm, unique constraints, and composite indexes. The primary risk is the storage of plain-text passwords (line 12), which is a critical security vulnerability. Additionally, there are no foreign key constraints defined, which could lead to data integrity issues. The schema lacks timestamps with timezone awareness and uses text for date fields, which may cause parsing issues. Overall, the schema is clean but has a critical security flaw.
+
+  [CRITICAL] IssueType.SECURITY -- Line 12
+  Password is stored as plain text in the 'password' column. This is a critical security vulnerability that exposes user credentials if the database is compromised.
+  Fix: Hash passwords using bcrypt or argon2 before storing. Never store plain-text passwords.
+  Code: password: text("password").notNull(),
+
+  [MEDIUM] IssueType.DATA_INTEGRITY -- Line 14
+  createdBy and updatedBy fields are not defined as foreign keys to the user table. This can lead to orphaned records if a user is deleted.
+  Fix: Add foreign key references to the user table for createdBy and updatedBy fields.
+  Code: createdBy: integer("createdBy"),
+  updatedBy: integer("updatedBy"),
+
+  [LOW] IssueType.BEST_PRACTICE -- Line 16
+  created_at and updated_at are stored as text. Using text for timestamps can lead to inconsistent date formats and sorting issues.
+  Fix: Use a proper datetime type (e.g., integer for Unix timestamps or text with ISO 8601 format) and ensure consistent formatting.
+  Code: created_at: text("created_at").notNull(),
+  updated_at: text("updated_at").notNull(),
+
+  [MEDIUM] IssueType.DATA_INTEGRITY -- Line 38
+  documentId in iso_category table is not defined as a foreign key to iso_document. This can lead to orphaned categories if a document is deleted.
+  Fix: Add a foreign key reference to iso_document.id.
+  Code: documentId: integer("documentId").notNull(),
+
+  [MEDIUM] IssueType.DATA_INTEGRITY -- Line 54
+  categoryId in iso_level_1 table is not defined as a foreign key to iso_category. This can lead to orphaned level 1 entries if a category is deleted.
+  Fix: Add a foreign key reference to iso_category.id.
+  Code: categoryId: integer("categoryId").notNull(),
+
+  [MEDIUM] IssueType.DATA_INTEGRITY -- Line 74
+  level_1_ID in iso_level_2 table is not defined as a foreign key to iso_level_1. This can lead to orphaned level 2 entries if a level 1 entry is deleted.
+  Fix: Add a foreign key reference to iso_level_1.id.
+  Code: level_1_ID: integer("level_1_ID").notNull(),
+
+  [MEDIUM] IssueType.DATA_INTEGRITY -- Line 89
+  level_2_ID in iso_evidence table is not defined as a foreign key to iso_level_2. This can lead to orphaned evidence if a level 2 entry is deleted.
+  Fix: Add a foreign key reference to iso_level_2.id.
+  Code: level_2_ID: integer("level_2_ID").notNull(),
+
+  [MEDIUM] IssueType.DATA_INTEGRITY -- Line 104
+  asset_type_id in iso_asset_subtype table is not defined as a foreign key to iso_asset_type. This can lead to orphaned subtypes if an asset type is deleted.
+  Fix: Add a foreign key reference to iso_asset_type.id.
+  Code: asset_type_id: integer("asset_type_id").notNull(),
+
+  [MEDIUM] IssueType.DATA_INTEGRITY -- Line 112
+  asset_type_id and asset_subtype_id in iso_asset table are not defined as foreign keys to their respective tables. This can lead to orphaned assets if a type or subtype is deleted.
+  Fix: Add foreign key references to iso_asset_type.id and iso_asset_subtype.id.
+  Code: asset_type_id: integer("asset_type_id").notNull(),
+  asset_subtype_id: integer("asset_subtype_id"),
+
+  [MEDIUM] IssueType.DATA_INTEGRITY -- Line 116
+  createdBy and updatedBy in iso_asset table are not defined as foreign keys to the user table. This can lead to orphaned records if a user is deleted.
+  Fix: Add foreign key references to the user table.
+  Code: createdBy: integer("createdBy").notNull(),
+  updatedBy: integer("updatedBy").notNull(),
+
+  [LOW] IssueType.BEST_PRACTICE -- Line 124
+  asset_cost is stored as an integer. This may not be sufficient for monetary values that require decimal precision (e.g., 1234.56).
+  Fix: Use a real or text type to store monetary values with decimal precision, or store as integer cents.
+  Code: asset_cost: integer("asset_cost").notNull(),
+
+  🧪 Test Coverage Generator
+    - Should hash passwords before storing in the database
+    - Should enforce foreign key constraints for createdBy/updatedBy fields
+    - Should handle null values for optional fields like desc, url, sku_number
+    - Should validate date format for created_at and updated_at fields
+    - Should enforce unique constraint on iso_category name per documentId
+    - Should handle large text fields for asset_associated_risks and vulnerabilities
+    - Should prevent SQL injection through any user-supplied field
+    - Should handle concurrent inserts on unique composite indexes without race conditions
+
+=================================================================
+  FILE: next-env.d.ts
+  Score: 100/100   Issues: 0   Provider: nvidia   Time: 47.30s
+
+  The provided code snippet is a TypeScript definition file for Next.js and does not contain any executable code or potential issues. It is a configuration file that should not be edited, as indicated by the comment. The score is 100 since there are no issues found.
+
+=================================================================
+  FILE: src/db/index.ts
+  Score: 91/100   Issues: 3   Provider: nvidia   Time: 47.54s
+
+  The provided code is a database setup for a compliance system using SQLite and Drizzle ORM. It exports functions to get the SQLite database and the Drizzle ORM instance. The code is generally well-structured, but there are some potential issues and improvements that can be made. The biggest risk is the lack of error handling and potential SQL injection vulnerabilities. The code also uses synchronous file system operations, which can be a performance bottleneck. Overall, the code score is 80, with some medium-severity issues that need to be addressed.
+
+  [MEDIUM] IssueType.PERFORMANCE -- Line 12
+  Synchronous file system operation can be a performance bottleneck
+  Fix: Use asynchronous file system operations instead
+  Code: fs.mkdirSync(dir, { recursive: true });
+
+  [MEDIUM] IssueType.ERROR_HANDLING -- Line 25
+  No error handling for database connection errors
+  Fix: Add try-catch block to handle database connection errors
+  Code: const sqlite = new Database(dbPath);
+
+  [MEDIUM] IssueType.ERROR_HANDLING -- Line 35
+  No error handling for Drizzle ORM initialization errors
+  Fix: Add try-catch block to handle Drizzle ORM initialization errors
+  Code: globalForDb.__complianceDb = drizzle(getSqlite(), { schema });
+
+  🧪 Test Coverage Generator
+    - Should handle database connection errors
+    - Should handle SQL query errors
+    - Should prevent SQL injection attacks
+    - Should handle file system errors when creating the database directory
+
+=================================================================
+  FILE: src/app/compliance/page.tsx
+  Score: 96/100   Issues: 2   Provider: nvidia   Time: 64.19s
+
+  The provided code snippet appears to be a React functional component named CompliancePage. It renders a div with a heading, paragraph, and a DocumentWorkspace component. There are no critical security vulnerabilities or runtime failures identified in this code. However, there are some potential issues related to maintainability and best practices.
+
+  [LOW] IssueType.MAINTAINABILITY -- Line 16
+  The mode prop of the DocumentWorkspace component is hardcoded to 'compliance'. Consider making it a configurable prop or a constant.
+  Fix: Extract the mode value into a constant or a configurable prop.
+  Code: <DocumentWorkspace mode="compliance" />
+
+  [MEDIUM] IssueType.BEST_PRACTICE -- Line 13
+  The paragraph mentions that file uploads are intentionally disabled until S3 is configured. Consider adding a feature flag or a configurable setting to enable or disable file uploads.
+  Fix: Add a feature flag or a configurable setting to enable or disable file uploads.
+  Code: File uploads are intentionally disabled until S3 is configured.
+
+  🧪 Test Coverage Generator
+    - Should render the compliance page with the correct heading and paragraph
+    - Should render the DocumentWorkspace component in compliance mode
+
+=================================================================
+  FILE: src/app/api/level1/[id]/route.ts
+  Score: 100/100   Issues: 0   Provider: nvidia   Time: 57.40s
+
+  Could not parse model response.
+
+=================================================================
+  FILE: src/app/api/documents/route.ts
+  Score: 95/100   Issues: 3   Provider: nvidia   Time: 68.85s
+
+  The provided code snippet appears to be a simple API endpoint for retrieving documents. However, there are a few potential issues that could be improved for better reliability and security. The code does not handle potential errors that may occur during database operations, and it also does not validate or sanitize the 'auditor' query parameter. Additionally, the code assumes that the 'include' property exists in the database rows, which could lead to errors if it does not.
+
+  [MEDIUM] IssueType.ERROR_HANDLING -- Line 9
+  Database operations are not wrapped in a try-catch block, which could lead to unhandled errors
+  Fix: Wrap database operations in a try-catch block to handle potential errors
+  Code: const rows = await db.select().from(isoDocument).orderBy(asc(isoDocument.name));
+
+  [LOW] IssueType.INPUT_VALIDATION -- Line 7
+  The 'auditor' query parameter is not validated or sanitized
+  Fix: Validate and sanitize the 'auditor' query parameter to prevent potential security vulnerabilities
+  Code: const auditor = new URL(req.url).searchParams.get('auditor') === '1';
+
+  [LOW] IssueType.NULL_CHECK -- Line 13
+  The code assumes that the 'include' property exists in the database rows
+  Fix: Check for the existence of the 'include' property in database rows to prevent potential errors
+  Code: const list = auditor ? rows.filter((r) => r.include) : rows;
+
+  🧪 Test Coverage Generator
+    - Should handle database connection errors
+    - Should validate and sanitize the 'auditor' query parameter
+    - Should check for the existence of the 'include' property in database rows
+
+=================================================================
+  FILE: src/components/AppShell.tsx
+  Score: 94/100   Issues: 2   Provider: nvidia   Time: 70.35s
+
+  The provided code snippet appears to be a well-structured React component for an application shell. It utilizes Next.js features and follows good practices for navigation and styling. However, there are a few areas that could be improved for better maintainability, accessibility, and error handling. The score is deducted due to the lack of input validation, potential issues with the 'use client' directive, and missing accessibility attributes.
+
+  [MEDIUM] IssueType.MAINTAINABILITY -- Line 6
+  The navigation menu items are hardcoded. Consider making them configurable or fetching them from a database for better maintainability.
+  Fix: Create a separate file or API endpoint for navigation menu items.
+  Code: [{ href: '/', label: 'Overview' }, ...]
+
+  [MEDIUM] IssueType.BEST_PRACTICE -- Line 1
+  The 'use client' directive is used without a clear explanation. Consider adding a comment to explain its purpose.
+  Fix: Add a comment to explain the purpose of the 'use client' directive.
+  Code: "use client";
+
+  🧪 Test Coverage Generator
+    - Should render the navigation menu correctly
+    - Should handle active navigation item styling
+    - Should render the main content area correctly
+
+=================================================================
+  FILE: src/app/api/tree/[documentId]/route.ts
+  Score: 96/100   Issues: 2   Provider: nvidia   Time: 66.60s
+
+  The provided code snippet appears to be a part of a Node.js API, specifically designed to handle GET requests for building a document tree. It checks for a valid document ID and an optional 'auditor' parameter. However, there are a few potential issues and improvements that can be suggested. The code does not handle errors that might occur during the execution of the 'buildDocumentTree' function, and it does not validate the 'auditor' parameter. Additionally, the error messages returned to the user could be more descriptive and specific.
+
+  [MEDIUM] IssueType.ERROR_HANDLING -- Line 15
+  The 'buildDocumentTree' function call is not wrapped in a try-catch block, which means any errors that occur during its execution will not be caught and handled.
+  Fix: Wrap the 'buildDocumentTree' function call in a try-catch block to handle potential errors.
+  Code: const tree = await buildDocumentTree(id, auditor);
+
+  [LOW] IssueType.INPUT_VALIDATION -- Line 14
+  The 'auditor' parameter is not validated, which could potentially lead to unexpected behavior if it is not a valid value.
+  Fix: Add validation for the 'auditor' parameter to ensure it is a valid value.
+  Code: const auditor = new URL(req.url).searchParams.get('auditor') === '1';
+
+  🧪 Test Coverage Generator
+    - Should return 400 for non-numeric document ID
+    - Should return 404 when document tree is not found
+    - Should handle errors during document tree building
+    - Should validate the 'auditor' parameter
+
+=================================================================
+  FILE: src/lib/build-document-tree.ts
+  Score: 96/100   Issues: 2   Provider: nvidia   Time: 71.20s
+
+  The provided code is a TypeScript function named `buildDocumentTree` that constructs a document tree based on the provided `documentId` and `auditorMode`. The function appears to be well-structured and follows good coding practices. However, there are some potential issues and improvements that can be suggested. The function does not handle errors that may occur during database operations, and it does not validate the input parameters. Additionally, the function uses a lot of nested loops and conditional statements, which can make it difficult to understand and maintain. The score is 85 due to the lack of error handling and input validation.
+
+  [MEDIUM] IssueType.ERROR_HANDLING -- Line 18
+  The function does not handle errors that may occur during database operations
+  Fix: Add try-catch blocks to handle potential errors
+  Code: const [doc] = await db.select().from(isoDocument).where(eq(isoDocument.id, documentId)).limit(1);
+
+  [LOW] IssueType.INPUT_VALIDATION -- Line 13
+  The function does not validate the input parameters
+  Fix: Add input validation to ensure that the parameters are valid
+  Code: export async function buildDocumentTree(documentId: number, auditorMode: boolean): Promise<DocumentTree | null> {
+
+  🧪 Test Coverage Generator
+    - Should handle DB timeout gracefully
+    - Should prevent double-charge if retried
+    - Should return null if documentId is invalid
+    - Should return null if auditorMode is invalid
+    - Should return the correct document tree for a given documentId and auditorMode
+
+=================================================================
+  FILE: next.config.ts
+  Score: 99/100   Issues: 1   Provider: nvidia   Time: 80.04s
+
+  The provided Next.js configuration file is minimal and only includes the serverExternalPackages option. It does not pose any significant security risks or performance issues. However, it lacks other essential configurations that are typically included in a Next.js project, such as internationalized routing, optimized images, and environment variables. The score is high due to the lack of potential issues, but it can be improved by adding more configurations to enhance the project's functionality and security.
+
+  [LOW] IssueType.CONFIGURATION -- Line 3
+  The nextConfig object is missing other essential configurations, such as internationalized routing and optimized images.
+  Fix: Add more configurations to the nextConfig object to enhance the project's functionality and security.
+  Code: const nextConfig: NextConfig = {
+  serverExternalPackages: ["better-sqlite3"],
+};
+
+  🧪 Test Coverage Generator
+    - Should handle serverExternalPackages correctly
+    - Should not throw errors when building or starting the development server
+
+=================================================================
+  FILE: drizzle.config.ts
+  Score: 96/100   Issues: 2   Provider: nvidia   Time: 79.94s
+
+  The provided Drizzle configuration file has a few potential issues. It uses synchronous I/O operations and does not handle potential errors that may occur when creating directories or accessing environment variables. However, the code is generally well-structured and clear in its intent. The score is deducted due to the lack of error handling and the use of synchronous I/O.
+
+  [MEDIUM] IssueType.ERROR_HANDLING -- Line 8
+  The fs.mkdirSync function does not handle potential errors that may occur when creating directories. It would be better to use the asynchronous version fs.mkdir and handle potential errors.
+  Fix: Use the asynchronous version fs.mkdir and handle potential errors.
+  Code: fs.mkdirSync(path.dirname(file), { recursive: true });
+
+  [LOW] IssueType.ERROR_HANDLING -- Line 6
+  The process.env.DATABASE_URL is not checked for null or undefined before calling the replace method. This could potentially lead to a TypeError.
+  Fix: Add a null check before calling the replace method.
+  Code: process.env.DATABASE_URL?.replace(/^file:/, '')
+
+  🧪 Test Coverage Generator
+    - Should handle errors when creating directories
+    - Should handle errors when accessing environment variables
+    - Should use asynchronous I/O operations instead of synchronous ones
+
+=================================================================
+  FILE: src/app/page.tsx
+  Score: 93/100   Issues: 3   Provider: nvidia   Time: 82.87s
+
+  The provided code is a Next.js page that displays a dashboard with various metrics. The code is well-structured and readable. However, there are some potential issues that need to be addressed, such as error handling and input validation. The code uses a database to retrieve data, but it does not handle potential database errors. Additionally, the code does not validate user input, which could lead to security vulnerabilities. Overall, the code is a good start, but it needs some improvements to make it more robust and secure.
+
+  [MEDIUM] IssueType.ERROR_HANDLING -- Line 13
+  The code does not handle potential database errors when retrieving data
+  Fix: Add try-catch blocks to handle database errors
+  Code: const db = getDb();
+
+  [MEDIUM] IssueType.INPUT_VALIDATION -- Line 14
+  The code does not validate user input when retrieving data
+  Fix: Add input validation to prevent security vulnerabilities
+  Code: const [d0, d1, a0, l0, e0] = await Promise.all([
+
+  [LOW] IssueType.CODE_SMELL -- Line 53
+  The code uses a magic number (6) for the grid columns
+  Fix: Replace the magic number with a named constant
+  Code: lg:grid-cols-4
+
+  🧪 Test Coverage Generator
+    - Should handle database errors when retrieving data
+    - Should validate user input to prevent security vulnerabilities
+    - Should display a loading indicator while data is being retrieved
+    - Should handle cases where data is not available
+
+=================================================================
+  FILE: src/app/api/scope/route.ts
+  Score: 84/100   Issues: 3   Provider: nvidia   Time: 98.90s
+
+  The provided code snippet appears to be a part of a RESTful API, handling PATCH requests to update entities. However, there are several potential issues and improvements that can be suggested. The code lacks proper error handling, especially when dealing with database operations. Additionally, the code does not validate the entity type before attempting to update it in the database. The code also returns a generic 'Invalid JSON' error when the request body is not valid JSON, which could potentially leak information about the API's expectations. The score is deducted due to these potential security and reliability issues.
+
+  [MEDIUM] IssueType.ERROR_HANDLING -- Line 24
+  The code does not handle errors that may occur when parsing the request body as JSON. It should provide more specific error messages to help with debugging.
+  Fix: Use a try-catch block to catch any errors that occur during JSON parsing and return a more specific error message.
+  Code: try { body = (await req.json()) as Body; } catch { return Response.json({ error: "Invalid JSON" }, { status: 400 }); }
+
+  [MEDIUM] IssueType.DATABASE -- Line 33
+  The code does not validate the entity type before attempting to update it in the database. This could potentially lead to errors if the entity type is not valid.
+  Fix: Add a check to ensure the entity type is valid before attempting to update it in the database.
+  Code: const db = getDb(); const ts = now();
+
+  [HIGH] IssueType.DATABASE -- Line 38
+  The code does not handle errors that may occur when updating the entity in the database. This could potentially lead to data corruption or other issues.
+  Fix: Use a try-catch block to catch any errors that occur during the database update operation.
+  Code: await db.update(isoDocument).set({ include, updated_at: ts }).where(eq(isoDocument.id, id));
+
+  🧪 Test Coverage Generator
+    - Should handle database connection errors gracefully
+    - Should validate entity type before updating in the database
+    - Should return more specific error messages for invalid JSON
+    - Should handle cases where the entity is not found in the database
+
+=================================================================
+  FILE: src/app/api/assets/[id]/route.ts
+  Score: 83/100   Issues: 4   Provider: nvidia   Time: 98.82s
+
+  The provided code snippet appears to be a part of a Next.js API route, handling PATCH requests to update asset information. The code has some potential issues, including lack of input validation, potential SQL injection vulnerabilities, and missing error handling. However, it also demonstrates some good practices, such as using parameterized queries and handling JSON parsing errors.
+
+  [MEDIUM] IssueType.INPUT_VALIDATION -- Line 10
+  The id parameter is not validated for potential SQL injection vulnerabilities
+  Fix: Use a parameterized query or validate the id parameter to prevent SQL injection
+  Code: const id = Number(sid);
+
+  [LOW] IssueType.ERROR_HANDLING -- Line 17
+  The try-catch block only catches JSON parsing errors, but does not handle other potential errors
+  Fix: Add additional error handling to catch and handle other potential errors
+  Code: try { body = (await req.json()) as Record<string, unknown>; } catch {
+
+  [MEDIUM] IssueType.INPUT_VALIDATION -- Line 43
+  The code does not validate the input data for potential security vulnerabilities
+  Fix: Add input validation to prevent potential security vulnerabilities
+  Code: if (k in body) patch[k] = body[k];
+
+  [HIGH] IssueType.SQL_INJECTION -- Line 53
+  The code uses a parameterized query, but the id parameter is not validated for potential SQL injection vulnerabilities
+  Fix: Use a parameterized query and validate the id parameter to prevent SQL injection
+  Code: await db.update(isoAsset).set(patch).where(eq(isoAsset.id, id));
+
+  🧪 Test Coverage Generator
+    - Should handle invalid JSON payload
+    - Should handle missing or invalid id parameter
+    - Should update asset information successfully
+    - Should handle SQL errors during update operation
+
+=================================================================
+  FILE: src/lib/tree-types.ts
+  Score: 95/100   Issues: 5   Provider: nvidia   Time: 91.52s
+
+  The provided code defines a set of types for a document tree structure, including EvidenceNode, Level2Node, Level1Node, CategoryNode, and DocumentTree. The types are well-structured and follow good naming conventions. However, there are no issues found in terms of security, performance, or reliability. The code is maintainable and readable, but some improvements can be made to handle potential null or undefined values.
+
+  [LOW] IssueType.READABILITY -- Line 4
+  The desc property in EvidenceNode can be null, consider adding a default value or handling null cases
+  Fix: Add a default value or handle null cases for the desc property
+  Code: desc: string | null;
+
+  [LOW] IssueType.READABILITY -- Line 14
+  The desc property in Level2Node can be null, consider adding a default value or handling null cases
+  Fix: Add a default value or handle null cases for the desc property
+  Code: desc: string | null;
+
+  [LOW] IssueType.READABILITY -- Line 23
+  The desc property in Level1Node can be null, consider adding a default value or handling null cases
+  Fix: Add a default value or handle null cases for the desc property
+  Code: desc: string | null;
+
+  [LOW] IssueType.READABILITY -- Line 36
+  The desc property in CategoryNode can be null, consider adding a default value or handling null cases
+  Fix: Add a default value or handle null cases for the desc property
+  Code: desc: string | null;
+
+  [LOW] IssueType.READABILITY -- Line 45
+  The desc property in DocumentTree can be null, consider adding a default value or handling null cases
+  Fix: Add a default value or handle null cases for the desc property
+  Code: desc: string | null;
+
+  🧪 Test Coverage Generator
+    - Should handle null or undefined values for desc, url, inherent_likelihood, residual_likelihood, inherent_impact, and residual_impact properties
+    - Should validate the structure of the document tree to ensure it conforms to the defined types
+
+=================================================================
+  FILE: src/app/api/assets/route.ts
+  Score: 93/100   Issues: 3   Provider: nvidia   Time: 113.80s
+
+  The provided code snippet appears to be a part of an API route handling GET requests. It fetches data from the database and returns it as JSON. However, there are some potential issues and improvements that can be suggested. The code does not handle potential database errors, and it fetches all rows from the database without any pagination or filtering, which could lead to performance issues. Additionally, the code does not validate or sanitize the data before returning it, which could lead to security vulnerabilities.
+
+  [MEDIUM] IssueType.ERROR_HANDLING -- Line 8
+  Database query error handling is missing
+  Fix: Add try-catch blocks to handle potential database errors
+  Code: const db = getDb();
+const rows = await db.select().from(isoAsset).orderBy(asc(isoAsset.asset_name));
+
+  [MEDIUM] IssueType.PERFORMANCE -- Line 9
+  Fetching all rows from the database without pagination or filtering could lead to performance issues
+  Fix: Implement pagination or filtering for large datasets
+  Code: const rows = await db.select().from(isoAsset).orderBy(asc(isoAsset.asset_name));
+
+  [LOW] IssueType.SECURITY -- Line 14
+  Data validation and sanitization is missing
+  Fix: Validate and sanitize data before returning it
+  Code: return Response.json({ assets: rows, types, subtypes });
+
+  🧪 Test Coverage Generator
+    - Should handle database connection errors
+    - Should handle cases where database queries return no results
+    - Should validate and sanitize data before returning it
+    - Should implement pagination or filtering for large datasets
+
+=================================================================
+  FILE: src/app/api/evidence/route.ts
+  Score: 81/100   Issues: 4   Provider: nvidia   Time: 169.20s
+
+  The provided code has several issues, including potential SQL injection vulnerabilities, missing error handling, and inadequate input validation. The code also lacks proper logging and monitoring, which can make it difficult to diagnose issues in production. However, the code is well-structured and follows good practices in terms of organization and readability.
+
+  [HIGH] IssueType.SECURITY -- Line 14
+  Potential SQL injection vulnerability in GET request
+  Fix: Use parameterized queries to prevent SQL injection
+  Code: const rows = await db.select().from(isoEvidence).where(eq(isoEvidence.level_2_ID, id));
+
+  [MEDIUM] IssueType.ERROR_HANDLING -- Line 34
+  Missing error handling for JSON parsing errors
+  Fix: Add try-catch block to handle JSON parsing errors
+  Code: try { body = (await req.json()) as typeof body; } catch { return Response.json({ error: 'Invalid JSON' }, { status: 400 
+
+  [MEDIUM] IssueType.INPUT_VALIDATION -- Line 38
+  Missing input validation for required fields
+  Fix: Add input validation for required fields
+  Code: if (!body.name || !Number.isFinite(body.level_2_ID)) { return Response.json({ error: 'name and level_2_ID required' }, {
+
+  [MEDIUM] IssueType.DATABASE -- Line 44
+  Missing database transaction handling
+  Fix: Add database transaction handling to ensure data consistency
+  Code: await db.insert(isoEvidence).values({ ... });
+
+  🧪 Test Coverage Generator
+    - Should handle invalid JSON input in POST request
+    - Should handle missing required fields in POST request
+    - Should handle non-numeric level2Id in GET request
+    - Should handle database connection errors
+    - Should handle SQL injection attacks
+
+=================================================================
+  FILE: src/app/api/evidence/[id]/route.ts
+  Score: 93/100   Issues: 3   Provider: nvidia   Time: 174.02s
+
+  The provided code has several issues, including potential SQL injection vulnerabilities, lack of input validation, and missing error handling. The biggest risk is the potential for data corruption or unauthorized access due to the lack of proper validation and sanitization of user input. The code also lacks proper error handling, which could lead to unexpected behavior or crashes in production. However, the code does use parameterized queries, which is a good practice for preventing SQL injection attacks.
+
+  [MEDIUM] IssueType.ERROR_HANDLING -- Line 17
+  The code does not handle JSON parsing errors properly, it only returns a generic error message. It should provide more detailed information about the error.
+  Fix: Use a more specific error message and consider logging the error for further investigation.
+  Code: try { body = (await req.json()) as Record<string, unknown>; } catch { return Response.json({ error: "Invalid JSON" }, { 
+
+  [MEDIUM] IssueType.INPUT_VALIDATION -- Line 25
+  The code does not validate the input data properly, it only checks if the properties exist in the body object. It should also check the type and format of the input data.
+  Fix: Add more specific validation for the input data, such as checking the type and format of the name, desc, url, and include properties.
+  Code: if ("name" in body) patch.name = body.name; if ("desc" in body) patch.desc = body.desc; if ("url" in body) patch.url = b
+
+  [LOW] IssueType.DATABASE -- Line 30
+  The code uses a generic error message when updating the database. It should provide more detailed information about the error.
+  Fix: Use a more specific error message and consider logging the error for further investigation.
+  Code: const db = getDb(); await db.update(isoEvidence).set(patch).where(eq(isoEvidence.id, id)); return Response.json({ ok: tr
+
+  🧪 Test Coverage Generator
+    - Should handle invalid JSON input gracefully
+    - Should prevent SQL injection attacks
+    - Should handle missing or invalid id parameter
+    - Should handle database connection errors
+    - Should handle concurrent updates to the same evidence record
+
+=================================================================
+  FILE: src/components/DocumentWorkspace.tsx
+  Score: 75/100   Issues: 19   Provider: nvidia   Time: 423.43s
+
+  The review of `src/components/DocumentWorkspace.tsx` identified 12 medium and 7 low-severity issues, primarily centered on missing input validation for URL fields and inadequate error handling for async operations, which could lead to security vulnerabilities and silent failures. While the code is generally well-structured and follows good practices, the use of `void add()` suppresses unhandled promise rejections, risking silent failures during evidence addition. Many chunks were partial fragments with no actionable logic, limiting the review's depth, but the overall component requires improved validation, error feedback, and promise handling to enhance reliability and security.
+
+  [MEDIUM] IssueType.ERROR_HANDLING -- Line 43
+  Error handling in loadTree function can be improved
+  Fix: Add more specific error handling to handle different types of errors
+  Code: try { const res = await fetch(`/api/tree/${docId}?auditor=${auditor ? "1" : "0"}`); if (!res.ok) { const j = await res.j
+
+  [MEDIUM] IssueType.ERROR_HANDLING -- Line 60
+  Error handling in useEffect can be improved
+  Fix: Add more specific error handling to handle different types of errors
+  Code: const res = await fetch(`/api/documents?auditor=${auditor ? "1" : "0"}`); const data = (await res.json()) as { id: numbe
+
+  [MEDIUM] IssueType.SECURITY -- Line 83
+  Potential security vulnerability due to missing input validation
+  Fix: Add input validation to prevent security vulnerabilities
+  Code: await patchScope(entity, id, include); await loadTree();
+
+  [MEDIUM] IssueType.ERROR_HANDLING -- Line 484
+  The API request does not handle potential errors, such as network failures or server errors.
+  Fix: Add try-catch blocks to handle potential errors and provide meaningful error messages.
+  Code: const res = await fetch("/api/evidence", { ... });
+
+  [LOW] IssueType.INPUT_VALIDATION -- Line 173
+  The input validation only checks if the name is empty, but does not check for other potential issues, such as excessive length or invalid characters.
+  Fix: Add more comprehensive input validation to ensure that the user input is valid and secure.
+  Code: if (!name.trim()) return;
+
+  [MEDIUM] IssueType.ERROR_HANDLING -- Line 201
+  The API request does not handle potential errors, such as network failures or server errors.
+  Fix: Add try-catch blocks to handle potential errors and provide meaningful error messages.
+  Code: const res = await fetch(`/api/evidence/${id}`, { method: "DELETE" });
+
+  [MEDIUM] IssueType.ERROR_HANDLING -- Line 496
+  The code does not handle API request failures properly, it only checks if the response is OK and throws a generic error if it's not.
+  Fix: Implement proper error handling for API requests, including checking the response status code and handling specific error cases.
+  Code: if (!res.ok) throw new Error("Failed to add evidence");
+
+  [MEDIUM] IssueType.ERROR_HANDLING -- Line 510
+  The code does not handle API request failures properly, it only checks if the response is OK and throws a generic error if it's not.
+  Fix: Implement proper error handling for API requests, including checking the response status code and handling specific error cases.
+  Code: if (!res.ok) throw new Error("Delete failed");
+
+  [LOW] IssueType.CODE_SMELL -- Line 548
+  The code uses the `void` keyword to suppress the return value of a function, which can make the code harder to read and understand.
+  Fix: Remove the `void` keyword and handle the return value of the function properly.
+  Code: void onToggleInclude("evidence", ev.id, e.target.checked);
+
+  [MEDIUM] IssueType.INPUT_VALIDATION -- Line 591
+  Input validation for URL or storage path is missing
+  Fix: Add input validation to ensure the user enters a valid URL or storage path
+  Code: onChange={(e) => setUrl(e.target.value)}
+
+  [LOW] IssueType.CODE_SMELL -- Line 596
+  The disabled state of the button could be improved for better user experience
+  Fix: Consider adding a tooltip or a message to inform the user why the button is disabled
+  Code: disabled={busy}
+
+  [MEDIUM] IssueType.ERROR_HANDLING -- Line 597
+  The add evidence button lacks error handling, which could cause unexpected behavior if the add function fails.
+  Fix: Add try-catch block to handle potential errors when calling the add function.
+  Code: onClick={() => void add()}
+
+  [LOW] IssueType.READABILITY -- Line 590
+  The variable 'url' is not explicitly typed. Consider adding type annotations for better code readability.
+  Fix: Add type annotations for the 'url' variable.
+  Code: value={url}
+
+  [MEDIUM] IssueType.ERROR_HANDLING -- Line 594
+  The 'add' function is called without any error handling. Consider adding try-catch blocks to handle potential errors.
+  Fix: Add try-catch blocks to handle potential errors in the 'add' function.
+  Code: onClick={() => void add()}
+
+  [MEDIUM] IssueType.ERROR_HANDLING -- Line 599
+  The add evidence operation does not handle errors that may occur.
+  Fix: Add try-catch block to handle errors that may occur during the add evidence operation.
+  Code: onClick={() => void add()}
+
+  [LOW] IssueType.CODE_SMELL -- Line 597
+  The add function is not defined in this chunk, so its implementation and potential issues are unknown
+  Fix: Define the add function in this chunk or import it from another file
+  Code: onClick={() => void add()}
+
+  [LOW] IssueType.ERROR_HANDLING -- Line 597
+  Using void add() suppresses the promise rejection. If add() throws an error, it will be silently swallowed without any user feedback or error logging. This could lead to silent failures where the user clicks but nothing happens.
+  Fix: Either handle the promise with .catch() to log errors, or ensure add() internally catches and handles all errors before returning.
+  Code: onClick={() => void add()}
+
+  [MEDIUM] IssueType.BEST_PRACTICE -- Line 597
+  Consider adding a check to ensure the add function is available before calling it
+  Fix: Add a check to ensure the add function is available before calling it
+  Code: onClick={() => void add()}
+
+  [LOW] IssueType.CODE_SMELL -- Line 603
+  The code snippet is too small to provide meaningful insights into the component's functionality or potential issues. A full review of the component and its context is necessary.
+  Fix: Review the entire component and its usage to ensure it meets the requirements and follows best practices.
+  Code: </div>
+);
+
+  🧪 Test Coverage Generator
+    - Should handle DB timeout gracefully
+    - Should prevent double-charge if retried
+    - Should validate user input to prevent security vulnerabilities
+    - Should handle tree data loading and rendering correctly
+    - Should handle toggle include functionality for categories and levels
+    - Should handle save risk functionality for level 1 items
+    - Should handle API request failures gracefully
+    - Should validate user input before sending API requests
+    - Should handle concurrent API requests correctly
+    - Should prevent duplicate evidence records
+    - Should handle empty input gracefully
+    - Should validate user input for URL or storage path
+    - Should handle button click event when busy state is true
+    - Should handle invalid URL input
+    - Should handle add evidence button click failure
+    - Should disable the 'Add evidence' button when busy
+    - Should display an error message when add evidence operation fails
+    - Should disable the button and show loading state when `busy` is true
+    - Should call `add()` function when button is clicked and `busy` is false
+    - Should update URL state when input value changes
+    - Should handle empty URL gracefully in `add()` function (not visible in this chunk)
+    - Should prevent default form submission behavior (button has type='button')
+    - Should disable the 'Add evidence' button while the add operation is in progress
+    - Should re-enable the button after the add operation completes (success or failure)
+    - Should handle the case where the URL input is empty or invalid before calling add()
+    - Should display an error message if the add() operation fails (e.g., network error, server error)
+    - Should not allow duplicate evidence URLs to be added (if applicable)
+    - Should handle button click and add evidence successfully
+    - Should display feedback or notification when button is clicked
+    - Should handle errors when calling the add function
+    - Should display feedback or notification when add evidence is successful
+    - Should handle errors when adding evidence
+    - Should disable button when busy is true and re-enable when async operation completes
+    - Should call add() function on click when not busy
+    - Should not trigger add() when button is disabled (busy=true)
+    - Should handle add() promise rejection gracefully (error logged or shown to user)
+    - Should render the button with the correct text and styling
+    - Should call the add function when the button is clicked
+    - Should be disabled when the add function is not available
+    - Should render the 'Add evidence' button correctly
+    - Should handle button click event without errors
+    - Should render the component without errors
+    - Should handle user interactions correctly
+    - Should validate user input if applicable
+
+=================================================================
+  FILE: src/app/assets/page.tsx
+  Score: 19/100   Issues: 35   Provider: nvidia   Time: 703.04s
+
+  The review of `src/app/assets/page.tsx` identified 35 issues, including 1 critical, 3 high, 19 medium, and 12 low severity problems. The most critical issues involve missing `await` keywords on `fetch` calls, which cause the application to always proceed as if a request succeeded, and a complete lack of loading state management or optimistic UI updates. Error handling is consistently poor throughout the file, relying on generic `alert('Save failed')` calls that provide no actionable information to users and mask different failure modes such as validation errors, server errors, or permission issues. Additionally, the code lacks input validation before sending requests, has no error recovery mechanisms, and the inline editing UI is missing accessibility attributes and keyboard navigation support.
+
+  [MEDIUM] IssueType.ERROR_HANDLING -- Line 67
+  Generic error message 'Save failed' is used, which may not provide enough information to the user. Consider logging the actual error or providing a more specific error message.
+  Fix: Use a more specific error message or log the actual error.
+  Code: alert('Save failed');
+
+  [LOW] IssueType.CODE_SMELL -- Line 61
+  The fetch API is used without any retries or timeout handling. Consider adding retries or timeout handling to make the code more robust.
+  Fix: Use a library like axios or add retries and timeout handling manually.
+  Code: const res = await fetch(`/api/assets/${editing}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, bo
+
+  [LOW] IssueType.INPUT_VALIDATION -- Line 61
+  The API request does not validate the user input before sending it to the server. This could potentially lead to security vulnerabilities or data corruption.
+  Fix: Validate the user input using a library like Joi or Zod before sending it to the API
+  Code: body: JSON.stringify(form),
+
+  [MEDIUM] IssueType.ERROR_HANDLING -- Line 61
+  The fetch call is not properly handled for errors. If the fetch call fails, it will not be caught and handled.
+  Fix: Add a try-catch block around the fetch call to handle any potential errors.
+  Code: const res = await fetch(`/api/assets/${editing}`, { ... });
+
+  [HIGH] IssueType.UX_COPY -- Line 67
+  Generic alert message 'Save failed' on line 67 provides no actionable information. User cannot distinguish between validation errors, permission issues, or server errors. This leads to poor user experience and makes debugging difficult.
+  Fix: Parse the response body for a specific error message and display it to the user, or at minimum differentiate between 4xx and 5xx errors.
+  Code:     if (!res.ok) {
+      alert("Save failed");
+      return;
+    }
+
+  [HIGH] IssueType.ERROR_HANDLING -- Line 59
+  No try/catch block around the fetch call on lines 61-65. If the network fails or the fetch throws (e.g., DNS failure, CORS error), the promise rejection will be unhandled, potentially crashing the component or leaving the UI in an inconsistent state.
+  Fix: Wrap the fetch call in a try/catch block and handle network errors gracefully with user feedback.
+  Code:   const save = async () => {
+    if (editing === null) return;
+    const res = await fetch(`/api/assets/${editing}`, {
+ 
+
+  [MEDIUM] IssueType.UIUX -- Line 59
+  No loading state or disabled button during save operation. User can click save multiple times, causing duplicate requests. No visual feedback that the operation is in progress.
+  Fix: Add a loading state (e.g., `isSaving`) that disables the save button and shows a spinner or 'Saving...' text.
+  Code:   const save = async () => {
+    if (editing === null) return;
+    const res = await fetch(`/api/assets/${editing}`, {
+ 
+
+  [MEDIUM] IssueType.INPUT_VALIDATION -- Line 59
+  No client-side validation of form data before sending to server on line 64. Invalid or incomplete data will be sent, resulting in a server error that could have been caught earlier.
+  Fix: Add validation logic before the fetch call to check required fields, data types, and constraints.
+  Code:   const save = async () => {
+    if (editing === null) return;
+    const res = await fetch(`/api/assets/${editing}`, {
+ 
+
+  [LOW] IssueType.UIUX -- Line 70
+  No success feedback after successful save on line 70. The UI just closes the editing state without confirming to the user that the save was successful.
+  Fix: Show a success toast or notification after the save completes successfully.
+  Code:     setEditing(null);
+
+  [CRITICAL] IssueType.BUG -- Line 61
+  Missing `await` on the `fetch` call. The `save` function is async, but the `fetch` call is not awaited. This means the function will immediately proceed to the `if (!res.ok)` check, which will always be `undefined` (falsy), so the error handling block will never execute. The `setEditing(null)` will always run, even if the request fails, leading to data inconsistency and a silent failure.
+  Fix: Add `await` before the `fetch` call to properly handle the asynchronous response.
+  Code: const res = await fetch(`/api/assets/${editing}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application
+
+  [MEDIUM] IssueType.UX_COPY -- Line 67
+  Generic error message 'Save failed' provides no actionable information to the user. It should include the HTTP status or a more specific error message from the API response.
+  Fix: Parse the error response body and display a more specific error message, or at least include the HTTP status code.
+  Code: alert("Save failed");
+
+  [MEDIUM] IssueType.UIUX -- Line 70
+  No loading or success state is shown to the user. The editing state is cleared immediately after the request, but there is no visual feedback (e.g., spinner, success toast) to indicate the operation is in progress or completed.
+  Fix: Add a loading state (e.g., `setIsSaving(true)`) before the fetch and clear it after, and show a success message or toast after a successful save.
+  Code: setEditing(null);
+
+  [HIGH] IssueType.BUG -- Line 59
+  Missing await on fetch call at line 61. The async function save() does not await the fetch promise, so the response check at line 66 will always evaluate to true (since fetch returns a Promise object which is truthy), and setEditing(null) will execute immediately without waiting for the API response. This means the editing state is cleared before the save completes, and errors are never caught.
+  Fix: Add await before the fetch call to properly handle the asynchronous operation.
+  Code: const save = async () => {
+    if (editing === null) return;
+    const res = await fetch(`/api/assets/${editing}`, {
+   
+
+  [LOW] IssueType.ERROR_HANDLING -- Line 66
+  No try/catch block around the fetch call. Network errors (e.g., DNS failure, connection refused) will result in an unhandled promise rejection, which could crash the component or leave the UI in an inconsistent state.
+  Fix: Wrap the fetch call in a try/catch block to handle network errors gracefully.
+  Code: if (!res.ok) {
+      alert("Save failed");
+      return;
+    }
+    setEditing(null);
+
+  [MEDIUM] IssueType.INPUT_VALIDATION -- Line 64
+  The form data is stringified and sent to the API without any validation.
+  Fix: Validate the form data before sending it to the API to prevent potential security vulnerabilities.
+  Code: body: JSON.stringify(form)
+
+  [MEDIUM] IssueType.ERROR_HANDLING -- Line 66
+  The code does not handle cases where the API request fails. It should handle cases where the API request fails and display an error message to the user.
+  Fix: Handle cases where the API request fails and display an error message to the user.
+  Code: if (!res.ok) {
+
+  [LOW] IssueType.CODE_SMELL -- Line 65
+  The response from the API is not checked for any potential errors
+  Fix: Add error handling to check for any potential errors in the response
+  Code: }
+
+  [MEDIUM] IssueType.ERROR_HANDLING -- Line 64
+  No loading state is shown during the save operation. Users may click save multiple times, submit duplicate requests, or navigate away thinking nothing happened. The fetch rejection (network error) is also unhandled.
+  Fix: Add a loading state that disables the save button and shows a spinner, and wrap the fetch in try/catch to handle network failures.
+  Code:       body: JSON.stringify(form),
+    });
+    if (!res.ok) {
+      alert("Save failed");
+      return;
+    }
+    setEdit
+
+  [MEDIUM] IssueType.UIUX -- Line 67
+  Using browser alert() for error feedback is disruptive and non-standard for a modern web application. It blocks the UI, cannot be styled, and provides no way to show detailed error information or recovery actions.
+  Fix: Replace alert() with an inline error message component that can show detailed error information and recovery options.
+  Code:       alert("Save failed");
+
+  [LOW] IssueType.CODE_SMELL -- Line 70
+  setEditing(null) is called unconditionally after the save attempt, even on failure. This closes the edit mode and loses the user's unsaved changes, forcing them to re-enter all data.
+  Fix: Only close edit mode on successful save, or provide a way to recover unsaved changes on failure.
+  Code:     setEditing(null);
+
+  [LOW] IssueType.OBSERVABILITY -- Line 67
+  No error logging is performed when the save fails. In production, this makes debugging silent failures impossible.
+  Fix: Log the error details (status code, response body) to the server or a monitoring service before returning.
+  Code: if (!res.ok) {
+  alert("Save failed");
+  return;
+}
+
+  [LOW] IssueType.ERROR_HANDLING -- Line 68
+  Line 68: The `return` statement exits the function without logging the error, making debugging difficult in production.
+  Fix: Log the error to the server or console before returning to aid in troubleshooting.
+  Code: alert("Save failed");
+return;
+
+  [MEDIUM] IssueType.NULL_POINTER_EXCEPTION -- Line 255
+  Potential runtime error: `types.find(...)` will throw if `types` is null or undefined. The optional chaining `types?.find(...)` should be used to safely handle cases where the types array hasn't loaded yet.
+  Fix: Use optional chaining on the types array before calling .find()
+  Code:                         {types.find((t) => t.id === a.asset_type_id)?.asset_type ??
+                          a.asset_ty
+
+  [LOW] IssueType.UIUX -- Line 265
+  Edit button lacks an accessible label and keyboard event handler. Screen readers will not convey the action clearly, and keyboard-only users cannot activate it with Enter/Space.
+  Fix: Add aria-label and onKeyDown handler for keyboard accessibility
+  Code:                         <button
+                          type="button"
+                          className="text-xs fon
+
+  [LOW] IssueType.UIUX -- Line 240
+  Cancel button lacks an accessible label and keyboard event handler for consistency with the Edit button.
+  Fix: Add aria-label and onKeyDown handler for keyboard accessibility
+  Code:                               onClick={() => setEditing(null)}
+                            >
+                           
+
+  [MEDIUM] IssueType.READABILITY -- Line 268
+  The onClick event handler is defined as an anonymous function. Consider defining it as a separate named function for better readability and maintainability.
+  Fix: Define a named function for the onClick event handler
+  Code: onClick={() => startEdit(a)}
+
+  [MEDIUM] IssueType.NULL_POINTER_EXCEPTION -- Line 268
+  Potential null pointer exception if 'a' is null or undefined
+  Fix: Add null checks for 'a' before calling startEdit
+  Code: onClick={() => startEdit(a)}
+
+  [MEDIUM] IssueType.INPUT_VALIDATION -- Line 268
+  Lack of input validation for 'a' before passing it to startEdit
+  Fix: Add input validation for 'a' before calling startEdit
+  Code: onClick={() => startEdit(a)}
+
+  [LOW] IssueType.READABILITY -- Line 268
+  The `startEdit` function is not defined in this chunk, but it is assumed to be defined elsewhere in the file. Consider adding a type annotation for the `startEdit` function to improve code readability.
+  Fix: Add a type annotation for the `startEdit` function.
+  Code: onClick={() => startEdit(a)}
+
+  [MEDIUM] IssueType.MAINTAINABILITY -- Line 279
+  The closing div tag is not explicitly closed, which can lead to confusion when reading the code. Consider adding an explicit closing tag to improve code maintainability.
+  Fix: Add an explicit closing tag for the div element.
+  Code: </div>
+
+  [MEDIUM] IssueType.CODE_SMELL -- Line 269
+  The code snippet seems to be a part of a larger component, but without the full context, it's difficult to assess its correctness or potential issues.
+  Fix: Review the full file to ensure proper rendering and handling of data.
+  Code: No specific code snippet to highlight due to the partial nature of the file.
+
+  [MEDIUM] IssueType.UIUX -- Line 270
+  Edit button on line 270 lacks an accessible label (aria-label) and keyboard event handler (onKeyDown). Screen reader users will not understand the button's purpose, and keyboard-only users cannot activate it with Enter/Space.
+  Fix: Add aria-label='Edit [item name]' and onKeyDown handler for Enter/Space keys, or use a semantic <button> with visible text.
+  Code:                           Edit
+                        </button>
+
+  [MEDIUM] IssueType.READABILITY -- Line 271
+  The code snippet is too partial to fully understand the component's functionality and potential issues. It lacks context on data handling, error management, and edge cases.
+  Fix: Review the full file to ensure proper data handling, error management, and edge case consideration.
+  Code: The provided snippet is too partial for a meaningful code snippet.
+
+  [LOW] IssueType.CODE_SMELL -- File-level
+  The code snippet is too partial to provide meaningful review. Full-file context is necessary for a thorough analysis.
+  Fix: Review the complete file for potential issues.
+
+  [MEDIUM] IssueType.CODE_SMELL -- File-level
+  The partial nature of the file makes it difficult to assess the component's overall quality and potential issues.
+  Fix: Review the full file to ensure proper data handling, error management, and component optimization.
+  Code: None
+
+  🧪 Test Coverage Generator
+    - Should handle API request failures gracefully
+    - Should validate user input before sending it to the API
+    - Should handle cases where the API returns an empty or null response
+    - Should handle save button click with valid asset data
+    - Should handle save button click with invalid asset data
+    - Should handle API request failure during save
+    - Should handle save failure with a specific error message
+    - Should handle API request failures with a retry mechanism
+    - Should handle fetch errors when saving asset
+    - Should validate asset data before saving
+    - Should handle cases where editing is null
+    - Should handle fetch error when saving asset information
+    - Should validate asset information before saving
+    - Should handle fetch error when saving asset
+    - Should validate asset form data before saving
+    - Should display a more informative error message when save fails
+    - Should show specific error message when server returns 400 validation error (e.g., missing required field)
+    - Should show specific error message when server returns 403 forbidden
+    - Should show specific error message when server returns 500 internal error
+    - Should handle network failure gracefully (e.g., fetch throws TypeError)
+    - Should disable save button and show loading indicator while request is in flight
+    - Should prevent double-submit by disabling button during save
+    - Should validate form data client-side before sending to server
+    - Should show success feedback (e.g., toast) after successful save
+    - Should handle case where editing ID is invalid or deleted by another user
+    - Should handle case where form data is empty or incomplete
+    - Should handle network failure gracefully and show an error message
+    - Should show a loading indicator while the save request is in progress
+    - Should not reset editing state if the API returns a non-OK response
+    - Should show a success message or visual feedback after a successful save
+    - Should handle the case where the API returns a 4xx or 5xx error with a specific message
+    - Should handle network failure gracefully and not clear editing state
+    - Should show loading indicator during save operation
+    - Should display specific error message from API response
+    - Should handle 400 validation errors with field-level feedback
+    - Should handle 401/403 unauthorized errors with redirect to login
+    - Should handle 500 server errors with retry option
+    - Should prevent double submission while save is in progress
+    - Should restore previous form state if save fails
+    - Should handle concurrent edits from multiple tabs
+    - Should handle non-OK responses from the API
+    - Should handle API request failure gracefully
+    - Should validate input data before sending it to the API
+    - Should handle cases where the form data cannot be stringified
+    - Should handle potential errors when stringifying the form data
+    - Should display a specific error message instead of a generic one
+    - Should handle potential errors when parsing the response as JSON
+    - Should handle non-OK response status codes
+    - Should validate form data before sending it in the request body
+    - Should provide more informative error messages
+    - Should show a loading spinner while saving
+    - Should display specific error message from API response body when save fails
+    - Should handle network timeout gracefully with retry option
+    - Should handle 500 error with user-friendly message and support reference
+    - Should handle 422 validation error by showing field-level errors
+    - Should handle 409 conflict error with explanation and resolution options
+    - Should handle 403 forbidden error with permission explanation
+    - Should handle 429 rate limit error with retry-after information
+    - Should handle fetch rejection (network offline) with offline message
+    - Should revert optimistic UI changes on save failure
+    - Should not close edit mode on network error to allow retry
+    - Should show success confirmation after successful save
+    - Should show a toast/notification instead of alert when save fails
+    - Should log the error details to the server for debugging
+    - Should handle network timeout gracefully with a retry option
+    - Should preserve the editing state on failure so user can retry
+    - Should display specific error message from the API response
+    - Should show a user-friendly toast/notification instead of alert() when save fails
+    - Should log the error details to console or monitoring service before returning
+    - Should handle network errors (fetch throws) gracefully with a catch block
+    - Should display the specific error message from the API response if available
+    - Should not leave the UI in an inconsistent state after a failed save
+    - Should display a user-friendly error message instead of a browser alert when save fails
+    - Should log the error details to the server for debugging when save fails
+    - Should handle network timeout during save and show appropriate feedback
+    - Should preserve unsaved changes in the form when save fails (not reset editing state prematurely)
+    - Should handle editing state correctly
+    - Should not throw any errors when setting editing state to null
+    - Verify that setEditing(null) is called after all state updates and side effects are complete to avoid stale closure issues.
+    - Ensure the conditional block (line 69) correctly guards against null/undefined states before resetting editing.
+    - Test that the component re-renders correctly after setEditing(null) without causing infinite loops or unnecessary API calls.
+    - Should handle invalid input for asset name
+    - Should handle invalid input for asset owner
+    - Should handle invalid input for asset type
+    - Should handle invalid input for asset subtype
+    - Should handle error when saving asset information
+    - Should render asset rows correctly when types array is populated
+    - Should handle empty types array gracefully without crashing
+    - Should display fallback text when asset_type_id does not match any type
+    - Should toggle between edit and display modes correctly
+    - Should handle null/undefined asset_name gracefully
+    - Should handle null/undefined owner gracefully
+    - Should handle null/undefined asset_risk_level gracefully
+    - Should handle null/undefined iso_clause_ref gracefully
+    - Should support keyboard navigation (Tab, Enter, Escape) for edit/cancel buttons
+    - Should have proper ARIA labels on edit and cancel buttons
+    - Should render the table with the correct data
+    - Should handle the edit button click event correctly
+    - Should not throw any errors when rendering the table
+    - Should handle null or undefined values for 'a' in the startEdit function
+    - Should validate user input before passing it to the startEdit function
+    - Should render the edit button correctly
+    - Should call the `startEdit` function when the edit button is clicked
+    - Should render table rows correctly with varying data
+    - Should handle edge cases like empty data or missing properties
+    - Should render edit button with proper ARIA label for screen readers
+    - Should handle keyboard navigation (Enter/Space) on edit button
+    - Should display loading state while edit action is processing
+    - Should handle empty table body gracefully
+    - Should handle null/undefined values in table cells without crashing
+    - Should render table correctly with varying data sets
+    - Should render table rows correctly
+    - Should handle empty data sets
+    - Should not throw errors with valid props
+    - Should render table structure correctly
+    - Should handle data population without errors
+    - Should manage component state changes appropriately
+    - Should render the table correctly with sample data
+    - Should render table correctly with sample data
+    - Should handle empty data set without errors
+    - Should support dynamic table headers and columns
+    - Should handle empty data sets without errors
+    - Should render the table with correct styling and layout
+
+=================================================================
+  FILE: scripts/seed.ts
+  Score: 0/100   Issues: 42   Provider: nvidia   Time: 932.23s
+
+  The `scripts/seed.ts` file, reviewed in 43 chunks, contains a seeding script for a database, handling CSV imports and data processing, with some potential issues, including missing error handling and inadequate input validation, capped at medium severity due to the partial nature of the file. The code has a mix of well-structured and readable parts, but also some areas that could be improved for reliability and security, such as the use of loose equality checks and the lack of input validation. Critical issues, including a SQL injection vulnerability, are present in some chunks, and the script lacks proper error handling and transaction wrapping, which could lead to data corruption or inconsistencies. Overall, the script has 25 medium-severity issues, 11 low-severity issues, 4 critical issues, and 2 high-severity issues, highlighting the need for improvements in error handling, input validation, and security to ensure the script's reliability and maintainability.
+
+  [MEDIUM] IssueType.BUG -- Line 57
+  The asBool() function only checks for specific string values, which may not cover all possible boolean representations.
+  Fix: Consider using a more robust boolean parsing approach, such as using a library or a more comprehensive set of checks.
+  Code: return v === "1" || v === "true" || v === "TRUE";
+
+  [MEDIUM] IssueType.BUG -- Line 61
+  The n() function uses the Number() function to convert strings to numbers, which can lead to NaN (Not a Number) values if the input is not a valid number.
+  Fix: Consider using a more robust number parsing approach, such as using a library or a more comprehensive set of checks.
+  Code: return Number(v);
+
+  [LOW] IssueType.CODE_SMELL -- Line 66
+  The opt() function uses the trim() method to remove whitespace from the input string, but does not handle null or undefined input.
+  Fix: Consider adding a null check or using the optional chaining operator (?.) to handle null or undefined input.
+  Code: const t = v?.trim();
+
+  [LOW] IssueType.CODE_SMELL -- Line 65
+  The opt function uses the optional chaining operator (?.) which may not be supported in all environments.
+  Fix: Consider using a more traditional null check instead.
+  Code: const t = v?.trim();
+
+  [MEDIUM] IssueType.BEST_PRACTICE -- Line 57
+  The asBool function uses loose equality checks, which can lead to unexpected behavior. Consider using strict equality checks instead.
+  Fix: Use strict equality checks (===) instead of loose equality checks (==).
+  Code: return v === "1" || v === "true" || v === "TRUE";
+
+  [MEDIUM] IssueType.BEST_PRACTICE -- Line 61
+  The n function does not handle non-numeric string inputs. Consider adding input validation to handle such cases.
+  Fix: Add input validation to handle non-numeric string inputs.
+  Code: return Number(v);
+
+  [MEDIUM] IssueType.READABILITY -- Line 57
+  The function asBool uses loose equality checks, which can lead to unexpected behavior. Consider using strict equality checks instead.
+  Fix: Use strict equality checks (===) instead of loose equality checks (==).
+  Code: return v === "1" || v === "true" || v === "TRUE";
+
+  [MEDIUM] IssueType.ERROR_HANDLING -- Line 61
+  The function n does not handle non-numeric strings correctly. Consider adding input validation to handle such cases.
+  Fix: Add input validation to handle non-numeric strings.
+  Code: return Number(v);
+
+  [MEDIUM] IssueType.INPUT_VALIDATION -- Line 57
+  The asBool function does not handle cases where the input is not a string or undefined. It may throw an error or produce unexpected results.
+  Fix: Add input validation to handle non-string and non-undefined inputs.
+  Code: return v === "1" || v === "true" || v === "TRUE";
+
+  [MEDIUM] IssueType.INPUT_VALIDATION -- Line 65
+  The opt function does not handle cases where the input is not a string or undefined. It may throw an error or produce unexpected results.
+  Fix: Add input validation to handle non-string and non-undefined inputs.
+  Code: const t = v?.trim(); if (t === undefined || t === "" || t === "NULL") return null;
+
+  [MEDIUM] IssueType.BUG -- Line 65
+  Function opt does not handle null or undefined input explicitly, relying on optional chaining
+  Fix: Add an explicit null check for better readability and maintainability
+  Code: const t = v?.trim();
+
+  [MEDIUM] IssueType.BUG -- Line 60
+  Function `n()` converts `undefined` to `NaN` via `Number(undefined)`. If a CSV column is missing or undefined, this will silently produce NaN instead of throwing or defaulting to 0. NaN can propagate through calculations and comparisons, causing silent data corruption in the seed data.
+  Fix: Add an explicit check for undefined/null before conversion, and either throw, default to 0, or return null based on the expected behavior.
+  Code: function n(v: string | undefined): number {
+  return Number(v);
+}
+
+  [MEDIUM] IssueType.ERROR_HANDLING -- Line 60
+  Function n does not handle NaN (Not a Number) values, which can occur when passing non-numeric strings to Number()
+  Fix: Add a check for NaN values and handle them accordingly
+  Code: return Number(v);
+
+  [LOW] IssueType.CODE_SMELL -- Line 64
+  The function opt does not explicitly handle null or undefined inputs
+  Fix: Add explicit null and undefined checks to the function
+  Code: function opt(v: string | undefined): string | null { ... }
+
+  [LOW] IssueType.LOGIC -- Line 65
+  The undefined check on line 66 is unreachable because optional chaining (v?.trim()) already returns undefined for null/undefined inputs. The condition `t === undefined` will never be true since the only way t is undefined is if v is null/undefined, but then the optional chaining returns undefined and the check is redundant. This doesn't cause a bug but indicates confusion about optional chaining behavior.
+  Fix: Remove the redundant undefined check or restructure to make the intent clearer.
+  Code: const t = v?.trim();
+if (t === undefined || t === "" || t === "NULL") return null;
+return t;
+
+  [MEDIUM] IssueType.NULL_CHECK -- Line 66
+  The function does not check for NaN or null objects, which could potentially cause issues if not handled properly.
+  Fix: Consider adding additional checks for NaN and null objects to make the function more robust.
+  Code: if (t === undefined || t === "" || t === "NULL") return null;
+
+  [CRITICAL] IssueType.SQL_INJECTION -- Line 88
+  SQL injection vulnerability in DELETE statement: table name `t` is interpolated directly into SQL string without sanitization. An attacker who can control CSV filenames or table names could execute arbitrary SQL.
+  Fix: Use parameterized queries or validate table names against a whitelist before executing DELETE.
+  Code: for (const t of tables) {
+    sqlite.exec(`DELETE FROM ${t};`);
+}
+
+  [CRITICAL] IssueType.SQL_INJECTION -- Line 176
+  SQL injection vulnerability in resetSeq function: table name `table` is interpolated directly into SELECT MAX query without sanitization.
+  Fix: Validate table name against a whitelist before using in SQL string.
+  Code: const row = sqlite.prepare(`SELECT MAX(id) AS m FROM "${table}"`).get() as { m: number | null; };
+
+  [CRITICAL] IssueType.SECURITY -- Line 29
+  Plaintext password stored in database: `password: r.password` directly inserts the CSV value without hashing. This exposes user credentials if the database is compromised.
+  Fix: Hash passwords using bcrypt or argon2 before inserting into the database.
+  Code: password: r.password,
+
+  [HIGH] IssueType.ERROR_HANDLING -- Line 71
+  No transaction wrapping: if any insert fails mid-way, the database will be left in an inconsistent state with partial data from earlier tables.
+  Fix: Wrap the entire seed operation in a transaction with rollback on failure.
+  Code: async function main() {
+  fs.mkdirSync(path.dirname(dbPath), { recursive: true });
+  const sqlite = new Database(dbPath)
+
+  [HIGH] IssueType.DATA_INTEGRITY -- Line 92
+  No validation that CSV rows contain required fields: if `r.id`, `r.name`, `r.email`, or `r.role` are undefined, the insert will either fail with a constraint error or silently store null/undefined values.
+  Fix: Add validation for required fields before each insert, skipping or erroring on invalid rows.
+  Code: for (const r of userRows) {
+    await db.insert(user).values({
+      id: n(r.id),
+      name: r.name,
+      email: r.ema
+
+  [MEDIUM] IssueType.ERROR_HANDLING -- Line 171
+  Unhandled error if seedDir does not exist: fs.readdirSync will throw ENOENT, crashing the script without a helpful message.
+  Fix: Check if directory exists before reading, or wrap in try/catch.
+  Code: const evFiles = fs
+    .readdirSync(evPath)
+    .filter((f) => f.startsWith("iso_evidence_") && f.endsWith(".csv"));
+
+  [MEDIUM] IssueType.ERROR_HANDLING -- Line 107
+  No check that latestCsv returns a valid file path: if no matching CSV file exists, the function may return undefined or throw, crashing the script.
+  Fix: Check the result of latestCsv before attempting to read the file.
+  Code: const docRows = readCsv(latestCsv("iso_document_"));
+
+  [MEDIUM] IssueType.DATA_INTEGRITY -- Line 73
+  Foreign keys are disabled during seed: if CSV data has orphaned references (e.g., categoryId pointing to a non-existent category), the insert will succeed but the database will have referential integrity violations.
+  Fix: Validate foreign key relationships in code before inserting, or enable foreign keys and handle constraint errors gracefully.
+  Code: sqlite.exec("PRAGMA foreign_keys = OFF;");
+
+  [MEDIUM] IssueType.DATABASE -- Line 175
+  resetSeq function is never called in the visible code: the function is defined but not invoked, meaning auto-increment sequences are not reset after seeding. This could cause ID conflicts on subsequent seed runs.
+  Fix: Call resetSeq for each table after inserts, or remove the dead code.
+  Code: const resetSeq = (table: string) => {
+  // ... function body
+};
+
+  [LOW] IssueType.PERFORMANCE -- Line 88
+  Individual DELETE statements for each table: using separate DELETE statements instead of a single DROP TABLE or TRUNCATE is slower and not atomic.
+  Fix: Use a single DELETE with multiple tables or wrap in a transaction.
+  Code: for (const t of tables) {
+    sqlite.exec(`DELETE FROM ${t};`);
+}
+
+  [CRITICAL] IssueType.SQL_INJECTION -- Line 245
+  SQL injection vulnerability in resetSeq function: table name `table` is directly interpolated into the SQL query string via template literal `SELECT MAX(id) AS m FROM "${table}"`. Although this is a seed script, an attacker who can control the table name (e.g., via environment variable or config file) could execute arbitrary SQL. Even without an attacker, a table name containing a double quote would break the query.
+  Fix: Use parameterized queries or validate/sanitize the table name against a whitelist of allowed table names.
+  Code: const row = sqlite.prepare(`SELECT MAX(id) AS m FROM "${table}"`).get() as {
+  m: number | null;
+};
+
+  [MEDIUM] IssueType.SQL_INJECTION -- Line 249
+  Potential SQL injection in the second query: while the `name` parameter is parameterized with `?`, the table name in the first query is still interpolated. Additionally, the `INSERT INTO sqlite_sequence` query uses parameterized values correctly, but the overall pattern is inconsistent.
+  Fix: Apply the same whitelist validation to the table name before using it in any query.
+  Code: sqlite.prepare(`DELETE FROM sqlite_sequence WHERE name = ?`).run(table);
+if (m > 0) {
+  sqlite.prepare(`INSERT INTO sqli
+
+  [MEDIUM] IssueType.ERROR_HANDLING -- Line 271
+  Missing error handling for sqlite.close(): if the database connection is already closed or encounters an error during close, the error is silently swallowed. This could mask underlying issues with database state.
+  Fix: Wrap sqlite.close() in a try-catch block and log any errors.
+  Code: sqlite.close();
+
+  [LOW] IssueType.PERFORMANCE -- Line 257
+  Sequential table resets: the loop resets each table one by one, which is fine for a seed script but could be optimized with a transaction for atomicity. If any reset fails mid-loop, the sequence numbers could be inconsistent across tables.
+  Fix: Wrap the entire loop in a transaction to ensure atomicity of sequence resets.
+  Code: for (const t of [
+  "user",
+  "iso_document",
+  ...
+]) {
+  resetSeq(t);
+}
+
+  [LOW] IssueType.ERROR_HANDLING -- Line 276
+  The catch block logs the error but does not close the database connection. If an error occurs during seeding, the database connection may remain open, potentially causing resource leaks.
+  Fix: Ensure the database connection is closed in the catch block or use a finally block.
+  Code: main().catch((e) => {
+  console.error(e);
+  process.exit(1);
+});
+
+  [MEDIUM] IssueType.ERROR_HANDLING -- Line 268
+  The resetSeq function does not handle potential errors that may occur during sequence resetting
+  Fix: Add try-catch blocks to handle potential errors
+  Code: resetSeq(t);
+
+  [LOW] IssueType.CODE_SMELL -- Line 276
+  The main function does not handle potential errors that may occur during execution
+  Fix: Add try-catch blocks to handle potential errors
+  Code: main().catch((e) => { console.error(e); process.exit(1); });
+
+  [LOW] IssueType.SECURITY -- Line 272
+  Sensitive information, such as the database path, is logged to the console
+  Fix: Remove or mask sensitive information from console logs
+  Code: console.log("Seed complete:", dbPath);
+
+  [MEDIUM] IssueType.ERROR_HANDLING -- Line 278
+  The process exit code is not handled for potential errors
+  Fix: Add try-catch block to handle potential errors
+  Code: process.exit(1);
+
+  [MEDIUM] IssueType.ERROR_HANDLING -- Line 277
+  Process exit code is set to 1 in case of an error, which may not be desirable
+  Fix: Consider using a more robust error handling mechanism, such as logging the error and continuing execution
+  Code: process.exit(1);
+
+  [LOW] IssueType.BEST_PRACTICE -- Line 271
+  The console logs may not be suitable for a script and could be replaced with a logging mechanism.
+  Fix: Replace console logs with a logging mechanism.
+  Code: console.log("Seed complete:", dbPath);
+
+  [MEDIUM] IssueType.ERROR_HANDLING -- Line 265
+  The code does not handle any potential errors that may occur when resetting the sequence.
+  Fix: Add try-catch blocks to handle any errors that may occur when resetting the sequence.
+  Code: resetSeq(t);
+
+  [MEDIUM] IssueType.BEST_PRACTICE -- Line 278
+  The process exit code is hardcoded to 1, which may not be desirable in all scenarios
+  Fix: Consider using a more robust error handling mechanism, such as a error handling library
+  Code: process.exit(1);
+
+  [LOW] IssueType.OBSERVABILITY -- Line 277
+  console.error(e) logs the error object without structured context. In production seed runs, this makes it hard to correlate failures with specific seed directories or database paths.
+  Fix: Use a structured logger or include context like seedDir and dbPath in the error message.
+  Code: main().catch((e) => {
+  console.error(e);
+  process.exit(1);
+});
+
+  [MEDIUM] IssueType.ERROR_HANDLING -- Line 276
+  The error catch is very broad and may mask important errors. It would be better to catch specific errors and let unknown errors crash the process for visibility.
+  Fix: Catch specific errors instead of the general Error type.
+  Code: main().catch((e) => { console.error(e); process.exit(1); });
+
+  [MEDIUM] IssueType.RELIABILITY -- Line 278
+  Process exit code could be more specific
+  Fix: Use a more specific exit code to indicate the type of error
+  Code: process.exit(1);
+
+  🧪 Test Coverage Generator
+    - Should handle CSV file not found in the specified directory
+    - Should handle CSV file parsing errors
+    - Should handle database connection errors
+    - Should handle invalid input for asBool() function
+    - Should handle non-numeric input for n() function
+    - Should handle null or undefined input for opt() function
+    - Should handle empty or null input values correctly
+    - Should handle non-numeric input values correctly
+    - Should handle non-boolean input values correctly
+    - Should return true for '1', 'true', 'TRUE' and false for any other value including undefined
+    - Should return NaN when n() receives undefined or non-numeric string
+    - Should return null when opt() receives undefined, empty string, or 'NULL'
+    - Should trim whitespace in opt() before checking for empty/null
+    - Should preserve non-null, non-empty strings through opt()
+    - Should handle empty strings correctly
+    - Should handle null or undefined inputs correctly
+    - Should handle non-string inputs correctly
+    - Should handle invalid input for asBool function
+    - Should handle invalid input for n function
+    - Should handle invalid input for opt function
+    - Should handle numeric strings correctly
+    - Should handle boolean strings correctly
+    - Should handle invalid input for boolean conversion
+    - Should handle null or undefined input for numeric conversion
+    - Should handle empty or null input for optional string conversion
+    - Should handle null or undefined input for function n
+    - Should handle empty string or 'NULL' input for function opt
+    - Should return NaN when n() receives undefined, and verify downstream code handles NaN gracefully
+    - Should return null when opt() receives empty string, undefined, or 'NULL'
+    - Should return the trimmed string when opt() receives a non-empty, non-NULL string
+    - Should handle opt() with whitespace-only strings correctly (returns null)
+    - Should return null for undefined input
+    - Should return null for empty string input
+    - Should return null for 'NULL' string input
+    - Should return trimmed string for valid input
+    - Should return trimmed string for input with leading/trailing whitespace
+    - Should return null for the string 'NULL'
+    - Should return trimmed string for non-empty, non-NULL input
+    - Should return trimmed string for valid non-empty input
+    - Should handle null or undefined inputs
+    - Should handle excessive whitespace
+    - Should handle empty strings
+    - Should return null when input is null
+    - Should return null when input is undefined
+    - Should return null when input is empty string
+    - Should return null when input is 'NULL'
+    - Should return trimmed string when input has leading/trailing whitespace
+    - Should return the original string when input is a valid non-empty string
+    - Should return null when input is ' null ' (case sensitivity check)
+    - Should handle input with only whitespace characters
+    - Should handle undefined input
+    - Should handle empty string input
+    - Should handle 'NULL' string input
+    - Should handle NaN input
+    - Should handle null object input
+    - Should fail gracefully when CSV file is missing or malformed
+    - Should rollback all inserts if any insert fails mid-way
+    - Should reject SQL injection attempts via CSV column values (e.g., '; DROP TABLE users;')
+    - Should handle empty CSV files without crashing
+    - Should validate that all required fields are present in CSV rows before inserting
+    - Should hash passwords before storing in database
+    - Should handle concurrent seed executions without data corruption
+    - Should verify foreign key constraints are respected after seeding
+    - Should handle very large CSV files without memory overflow
+    - Should log progress and errors with sufficient context for debugging
+    - Should handle table names with special characters or SQL metacharacters without injection
+    - Should gracefully handle database connection failures during seed
+    - Should handle empty tables (MAX(id) returns NULL) correctly
+    - Should handle missing sqlite_sequence table gracefully
+    - Should rollback or report errors if any single table reset fails
+    - Should handle concurrent execution attempts (lock contention)
+    - Should validate that all table names exist before attempting operations
+    - Should handle SQLite connection errors gracefully
+    - Should validate input data before seeding the database
+    - Should handle seeding process interruptions or failures
+    - Should handle SQLite connection closure errors
+    - Should not log sensitive information to the console
+    - Should handle process exit code errors
+    - Should not log database path and seed directory in production environment
+    - Should handle errors when closing the SQLite connection
+    - Should not log sensitive information like database path and seed directory to the console
+    - Should handle sequence reset errors
+    - Should handle SQLite close errors
+    - Should provide specific error messages for any errors that occur
+    - Should handle errors when resetting sequences
+    - Should avoid using process.exit(1) and instead handle errors in a more robust way
+    - Should handle database connection errors gracefully
+    - Should validate input data before populating the database
+    - Should log errors to a file or a logging service instead of the console
+    - Should handle database connection failure gracefully with clear error message
+    - Should exit with non-zero code when seed data is malformed
+    - Should log structured error details including stack trace and seed directory path
+    - Should handle database closure errors
+    - Should handle seeding process errors
+    - Should log specific error messages instead of generic error objects
+    - Should handle seeding errors without crashing
+    - Should log seeding completion and source directory
+    - Should handle errors during data seeding
+    - Should log error messages to the console
+    - Should exit the process with a non-zero status code on error
+    - Should handle errors during database seeding
+    - Should exit the process with a non-zero status code in case of an error
+    - Should handle errors thrown by the main function
+    - Should exit the process with a non-zero status code when an error occurs
+    - Should handle errors properly and report them
+    - Should not exit the process without retrying or reporting the error
+    - Should handle errors with more informative logging
+    - Should handle process exit with a more specific code
+
+=================================================================
+  END OF REPORT
+=================================================================

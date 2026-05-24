@@ -1,0 +1,308 @@
+=================================================================
+  CODESENTINEL -- BATCH 10 REPORT
+  Files 226 - 242 of 262
+  Folder : C:\Users\sandeep\Downloads\Claudes\CampusPlacement\campus-placement
+  Saved  : 04/05/2026, 12:58:44
+=================================================================
+
+  Batch Score   : 86/100
+  Files Reviewed: 17
+  Total Issues  : 49
+
+=================================================================
+  FILE: src/lib/csvParse.js
+  Score: 86/100   Issues: 3
+
+  The CSV parser is a single-purpose function with a clear implementation, but it has a critical edge-case bug: it does not handle escaped quotes at the end of a quoted field (e.g., `"""`), which will cause the parser to treat the closing quote as part of the field and continue reading. Additionally, the function lacks input validation (null/undefined line), and the trim() on every field may silently corrupt intentionally padded data. No security vulnerabilities are present, but the parser is not RFC4180-compliant for all edge cases.
+
+  [HIGH] bug -- Line 12
+  When a quoted field ends with an escaped quote (e.g., `"""`), the parser incorrectly handles the sequence. At the first `"` inside quotes, it checks `s[i+1] === '"'` — if true, it adds a quote and skips one char. But if the field ends with `"""`, the sequence is: first `"` (escaped) -> add quote, skip; second `"` (closing) -> exit quotes; third `"` (starts new quote) -> re-enter quotes. This results in the closing quote being consumed as part of the field content, breaking the parse.
+  Fix: Rewrite the quote-handling logic to properly track state transitions for escaped quotes at field boundaries, or use a simpler state machine that handles all RFC4180 cases.
+
+  [MEDIUM] error_handling -- Line 4
+  The function does not handle null or undefined input. Calling `String(null)` returns 'null' and `String(undefined)` returns 'undefined', which will silently parse as a single field with that text instead of throwing or returning an empty array.
+  Fix: Add a guard clause at the top to return an empty array for null/undefined input.
+
+  [LOW] data_integrity -- Line 25
+  The function trims every field (cur.trim()) which may silently remove intentionally padded whitespace from CSV data (e.g., fields with leading/trailing spaces that are semantically meaningful). This is a data integrity concern for certain use cases.
+  Fix: Consider making trimming optional via a parameter, or only trim when the field is not quoted.
+
+=================================================================
+  FILE: src/lib/db.js
+  Score: 72/100   Issues: 6
+
+  The database module is well-structured with proper connection pooling, lazy initialization, and transaction support. The primary risk is the 30-second auto-release timeout in getClient() which could cause connection leaks if a transaction takes longer than expected, and the error logging in production that omits query text making debugging difficult. The fallback URL parsing in buildPoolConfig() could silently accept malformed URLs in production. Overall, the code is production-ready with minor hardening opportunities.
+
+  [HIGH] reliability -- Line 87
+  The 30-second auto-release timeout in getClient() will forcefully release a client that is still in use if a transaction or query takes longer than 30 seconds. This can cause connection leaks, partial transactions, or data corruption because the client is released while the database may still be processing the query.
+  Fix: Increase the timeout to 60 seconds or make it configurable via environment variable, and log a warning instead of silently releasing.
+
+  [HIGH] observability -- Line 71
+  In production, the error log only includes error.message without the query text or any correlation ID. This makes it extremely difficult to debug database issues in production because you cannot identify which query failed or trace it back to a specific request.
+  Fix: Log the query text (truncated) and a correlation/request ID in production errors, but ensure no PII is exposed.
+
+  [MEDIUM] error_handling -- Line 25
+  The fallback in buildPoolConfig() silently accepts a malformed DATABASE_URL by using connectionString directly. If the URL is truly malformed (e.g., missing protocol), the pg driver may fail with a confusing error or connect to the wrong database. This masks configuration errors in production.
+  Fix: Log a warning when falling back to connectionString, and consider throwing in production if the URL is malformed.
+
+  [MEDIUM] reliability -- Line 44
+  The pool error handler only logs to console.error. In production, if the pool encounters repeated errors (e.g., database restart), the application will continue attempting to use the pool without any circuit-breaking or health degradation logic, leading to cascading failures.
+  Fix: Consider adding a health check mechanism or circuit breaker that marks the pool as unhealthy and triggers alerts.
+
+  [LOW] performance -- Line 63
+  Logging every query in development with console.log can generate excessive output and slow down development. Consider using a debug logger or sampling.
+  Fix: Use a structured logger with level-based filtering instead of console.log.
+
+  [LOW] edge_case -- Line 16
+  parseInt(url.port, 10) will return NaN if the port is empty string or non-numeric, which will then default to 5432. This silently ignores invalid port values.
+  Fix: Validate the port explicitly and throw or log a warning if it's invalid.
+
+=================================================================
+  FILE: src/lib/demoHiringAssessment.js
+  Score: 99/100   Issues: 1
+
+  The file is a simple constant definition with no runtime logic, no data flow, and no external dependencies. It poses no security, reliability, or correctness risk. The only minor concern is the lack of a freeze on the exported array to prevent accidental mutation, but this is a low-severity code quality issue.
+
+  [LOW] code_quality -- Line 5
+  The exported HIRING_ROUNDS array is mutable. Consumers could accidentally push, pop, or modify entries, leading to unexpected behavior across the application.
+  Fix: Freeze the array and its objects to prevent accidental mutation.
+
+=================================================================
+  FILE: src/lib/demoClarifications.js
+  Score: 95/100   Issues: 3
+
+  The file is a thin client-side API wrapper with no data processing, no state management, and no direct security exposure. The primary risk is the lack of error differentiation (all failures produce a generic error message) and the absence of request timeouts, which could cause the UI to hang indefinitely if the server is slow or unreachable. The code is otherwise clean and follows a consistent pattern.
+
+  [MEDIUM] error_handling -- Line 6
+  No timeout on fetch calls in loadClarifications, publishClarificationBatch, and saveAnswer. If the server is slow or unreachable, the fetch will hang indefinitely, causing the UI to freeze or the user to see no feedback.
+  Fix: Add an AbortController with a timeout (e.g., 10 seconds) to all fetch calls.
+
+  [LOW] error_handling -- Line 8
+  Error message 'Failed to load clarifications' is generic and does not differentiate between a 404, 500, or other server error. This makes debugging harder for developers and provides no actionable feedback to the user.
+  Fix: Include the HTTP status code in the error message for better diagnostics.
+
+  [LOW] error_handling -- Line 13
+  publishClarificationBatch does not validate that questionTexts is a non-empty array before sending. If an empty array is sent, the server may accept it silently, leading to an empty batch with no questions.
+  Fix: Add client-side validation to reject empty questionTexts before making the API call.
+
+=================================================================
+  FILE: src/lib/inferImageContentType.js
+  Score: 96/100   Issues: 2
+
+  The function is concise and handles the common case of inferring image content type from file name extension. The primary risk is that it trusts the file name extension entirely, which is trivially spoofed and could lead to incorrect content-type headers being set, potentially causing rendering issues or security bypasses in downstream processing. Additionally, the function returns an empty string for unknown types, which may cause silent failures if callers do not check for a valid MIME type before using it. No critical security or runtime crash issues are present, but the logic is incomplete for production use.
+
+  [MEDIUM] security -- Line 2
+  The function trusts the file name extension to determine content type. An attacker can upload a file named 'malicious.jpg' containing executable code, and the function will return 'image/jpeg', potentially bypassing security checks downstream that rely on this MIME type for safe processing.
+  Fix: Add magic byte inspection of the file buffer to verify the actual content type, or accept a file buffer parameter and use a library like 'file-type' for reliable detection.
+
+  [LOW] error_handling -- Line 11
+  Returning an empty string for unknown types forces callers to check for falsy values. If callers do not check, they may set an empty Content-Type header, which can cause browsers to misinterpret the file or reject the response.
+  Fix: Consider returning a default safe MIME type like 'application/octet-stream' or throwing a descriptive error so callers are forced to handle the unknown case explicitly.
+
+=================================================================
+  FILE: src/lib/csvImportUtils.js
+  Score: 99/100   Issues: 1
+
+  The provided CSV import utility functions appear to be well-structured and handle various edge cases. However, there are some potential issues with date parsing and UUID validation. The code does not account for timezone differences when parsing dates, and the UUID validation regex may not cover all possible valid UUID formats. Additionally, some functions do not handle errors explicitly, which could lead to unexpected behavior in production.
+
+  [LOW] error_handling -- Line 59
+  Error handling for invalid input is not explicit
+  Fix: Add try-catch blocks to handle errors explicitly
+
+=================================================================
+  FILE: src/lib/demoLogins.js
+  Score: 86/100   Issues: 3
+
+  This file defines demo login credentials and a feature flag for a try-the-app flow. The primary risk is that the hardcoded password 'Admin@123' is exposed in the client bundle via a NEXT_PUBLIC_* variable, which is a security concern for any production deployment where these accounts exist. Additionally, the demo accounts include real email addresses that could be used for credential stuffing attacks. The feature flag logic is correct but the default behavior exposes demo logins in production, which may be undesirable for a live SaaS application. The code is otherwise clean and well-documented.
+
+  [HIGH] security -- Line 3
+  DEMO_SEED_PASSWORD is exported as a constant and will be bundled into the client-side JavaScript because it is imported by components that render on the client. This exposes the demo password to anyone who inspects the browser's network tab or source maps. An attacker could use this password to log into any demo account and potentially escalate privileges if those accounts have elevated roles.
+  Fix: Remove the hardcoded password from the client bundle. Instead, only reference the password server-side (e.g., in the seed script or API route) and never expose it to the frontend. The login form should not need to know the password; it should only prefill the email.
+
+  [MEDIUM] security -- Line 5
+  The DEMO_LOGINS array contains real email addresses that are hardcoded in the client bundle. This exposes valid user email addresses to anyone viewing the page source, enabling targeted phishing attacks or credential stuffing. Additionally, the presence of these emails on the login page could be used for user enumeration if the login endpoint behaves differently for existing vs. non-existing accounts.
+  Fix: Consider obfuscating or not exposing the full email addresses in the client bundle. Alternatively, use a server-side API to fetch demo account metadata only when the feature is enabled, and return only display labels without exposing the actual emails.
+
+  [LOW] configuration -- Line 28
+  The isDemoLoginsEnabled function defaults to true, meaning demo logins are shown in production by default. For a live SaaS application with real user data, this could be a security and UX concern (users might accidentally click a demo account). The default should be false for production environments.
+  Fix: Change the default to false, or add an explicit check for NODE_ENV === 'production' to disable demo logins by default in production. Only enable them when explicitly configured via environment variable.
+
+=================================================================
+  FILE: src/lib/employerCompanyTypeLabels.js
+  Score: 100/100   Issues: 0
+
+  This file is a well-structured constants-and-lookup module with no runtime, security, or data-integrity risks. The label lookup function handles null/empty input gracefully and falls back to the raw value for unknown keys. The only minor concern is that the company-size options use a mix of hyphens and commas in labels, which is a cosmetic inconsistency but not a production issue. Score is high because the code is correct, defensive, and matches the schema constraints exactly.
+
+=================================================================
+  FILE: src/lib/offersAssessmentStarterCsv.js
+  Score: 84/100   Issues: 3
+
+  The file is a small, focused CSV builder with no external dependencies, no I/O, and no user input processing. The primary risk is CSV injection (formula injection) in the `csvEscapeCell` function, which does not escape cells starting with `=`, `+`, `-`, or `@`. This could allow malicious data in `roll_number`, `company_name`, or `tenant_id` fields to execute arbitrary formulas when the CSV is opened in Excel/Google Sheets. Additionally, the `buildCollegeOffersAllStudentsCsv` function does not validate that `masterRows` is an array, which would cause a runtime crash if called with `null` or `undefined`. The code is otherwise clean and well-structured.
+
+  [HIGH] csv_injection -- Line 8
+  csvEscapeCell does not escape cells starting with =, +, -, or @, which can lead to CSV formula injection attacks. When the CSV is opened in Excel/Google Sheets, these cells will be interpreted as formulas, potentially executing arbitrary commands or exfiltrating data.
+  Fix: Prefix cells starting with =, +, -, or @ with a single quote or tab character to prevent formula interpretation.
+
+  [MEDIUM] null_pointer_exception -- Line 20
+  buildCollegeOffersAllStudentsCsv assumes masterRows is an array and iterates over it with for...of. If masterRows is null or undefined, this will throw a TypeError and crash the calling process.
+  Fix: Add a guard clause to check if masterRows is an array before iterating, returning just the header line if not.
+
+  [MEDIUM] null_pointer_exception -- Line 44
+  buildEmployerOffersAllStudentsCsv assumes flatRows is an array and iterates over it with for...of. If flatRows is null or undefined, this will throw a TypeError and crash the calling process.
+  Fix: Add a guard clause to check if flatRows is an array before iterating, returning just the header line if not.
+
+=================================================================
+  FILE: src/lib/helpFaqOpenai.js
+  Score: 82/100   Issues: 5
+
+  The module is well-structured with proper error handling, input validation, and security-conscious design. The primary risk is the missing request timeout on the OpenAI API call, which could cause the serverless function to hang indefinitely. Additionally, the error logging exposes the first 500 characters of the OpenAI error response, which may contain sensitive information. The overall code quality is high with good defensive programming practices.
+
+  [HIGH] reliability -- Line 79
+  Missing request timeout on OpenAI API fetch call. If the OpenAI API hangs or is slow to respond, this request will hang indefinitely, potentially exhausting serverless function timeout limits and blocking the event loop. This is critical for production reliability.
+  Fix: Add an AbortController with a reasonable timeout (e.g., 15 seconds) to the fetch call to prevent hanging requests.
+
+  [MEDIUM] security -- Line 97
+  Error logging exposes up to 500 characters of the OpenAI API error response body. This could leak sensitive information such as API key hints, internal error details, or account identifiers in production logs.
+  Fix: Log only the HTTP status code and a sanitized error message without the response body content.
+
+  [MEDIUM] observability -- Line 79
+  No request ID or correlation ID is included in the fetch call or error logging. In production, this makes it impossible to correlate OpenAI API failures with specific user requests or trace the issue across distributed logs.
+  Fix: Accept an optional requestId parameter and include it in all log messages and potentially as a header in the OpenAI API call.
+
+  [LOW] error_handling -- Line 102
+  The catch on line 102 returns null for the entire response, but then line 103 accesses data?.choices?.[0]?.message?.content. If data is null, this will safely return undefined, but the error is silently swallowed. Consider logging the JSON parse failure for observability.
+  Fix: Log a warning when the OpenAI response JSON fails to parse, to aid debugging in production.
+
+  [LOW] configuration -- Line 56
+  The function silently returns empty results when OPENAI_API_KEY is missing. This could mask a configuration error in production where the key is expected but not set. Consider logging a warning or throwing a configuration error at startup.
+  Fix: Log a warning when OPENAI_API_KEY is not set, to alert operators of a potential misconfiguration.
+
+=================================================================
+  FILE: src/lib/offerReportedColumn.js
+  Score: 100/100   Issues: 0
+
+  The file is a minimal utility function with no security, reliability, or correctness issues. It correctly checks for the Postgres error code 42703 (undefined_column) and the specific column name. The only minor concern is that the function name is slightly misleading (it checks for a missing column, not a reported column), but this is a code clarity issue, not a production risk. The code is safe and well-structured.
+
+=================================================================
+  FILE: src/lib/employerOffersCsvTemplate.js
+  Score: 96/100   Issues: 2
+
+  The provided code snippet is a JavaScript module that exports a CSV template for employer offers and a function to download this template. The code is generally well-structured and concise. However, there are a few potential issues and improvements that can be suggested. The CSV template is defined as a string and includes sample data, which might not be desirable in a production environment. The download function creates a blob from the template string and initiates a download. The primary risk is the potential for the CSV template to be modified accidentally or maliciously, and the lack of input validation in the download function.
+
+  [MEDIUM] security -- Line 1
+  The CSV template includes sample data, which might not be desirable in a production environment.
+  Fix: Consider removing the sample data from the CSV template or making it configurable.
+
+  [LOW] best_practice -- Line 8
+  The download function does not validate user input before initiating the download.
+  Fix: Consider adding input validation to the download function to prevent potential security issues.
+
+=================================================================
+  FILE: src/lib/downloadCsvFromApi.js
+  Score: 36/100   Issues: 5
+
+  The function is concise and handles the basic download flow, but it has several critical issues: it lacks error handling for network failures (fetch throws on network errors, not HTTP status), it immediately revokes the blob URL before the browser has started the download (race condition), and it has no fallback for missing Content-Disposition filename. The biggest risk is that the download silently fails on slow connections or when the browser delays the download start. Score is reduced due to the race condition and missing network error handling.
+
+  [CRITICAL] error_handling -- Line 7
+  Network errors (e.g., DNS failure, connection refused) will cause an unhandled promise rejection because fetch only rejects on network failures, not HTTP error statuses. This will crash the calling component or page.
+  Fix: Wrap the fetch call in a try/catch block to handle network errors gracefully.
+
+  [CRITICAL] runtime -- Line 22
+  URL.revokeObjectURL(u) is called immediately after a.click(), but the browser may not have started the download yet. On slow connections or with large files, the blob URL may be revoked before the download begins, causing a failed download with no error feedback to the user.
+  Fix: Delay the revokeObjectURL call using requestAnimationFrame or setTimeout(0) to ensure the browser has initiated the download.
+
+  [HIGH] error_handling -- Line 9
+  If the API returns a non-JSON error response (e.g., HTML error page, plain text), res.json() will throw, and the catch block returns an empty object. The error message will be 'Download failed (500)' which is not actionable for the user.
+  Fix: Try to parse as text first if JSON parsing fails, or use res.text() and attempt JSON.parse with a fallback.
+
+  [MEDIUM] edge_case -- Line 15
+  The regex for extracting filename from Content-Disposition does not handle RFC 5987 encoded filenames (e.g., filename*=UTF-8''%E2%82%AC.html). This will cause downloads with non-ASCII filenames to use the fallback filename instead.
+  Fix: Add handling for the filename* parameter per RFC 5987 before falling back to the simple filename parameter.
+
+  [LOW] memory -- Line 17
+  URL.createObjectURL(blob) creates a blob URL that persists until explicitly revoked. If this function is called rapidly without waiting for revocation, it could leak blob URLs. The current code revokes immediately (which is a separate bug), but if the fix delays revocation, rapid calls could accumulate.
+  Fix: Consider revoking the previous blob URL if the function is called again before the previous download completes, or use a single reusable blob URL pattern.
+
+=================================================================
+  FILE: src/lib/placementDriveEmail.js
+  Score: 55/100   Issues: 7
+
+  The file is a straightforward email notification module with two nearly identical functions. The primary risks are: (1) `getPlatformSettings()` is called without error handling, which will crash the process if the database is unreachable; (2) `sendMail()` is awaited without a try/catch, so a transient email failure (SMTP timeout, rate limit) will throw an unhandled rejection; (3) the `appOrigin()` function returns an empty string when neither env var is set, producing a broken link in the email body. The code is otherwise clean and well-structured.
+
+  [HIGH] error_handling -- Line 23
+  getPlatformSettings() is called without a try/catch. If the database is unreachable or the query fails, this will throw an unhandled promise rejection, crashing the process or at least failing the API request silently.
+  Fix: Wrap the call in a try/catch block and either log the error and return, or throw a controlled error.
+
+  [HIGH] error_handling -- Line 48
+  sendMail() is awaited without a try/catch. A transient SMTP failure (timeout, connection refused, rate limit) will throw an unhandled promise rejection, crashing the process or failing the caller without logging.
+  Fix: Wrap sendMail() in a try/catch block, log the error, and allow the function to complete gracefully.
+
+  [MEDIUM] edge_case -- Line 9
+  appOrigin() returns an empty string when neither NEXTAUTH_URL nor VERCEL_URL is set. This produces a broken link in the email body (e.g. '/dashboard/college/drives' without a host), which will be non-clickable or resolve to a relative path on the recipient's email client.
+  Fix: Provide a fallback default URL or log a warning at startup if neither env var is configured.
+
+  [HIGH] error_handling -- Line 66
+  Same as line 23: getPlatformSettings() is called without error handling in emailPlacementDriveApproved.
+  Fix: Wrap the call in a try/catch block.
+
+  [HIGH] error_handling -- Line 91
+  Same as line 48: sendMail() is awaited without a try/catch in emailPlacementDriveApproved.
+  Fix: Wrap sendMail() in a try/catch block.
+
+  [LOW] code_smell -- Line 4
+  The appOrigin() function is duplicated in both functions. It should be extracted to a shared utility to avoid drift and reduce duplication.
+  Fix: Move appOrigin() to a shared utility module (e.g. src/lib/appOrigin.js) and import it in both functions.
+
+  [LOW] code_smell -- Line 39
+  driveType is coerced to String and then replace is called, but if driveType is already a string, the String() wrapper is redundant. If driveType is undefined, String(undefined) returns 'undefined', which will be displayed as 'undefined' in the email.
+  Fix: Use a default empty string: (driveType || '').replace(/_/g, ' ')
+
+=================================================================
+  FILE: src/lib/pgSsl.js
+  Score: 94/100   Issues: 2
+
+  The provided code for PostgreSQL SSL options is well-structured and handles various environments and configurations. However, there are a few potential issues and improvements that can be suggested. The code does not handle the case where the `DATABASE_SSL_CA` environment variable is set but the file does not exist or cannot be read. Additionally, the code does not validate the `hostname` parameter. The code also uses the `fs` module to read the CA file, which can be a potential security risk if not handled properly.
+
+  [MEDIUM] security -- Line 20
+  Insecure environment variables are used to determine the SSL rejection behavior. This could potentially lead to a security risk if not handled properly.
+  Fix: Consider using a more secure way to determine the SSL rejection behavior, such as using a separate configuration file or environment variable.
+
+  [MEDIUM] error_handling -- Line 35
+  The code does not handle the case where the CA file does not exist or cannot be read.
+  Fix: Consider adding error handling to handle the case where the CA file does not exist or cannot be read.
+
+=================================================================
+  FILE: src/lib/notificationService.js
+  Score: 92/100   Issues: 4
+
+  The notification service is well-structured with parameterized queries and optional transaction support. The primary risk is the lack of input validation on the `message` field (no length clipping), which could lead to database errors or truncation issues with very long messages. Additionally, the `notifyUsersOneAtATime` function performs N sequential queries without batching, which could cause performance issues with large user lists. The `fetchCollegeAdminUserIds` function fetches all IDs into memory without pagination, which could be problematic for tenants with many admins.
+
+  [MEDIUM] input_validation -- Line 15
+  The `message` parameter is not clipped or validated for length, unlike `title` which is clipped to MAX_TITLE. If the database column has a length limit, this could cause a database error or silent truncation.
+  Fix: Add a MAX_MESSAGE constant and clip the message parameter similarly to title.
+
+  [MEDIUM] performance -- Line 42
+  notifyUsersOneAtATime performs N sequential database queries for N user IDs. For large user lists (e.g., 1000+ students), this will be slow and could exhaust the connection pool. The batch INSERT approach used in notifyStudentsOfTenant is more efficient.
+  Fix: Use a batch INSERT with UNNEST or multiple value rows instead of sequential queries.
+
+  [LOW] performance -- Line 53
+  fetchCollegeAdminUserIds fetches all matching user IDs into memory without pagination. For tenants with thousands of college admins, this could consume significant memory and slow down the query.
+  Fix: Consider adding pagination or a LIMIT clause if the caller doesn't need all IDs at once.
+
+  [LOW] edge_case -- Line 6
+  clipTitle uses a Unicode ellipsis character (…) which may cause encoding issues in some database configurations or when the title is used in contexts that don't support multi-byte characters.
+  Fix: Consider using three dots '...' instead of the Unicode ellipsis character for broader compatibility.
+
+=================================================================
+  FILE: src/lib/screenSearchOpenai.js
+  Score: 96/100   Issues: 2
+
+  The function is well-structured with proper input validation, error handling, and output sanitization. The primary risk is the lack of a fetch timeout, which could cause the serverless function to hang indefinitely if OpenAI is slow or unresponsive. Additionally, the error response body is truncated to 500 chars, which is acceptable for logging but could leak sensitive info if OpenAI returns verbose errors. The function gracefully degrades on failure, returning empty results. Overall, this is production-ready with one medium-severity reliability issue.
+
+  [MEDIUM] reliability -- Line 30
+  fetch call to OpenAI API has no timeout. If OpenAI is slow or unresponsive, this function could hang indefinitely, especially in serverless environments (e.g., Vercel, AWS Lambda) where the function may timeout at the platform level, causing a 504 or cold start issues.
+  Fix: Add an AbortController with a reasonable timeout (e.g., 10 seconds) to the fetch call.
+
+  [LOW] observability -- Line 52
+  Error logging uses console.error with a truncated response body (500 chars). While this prevents log flooding, it may miss important error details from OpenAI (e.g., rate limit reset time, quota exceeded messages). Consider logging the full error response at a higher log level or including structured metadata.
+  Fix: Log the full error response as a structured JSON object with status, headers, and body (truncated to a safe limit) for better debugging.

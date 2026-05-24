@@ -1,0 +1,1053 @@
+{
+  "job_id": "0995239186b944ef",
+  "batch": 4,
+  "folder_path": "C:\\Users\\sandeep\\Downloads\\Claudes\\CampusPlacement\\campus-placement",
+  "model_used": "nvidia/meta/llama-3.3-70b-instruct",
+  "saved_at": "2026-05-01T10:40:43.613902",
+  "files": [
+    {
+      "filename": "src/app/api/hiring-assessment/route.js",
+      "score": 86,
+      "summary": "The hiring assessment API endpoint is generally well-structured with proper authentication and parameterized queries. However, there are some issues with error handling, input validation, and potential security vulnerabilities. The biggest risk is the lack of input validation for the `rows` parameter in the PUT request, which could lead to a security vulnerability. Additionally, the error handling in the catch blocks is not specific and does not provide enough information for debugging.",
+      "issues_count": 3
+    },
+    {
+      "filename": "src/app/api/student/dashboard/route.js",
+      "score": 94,
+      "summary": "The provided code is generally well-structured and follows good practices. However, there are some issues with error handling, input validation, and potential SQL injection vulnerabilities. The code also lacks proper logging and monitoring. The biggest risk is the lack of input validation and sanitization, which could lead to security vulnerabilities. The code score is 70 due to these issues.",
+      "issues_count": 2
+    },
+    {
+      "filename": "src/app/api/student/documents/route.js",
+      "score": 76,
+      "summary": "The code is well-structured with proper authentication, parameterized queries, and tenant isolation. The biggest risk is the exposure of the database error message in the response, which could leak internal details. Additionally, the DELETE endpoint does not clean up the actual file from storage, leading to orphaned files. The GET endpoint returns an empty array instead of a 404 when no student profile exists, which is acceptable but could be confusing. Overall, the code is production-ready with minor improvements needed.",
+      "issues_count": 4
+    },
+    {
+      "filename": "src/app/api/student/calendar/route.js",
+      "score": 95,
+      "summary": "The endpoint is generally well-structured with proper authentication, parameterized queries, and tenant isolation. The biggest risk is the silent failure when `getOrCreateStudentProfileId` returns null, which returns an empty array instead of an error, potentially masking a real issue. The query is efficient with a LIMIT clause, but the hardcoded limit of 500 could become a performance concern for large tenants. No critical security or data integrity issues found.",
+      "issues_count": 3
+    },
+    {
+      "filename": "src/app/api/student/documents/presign/route.js",
+      "score": 100,
+      "summary": "Could not parse model response.",
+      "issues_count": 0
+    },
+    {
+      "filename": "src/app/api/notifications/route.js",
+      "score": 84,
+      "summary": "The notifications API is generally well-structured with parameterized queries and proper authentication. The biggest risk is the missing tenant isolation in the GET endpoint, where the notification sender email is fetched from the first tenant in the database without any tenant context, potentially leaking cross-tenant configuration data. Additionally, the PATCH endpoint lacks input validation for UUIDs, which could cause a database error if malformed IDs are provided. The code is clean and maintainable, but these issues need addressing before production deployment.",
+      "issues_count": 5
+    },
+    {
+      "filename": "src/app/api/student/documents/complete/route.js",
+      "score": 63,
+      "summary": "The endpoint is simple and uses parameterized queries, avoiding SQL injection. The biggest risk is the lack of input validation on `file_url` and `file_size`, which could allow storing malicious or oversized URLs and cause storage abuse or SSRF. The error handler exposes `e.message` to the client, leaking internal details. The `student_documents` table is not defined in the schema, suggesting a missing migration or schema drift. The endpoint also lacks tenant isolation checks, potentially allowing cross-tenant data insertion.",
+      "issues_count": 6
+    },
+    {
+      "filename": "src/app/api/student/applications/route.js",
+      "score": 86,
+      "summary": "The code is well-structured with proper authentication, parameterized queries, and clear error handling. The biggest risk is the lack of input validation on `drive_id` (UUID format) and `location_preference` (string length/sanitization), which could lead to database errors or injection-like behavior. Additionally, the GET endpoint does not paginate results, which could cause performance issues for students with many applications. The POST endpoint's ON CONFLICT clause silently re-applies withdrawn applications without checking the current status, which may be unintended.",
+      "issues_count": 8
+    },
+    {
+      "filename": "src/app/api/student/applications/cancel/route.js",
+      "score": 54,
+      "summary": "The endpoint is functionally correct with proper authentication and parameterized queries, but has a critical race condition in the waitlist auto-promotion logic that can lead to over-capacity drives. The withdrawal and promotion are not wrapped in a database transaction, so a crash after withdrawal but before promotion causes silent data loss. Error messages are generic and lack observability context. The code is clean and well-structured overall.",
+      "issues_count": 7
+    },
+    {
+      "filename": "src/app/api/help/faq/route.js",
+      "score": 59,
+      "summary": "The FAQ endpoint is well-structured with parameterized queries, proper authentication, and a thoughtful multi-tier search strategy. The biggest risk is the exposure of internal implementation details (OpenAI HTTP status, pool size, migration hints) in API responses, which could aid attackers. Additionally, the catch block has a potential null pointer access on `e.message` and the OpenAI fallback path lacks a timeout, risking a hung request. Overall, the code is solid but has moderate security and reliability concerns.",
+      "issues_count": 8
+    },
+    {
+      "filename": "src/app/api/student/interviews/route.js",
+      "score": 93,
+      "summary": "The provided code is generally well-structured with proper authentication and parameterized queries. However, there are some issues with error handling, input validation, and potential SQL injection risks. The biggest risk is the lack of input validation for the user ID and the potential for SQL injection if the query parameters are not properly sanitized. Additionally, the error handling can be improved to provide more specific and actionable error messages.",
+      "issues_count": 3
+    },
+    {
+      "filename": "src/app/api/student/drives/route.js",
+      "score": 57,
+      "summary": "The endpoint is simple and functional, but has a critical multi-tenancy vulnerability: the tenant filter uses `session.user.tenantId` which may not be set or could be manipulated, potentially exposing drives from other tenants. Additionally, the error message 'Database unavailable' is misleading for non-database errors, and there is no pagination, which could cause performance issues with large datasets. The code otherwise uses parameterized queries and has reasonable null handling.",
+      "issues_count": 6
+    },
+    {
+      "filename": "src/app/api/student/profile/avatar/presign/route.js",
+      "score": 70,
+      "summary": "The endpoint is well-structured with proper authentication, file type validation, and size limits. The biggest risk is the exposure of the database error message in the catch block, which could leak internal details. Additionally, the file name is not sanitized, which could lead to path traversal or S3 key injection. The S3 configuration check is a good practice but the hint message exposes environment variable names.",
+      "issues_count": 6
+    },
+    {
+      "filename": "src/app/api/student/profile/avatar/complete/route.js",
+      "score": 48,
+      "summary": "The endpoint is simple and mostly correct, but it has a critical security issue: it exposes the database error message to the client in the 503 response, which can leak internal schema details. Additionally, the avatar URL validation is weak (only checks https:// prefix), and there is no tenant isolation check, allowing a student from one tenant to update their avatar even if the user record belongs to another tenant. The error handling also lacks differentiation between expected and unexpected errors.",
+      "issues_count": 6
+    },
+    {
+      "filename": "src/app/api/student/profile/route.js",
+      "score": 97,
+      "summary": "The code is generally well-structured with proper authentication, parameterized queries, and clear error handling. However, there are some issues with input validation, potential SQL errors, and missing error handling. The biggest risk is the lack of input validation on certain fields, which could lead to SQL errors or data corruption. Additionally, there are some potential issues with the `ensureStudentProfileRow` function, which could lead to errors if the student profile row does not exist.",
+      "issues_count": 1
+    },
+    {
+      "filename": "src/app/dashboard/admin/audit-reports/page.js",
+      "score": 100,
+      "summary": "This is a thin wrapper component that delegates entirely to a shared AuditReportsPage component. The code itself is minimal and contains no logic, data handling, or security-sensitive operations. The primary risk is that the shared component may not properly enforce tenant isolation or role-based access controls, but that risk exists in the imported component, not in this file. The code is clean and follows good separation of concerns.",
+      "issues_count": 0
+    },
+    {
+      "filename": "src/app/dashboard/admin/colleges/page.js",
+      "score": 82,
+      "summary": "The component is a straightforward client-side page that fetches and displays a list of colleges. The biggest risk is the lack of input validation on the API response, which could cause the page to crash if the API returns unexpected data (e.g., missing fields like `name`, `city`, `naac`, `students`, `placed`, `active`). Additionally, there is no loading skeleton or error boundary, and the empty state message is misleading when an error occurs. The code is otherwise clean with proper cleanup on unmount.",
+      "issues_count": 5
+    },
+    {
+      "filename": "src/app/api/student/program-opportunities/route.js",
+      "score": 48,
+      "summary": "The endpoint is well-structured with parameterized queries and proper authentication, but has a critical SQL injection vulnerability via the `kind` parameter, a missing tenant filter in the `employer_approvals` join that could leak data across tenants, and insufficient error handling that exposes internal error messages. The code also lacks pagination, which will cause performance issues as data grows. The biggest risk is the SQL injection in the `types` array construction, which could allow an attacker to manipulate the query logic.",
+      "issues_count": 6
+    },
+    {
+      "filename": "src/app/dashboard/admin/overview/page.js",
+      "score": 96,
+      "summary": "The admin overview page is a clean, well-structured client component with proper loading and error states. The main risk is the lack of a fallback for the `registeredColleges` map when the array is empty, which would render nothing silently. Additionally, the `key` prop fallback to `c.name` could cause rendering issues if names are not unique. The component is otherwise solid with good use of skeleton loading and error boundaries.",
+      "issues_count": 2
+    },
+    {
+      "filename": "src/app/dashboard/admin/employers/page.js",
+      "score": 66,
+      "summary": "The component is a basic admin employers list page with proper loading and error states. The biggest risk is the lack of pagination, search, and filtering, which will cause performance issues and poor UX as the employer count grows. The 'View' button is permanently disabled with a 'Coming soon' title, indicating incomplete functionality. There is no multi-tenancy enforcement visible in the client-side code, but this is acceptable if the API endpoint handles tenant isolation. The component uses array index as React key, which can cause rendering issues with dynamic lists.",
+      "issues_count": 8
+    },
+    {
+      "filename": "src/app/api/student/program-applications/route.js",
+      "score": 86,
+      "summary": "The provided API endpoint for student program applications is generally well-structured with proper authentication and parameterized queries. However, there are several areas that require improvement, including input validation, error handling, and potential SQL injection vulnerabilities. The biggest risk is the lack of input validation on user-supplied data, which could lead to security vulnerabilities. Additionally, the error handling mechanism is not robust and could potentially expose sensitive information to users.",
+      "issues_count": 3
+    },
+    {
+      "filename": "src/app/dashboard/admin/page.js",
+      "score": 86,
+      "summary": "The code is a thin client-side wrapper that renders a skeleton loading state while the session is loading, then delegates to a shared DashboardFullScreenHub component. The primary risk is the lack of server-side authorization enforcement \u2014 the role check is performed client-side only, meaning a user could potentially manipulate the role value or bypass the check entirely. Additionally, there is no error handling for a failed session fetch (e.g., network error), which would result in a blank page or infinite loading state. The code is otherwise clean and minimal.",
+      "issues_count": 3
+    },
+    {
+      "filename": "src/app/dashboard/admin/pending-registrations/page.js",
+      "score": 87,
+      "summary": "The component is functionally correct with proper loading, empty, and error states. The main risks are the lack of a loading skeleton for the initial load, the absence of a confirmation dialog for the approve action (which is irreversible), and the use of a generic error message in the catch block that could expose internal details. The code is clean and well-structured overall.",
+      "issues_count": 7
+    },
+    {
+      "filename": "src/app/api/student/offers/route.js",
+      "score": 68,
+      "summary": "The offers API has a critical race condition in the GET endpoint where auto-expiry updates are performed sequentially without a transaction, risking partial updates and inconsistent state under concurrent access. The PATCH endpoint lacks input validation for the offer ID format and does not handle the case where a student accepts an offer while another is already accepted, which could lead to duplicate accepted offers. The error messages are generic and not actionable. Overall, the code is functional but has reliability and data integrity risks that need addressing before production deployment.",
+      "issues_count": 10
+    }
+  ],
+  "batch_score": 78,
+  "total_issues": 112,
+  "issues": [
+    {
+      "filename": "src/app/api/hiring-assessment/route.js",
+      "type": "security",
+      "severity": "high",
+      "message": "The `body` object is not validated before accessing its properties, which could lead to a security vulnerability",
+      "line": 74,
+      "suggestion": "Validate the `body` object before accessing its properties"
+    },
+    {
+      "filename": "src/app/api/hiring-assessment/route.js",
+      "type": "validation",
+      "severity": "medium",
+      "message": "The `rows` parameter is not validated before passing it to the `normalizeRows` function",
+      "line": 79,
+      "suggestion": "Validate the `rows` parameter before passing it to the `normalizeRows` function"
+    },
+    {
+      "filename": "src/app/api/hiring-assessment/route.js",
+      "type": "best_practice",
+      "severity": "low",
+      "message": "The `UPDATE` query is not using a transaction, which could lead to inconsistent data in case of an error",
+      "line": 84,
+      "suggestion": "Use a transaction when updating the `settings` column in the `tenants` table"
+    },
+    {
+      "filename": "src/app/api/student/dashboard/route.js",
+      "type": "security",
+      "severity": "medium",
+      "message": "Lack of input validation and sanitization for user role",
+      "line": 28,
+      "suggestion": "Add input validation and sanitization for user role"
+    },
+    {
+      "filename": "src/app/api/student/dashboard/route.js",
+      "type": "error_handling",
+      "severity": "medium",
+      "message": "Lack of proper error handling and logging",
+      "line": 123,
+      "suggestion": "Add proper error handling and logging"
+    },
+    {
+      "filename": "src/app/api/student/documents/route.js",
+      "type": "security",
+      "severity": "high",
+      "message": "Exposing `e.message` in the error response leaks internal database error details (e.g., connection string, query syntax) to the client, aiding attackers in reconnaissance.",
+      "line": 30,
+      "suggestion": "Remove `detail: e.message` from the response and log it server-side only."
+    },
+    {
+      "filename": "src/app/api/student/documents/route.js",
+      "type": "security",
+      "severity": "high",
+      "message": "Exposing `e.message` in the error response leaks internal database error details to the client.",
+      "line": 62,
+      "suggestion": "Remove `detail: e.message` from the response."
+    },
+    {
+      "filename": "src/app/api/student/documents/route.js",
+      "type": "data_lifecycle",
+      "severity": "medium",
+      "message": "DELETE endpoint removes the database record but does not delete the actual file from storage (S3/local), leaving orphaned files that waste storage and could be a compliance risk.",
+      "line": 50,
+      "suggestion": "After successful DB deletion, also delete the file from storage using the file_url stored in the record."
+    },
+    {
+      "filename": "src/app/api/student/documents/route.js",
+      "type": "code_smell",
+      "severity": "low",
+      "message": "Returning an empty documents array when no student profile exists is acceptable but could be misleading. A 404 might be more appropriate to indicate the profile is missing.",
+      "line": 15,
+      "suggestion": "Consider returning a 404 with an appropriate error message instead of an empty array."
+    },
+    {
+      "filename": "src/app/api/student/calendar/route.js",
+      "type": "error_handling",
+      "severity": "medium",
+      "message": "When getOrCreateStudentProfileId returns null, the endpoint returns an empty events array with a 200 status instead of an error. This silently swallows a potentially serious condition (e.g., student profile creation failure, database error) and could mask bugs or data inconsistencies.",
+      "line": 15,
+      "suggestion": "Return a 500 error with a descriptive message when the student profile cannot be found or created, so the client can surface the issue."
+    },
+    {
+      "filename": "src/app/api/student/calendar/route.js",
+      "type": "scalability",
+      "severity": "low",
+      "message": "The query uses a hardcoded LIMIT 500 without pagination. For tenants with many drives, this could return a large payload and cause performance degradation over time. Additionally, the client has no way to request more data or filter by date range.",
+      "line": 28,
+      "suggestion": "Add query parameters for pagination (page, limit) or date range filtering (startDate, endDate) to allow the client to control the result set size."
+    },
+    {
+      "filename": "src/app/api/student/calendar/route.js",
+      "type": "edge_case",
+      "severity": "low",
+      "message": "The date formatting uses String(r.drive_date).slice(0, 10) which assumes the date is always in YYYY-MM-DD format. If the database returns a Date object or a different string format, this could produce incorrect results or throw an error.",
+      "line": 34,
+      "suggestion": "Use a proper date formatting library or method (e.g., toISOString().split('T')[0]) to safely extract the date portion."
+    },
+    {
+      "filename": "src/app/api/notifications/route.js",
+      "type": "multi_tenancy",
+      "severity": "high",
+      "message": "The notification sender email is fetched from the first tenant in the database without any tenant context. This leaks cross-tenant configuration data and returns incorrect sender email for users belonging to other tenants.",
+      "line": 29,
+      "suggestion": "Filter the query by the user's tenant_id to ensure tenant isolation."
+    },
+    {
+      "filename": "src/app/api/notifications/route.js",
+      "type": "input_validation",
+      "severity": "medium",
+      "message": "The PATCH endpoint accepts an array of ids without validating that each element is a valid UUID. Malformed UUIDs will cause a database error (invalid input syntax for type uuid), resulting in a 500 error.",
+      "line": 66,
+      "suggestion": "Validate each id in the array is a valid UUID before passing to the query."
+    },
+    {
+      "filename": "src/app/api/notifications/route.js",
+      "type": "error_handling",
+      "severity": "low",
+      "message": "The catch block on req.json() silently swallows parse errors and defaults to an empty object. This could mask client errors and make debugging difficult.",
+      "line": 56,
+      "suggestion": "Log the parse error and return a 400 response for malformed JSON bodies."
+    },
+    {
+      "filename": "src/app/api/notifications/route.js",
+      "type": "observability",
+      "severity": "low",
+      "message": "Error logging uses console.error with a generic message and the error object. In production, this lacks structured context (request ID, user ID, tenant ID) making it hard to correlate errors across services.",
+      "line": 44,
+      "suggestion": "Use a structured logger that includes request context and stack traces."
+    },
+    {
+      "filename": "src/app/api/notifications/route.js",
+      "type": "observability",
+      "severity": "low",
+      "message": "Same observability issue as line 44: error logging lacks structured context for the PATCH endpoint.",
+      "line": 77,
+      "suggestion": "Use structured logging with request context."
+    },
+    {
+      "filename": "src/app/api/student/documents/complete/route.js",
+      "type": "security",
+      "severity": "high",
+      "message": "Exposing `e.message` in the error response leaks internal database error details (e.g., constraint violations, column names) to the client, aiding attackers in schema discovery.",
+      "line": 44,
+      "suggestion": "Return a generic error message and log the full error server-side only."
+    },
+    {
+      "filename": "src/app/api/student/documents/complete/route.js",
+      "type": "input_validation",
+      "severity": "high",
+      "message": "`file_url` is not validated for format, length, or protocol. An attacker could store a `javascript:` URL, a file:// URL, or an extremely long URL, leading to XSS in document viewers or storage abuse.",
+      "line": 19,
+      "suggestion": "Validate file_url is a valid HTTP/HTTPS URL with a reasonable max length (e.g., 2048 chars)."
+    },
+    {
+      "filename": "src/app/api/student/documents/complete/route.js",
+      "type": "input_validation",
+      "severity": "medium",
+      "message": "`file_size` is parsed with `parseInt` but not validated for negative values or excessively large numbers. A negative or huge value could cause database errors or storage miscalculations.",
+      "line": 20,
+      "suggestion": "Validate file_size is a non-negative integer and within a reasonable max (e.g., 100MB = 104857600 bytes)."
+    },
+    {
+      "filename": "src/app/api/student/documents/complete/route.js",
+      "type": "data_integrity",
+      "severity": "high",
+      "message": "The `student_documents` table is not defined in the provided database schema. This indicates a missing migration or schema drift, which will cause a runtime error (relation does not exist) in production.",
+      "line": 34,
+      "suggestion": "Add the `student_documents` table to the schema or use an existing table like `student_profiles` with a JSONB documents field."
+    },
+    {
+      "filename": "src/app/api/student/documents/complete/route.js",
+      "type": "multi_tenancy",
+      "severity": "medium",
+      "message": "No tenant isolation check is performed. A student from tenant A could potentially upload a document linked to a student profile from tenant B if `getOrCreateStudentProfileId` does not enforce tenant scoping.",
+      "line": 29,
+      "suggestion": "Ensure `getOrCreateStudentProfileId` scopes the student profile lookup to the session user's tenant, or add an explicit tenant_id check in the INSERT."
+    },
+    {
+      "filename": "src/app/api/student/documents/complete/route.js",
+      "type": "input_validation",
+      "severity": "low",
+      "message": "`document_name` is required but not validated for length or content. A very long name could cause database truncation errors or UI issues.",
+      "line": 22,
+      "suggestion": "Add a max length check (e.g., 255 characters) for document_name."
+    },
+    {
+      "filename": "src/app/api/student/applications/route.js",
+      "type": "input_validation",
+      "severity": "medium",
+      "message": "drive_id is not validated as a UUID. Passing an invalid UUID string will cause a PostgreSQL error (invalid input syntax for type uuid) and return a 500 error instead of a 400.",
+      "line": 63,
+      "suggestion": "Validate drive_id as a UUID using a regex or a library like uuid.validate() before using it in the query."
+    },
+    {
+      "filename": "src/app/api/student/applications/route.js",
+      "type": "input_validation",
+      "severity": "low",
+      "message": "location_preference is not validated for length or content. A very long string could be stored in the notes column, potentially causing issues with storage or display.",
+      "line": 63,
+      "suggestion": "Trim and limit location_preference to a reasonable length (e.g., 500 characters) before using it."
+    },
+    {
+      "filename": "src/app/api/student/applications/route.js",
+      "type": "code_smell",
+      "severity": "low",
+      "message": "notes is set to null when location_preference is falsy, but the column allows NULL. This is fine, but the ternary could be simplified.",
+      "line": 76,
+      "suggestion": "Use a more explicit default: const notes = location_preference ? `Preferred Location: ${location_preference.trim().slice(0, 500)}` : null;"
+    },
+    {
+      "filename": "src/app/api/student/applications/route.js",
+      "type": "business_logic",
+      "severity": "medium",
+      "message": "ON CONFLICT DO UPDATE SET status = 'applied' will re-apply a student even if they previously withdrew or were rejected. This may be unintended and could bypass business rules.",
+      "line": 85,
+      "suggestion": "Consider adding a WHERE clause to only update if the current status is not 'withdrawn' or 'rejected', or check the current status before the upsert."
+    },
+    {
+      "filename": "src/app/api/student/applications/route.js",
+      "type": "performance",
+      "severity": "medium",
+      "message": "GET endpoint returns all applications for a student without pagination. A student with hundreds of applications could cause slow responses and high memory usage.",
+      "line": 15,
+      "suggestion": "Add pagination with LIMIT and OFFSET, and accept page and pageSize query parameters."
+    },
+    {
+      "filename": "src/app/api/student/applications/route.js",
+      "type": "observability",
+      "severity": "low",
+      "message": "Error logging in GET uses console.error with a static string and the error object. This lacks structured context like request ID or user ID, making debugging harder in production.",
+      "line": 50,
+      "suggestion": "Use a structured logger or include userId in the log message."
+    },
+    {
+      "filename": "src/app/api/student/applications/route.js",
+      "type": "observability",
+      "severity": "low",
+      "message": "DB error logging in POST does not include the drive_id or studentId, making it hard to correlate failures.",
+      "line": 98,
+      "suggestion": "Include relevant identifiers in the log message."
+    },
+    {
+      "filename": "src/app/api/student/applications/route.js",
+      "type": "code_smell",
+      "severity": "low",
+      "message": "The GET response mapping uses snake_case from the database and converts to camelCase inconsistently (currentRound, appliedAt, driveDate). This is fine but could be centralized.",
+      "line": 37,
+      "suggestion": "Consider using a helper function to map rows consistently."
+    },
+    {
+      "filename": "src/app/api/student/applications/cancel/route.js",
+      "type": "concurrency",
+      "severity": "critical",
+      "message": "Race condition: The withdrawal and waitlist promotion are not in a database transaction. Two concurrent withdrawals for the same drive can both read activeCount < max_students and both promote a waitlisted student, exceeding max_students. Also, if the server crashes after the withdrawal UPDATE but before the promotion UPDATE, the promotion is lost and the drive capacity is underutilized.",
+      "line": 36,
+      "suggestion": "Wrap the withdrawal and promotion logic in a PostgreSQL transaction using BEGIN/COMMIT/ROLLBACK, and use SELECT ... FOR UPDATE on the drive row to serialize access."
+    },
+    {
+      "filename": "src/app/api/student/applications/cancel/route.js",
+      "type": "observability",
+      "severity": "high",
+      "message": "Error logging uses console.error with a generic message and no structured context (request ID, user ID, application ID). In production, this makes debugging failures impossible \u2014 you cannot correlate the error to a specific request or user.",
+      "line": 92,
+      "suggestion": "Use a structured logger that includes request ID, user ID, application_id, and error stack trace."
+    },
+    {
+      "filename": "src/app/api/student/applications/cancel/route.js",
+      "type": "ux_copy",
+      "severity": "medium",
+      "message": "Error message 'Failed to withdraw application' is generic and not actionable. The user cannot tell if the issue is temporary, a permission problem, or a data issue. This leads to confusion and support tickets.",
+      "line": 93,
+      "suggestion": "Return a more specific error message based on the error type, e.g., 'Unable to withdraw application due to a temporary system issue. Please try again.'"
+    },
+    {
+      "filename": "src/app/api/student/applications/cancel/route.js",
+      "type": "input_validation",
+      "severity": "medium",
+      "message": "withdrawal_reason is not validated for length or content. An extremely long string (e.g., 10MB) could cause database storage issues or denial of service. Also, no sanitization is applied, though parameterized queries prevent SQL injection.",
+      "line": 14,
+      "suggestion": "Add a maximum length check (e.g., 500 characters) and trim whitespace."
+    },
+    {
+      "filename": "src/app/api/student/applications/cancel/route.js",
+      "type": "error_handling",
+      "severity": "medium",
+      "message": "No try/catch around req.json() \u2014 if the request body is malformed JSON, the endpoint will throw an unhandled exception and crash the request with a 500 error.",
+      "line": 14,
+      "suggestion": "Wrap the JSON parsing in a try/catch and return a 400 error for invalid JSON."
+    },
+    {
+      "filename": "src/app/api/student/applications/cancel/route.js",
+      "type": "data_integrity",
+      "severity": "low",
+      "message": "Using CONCAT(notes, ...) assumes notes is never NULL. If notes is NULL, the result will be NULL, silently losing the promotion note. The schema shows notes is TEXT without a default, so it can be NULL.",
+      "line": 73,
+      "suggestion": "Use COALESCE(notes, '') to handle NULL safely."
+    },
+    {
+      "filename": "src/app/api/student/applications/cancel/route.js",
+      "type": "code_quality",
+      "severity": "low",
+      "message": "Notification insertion is commented out. In production, the promoted student will not be notified, which is a poor user experience. This should either be implemented or a TODO comment should explain why it's deferred.",
+      "line": 80,
+      "suggestion": "Implement the notification insertion or add a clear TODO with a ticket reference."
+    },
+    {
+      "filename": "src/app/api/help/faq/route.js",
+      "type": "null_pointer_exception",
+      "severity": "high",
+      "message": "Line 164: `e.message` is accessed without checking if `e` is an Error object. If the catch block receives a non-Error value (e.g., a string thrown directly), `e.message` will be undefined, causing a TypeError when calling `.includes()`. This would crash the request and return a 500 with no useful error.",
+      "line": 164,
+      "suggestion": "Check that `e` is an Error instance before accessing `.message`, or use optional chaining."
+    },
+    {
+      "filename": "src/app/api/help/faq/route.js",
+      "type": "security",
+      "severity": "high",
+      "message": "Line 131: The response exposes `openaiHttpStatus` and `poolSize` (line 129) and `idsFromModel` (line 130) to the client. This leaks internal implementation details (OpenAI HTTP status codes, pool size) that could aid an attacker in understanding the system's architecture and potentially timing attacks.",
+      "line": 131,
+      "suggestion": "Remove internal details from the API response or only include them in development mode."
+    },
+    {
+      "filename": "src/app/api/help/faq/route.js",
+      "type": "security",
+      "severity": "high",
+      "message": "Line 169: The error response includes a `hint` field with the exact migration file path (`db/migrations/011_documentation_faq.sql`). This exposes internal file structure and migration history to the client, aiding attackers in understanding the database schema and deployment process.",
+      "line": 169,
+      "suggestion": "Remove the hint from the production response or only include it in development mode."
+    },
+    {
+      "filename": "src/app/api/help/faq/route.js",
+      "type": "reliability",
+      "severity": "medium",
+      "message": "Lines 96-112: The OpenAI call (`rankFaqIdsWithOpenAI`) has no timeout. If the OpenAI API is slow or hangs, the request will hang indefinitely, potentially exhausting server resources and causing a denial of service.",
+      "line": 96,
+      "suggestion": "Add a timeout (e.g., 5 seconds) to the OpenAI API call using AbortController or a timeout wrapper."
+    },
+    {
+      "filename": "src/app/api/help/faq/route.js",
+      "type": "error_handling",
+      "severity": "medium",
+      "message": "Line 112: If `rankFaqIdsWithOpenAI` throws an error (e.g., network failure, invalid response), the entire request will fail with a 500 error. There is no fallback to return empty matches without AI ranking.",
+      "line": 112,
+      "suggestion": "Wrap the OpenAI call in a try-catch and fall back to returning empty matches with an appropriate error outcome."
+    },
+    {
+      "filename": "src/app/api/help/faq/route.js",
+      "type": "edge_case",
+      "severity": "medium",
+      "message": "Line 115: The map key uses `String(r.id).trim().toLowerCase()` but `r.id` is a UUID (already lowercase). However, if `rankedIds` contains IDs with different casing or whitespace, the lookup will fail silently, returning fewer matches than expected.",
+      "line": 115,
+      "suggestion": "Normalize both sides consistently (e.g., always lowercase and trim) or use a Set for O(1) lookup."
+    },
+    {
+      "filename": "src/app/api/help/faq/route.js",
+      "type": "logic",
+      "severity": "low",
+      "message": "Line 147: The condition `ranked.openaiHttpStatus != null` is used to determine if there was an HTTP error. However, a successful response could also have a non-null HTTP status (e.g., 200). This logic incorrectly labels successful responses as errors.",
+      "line": 147,
+      "suggestion": "Check for HTTP status codes that indicate errors (e.g., >= 400) instead of just non-null."
+    },
+    {
+      "filename": "src/app/api/help/faq/route.js",
+      "type": "ux_copy",
+      "severity": "low",
+      "message": "Line 174: The error message 'Failed to load help' is generic and not actionable for the user. It does not indicate what went wrong or what the user can do.",
+      "line": 174,
+      "suggestion": "Provide a more user-friendly message like 'Unable to load help content. Please try again later.'"
+    },
+    {
+      "filename": "src/app/api/student/interviews/route.js",
+      "type": "input_validation",
+      "severity": "medium",
+      "message": "The user ID is not validated before being used in the database query",
+      "line": 14,
+      "suggestion": "Add input validation for the user ID to prevent potential SQL injection risks"
+    },
+    {
+      "filename": "src/app/api/student/interviews/route.js",
+      "type": "sql_injection",
+      "severity": "medium",
+      "message": "The database query uses string concatenation to build the query string",
+      "line": 24,
+      "suggestion": "Use parameterized queries or prepared statements to prevent SQL injection risks"
+    },
+    {
+      "filename": "src/app/api/student/interviews/route.js",
+      "type": "error_handling",
+      "severity": "low",
+      "message": "The error handling can be improved to provide more specific and actionable error messages",
+      "line": 59,
+      "suggestion": "Add more specific error messages and logging to improve error handling"
+    },
+    {
+      "filename": "src/app/api/student/drives/route.js",
+      "type": "multi_tenancy",
+      "severity": "critical",
+      "message": "The tenant filter uses `session.user.tenantId` which may be undefined or null if the session does not contain it, causing the WHERE clause to filter by NULL and potentially return all drives (since NULL comparison fails). This can lead to cross-tenant data leakage.",
+      "line": 50,
+      "suggestion": "Validate that session.user.tenantId exists before querying, and ensure the session always includes tenantId for student users."
+    },
+    {
+      "filename": "src/app/api/student/drives/route.js",
+      "type": "error_handling",
+      "severity": "high",
+      "message": "The error message 'Database unavailable' is misleading because the catch block catches all errors, not just database failures. A non-database error (e.g., JSON serialization issue, null pointer) would also return a 503 with a misleading message, making debugging harder.",
+      "line": 78,
+      "suggestion": "Differentiate between database errors and other errors, returning appropriate messages and status codes."
+    },
+    {
+      "filename": "src/app/api/student/drives/route.js",
+      "type": "scalability",
+      "severity": "medium",
+      "message": "The endpoint returns all drives without pagination. For tenants with hundreds or thousands of drives, this will cause high memory usage and slow responses, potentially timing out or crashing the server.",
+      "line": 14,
+      "suggestion": "Add pagination with limit and offset query parameters, and return total count for UI pagination."
+    },
+    {
+      "filename": "src/app/api/student/drives/route.js",
+      "type": "observability",
+      "severity": "medium",
+      "message": "Error logging uses console.error with a generic message and the error object, but lacks structured logging with request ID or context, making it hard to correlate errors in production.",
+      "line": 77,
+      "suggestion": "Use a structured logger that includes request ID, user ID, and tenant ID."
+    },
+    {
+      "filename": "src/app/api/student/drives/route.js",
+      "type": "edge_case",
+      "severity": "low",
+      "message": "formatSalary uses division by 100000 and toFixed(1) which may produce unexpected results for very small or very large salary values (e.g., 0 becomes '\u20b90.0L+ PA' for min-only). Also, if both min and max are 0, it returns 'Not disclosed' due to falsy check, but 0 is a valid salary.",
+      "line": 66,
+      "suggestion": "Handle zero salary explicitly and consider using Intl.NumberFormat for locale-aware formatting."
+    },
+    {
+      "filename": "src/app/api/student/drives/route.js",
+      "type": "edge_case",
+      "severity": "low",
+      "message": "When row.branch is null or undefined, Array.isArray returns false, so it falls back to ['All eligible branches']. However, if row.branch is an empty array, it also returns ['All eligible branches'], which is correct but could be confusing if the job explicitly has no eligible branches.",
+      "line": 68,
+      "suggestion": "Consider distinguishing between 'no branches specified' and 'all branches eligible' if needed."
+    },
+    {
+      "filename": "src/app/api/student/profile/avatar/presign/route.js",
+      "type": "security",
+      "severity": "high",
+      "message": "The catch block exposes the raw error message (e.message) to the client, which may leak internal implementation details, stack traces, or database errors. This is a security risk in production.",
+      "line": 52,
+      "suggestion": "Log the full error server-side and return a generic error message to the client."
+    },
+    {
+      "filename": "src/app/api/student/profile/avatar/presign/route.js",
+      "type": "security",
+      "severity": "high",
+      "message": "The fileName is taken directly from user input without sanitization. This could allow path traversal (e.g., '../../etc/passwd') or S3 key injection, potentially overwriting other users' files or accessing unintended S3 paths.",
+      "line": 33,
+      "suggestion": "Sanitize the fileName by stripping path separators, limiting length, and using a safe pattern (e.g., only alphanumeric, hyphens, underscores)."
+    },
+    {
+      "filename": "src/app/api/student/profile/avatar/presign/route.js",
+      "type": "input_validation",
+      "severity": "medium",
+      "message": "The contentType is taken directly from user input and used in S3 presign. While validated against ALLOWED_TYPES, the Set.has() check is strict and may reject valid MIME types with parameters (e.g., 'image/jpeg; charset=utf-8'). This could cause false rejections.",
+      "line": 34,
+      "suggestion": "Parse the MIME type to extract the base type before validation, or use a more flexible matching approach."
+    },
+    {
+      "filename": "src/app/api/student/profile/avatar/presign/route.js",
+      "type": "input_validation",
+      "severity": "medium",
+      "message": "The fileSize is converted to Number() which can result in NaN if the input is not a valid number. NaN > MAX_BYTES is false, so the size check would be bypassed, allowing oversized files.",
+      "line": 35,
+      "suggestion": "Validate that fileSize is a finite positive number before comparing."
+    },
+    {
+      "filename": "src/app/api/student/profile/avatar/presign/route.js",
+      "type": "error_handling",
+      "severity": "medium",
+      "message": "If req.json() fails (e.g., malformed JSON, empty body), the error will be caught by the outer catch block and the raw error message will be exposed to the client.",
+      "line": 32,
+      "suggestion": "Add a specific try-catch around req.json() to return a 400 error for malformed input."
+    },
+    {
+      "filename": "src/app/api/student/profile/avatar/presign/route.js",
+      "type": "security",
+      "severity": "low",
+      "message": "The hint message in the 503 response exposes the names of required environment variables (AWS_REGION, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, S3_BUCKET_NAME). This could aid an attacker in understanding the infrastructure.",
+      "line": 26,
+      "suggestion": "Remove the hint or make it more generic (e.g., 'File upload service is not configured')."
+    },
+    {
+      "filename": "src/app/api/student/profile/avatar/complete/route.js",
+      "type": "security",
+      "severity": "critical",
+      "message": "Exposing e.message in the error response leaks internal database error details (e.g., constraint names, column types, connection errors) to the client, aiding attackers in reconnaissance.",
+      "line": 32,
+      "suggestion": "Log the full error server-side and return a generic error message to the client."
+    },
+    {
+      "filename": "src/app/api/student/profile/avatar/complete/route.js",
+      "type": "validation",
+      "severity": "high",
+      "message": "The file_url validation only checks for 'https://' prefix, which is insufficient. An attacker could provide a URL like 'https://evil.com/../../etc/passwd' or a URL with embedded JavaScript, leading to potential XSS or SSRF if the URL is later rendered or fetched.",
+      "line": 16,
+      "suggestion": "Validate the URL using a proper URL parser and restrict to allowed domains or at least ensure it is a well-formed URL with no path traversal or script injection."
+    },
+    {
+      "filename": "src/app/api/student/profile/avatar/complete/route.js",
+      "type": "multi_tenancy",
+      "severity": "high",
+      "message": "The UPDATE query does not include a tenant_id filter, so a student from tenant A could update the avatar of a user record that belongs to tenant B if they know the user ID. This violates tenant isolation.",
+      "line": 21,
+      "suggestion": "Add a tenant_id condition to the UPDATE query using the session's tenant_id."
+    },
+    {
+      "filename": "src/app/api/student/profile/avatar/complete/route.js",
+      "type": "error_handling",
+      "severity": "medium",
+      "message": "All errors (including validation errors, DB errors, etc.) are caught and return a 503 status with 'Database unavailable', which is misleading for non-database errors (e.g., JSON parse failure).",
+      "line": 31,
+      "suggestion": "Differentiate error types: return 400 for validation errors, 503 for DB errors, and 500 for unexpected errors."
+    },
+    {
+      "filename": "src/app/api/student/profile/avatar/complete/route.js",
+      "type": "error_handling",
+      "severity": "medium",
+      "message": "If req.json() fails (e.g., malformed body), the error is caught by the outer catch but returns a misleading 'Database unavailable' message. Also, the file_url is cast to string, which could mask type errors.",
+      "line": 13,
+      "suggestion": "Wrap the JSON parsing in a try-catch specifically for SyntaxError and return a 400 status."
+    },
+    {
+      "filename": "src/app/api/student/profile/avatar/complete/route.js",
+      "type": "logic",
+      "severity": "low",
+      "message": "The check `!upd.rows[0]` returns 404 even if the user exists but the role is not 'student' (due to the WHERE clause). The error message 'User not found' is misleading; it could be 'User not found or not a student'.",
+      "line": 25,
+      "suggestion": "Clarify the error message to indicate the user may not exist or is not a student."
+    },
+    {
+      "filename": "src/app/api/student/profile/route.js",
+      "type": "validation",
+      "severity": "medium",
+      "message": "CGPA validation only checks if it's between 0 and 10, but does not check for null or undefined values",
+      "line": 84,
+      "suggestion": "Add null and undefined checks for CGPA validation"
+    },
+    {
+      "filename": "src/app/dashboard/admin/colleges/page.js",
+      "type": "null_pointer_exception",
+      "severity": "high",
+      "message": "Accessing `c.name`, `c.city`, `c.naac`, `c.students`, `c.placed`, `c.active` without null/undefined checks will crash the page if the API returns a college object missing any of these fields. This is a runtime crash that breaks the entire table.",
+      "line": 43,
+      "suggestion": "Add optional chaining or default values for each accessed property, or validate the shape of each college object before rendering."
+    },
+    {
+      "filename": "src/app/dashboard/admin/colleges/page.js",
+      "type": "ux_copy",
+      "severity": "medium",
+      "message": "When an error occurs, the empty state shows the error message in the same cell as 'No colleges found.', but if there is an error, the message 'No colleges found.' is misleading because the data might exist but failed to load.",
+      "line": 54,
+      "suggestion": "Separate the error state from the empty state: show the error message when there is an error, and 'No colleges found.' only when the API returns an empty array successfully."
+    },
+    {
+      "filename": "src/app/dashboard/admin/colleges/page.js",
+      "type": "error_handling",
+      "severity": "medium",
+      "message": "The fetch call does not include a timeout. If the API hangs (e.g., due to network issues or server overload), the page will show a loading spinner indefinitely, providing no feedback to the user.",
+      "line": 16,
+      "suggestion": "Add an AbortController with a timeout (e.g., 10 seconds) to abort the fetch and show an error message if the request takes too long."
+    },
+    {
+      "filename": "src/app/dashboard/admin/colleges/page.js",
+      "type": "performance",
+      "severity": "low",
+      "message": "Using `colleges.map` directly without pagination or virtualization could cause performance issues if the number of colleges is large (e.g., hundreds or thousands). The entire list is rendered in the DOM.",
+      "line": 41,
+      "suggestion": "Implement client-side pagination or use a virtualized list (e.g., react-window) for large datasets."
+    },
+    {
+      "filename": "src/app/dashboard/admin/colleges/page.js",
+      "type": "uiux",
+      "severity": "low",
+      "message": "The 'View' and 'Edit' buttons are disabled with 'Coming soon' title, which is acceptable for a work-in-progress feature, but they still appear as interactive elements. This may confuse users.",
+      "line": 47,
+      "suggestion": "Either remove the buttons until the feature is ready, or add a tooltip explaining they are not yet available."
+    },
+    {
+      "filename": "src/app/api/student/program-opportunities/route.js",
+      "type": "sql_injection",
+      "severity": "critical",
+      "message": "The `types` array is constructed from user-controlled `kind` parameter without validation. Although the array values are hardcoded, the `kind` parameter is used in a ternary that could be manipulated if the URL is crafted with unexpected values. The array is passed to the query as a parameter, but the `kind` value itself is not directly interpolated into SQL. However, the logic is fragile and could be bypassed if the ternary is not exhaustive. More critically, the `kind` parameter is not sanitized and could be used in other parts of the application.",
+      "line": 30,
+      "suggestion": "Validate the `kind` parameter against an allowlist before using it to construct the types array."
+    },
+    {
+      "filename": "src/app/api/student/program-opportunities/route.js",
+      "type": "multi_tenancy",
+      "severity": "high",
+      "message": "The `employer_approvals` join uses `ea.tenant_id = jpv.tenant_id` but does not restrict to the student's own tenant IDs. This could allow a student to see opportunities from employers approved for other tenants if the visibility record exists for a different tenant. The join should also filter by the resolved tenantIds to ensure cross-tenant data leakage is prevented.",
+      "line": 58,
+      "suggestion": "Add a filter to ensure `ea.tenant_id` is within the student's resolved tenant IDs."
+    },
+    {
+      "filename": "src/app/api/student/program-opportunities/route.js",
+      "type": "error_handling",
+      "severity": "high",
+      "message": "The catch block logs the error but returns the error message directly to the client. This can leak sensitive database or system information in production. The error message should be sanitized or replaced with a generic message.",
+      "line": 90,
+      "suggestion": "Return a generic error message to the client and log the full error server-side."
+    },
+    {
+      "filename": "src/app/api/student/program-opportunities/route.js",
+      "type": "performance",
+      "severity": "medium",
+      "message": "The query has no LIMIT or pagination. As the number of published job postings grows, this endpoint will return an unbounded result set, causing memory pressure and slow responses. The frontend also has no way to paginate.",
+      "line": 36,
+      "suggestion": "Add pagination with LIMIT and OFFSET, and accept page/pageSize query parameters."
+    },
+    {
+      "filename": "src/app/api/student/program-opportunities/route.js",
+      "type": "null_pointer_exception",
+      "severity": "medium",
+      "message": "The check `!userId || !tenantIds.length` will throw a TypeError if `tenantIds` is null or undefined because accessing `.length` on null/undefined will crash. The `resolveStudentPlacementTenantIds` function could return null in some error scenarios.",
+      "line": 24,
+      "suggestion": "Add a null check for tenantIds before accessing .length."
+    },
+    {
+      "filename": "src/app/api/student/program-opportunities/route.js",
+      "type": "edge_case",
+      "severity": "low",
+      "message": "The LEFT JOIN on `student_profiles` uses `sp.user_id = $${userIdx}::uuid`. If the user does not have a student profile, the join will return NULL for `sp.id`, and the subsequent LEFT JOIN on `program_applications` will also be NULL. This is handled correctly, but the query could be simplified by using a subquery or a direct join on the user ID.",
+      "line": 60,
+      "suggestion": "Consider using a direct join on user ID to avoid the extra LEFT JOIN on student_profiles."
+    },
+    {
+      "filename": "src/app/dashboard/admin/overview/page.js",
+      "type": "edge_case",
+      "severity": "medium",
+      "message": "When registeredColleges is an empty array, the map returns nothing and the card renders with an empty div, providing no visual feedback to the user that no colleges are registered.",
+      "line": 88,
+      "suggestion": "Add an empty state message inside the map block when the array is empty."
+    },
+    {
+      "filename": "src/app/dashboard/admin/overview/page.js",
+      "type": "code_smell",
+      "severity": "low",
+      "message": "The key prop falls back to c.name if c.id is undefined, which can cause duplicate key warnings or incorrect React reconciliation if two colleges share the same name.",
+      "line": 90,
+      "suggestion": "Use a more reliable unique identifier, such as c.id, and ensure the API always returns it."
+    },
+    {
+      "filename": "src/app/dashboard/admin/employers/page.js",
+      "type": "bug",
+      "severity": "high",
+      "message": "Uses array index as React key (key={i}) which causes incorrect re-rendering when employers list changes order or items are added/removed. This can lead to UI glitches, lost focus states, and incorrect DOM updates.",
+      "line": 40,
+      "suggestion": "Use a unique identifier from the employer data (e.g., employer.id or employer.slug) as the key prop."
+    },
+    {
+      "filename": "src/app/dashboard/admin/employers/page.js",
+      "type": "performance",
+      "severity": "high",
+      "message": "No pagination, search, or filtering implemented. As the number of employers grows, this page will fetch and render all employers at once, causing slow load times and poor performance. The API endpoint likely returns all employers without pagination.",
+      "line": 39,
+      "suggestion": "Implement server-side pagination with page/size parameters, add search input, and add column sorting. Fetch only the first page initially and add pagination controls."
+    },
+    {
+      "filename": "src/app/dashboard/admin/employers/page.js",
+      "type": "uiux",
+      "severity": "medium",
+      "message": "The 'View' button is permanently disabled with 'Coming soon' title, indicating incomplete functionality. This is confusing for users and suggests the feature is not production-ready.",
+      "line": 42,
+      "suggestion": "Either implement the view functionality (navigate to employer detail page) or remove the button entirely until it's ready. If keeping, add a meaningful action like navigating to a detail page."
+    },
+    {
+      "filename": "src/app/dashboard/admin/employers/page.js",
+      "type": "bug",
+      "severity": "medium",
+      "message": "Accessing e.name, e.industry, e.hires, e.verified assumes these fields exist on every employer object. If the API returns different field names (e.g., company_name instead of name), the table will show undefined values silently.",
+      "line": 40,
+      "suggestion": "Add fallback values or validate the data shape. Use optional chaining and default values."
+    },
+    {
+      "filename": "src/app/dashboard/admin/employers/page.js",
+      "type": "uiux",
+      "severity": "medium",
+      "message": "Empty state shows error message when there's no error ('No employers found.' is shown when error is empty string). This is misleading - it should show a helpful empty state message, not an error.",
+      "line": 44,
+      "suggestion": "Separate the empty state from the error state. Show a helpful message like 'No employers have registered yet.' with an illustration or CTA."
+    },
+    {
+      "filename": "src/app/dashboard/admin/employers/page.js",
+      "type": "error_handling",
+      "severity": "medium",
+      "message": "No timeout or abort controller on the fetch request. If the API hangs or is slow, the component will wait indefinitely, showing a loading state forever.",
+      "line": 15,
+      "suggestion": "Add an AbortController with a timeout (e.g., 10 seconds) to cancel the request and show an appropriate error message."
+    },
+    {
+      "filename": "src/app/dashboard/admin/employers/page.js",
+      "type": "uiux",
+      "severity": "low",
+      "message": "Uses Tailwind class 'animate-fadeIn' which is not a standard Tailwind utility class. This will have no effect unless custom CSS is defined, making the animation non-functional.",
+      "line": 34,
+      "suggestion": "Either define the custom animation in global CSS or use standard Tailwind animation classes like 'animate-fade-in' if configured."
+    },
+    {
+      "filename": "src/app/dashboard/admin/employers/page.js",
+      "type": "code_smell",
+      "severity": "low",
+      "message": "Inline emoji in heading (\ud83c\udfe2) is inconsistent with modern UI patterns and may not render consistently across platforms. Consider using an SVG icon instead.",
+      "line": 35,
+      "suggestion": "Replace the emoji with a proper SVG icon component for consistent rendering."
+    },
+    {
+      "filename": "src/app/api/student/program-applications/route.js",
+      "type": "security",
+      "severity": "high",
+      "message": "Missing input validation on jobId and notes",
+      "line": 76,
+      "suggestion": "Add input validation to ensure jobId and notes are valid and sanitized"
+    },
+    {
+      "filename": "src/app/api/student/program-applications/route.js",
+      "type": "performance",
+      "severity": "medium",
+      "message": "Potential N+1 query issue in job posting retrieval",
+      "line": 87,
+      "suggestion": "Consider using a single query to retrieve all necessary data"
+    },
+    {
+      "filename": "src/app/api/student/program-applications/route.js",
+      "type": "readability",
+      "severity": "low",
+      "message": "Potential issue with COALESCE function",
+      "line": 114,
+      "suggestion": "Consider using a more explicit null check"
+    },
+    {
+      "filename": "src/app/dashboard/admin/page.js",
+      "type": "authorization",
+      "severity": "high",
+      "message": "Missing server-side role authorization. The check `if (!session?.user)` only verifies the session exists, but does not validate that the user has an admin role (college_admin or super_admin). A student or employer could access this page and potentially see admin content if the DashboardFullScreenHub component does not enforce its own role check.",
+      "line": 9,
+      "suggestion": "Add a role check after the session is confirmed to exist, redirecting non-admin users away from this page."
+    },
+    {
+      "filename": "src/app/dashboard/admin/page.js",
+      "type": "error_handling",
+      "severity": "medium",
+      "message": "No error handling for session fetch failure. If the session API call fails (network error, server error), the component will show the skeleton loading state indefinitely, providing no feedback to the user.",
+      "line": 9,
+      "suggestion": "Add a timeout or error state for the session fetch, redirecting to login or showing an error message if the session cannot be loaded."
+    },
+    {
+      "filename": "src/app/dashboard/admin/page.js",
+      "type": "code_smell",
+      "severity": "low",
+      "message": "The component does not handle the case where session.user.role is undefined or null, which could cause the DashboardFullScreenHub to receive an unexpected value.",
+      "line": 22,
+      "suggestion": "Add a fallback or validation for session.user.role before passing it to the child component."
+    },
+    {
+      "filename": "src/app/dashboard/admin/pending-registrations/page.js",
+      "type": "ux_copy",
+      "severity": "medium",
+      "message": "Error message in catch block uses e.message directly, which may expose internal error details to the user. Should show a generic message.",
+      "line": 23,
+      "suggestion": "Replace e.message with a generic fallback message like 'Failed to load pending registrations'."
+    },
+    {
+      "filename": "src/app/dashboard/admin/pending-registrations/page.js",
+      "type": "ux_copy",
+      "severity": "medium",
+      "message": "Error message in catch block uses e.message directly, which may expose internal error details to the user. Should show a generic message.",
+      "line": 49,
+      "suggestion": "Replace e.message with a generic fallback message like 'Failed to update registration'."
+    },
+    {
+      "filename": "src/app/dashboard/admin/pending-registrations/page.js",
+      "type": "uiux",
+      "severity": "medium",
+      "message": "Approve action is irreversible but has no confirmation dialog. A single click immediately approves the registration, which could be accidental.",
+      "line": 95,
+      "suggestion": "Add a confirmation dialog before approving, similar to the reject flow."
+    },
+    {
+      "filename": "src/app/dashboard/admin/pending-registrations/page.js",
+      "type": "uiux",
+      "severity": "low",
+      "message": "No loading skeleton or spinner is shown while the initial fetch is in progress. The table area appears blank until data loads, which may confuse users.",
+      "line": 15,
+      "suggestion": "Render a loading skeleton or spinner when loading is true and rows are empty."
+    },
+    {
+      "filename": "src/app/dashboard/admin/pending-registrations/page.js",
+      "type": "code_smell",
+      "severity": "low",
+      "message": "The map callback uses 'r' as a variable name, which is not descriptive. Renaming to 'registration' improves readability.",
+      "line": 79,
+      "suggestion": "Rename 'r' to 'registration' in the map callback."
+    },
+    {
+      "filename": "src/app/dashboard/admin/pending-registrations/page.js",
+      "type": "edge_case",
+      "severity": "low",
+      "message": "If firstName or lastName is null/undefined, the display will show 'undefined undefined' or 'null null'.",
+      "line": 83,
+      "suggestion": "Use optional chaining and fallback to empty string."
+    },
+    {
+      "filename": "src/app/dashboard/admin/pending-registrations/page.js",
+      "type": "edge_case",
+      "severity": "low",
+      "message": "If createdAt is an invalid date string, new Date(r.createdAt).toLocaleString() will return 'Invalid Date'.",
+      "line": 92,
+      "suggestion": "Add a try-catch or check for valid date before formatting."
+    },
+    {
+      "filename": "src/app/api/student/offers/route.js",
+      "type": "concurrency",
+      "severity": "high",
+      "message": "Race condition in auto-expiry loop: multiple concurrent GET requests can simultaneously read pending offers, both detect expiry, and both attempt UPDATE. Without a transaction or SELECT FOR UPDATE, the same offer may be updated multiple times, and the loop modifies the in-memory object while iterating, which is safe but the DB updates are not atomic with the read. This can lead to inconsistent state if a PATCH request arrives between the read and the update.",
+      "line": 36,
+      "suggestion": "Wrap the read and update in a database transaction with SELECT FOR UPDATE to lock the rows, or move auto-expiry to a scheduled background job instead of doing it on every GET request."
+    },
+    {
+      "filename": "src/app/api/student/offers/route.js",
+      "type": "business_logic",
+      "severity": "high",
+      "message": "The PATCH endpoint does not check if the student already has an accepted offer before accepting a new one. A student could accept multiple offers by sending concurrent PATCH requests, violating the business rule that a student should only have one accepted offer.",
+      "line": 80,
+      "suggestion": "Add a check before the UPDATE to ensure the student does not already have an accepted offer. Use a transaction to atomically check and update."
+    },
+    {
+      "filename": "src/app/api/student/offers/route.js",
+      "type": "validation",
+      "severity": "medium",
+      "message": "The offer ID is not validated as a UUID before being used in the query. If a malformed ID is passed, the query will fail with a database error (invalid input syntax for type uuid), resulting in a 500 error instead of a 400. This also opens a potential for SQL injection if the input is not properly sanitized, though parameterized queries mitigate that risk.",
+      "line": 73,
+      "suggestion": "Validate that the id is a valid UUID using a regex or a library like uuid.validate() before using it in the query."
+    },
+    {
+      "filename": "src/app/api/student/offers/route.js",
+      "type": "logic",
+      "severity": "medium",
+      "message": "The status mapping uses 'declined' but the database CHECK constraint for offers.status only allows 'rejected', not 'declined'. This will cause a database constraint violation error when a student declines an offer.",
+      "line": 79,
+      "suggestion": "Change 'declined' to 'rejected' to match the database schema, or update the schema to include 'declined' if that is the intended status."
+    },
+    {
+      "filename": "src/app/api/student/offers/route.js",
+      "type": "ux_copy",
+      "severity": "low",
+      "message": "Error message 'Failed to load student offers' is generic and not actionable for the user. It does not indicate what went wrong or what the user can do.",
+      "line": 52,
+      "suggestion": "Provide a more specific error message, e.g., 'Unable to load your offers. Please try again later.' and log the detailed error server-side."
+    },
+    {
+      "filename": "src/app/api/student/offers/route.js",
+      "type": "ux_copy",
+      "severity": "low",
+      "message": "Error message 'Failed to update offer status' is generic and not actionable. It does not tell the user what happened or what to do next.",
+      "line": 96,
+      "suggestion": "Provide a more specific error message, e.g., 'Unable to update offer status. Please try again later.' and log the detailed error server-side."
+    },
+    {
+      "filename": "src/app/api/student/offers/route.js",
+      "type": "authentication",
+      "severity": "low",
+      "message": "The role check uses 'student' but the database schema defines the role as 'student' in the users table. This is correct, but the error message 'Unauthorized' is generic and does not indicate whether the user is not logged in or does not have the correct role.",
+      "line": 9,
+      "suggestion": "Differentiate between 'not authenticated' (401) and 'forbidden' (403) with appropriate messages."
+    },
+    {
+      "filename": "src/app/api/student/offers/route.js",
+      "type": "authentication",
+      "severity": "low",
+      "message": "Same generic 'Unauthorized' error in PATCH endpoint. Should differentiate between 401 and 403.",
+      "line": 63,
+      "suggestion": "Same fix as GET endpoint."
+    },
+    {
+      "filename": "src/app/api/student/offers/route.js",
+      "type": "performance",
+      "severity": "low",
+      "message": "Auto-expiry logic runs on every GET request, performing N sequential UPDATE queries for expired offers. This is inefficient and does not scale. For a student with many expired offers, this could cause noticeable latency.",
+      "line": 33,
+      "suggestion": "Move auto-expiry to a scheduled background job (e.g., cron) that runs periodically, or batch the updates into a single query."
+    },
+    {
+      "filename": "src/app/api/student/offers/route.js",
+      "type": "error_handling",
+      "severity": "low",
+      "message": "The catch block in the auto-expiry loop silently logs the error but continues execution. If the UPDATE fails, the offer remains in 'pending' state in the database but is marked as 'expired' in the response, causing inconsistency between the returned data and the database.",
+      "line": 41,
+      "suggestion": "Either throw the error to fail the request (so the client retries) or handle it gracefully by not marking the offer as expired in the response if the update fails."
+    }
+  ]
+}

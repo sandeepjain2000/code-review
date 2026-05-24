@@ -1,0 +1,46 @@
+=================================================================
+  CODESENTINEL -- BATCH 10 REPORT
+  Files 226 - 227 of 229
+  Folder : C:\Users\sandeep\Downloads\Claudes\CampusPlacement\campus-placement
+  Saved  : 01/05/2026, 21:57:06
+=================================================================
+
+  Batch Score   : 78/100
+  Files Reviewed: 2
+  Total Issues  : 6
+
+=================================================================
+  FILE: src/middleware.js
+  Score: 83/100   Issues: 4
+
+  The middleware is concise and correctly uses next-auth/jwt for token verification. The main risk is that the matcher only covers /login and /data-entry, leaving all other routes unprotected by middleware-level auth checks. This means unauthenticated users can access any other route (e.g., /dashboard/student) directly, relying solely on client-side or per-API checks. Additionally, the middleware does not validate token expiry or handle the case where NEXTAUTH_SECRET is missing, which would cause a runtime crash. The code is otherwise clean and well-structured.
+
+  [HIGH] authentication -- Line 53
+  Middleware matcher only covers /login and /data-entry paths. All other routes (e.g., /dashboard/*, /api/*) are unprotected by middleware-level auth checks, allowing unauthenticated users to access them directly. This shifts the auth burden to individual pages/APIs and can lead to inconsistent enforcement.
+  Fix: Expand the matcher to cover all protected routes, or add a catch-all check in the middleware that redirects unauthenticated users to /login for any protected path.
+
+  [MEDIUM] configuration -- Line 22
+  Missing NEXTAUTH_SECRET environment variable validation at startup. If NEXTAUTH_SECRET is undefined, getToken will throw an error, crashing the middleware and returning a 500 to the user.
+  Fix: Add a startup check that validates NEXTAUTH_SECRET is set, or wrap getToken in a try/catch with a fallback redirect to /login.
+
+  [MEDIUM] authentication -- Line 36
+  The middleware allows all non-login paths (e.g., /dashboard/student, /api/jobs) to pass through without any auth check. This means unauthenticated users can access protected pages and API routes, relying solely on client-side or per-API enforcement which may be inconsistent.
+  Fix: Add a general auth check for all protected routes (e.g., /dashboard/*, /api/*) that redirects unauthenticated users to /login.
+
+  [LOW] edge_case -- Line 45
+  If token exists but role is missing (e.g., malformed token), the user is allowed to stay on /login. This is a minor edge case but could lead to confusion.
+  Fix: Treat a token without a role as unauthenticated and redirect to /login with an error parameter.
+
+=================================================================
+  FILE: test-db.js
+  Score: 72/100   Issues: 2
+
+  This is a simple database connection test script with a critical security issue: hardcoded database credentials in the connection string. The script also lacks proper error handling (missing stack trace on failure) and uses process.exit() which is acceptable for a test script but should be noted. The code is otherwise functional for its intended purpose.
+
+  [CRITICAL] security -- Line 4
+  Hardcoded database credentials (postgres:postgres) in connection string at line 4. This exposes the database password in source code, which is a severe security risk if committed to version control or shared.
+  Fix: Load the connection string from an environment variable (e.g., process.env.DATABASE_URL) with a fallback for local development.
+
+  [MEDIUM] error_handling -- Line 14
+  Error logging only includes err.message, missing the full stack trace (err.stack). This makes debugging connection failures harder in production.
+  Fix: Log the full error object or err.stack to capture the call stack for better debugging.

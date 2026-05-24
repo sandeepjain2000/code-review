@@ -1,0 +1,502 @@
+=================================================================
+  CODESENTINEL -- BATCH 3 REPORT
+  Files 51 - 68 of 262
+  Folder : C:\Users\sandeep\Downloads\Claudes\CampusPlacement\campus-placement
+  Saved  : 03/05/2026, 23:19:06
+=================================================================
+
+  Batch Score   : 76/100
+  Files Reviewed: 18
+  Total Issues  : 96
+
+=================================================================
+  FILE: src/app/api/college/students/bulk-upload/route.js
+  Score: 44/100   Issues: 8
+
+  The bulk upload endpoint has a critical security vulnerability: temporary passwords are returned in the API response, allowing anyone with network access to intercept them. Additionally, the code lacks transaction handling, leading to partial data writes on failure, and has no file size or type validation, risking resource exhaustion. The overall structure is reasonable but these issues make it unsafe for production.
+
+  [CRITICAL] security -- Line 125
+  Temporary passwords are returned in the API response body (newUserCredentials). This exposes plaintext passwords over the network, in server logs, and to any intermediary. An attacker with network access or log access can compromise newly created accounts.
+  Fix: Remove temporary passwords from the API response. Instead, send them via email or a secure out-of-band channel. If returning in response is unavoidable, encrypt them with a per-request key and ensure they are never logged.
+
+  [HIGH] data_integrity -- Line 71
+  No database transaction is used. If the process crashes after inserting a user (line 81-88) but before inserting the student profile (line 99-110), or vice versa, the system will have orphaned records or missing profiles. Partial bulk uploads can leave the database in an inconsistent state.
+  Fix: Wrap the entire per-row operation in a database transaction. Use BEGIN/COMMIT/ROLLBACK or a client-level transaction. Also consider batching all rows in a single transaction for atomicity.
+
+  [HIGH] scalability -- Line 28
+  The entire file is read into memory (file.text()) and then split into lines. For large CSV files (e.g., 100MB with 100k+ students), this will cause high memory usage and potential OOM crashes. No file size limit is enforced.
+  Fix: Add a file size check before reading (e.g., reject files > 5MB). Use a streaming CSV parser (e.g., csv-parser) to process rows incrementally without loading the entire file into memory.
+
+  [MEDIUM] input_validation -- Line 22
+  No validation that the uploaded file is actually a CSV. An attacker could upload a malicious file (e.g., .exe, .html) which would be parsed as CSV, potentially causing unexpected behavior or resource exhaustion.
+  Fix: Check the file's MIME type (text/csv) and/or extension (.csv). Reject files that don't match.
+
+  [MEDIUM] validation -- Line 60
+  CGPA is parsed as a float but not validated for range (e.g., 0-10). A value like 15 or -1 would be accepted and stored, causing data integrity issues.
+  Fix: Validate CGPA is between 0 and 10 after parsing.
+
+  [MEDIUM] validation -- Line 63
+  Email format is not validated. An invalid email like 'notanemail' would be accepted and stored, causing issues with future communications.
+  Fix: Add a basic email regex validation before processing.
+
+  [LOW] observability -- Line 114
+  Error messages include the email address, which is PII. If these errors are logged or returned in production, they expose user email addresses.
+  Fix: Log the email server-side but do not include it in the error response sent to the client. Use a row index instead.
+
+  [LOW] observability -- Line 129
+  The catch block logs the error but does not include a correlation ID or structured logging, making it hard to trace in production.
+  Fix: Use structured logging with a correlation ID (e.g., from request headers or generated).
+
+=================================================================
+  FILE: src/app/api/data-entry/options/route.js
+  Score: 58/100   Issues: 5
+
+  The endpoint has a critical multi-tenancy vulnerability: the employer_profiles query (line 50-55) lacks a tenant_id filter, exposing all employers across all tenants to any authenticated data-entry user. Additionally, the query returns sensitive PII (email, names) for all users without a clear business need, and the hardcoded LIMITs may silently truncate results. The error handler logs the full error object which may contain sensitive data. Overall, the code is well-structured with proper auth and parameterized queries, but the cross-tenant data leak is a critical production risk.
+
+  [CRITICAL] multi_tenancy -- Line 50
+  The employer_profiles query (lines 50-55) has no tenant_id filter, causing all employers across all tenants to be returned to any authenticated data-entry user. This is a cross-tenant data leak that violates multi-tenancy isolation.
+  Fix: Add a WHERE tenant_id = $1 clause to the employer_profiles query, similar to the other queries in this function.
+
+  [HIGH] data_integrity -- Line 15
+  The tenantUsers and studentUsers queries (lines 16-31) return email, first_name, and last_name for all users. This exposes PII unnecessarily — the endpoint likely only needs IDs and roles for dropdown options. This violates data minimization principles and increases GDPR risk.
+  Fix: Remove email, first_name, and last_name from the SELECT clauses unless they are strictly required by the frontend. If names are needed for display, consider returning only first_name and last_name without email.
+
+  [MEDIUM] scalability -- Line 15
+  All five queries use hardcoded LIMITs (300, 200, 200, 200, 200) with no pagination or offset. If a tenant has more records than the limit, data will be silently truncated without any indication to the caller. This can cause missing options in dropdowns and confusing behavior.
+  Fix: Add pagination support via query parameters (page, limit) or increase the limits to a higher safe value (e.g., 1000) and add a warning header when results are truncated. Alternatively, implement server-side search to avoid loading all options at once.
+
+  [MEDIUM] gdpr -- Line 66
+  console.error logs the full error object which may contain sensitive data (e.g., SQL query text with parameters, stack traces revealing internal paths). In production, this could leak PII or system internals into log aggregation systems.
+  Fix: Log only a sanitized error message and a correlation ID. Avoid logging the full error object or query parameters.
+
+  [LOW] ux_copy -- Line 67
+  The error message 'Failed to load options' is generic and not actionable for the user. It does not indicate what went wrong or what the user should do next.
+  Fix: Provide a more specific error message, e.g., 'Unable to load options. Please try again or contact support.'
+
+=================================================================
+  FILE: src/app/api/college/students/verify/route.js
+  Score: 83/100   Issues: 4
+
+  The route is generally well-structured with proper authentication, tenant resolution, and parameterized queries. The primary risk is a potential runtime crash if `session.user.id` is undefined (line 47), which would cause the transaction to fail with a cryptic error. Additionally, the error handling is minimal — the catch block logs the error but returns a generic message, and there is no input validation for the `approve` field beyond the loose `=== true` check. The multi-tenancy check on `student_profiles` is correctly enforced. Overall, the code is production-ready with minor hardening needed.
+
+  [HIGH] runtime -- Line 47
+  session.user.id may be undefined if the session object does not include the user id. This would cause the transaction to fail with a PostgreSQL error (NULL value for verified_by) or a JavaScript error when passing undefined to the query parameter array. In production, this could silently fail to update the record or crash the request.
+  Fix: Add a guard clause to check session.user.id exists before proceeding, or provide a fallback (e.g., use a default UUID or throw a clear error).
+
+  [MEDIUM] input_validation -- Line 19
+  The `approve` field is only loosely validated with `body.approve === true`. If `approve` is `false`, `undefined`, or any non-boolean value, the behavior may be unexpected. For example, if `approve` is `false`, the student will be unverified, but if it's `undefined`, the `CASE WHEN $2 THEN ...` will treat it as falsy and clear the verification fields, which may not be the intended behavior.
+  Fix: Explicitly validate that `approve` is a boolean. If not provided, default to `true` or return a 400 error.
+
+  [MEDIUM] error_handling -- Line 57
+  The catch block logs the error to console.error but returns a generic 'Failed to update student' message. In production, this provides no actionable information to the client (e.g., whether the student was not found, a DB constraint failed, or a UUID was invalid). The error is also not structured for observability (no request ID, no tenant context).
+  Fix: Differentiate between expected errors (e.g., invalid UUID format -> 400) and unexpected errors (-> 500). Add structured logging with context fields (tenantId, studentProfileId, error stack).
+
+  [LOW] best_practice -- Line 29
+  The UUID cast `$1::uuid` and `$2::uuid` is redundant when using parameterized queries with a PostgreSQL driver that already handles type coercion. If the parameter is not a valid UUID string, PostgreSQL will throw error code 22P02, which is caught by the generic catch block. This is not a bug but adds unnecessary coupling to the database type system.
+  Fix: Remove the `::uuid` casts and let the driver handle type conversion. If you want to validate UUID format, do it in JavaScript before the query.
+
+=================================================================
+  FILE: src/app/api/data-entry/placement-drives/route.js
+  Score: 88/100   Issues: 8
+
+  The code is generally well-structured with proper parameterized queries, tenant isolation, and authentication. The main risks are: (1) missing input validation for employerId (UUID format) and maxStudents (negative/zero values), (2) no pagination for GET (hard limit of 300), (3) silent error logging without structured context, and (4) missing idempotency checks for POST. No critical security vulnerabilities found.
+
+  [MEDIUM] validation -- Line 50
+  employerId is not validated as a UUID. If an invalid UUID string is passed, the INSERT will fail with a database error (foreign key violation), resulting in a 500 response instead of a clear 400.
+  Fix: Validate employerId as a UUID format before querying, or catch the foreign key violation and return a 400.
+
+  [MEDIUM] validation -- Line 49
+  maxStudents is not validated for negative values or zero. A negative or zero value would be inserted into the database, which is likely invalid for a placement drive.
+  Fix: Validate that maxStudents is a positive integer if provided.
+
+  [LOW] scalability -- Line 27
+  GET endpoint has a hard limit of 300 rows with no pagination support. If a tenant has more than 300 drives, older drives are silently omitted. No cursor or page parameter is supported.
+  Fix: Add pagination with page/limit query parameters and return total count for UI.
+
+  [LOW] observability -- Line 81
+  Error logging in POST uses console.error with the error object but lacks structured context (tenantId, request body summary). In production, this makes debugging failures harder.
+  Fix: Use a structured logger or include tenantId and action in the log message.
+
+  [LOW] idempotency -- Line 62
+  POST does not check for duplicate drives (same title, drive_date, employer_id for the same tenant). A client retry could create duplicate drives.
+  Fix: Add a unique constraint on (tenant_id, title, drive_date) or check for existing drive before insert.
+
+  [LOW] error_handling -- Line 32
+  GET catch block returns a generic 500 error without logging the actual error. In production, this makes it impossible to diagnose why the query failed.
+  Fix: Log the error server-side before returning the generic response.
+
+  [LOW] error_handling -- Line 116
+  PUT catch block returns a generic 500 error without logging the actual error.
+  Fix: Log the error server-side before returning the generic response.
+
+  [LOW] error_handling -- Line 140
+  DELETE catch block returns a generic 500 error without logging the actual error.
+  Fix: Log the error server-side before returning the generic response.
+
+=================================================================
+  FILE: src/app/api/employer/assessments/route.js
+  Score: 94/100   Issues: 2
+
+  The provided code snippet is generally well-structured and secure, with proper authentication and parameterized queries. However, there are a few areas that need improvement, such as input validation and error handling. The code is vulnerable to potential issues like SQL errors and unhandled promise rejections, which could lead to crashes or data corruption. The score is 85 due to the lack of input validation and potential SQL errors.
+
+  [MEDIUM] input_validation -- Line 23
+  The 'limit' parameter is not validated properly, which could lead to potential SQL errors or crashes
+  Fix: Validate the 'limit' parameter to ensure it is a positive integer
+
+  [MEDIUM] error_handling -- Line 34
+  The error handling mechanism is not robust and could lead to crashes or data corruption
+  Fix: Improve the error handling mechanism to handle potential errors and exceptions
+
+=================================================================
+  FILE: src/app/api/employer/assessments/[uploadId]/route.js
+  Score: 84/100   Issues: 5
+
+  The code is well-structured with proper parameterized queries, ownership checks, and input validation. The biggest risk is the GET endpoint's JOIN on `student_profiles` and `users` without a tenant_id filter, which could expose student data across tenants if a malicious employer uploads a crafted CSV. Additionally, the PATCH endpoint performs N+1 queries inside a transaction, which could cause performance issues with large batches. The error handling is adequate but lacks structured logging. Overall, the code is production-ready with minor improvements needed.
+
+  [HIGH] multi_tenancy -- Line 60
+  The GET endpoint JOINs employer_assessment_rows with student_profiles and users without filtering by tenant_id. If an employer uploads a CSV with roll numbers that match students from another tenant, the query will return those students' names (account_name) from the users table, causing cross-tenant data leakage.
+  Fix: Add a tenant_id filter to the JOIN to ensure only students belonging to the same tenant as the employer are returned.
+
+  [MEDIUM] performance -- Line 110
+  The PATCH endpoint performs N+1 queries inside a transaction: for each row, it first does a SELECT to verify ownership, then an UPDATE. With up to 500 rows, this results in up to 1000 queries, which can be slow and increase transaction duration, leading to lock contention.
+  Fix: Batch the ownership check using a single SELECT with IN clause, then batch the UPDATE using a CASE statement or multiple UPDATE statements in a single query.
+
+  [LOW] observability -- Line 73
+  Error logging uses console.error with a string prefix and the error object. This lacks structured logging (JSON) and a correlation ID, making it difficult to trace errors in production log aggregation systems.
+  Fix: Use a structured logger that includes request ID, tenant ID, and error context as JSON fields.
+
+  [LOW] observability -- Line 151
+  Same as above for PATCH endpoint error logging.
+  Fix: Use structured logging with context.
+
+  [LOW] edge_case -- Line 42
+  The GET endpoint queries employer_assessment_rounds but does not verify that the rounds belong to the same upload that the employer owns. While the upload ownership is checked, the rounds query could theoretically return data from a different upload if the uploadId is manipulated, but since uploadId is validated as UUID and the rounds table has a foreign key to upload_id, this is unlikely. Still, adding a join to verify ownership is a defense-in-depth measure.
+  Fix: Add a JOIN to employer_assessment_uploads to ensure the rounds belong to the employer's upload.
+
+=================================================================
+  FILE: src/app/api/employer/assessments/template/route.js
+  Score: 85/100   Issues: 4
+
+  The route is a simple CSV template download endpoint with no authentication, authorization, or rate limiting. While the code is functionally correct for its purpose, it exposes a public endpoint that could be abused for CSV injection attacks against users who download and open the file. The lack of any access control means any unauthenticated user can download the template, which may be acceptable for a public template but should be reviewed against business requirements. The CSV content includes sample data that could trigger formula execution in spreadsheet applications.
+
+  [HIGH] csv_injection -- Line 4
+  CSV injection vulnerability: The sample data in the template contains values like 'Passed', 'Pending', 'On Hold', and 'Strong aptitude score; interview pending' that could be prefixed with =, +, @, or - by a malicious user after download, leading to formula execution when opened in Excel/Google Sheets. The template itself is static but the risk is that users may modify and re-upload the CSV, and the sample data provides a pattern that could be exploited.
+  Fix: Add a warning comment in the CSV or sanitize sample data to prevent formula injection by prefixing cells that start with =, +, @, - with a single quote.
+
+  [MEDIUM] authentication -- Line 4
+  Missing authentication: The GET handler has no session check or authorization. If this endpoint is meant to be protected (e.g., only for authenticated employers), any unauthenticated user can download the template. This may be intentional for a public template, but should be explicitly reviewed.
+  Fix: Add authentication check using getServerSession or similar if this endpoint should be protected. If public, add a comment explaining why.
+
+  [LOW] best_practice -- Line 20
+  No rate limiting: The endpoint has no rate limiting, making it susceptible to abuse through repeated requests that could consume bandwidth or server resources.
+  Fix: Add rate limiting middleware or use a library like express-rate-limit or a Next.js middleware to limit requests per IP.
+
+  [LOW] code_quality -- Line 20
+  Hardcoded BOM character: The BOM (\uFEFF) is hardcoded as a Unicode escape. While functionally correct, it would be more readable to use a constant or comment explaining its purpose for UTF-8 BOM handling in Excel.
+  Fix: Add a comment explaining the BOM is for Excel compatibility with UTF-8 CSV files.
+
+=================================================================
+  FILE: src/app/api/college/students/route.js
+  Score: 93/100   Issues: 3
+
+  The provided code snippet appears to be a well-structured API route for handling college students. However, there are a few potential issues that need to be addressed, including error handling, input validation, and potential SQL injection vulnerabilities. The code is generally well-structured and follows good practices, but there are some areas that can be improved for better security, reliability, and performance.
+
+  [MEDIUM] security -- Line 19
+  Potential SQL injection vulnerability in the query string
+  Fix: Use a parameterized query or an ORM to prevent SQL injection
+
+  [MEDIUM] error_handling -- Line 67
+  Error handling can be improved by logging more detailed error information
+  Fix: Log more detailed error information, such as the error stack and message
+
+  [LOW] input_validation -- Line 14
+  Input validation can be improved by checking for null or empty values
+  Fix: Check for null or empty values and return a 400 error for invalid requests
+
+=================================================================
+  FILE: src/app/api/employer/calendar/route.js
+  Score: 83/100   Issues: 4
+
+  The endpoint is simple and mostly correct, but has a critical SQL injection vulnerability on line 14 where the userId is used in a parameterized query but the cast to uuid could fail if the value is not a valid UUID, causing a 500 error. Additionally, the session.user.id fallback to session.user.sub is fragile and may silently fail. The lack of pagination and hardcoded LIMIT 500 could cause performance issues for employers with many drives. No other major issues found.
+
+  [HIGH] bug -- Line 14
+  The query on line 14 casts userId to UUID using $1::uuid. If session.user.id or session.user.sub is not a valid UUID (e.g., undefined, null, or a malformed string), the cast will throw a database error, resulting in a 500 response. This can happen if the session object is malformed or if the user ID is not a UUID.
+  Fix: Validate that userId is a valid UUID before using it in the query, or remove the explicit cast and let the parameter be treated as text.
+
+  [MEDIUM] edge_case -- Line 13
+  The fallback from session.user.id to session.user.sub assumes that one of these fields is always present and is the correct user identifier. If both are undefined or null, the query will fail with a UUID cast error (as noted above). Additionally, if session.user.sub is not the user ID but a different identifier (e.g., a subject claim from an external provider), this could lead to incorrect data access.
+  Fix: Use a single, reliable source for the user ID from the session, and validate its presence before proceeding.
+
+  [MEDIUM] performance -- Line 24
+  The query uses LIMIT 500 without any pagination mechanism (offset, cursor). For employers with many drives, this will truncate results and may miss older events. Additionally, fetching 500 rows in a single query could be slow if the table is large.
+  Fix: Implement cursor-based or offset-based pagination, or at least add an ORDER BY clause that ensures consistent pagination. Consider adding a page query parameter.
+
+  [LOW] edge_case -- Line 31
+  If drive_date is a valid date but the conversion to string and slicing to 10 characters assumes ISO format (YYYY-MM-DD). If the database returns a different format (e.g., depending on locale settings), the slice may produce incorrect results.
+  Fix: Use a proper date formatting function or library (e.g., toISOString().split('T')[0]) to ensure consistent output.
+
+=================================================================
+  FILE: src/app/api/discussions/route.js
+  Score: 3/100   Issues: 14
+
+  The discussions API stores all thread data inside the tenant's `settings` JSONB column, which will cause unbounded growth, data loss on any concurrent write, and poor query performance. The `resolveTenantId` function allows any `college_admin` to access any tenant's data by passing a `campusId` query parameter, bypassing tenant isolation. There is no input sanitization on the `topic`, `company`, `campus`, or `text` fields, enabling stored XSS when these values are rendered in the UI. The `nowLabel()` function returns a static string instead of a timestamp, making the 'lastActivity' field meaningless. The PATCH handler has a race condition where two concurrent replies can overwrite each other's data. No pagination or limits exist on the threads array, which will grow without bound inside a single JSONB column.
+
+  [HIGH] bug -- Line 6
+  nowLabel() returns the static string 'Just now' instead of a real timestamp. This makes the `lastActivity` field on threads meaningless for sorting or display purposes. The field will never update to reflect actual time elapsed.
+  Fix: Replace nowLabel() with a function that returns an ISO 8601 timestamp (e.g., new Date().toISOString()) and handle relative time display on the client side.
+
+  [CRITICAL] multi_tenancy -- Line 25
+  resolveTenantId() allows a college_admin to override their own tenant_id by passing a `campusId` query parameter. This is a cross-tenant data leak vulnerability: a malicious college_admin can read/write discussions for any tenant by simply providing a different campusId.
+  Fix: Remove the searchParams fallback for college_admin. Only super_admin should be allowed to specify a different tenantId via query parameter.
+
+  [HIGH] security -- Line 65
+  The `topic`, `company`, `campus`, and `text` fields are not sanitized or escaped before being stored in the database. When these values are rendered in the UI (e.g., in a React component that uses dangerouslySetInnerHTML or simply as text content), they can execute arbitrary JavaScript (stored XSS).
+  Fix: Strip or encode HTML tags from all user-supplied text fields before storing. Use a library like DOMPurify on the server side or rely on React's default escaping (but never dangerouslySetInnerHTML).
+
+  [CRITICAL] data_integrity -- Line 72
+  The entire discussions data is stored inside the tenant's `settings` JSONB column. This is a race condition vulnerability: if two concurrent POST or PATCH requests read the same settings object, modify it, and write it back, one request's changes will be silently lost (lost update). This will cause data corruption under load.
+  Fix: Use a separate `discussions` table with proper row-level locking (SELECT ... FOR UPDATE) or use PostgreSQL's jsonb_set function to atomically update the threads array within the settings column.
+
+  [MEDIUM] bug -- Line 74
+  Thread ID is generated using `Date.now()` which is not unique under high concurrency. Two threads created in the same millisecond will have the same ID, causing data loss or incorrect updates.
+  Fix: Use a UUID (e.g., crypto.randomUUID()) or a combination of timestamp + random suffix for thread IDs.
+
+  [HIGH] data_integrity -- Line 119
+  The PATCH handler uses `Array.map()` to find and update a thread, but if two concurrent PATCH requests target the same thread, both will read the same base state and one reply will be lost. This is a classic lost update race condition.
+  Fix: Use atomic JSONB operations (jsonb_set) to append a reply without reading and writing the entire settings object, or use row-level locking as suggested above.
+
+  [MEDIUM] performance -- Line 47
+  The threads array is stored inside a JSONB column with no pagination or size limits. As the number of threads grows (potentially thousands), loading and saving the entire array on every request will become a performance bottleneck and increase database storage costs.
+  Fix: Move discussions to a separate table with proper indexing and pagination. If keeping in JSONB, enforce a maximum number of threads (e.g., 100) and archive older ones.
+
+  [MEDIUM] multi_tenancy -- Line 62
+  POST handler also allows overriding tenantId via `body.campusId`. This is another cross-tenant vector: any authenticated user can craft a POST request with a different campusId in the body to create discussions in another tenant's context.
+  Fix: Remove the body.campusId fallback for non-super_admin roles. Only super_admin should be able to specify a target tenant.
+
+  [MEDIUM] multi_tenancy -- Line 108
+  PATCH handler also allows overriding tenantId via `body.campusId`. Same cross-tenant vulnerability as POST.
+  Fix: Remove the body.campusId fallback for non-super_admin roles.
+
+  [LOW] observability -- Line 50
+  Error logging uses console.error with a static label but does not include the error stack trace or any structured context (request ID, tenant ID, user ID). This makes debugging production issues difficult.
+  Fix: Use a structured logger that includes error stack, request ID, tenant ID, and user ID.
+
+  [LOW] observability -- Line 95
+  Same issue as GET: POST error logging lacks context.
+  Fix: Include structured context in error logs.
+
+  [LOW] observability -- Line 138
+  Same issue: PATCH error logging lacks context.
+  Fix: Include structured context in error logs.
+
+  [LOW] code_smell -- Line 84
+  The reply object uses `session?.user?.name || 'Team'` as the author name. If the session user has no name set, the reply will be attributed to 'Team', which is misleading and loses accountability.
+  Fix: Require the user to have a name set, or use their email/ID as a fallback instead of a generic 'Team' label.
+
+  [LOW] code_smell -- Line 127
+  Same issue in PATCH handler: reply author falls back to 'Team'.
+  Fix: Use a more specific fallback for the author name.
+
+=================================================================
+  FILE: src/app/api/employer/assessments/[uploadId]/rows/route.js
+  Score: 87/100   Issues: 7
+
+  The POST handler for adding assessment rows is well-structured with proper authentication, parameterized queries, and transaction usage. The biggest risk is the error message leaking the internal 'Student not found for this campus' message to the client, which could expose tenant structure. Additionally, the handler lacks input validation for the round result fields (accepting arbitrary strings), has no rate limiting, and the error handling returns the raw error message which could leak sensitive details. The code is generally solid but has several medium-severity issues around error handling, input validation, and observability.
+
+  [MEDIUM] error_handling -- Line 66
+  Error message 'Student not found for this campus' is thrown with a custom statusCode but the catch block at line 138 returns e.message directly to the client. This leaks internal logic and could help an attacker enumerate valid students. The message should be generic for 4xx errors as well.
+  Fix: Use a generic error message for the client response and log the specific reason server-side.
+
+  [MEDIUM] error_handling -- Line 138
+  The catch block returns e.message directly to the client for all errors. For 5xx errors, this could leak internal details (e.g., database constraint names, stack traces). For 4xx errors, the custom messages may be too revealing.
+  Fix: Differentiate between client and server errors: return a generic message for 5xx and use a controlled message for 4xx.
+
+  [MEDIUM] input_validation -- Line 46
+  The request body is parsed with a catch that returns an empty object, but the round result fields (round_1_result through round_5_result) are not validated for type or content. An attacker could send non-string values (objects, arrays) that would be converted to '[object Object]' by String(v) in trimText, potentially causing data integrity issues.
+  Fix: Validate that round result fields are strings or null before passing to trimText.
+
+  [LOW] performance -- Line 79
+  The application lookup query uses OR conditions with nullable parameters. If both drive_id and job_id are null, the query will return all applications for the student, which could be many rows. The LIMIT 1 mitigates this, but the query could still be inefficient.
+  Fix: Add a check that at least one of drive_id or job_id is non-null before querying, or restructure the query to avoid the OR.
+
+  [LOW] observability -- Line 139
+  Error logging only occurs for 5xx errors, but 4xx errors are silently ignored. This makes debugging client-side issues harder in production.
+  Fix: Log all errors at least at debug level, or log 4xx errors with reduced severity.
+
+  [LOW] data_integrity -- Line 94
+  The INSERT ... ON CONFLICT DO UPDATE does not include a WHERE clause to prevent overwriting data that was intentionally set by another process. If two concurrent requests update the same row, the last one wins without any conflict detection.
+  Fix: Consider adding an updated_at check or using optimistic locking if concurrent edits are a concern.
+
+  [LOW] performance -- Line 7
+  getEmployerProfileId is called on every request and executes a separate query. This could be cached in the session or a short-lived cache to reduce database load.
+  Fix: Store employer_profile_id in the session object during login to avoid this query on every request.
+
+=================================================================
+  FILE: src/app/api/employer/dashboard/route.js
+  Score: 53/100   Issues: 8
+
+  The employer dashboard endpoint is generally well-structured with proper authentication and parameterized queries. The biggest risk is the lack of tenant-scoped authorization — the campusId parameter is user-supplied and not validated against the employer's actual tenant associations, allowing an employer to view dashboard data for any campus they guess or enumerate. Additionally, the error handler exposes internal error messages to the client, and there is no pagination or total count for the recent applications query, which could lead to performance issues at scale. The code also lacks input validation on the campusId parameter and has no rate limiting.
+
+  [CRITICAL] authorization -- Line 14
+  The campusId parameter is user-supplied and not validated against the employer's actual tenant associations. An employer can pass any campusId to view dashboard data for any campus, leading to cross-tenant data leakage.
+  Fix: Validate that the employer is actually associated with the requested campusId before executing queries.
+
+  [HIGH] error_handling -- Line 20
+  Throwing a generic Error when employer profile is not found will result in a 500 response with a generic message, but the actual error message 'Employer profile not found' is not exposed to the client. However, the catch block logs the error and returns a generic message, which is acceptable. The real issue is that this scenario should return a 404 status code, not 500.
+  Fix: Return a 404 response when employer profile is not found instead of throwing an error.
+
+  [MEDIUM] performance -- Line 22
+  The stats query uses 6 correlated subqueries that each join the placement_drives table. This can be optimized into a single query with conditional aggregation, reducing the number of table scans from 6 to 1.
+  Fix: Rewrite the stats query using conditional aggregation with COUNT(CASE WHEN ...) to avoid multiple subqueries.
+
+  [MEDIUM] performance -- Line 32
+  The recent applications query has a LIMIT 5 but no pagination metadata (total count, next page cursor). This makes it impossible for the frontend to know if there are more applications to load.
+  Fix: Add a total count query or use pagination with offset/limit and return total count in the response.
+
+  [LOW] data_integrity -- Line 55
+  The stats values are parsed with parseInt() which will return NaN for null/undefined values. The fallback to 0 only works if the value is falsy, but parseInt(null) returns NaN.
+  Fix: Use a safer conversion function that handles null/undefined properly.
+
+  [LOW] observability -- Line 68
+  The error is logged with console.error but lacks structured logging with request context (userId, campusId, requestId). This makes debugging production issues harder.
+  Fix: Use a structured logger that includes request context like userId, campusId, and a correlation ID.
+
+  [MEDIUM] input_validation -- Line 14
+  The campusId parameter is not validated for format or type. An attacker could pass non-UUID values, SQL injection attempts, or extremely long strings that could cause issues.
+  Fix: Validate that campusId is a valid UUID before using it in queries.
+
+  [LOW] nextjs_auth -- Line 9
+  The session check uses getServerSession which is correct for Next.js App Router. However, the role check is done after the session check, which is fine but could be more explicit about the authorization failure reason.
+  Fix: Consider returning a 403 status code for role mismatch instead of 401 to differentiate between unauthenticated and unauthorized.
+
+=================================================================
+  FILE: src/app/api/employer/offers/assessment-starter/route.js
+  Score: 82/100   Issues: 5
+
+  The route is well-structured with proper authentication, tenant isolation, and parameterized queries. The primary risk is a potential runtime crash when `fetchAssessmentRowsForView` or `pickRepresentativeAssessmentRows` throws an unhandled error (e.g., database connection failure), which is caught by the outer try/catch. However, there is a critical CSV injection vulnerability: the `roll_number` field is not sanitized, allowing formulas like =SUM(...) to execute in Excel. Additionally, the route lacks input validation for the `tenantId` parameter beyond UUID format, and the CSV export could expose sensitive student data if the employer has approved access to multiple campuses. The error message is generic and does not log the tenant context, making debugging harder.
+
+  [HIGH] csv_injection -- Line 82
+  The `roll_number` field from the database is directly embedded into the CSV without sanitization. If a student's roll number starts with '=', '+', '@', or '-', it will be interpreted as a formula by spreadsheet software (Excel, Google Sheets), leading to potential code execution or data exfiltration.
+  Fix: Sanitize the roll_number field by prefixing with a tab or single quote, or by escaping leading special characters.
+
+  [MEDIUM] error_handling -- Line 76
+  The calls to `fetchAssessmentRowsForView` and `pickRepresentativeAssessmentRows` are not individually wrapped in try/catch. If either function throws (e.g., database connection timeout, malformed data), the entire request fails with a generic 500 error, and the error is logged without tenant context, making debugging difficult.
+  Fix: Wrap the assessment fetching in a try/catch block, log the tenant ID and error details, and decide whether to fail the entire CSV or continue without assessment data.
+
+  [MEDIUM] input_validation -- Line 47
+  The `tenantId` parameter is only validated for UUID format and approved status. It does not check if the tenant exists or is active. An attacker could pass a valid UUID that is not a tenant, causing a database query that returns no rows but still passes the `isUuid` check, leading to a 403 error that reveals the UUID is valid but unapproved.
+  Fix: Add a check to verify the tenant exists and is active before calling `employerHasApprovedTenant`.
+
+  [LOW] observability -- Line 99
+  The error log on line 99 uses `console.error` with a static string and the error object. It does not include the employer ID, tenant ID, or any correlation ID, making it hard to trace the failing request in production logs.
+  Fix: Include structured logging with employer ID and tenant context.
+
+  [LOW] ux_copy -- Line 100
+  The error message 'Failed to build starter CSV' is generic and does not provide actionable information to the user. For a 500 error, this is acceptable, but the message could be slightly more descriptive without revealing internals.
+  Fix: Keep the generic message for 500 errors, but consider logging more details server-side.
+
+=================================================================
+  FILE: src/app/api/data-entry/users/route.js
+  Score: 81/100   Issues: 4
+
+  The codebase has several security and reliability issues, including missing input validation, potential SQL injection vulnerabilities, and inadequate error handling. However, it also demonstrates good practices such as proper authentication and authorization checks. The biggest risk is the potential for data corruption or unauthorized access due to the lack of input validation and potential SQL injection vulnerabilities.
+
+  [HIGH] security -- Line 41
+  Missing input validation for user creation
+  Fix: Add input validation for user creation
+
+  [MEDIUM] security -- Line 59
+  Potential SQL injection vulnerability in user creation query
+  Fix: Use parameterized queries to prevent SQL injection
+
+  [MEDIUM] security -- Line 92
+  Potential SQL injection vulnerability in user update query
+  Fix: Use parameterized queries to prevent SQL injection
+
+  [MEDIUM] security -- Line 116
+  Potential SQL injection vulnerability in user deletion query
+  Fix: Use parameterized queries to prevent SQL injection
+
+=================================================================
+  FILE: src/app/api/employer/hiring-assessment-view/route.js
+  Score: 86/100   Issues: 3
+
+  The endpoint is well-structured with proper authentication, role checks, and parameterized queries. The primary risk is a potential runtime crash if `fetchAssessmentRowsForView` or `fetchLatestRoundLabels` throws a non-standard error (e.g., a string), which would bypass the catch block and crash the process. Additionally, the `employerHasApprovedTenant` function makes two sequential queries where one JOIN would suffice, and the error message is generic (no differentiation between 4xx and 5xx). Overall, the code is production-ready with minor hardening opportunities.
+
+  [HIGH] runtime -- Line 64
+  The catch block logs the error but does not check if `e` is an Error object. If `fetchAssessmentRowsForView` or `fetchLatestRoundLabels` throws a non-Error value (e.g., a string), `console.error` will still work, but the error will not have a stack trace, making debugging difficult. More critically, if the thrown value is `null` or `undefined`, accessing `e.message` elsewhere would crash, but here it's only logged. However, the real risk is that if the error is not an instance of Error, the catch block still returns a 500, which is acceptable, but the lack of stack trace is an observability gap.
+  Fix: Ensure the caught error is always an Error object by wrapping it: `const error = e instanceof Error ? e : new Error(String(e));` before logging.
+
+  [MEDIUM] performance -- Line 19
+  `employerHasApprovedTenant` makes two sequential database queries: first to get the employer profile ID, then to check the approval. This can be optimized into a single JOIN query, reducing latency and database load.
+  Fix: Combine the two queries into a single JOIN: `SELECT 1 FROM employer_profiles ep JOIN employer_approvals ea ON ep.id = ea.employer_id WHERE ep.user_id = $1 AND ea.tenant_id = $2 AND ea.status = 'approved' LIMIT 1`.
+
+  [LOW] ux_copy -- Line 65
+  The error message 'Failed to load assessment view' is generic and does not differentiate between client errors (e.g., invalid tenantId) and server errors. For a 500 response, this is acceptable, but the endpoint could benefit from more specific error messages for 4xx cases (e.g., invalid tenantId format).
+  Fix: For 4xx errors, return specific messages like 'Invalid tenant ID format' or 'Employer not approved for this tenant'. Keep the 500 message generic.
+
+=================================================================
+  FILE: src/app/api/employer/jobs/visibility/route.js
+  Score: 89/100   Issues: 5
+
+  The route is well-structured with proper authentication, parameterized queries, and transactional integrity. The primary risk is a potential runtime crash from missing null checks on session.user.id and the request body, which could cause 500 errors under edge cases. Additionally, the error handling is generic and lacks observability details, making production debugging difficult. The code is secure against SQL injection and multi-tenancy issues are properly scoped to the employer's own jobs.
+
+  [MEDIUM] null_pointer_exception -- Line 19
+  session.user.id || session.user.sub may be null or undefined if session.user is null. This would cause a crash at line 32 when userId is passed to the query.
+  Fix: Add a null check for session.user before accessing its properties.
+
+  [MEDIUM] input_validation -- Line 24
+  No validation that jobId is a valid UUID. If an invalid UUID string is passed, the PostgreSQL query will throw an error (invalid input syntax for type uuid), resulting in a 500 error instead of a 400.
+  Fix: Validate jobId format using a UUID regex before querying.
+
+  [MEDIUM] observability -- Line 75
+  Error logging uses console.error with only the error object, which may not include stack trace in all environments. The error response is generic ('Failed to sync visibility'), making production debugging difficult.
+  Fix: Use structured logging with error details and include a correlation ID in the response.
+
+  [LOW] performance -- Line 52
+  The for loop executes individual queries for each tenantId inside a transaction. For large tenantIds arrays (e.g., 100+), this could cause slow transaction execution and potential lock contention.
+  Fix: Batch the approval check and insert operations using a single query with UNNEST or VALUES.
+
+  [LOW] error_handling -- Line 24
+  The catch block on request.json() silently returns an empty object, which could mask malformed JSON errors. The subsequent validation will catch missing fields, but the error message will be misleading ('jobId and at least one tenantId are required' instead of 'Invalid JSON body').
+  Fix: Let the JSON parse error propagate to the outer catch block for a clearer error message.
+
+=================================================================
+  FILE: src/app/api/employer/interviews/route.js
+  Score: 88/100   Issues: 4
+
+  The provided API endpoint for handling employer interviews has some potential issues, including a lack of input validation, potential SQL injection vulnerabilities, and incomplete error handling. However, the code is generally well-structured and follows best practices. The biggest risk is a potential runtime error due to missing null checks and the lack of a circuit breaker pattern for external API calls.
+
+  [MEDIUM] input_validation -- Line 27
+  Missing input validation for searchParams
+  Fix: Add input validation for searchParams
+
+  [MEDIUM] input_validation -- Line 49
+  Missing input validation for body
+  Fix: Add input validation for body
+
+  [MEDIUM] error_handling -- Line 63
+  Incomplete error handling for getTenant function
+  Fix: Add complete error handling for getTenant function
+
+  [MEDIUM] error_handling -- Line 80
+  Incomplete error handling for savePlans function
+  Fix: Add complete error handling for savePlans function
+
+=================================================================
+  FILE: src/app/api/employer/engagement-listings/route.js
+  Score: 95/100   Issues: 3
+
+  The provided API endpoint for retrieving engagement listings for employers is well-structured and follows best practices for authentication and error handling. However, there are a few potential issues that could be improved, such as adding a tenant_id filter to the query to prevent cross-tenant data leakage and implementing pagination to prevent large result sets. The code also lacks input validation and sanitization, which could lead to security vulnerabilities.
+
+  [MEDIUM] security -- Line 13
+  The query lacks a tenant_id filter, which could allow cross-tenant data leakage
+  Fix: Add a tenant_id filter to the query to prevent cross-tenant data leakage
+
+  [LOW] performance -- Line 32
+  The endpoint does not implement pagination, which could lead to large result sets
+  Fix: Implement pagination to prevent large result sets
+
+  [LOW] error_handling -- Line 50
+  The error handling could be improved to provide more specific error messages
+  Fix: Improve error handling to provide more specific error messages

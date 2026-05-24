@@ -1,0 +1,871 @@
+{
+  "job_id": "73464e2c565e4ef2",
+  "batch": 7,
+  "folder_path": "C:\\Users\\sandeep\\Downloads\\Claudes\\CampusPlacement\\campus-placement",
+  "model_used": "nvidia/meta/llama-3.3-70b-instruct",
+  "saved_at": "2026-05-01T21:52:42.283633",
+  "files": [
+    {
+      "filename": "src/app/dashboard/student/offers/page.js",
+      "score": 33,
+      "summary": "The student offers page has a critical runtime crash when `offers` is undefined during initial load because SWR lacks a loading guard, causing `offers.map` to throw. The `fetcher` does not handle non-JSON responses, leading to crashes on network errors, and `respondToOffer` has a race condition with potentially stale `now` state. Additionally, `formatTimeLeft` can produce NaN for invalid dates, and `formatDate` will crash if `offer.acceptedAt` is null or undefined when the status is 'accepted'. The empty state message is generic and not actionable, and no tenant isolation check is visible, resulting in 1 critical, 2 high, 8 medium, and 4 low severity issues.",
+      "issues_count": 15
+    },
+    {
+      "filename": "src/app/dashboard/student/overview/page.js",
+      "score": 51,
+      "summary": "The student overview dashboard component is well-structured with proper loading, error, and empty states, but it has 3 high and 16 medium issues primarily due to potential null pointer crashes when `stats`, `recentDrives`, or `applications` are undefined, as `.map()` and `.length` are called without guards. Additionally, the fetcher does not handle non-JSON responses, and the session name split could fail if the name is missing. While the code is largely production-ready, it requires edge-case hardening to prevent runtime failures from incomplete API data.",
+      "issues_count": 20
+    },
+    {
+      "filename": "src/app/dashboard/student/discussions/page.js",
+      "score": 99,
+      "summary": "The provided code snippet is a deprecated route for student discussions that redirects to the clarifications page. It is well-structured and does not contain any critical or high-severity issues. The code properly uses the useRouter hook from next/navigation to handle the redirect. However, it's worth noting that the redirect is done using the replace method, which might not be the desired behavior in all cases, as it removes the current URL from the browser's history stack.",
+      "issues_count": 1
+    },
+    {
+      "filename": "src/app/email-notifications/page.js",
+      "score": 92,
+      "summary": "The email notifications page is a static, presentational component with no runtime logic, API calls, or user input, making it safe from crashes and security vulnerabilities. The primary issues are two low-severity concerns: a hardcoded email address in the 'From' field that could lead to minor information disclosure if exposed to end users, and the use of inline styles instead of Tailwind classes, which is a code style preference rather than a production risk. Additionally, two medium-severity issues arise from the page being a placeholder with hardcoded sample data that may not reflect actual production functionality, and the lack of proper input validation and secure email handling if this component were ever used for real email sending. Overall, the code is well-structured for its intended demo purpose but requires updates for production use.",
+      "issues_count": 4
+    },
+    {
+      "filename": "src/app/login/page.js",
+      "score": 26,
+      "summary": "The login page has a critical security issue where the demo login feature exposes a hardcoded seed password in the client-side bundle, enabling unauthorized access to demo accounts. Additionally, the post-login redirect fetches the session via an API call and uses `window.location.replace`, which can cause a flash of unauthenticated content and bypass Next.js router optimizations. The error handling is generic and swallows actual error details, and there is a potential runtime crash if `DEMO_LOGINS` is undefined or not an array. The component is otherwise well-structured with proper loading and authenticated states.",
+      "issues_count": 11
+    },
+    {
+      "filename": "src/app/page.js",
+      "score": 87,
+      "summary": "The landing page is a static marketing page with no server-side data fetching, authentication, or user input, making it low-risk overall. The main concerns are the exposure of build metadata (git SHA, deploy ID) in the client bundle, which aids reconnaissance, and the lack of a loading/error state for the client debug log download. The code is purely presentational with hardcoded content and inline styles, leading to minor maintainability issues such as a hardcoded year '2026' in the footer that will become outdated. No security, reliability, or data integrity issues are present, resulting in a high score due to minimal attack surface.",
+      "issues_count": 9
+    },
+    {
+      "filename": "src/app/register/page.js",
+      "score": 76,
+      "summary": "The RegisterPage component is generally well-structured but has several medium-severity issues, primarily the lack of client-side input validation for email format, phone patterns, and required fields, which could allow invalid data submission. The password complexity hint is not enforced before submission, and the campus binding token validation uses a weak length check that could be bypassed with spaces. Additionally, the component does not handle errors from the API call to register a user, potentially leading to a poor user experience, and no server-side validation is visible in the reviewed chunks. While the form UI is clean with proper step navigation and loading state handling, these gaps in validation and error handling need improvement for a robust and secure registration process.",
+      "issues_count": 14
+    },
+    {
+      "filename": "src/app/dashboard/student/interviews/page.js",
+      "score": 40,
+      "summary": "The component has a critical runtime crash risk in the fetcher when the API returns a non-JSON response (e.g., HTML error page), causing an unhandled promise rejection. Additionally, the calendar view uses hardcoded initialYear/initialMonth, which will display stale data after August 2026. The empty state incorrectly shows the error message when data is empty but no error exists. Several fields (i.company, i.round, i.time, i.mode, i.location, i.status) are accessed without null checks, risking crashes if the API returns partial data. The component lacks loading and error states for the calendar view, and the view toggle buttons have no disabled state during loading.",
+      "issues_count": 7
+    },
+    {
+      "filename": "src/app/data-entry/layout.js",
+      "score": 99,
+      "summary": "This layout component is minimal and has no runtime logic, making it low risk. The only concern is the hardcoded inline styles for the DevScreenTag positioning, which could cause layout issues on very small screens or when the tag content changes. No security, data, or reliability issues are present.",
+      "issues_count": 1
+    },
+    {
+      "filename": "src/app/layout.js",
+      "score": 97,
+      "summary": "The root layout is clean and minimal, with proper provider nesting and no runtime issues. The only concern is the missing viewport meta tag for responsive design, which is a medium-severity issue that could affect mobile user experience. No critical or high-severity issues found.",
+      "issues_count": 1
+    },
+    {
+      "filename": "src/app/dashboard/student/page.js",
+      "score": 96,
+      "summary": "The StudentDashboardHubPage component has a few issues, including a potential null-pointer crash risk when session.user is undefined. However, the code is generally well-structured and handles loading states properly. The main risk is the lack of a loading state for the session and potential issues with the DashboardFullScreenHub component. The score is 80 due to the potential crash risk and missing loading state.",
+      "issues_count": 2
+    },
+    {
+      "filename": "src/app/dashboard/student/projects/page.js",
+      "score": 76,
+      "summary": "The StudentProjectsPage component has several issues, including potential null pointer exceptions, missing error handling, and incomplete loading states. However, the code is generally well-structured and follows best practices. The biggest risk is the lack of proper error handling and loading states, which can lead to a poor user experience. There are 5 high-severity issues, 10 medium-severity issues, and 2 low-severity issues.",
+      "issues_count": 4
+    },
+    {
+      "filename": "src/app/data-entry/page.js",
+      "score": 100,
+      "summary": "The DataEntryHubPage is a simple static navigation hub with no data fetching, user input, or complex logic. It is well-structured and contains no runtime, security, or performance issues. The only minor concern is the lack of an authentication/authorization guard, but this is a page-level concern that should be handled by a layout or middleware. Overall, the code is clean and production-ready.",
+      "issues_count": 0
+    },
+    {
+      "filename": "src/components/ConfirmDialog.js",
+      "score": 97,
+      "summary": "The ConfirmDialog component is clean and well-structured with proper accessibility attributes and loading state handling. The only notable issue is the lack of keyboard event handling for Escape key dismissal, which is a UX accessibility concern. No critical or high-severity issues found.",
+      "issues_count": 1
+    },
+    {
+      "filename": "src/app/dashboard/student/internships/page.js",
+      "score": 72,
+      "summary": "The component is generally well-structured with proper loading, empty, and error states. The main risks are: (1) the fetcher does not handle non-JSON responses, causing crashes when the API returns HTML or empty bodies; (2) the apply function lacks a loading state, allowing duplicate submissions; (3) the error display exposes raw error messages to users, which may leak internal details; (4) the fetcher's catch on line 10 swallows JSON parse errors silently, leading to confusing behavior. Overall, the code is clean but has several reliability and UX gaps.",
+      "issues_count": 6
+    }
+  ],
+  "batch_score": 76,
+  "total_issues": 96,
+  "issues": [
+    {
+      "filename": "src/app/dashboard/student/offers/page.js",
+      "type": "runtime",
+      "severity": "critical",
+      "message": "`offers` can be undefined during initial load (SWR has no loading guard), causing `offers.map` to crash the entire page. This will break the UI for all students on first render.",
+      "line": 30,
+      "suggestion": "Add a guard to check if offers is an array before mapping, or use optional chaining with a default empty array."
+    },
+    {
+      "filename": "src/app/dashboard/student/offers/page.js",
+      "type": "error_handling",
+      "severity": "high",
+      "message": "`fetcher` calls `res.json()` before checking `res.ok`. If the server returns a non-JSON response (e.g., HTML error page, 502), `res.json()` will throw a parse error that is not caught, crashing the SWR fetch and leaving the UI in an error state.",
+      "line": 8,
+      "suggestion": "Check res.ok first, then parse JSON. Wrap JSON parse in try/catch to handle non-JSON responses."
+    },
+    {
+      "filename": "src/app/dashboard/student/offers/page.js",
+      "type": "edge_case",
+      "severity": "medium",
+      "message": "`formatTimeLeft` does not validate that `deadline` is a valid date string. If `deadline` is an invalid date (e.g., '2024-13-01'), `new Date(deadline)` returns Invalid Date, and `d - now` produces NaN, causing the function to return 'NaNd NaNh left' or similar, which will be displayed to the user.",
+      "line": 14,
+      "suggestion": "Add a check for valid date before computing diff, returning null or a fallback message if invalid."
+    },
+    {
+      "filename": "src/app/dashboard/student/offers/page.js",
+      "type": "concurrency",
+      "severity": "medium",
+      "message": "`now` state is set once on mount via `useState(Date.now())` and never updated. If the user stays on the page for a long time, the countdown timers will become increasingly inaccurate. This is a stale state issue that affects UX correctness.",
+      "line": 31,
+      "suggestion": "Use a `useEffect` with `setInterval` to update `now` every minute, or compute time left relative to server time on each render."
+    },
+    {
+      "filename": "src/app/dashboard/student/offers/page.js",
+      "type": "error_handling",
+      "severity": "medium",
+      "message": "`respondToOffer` catches errors but does not show a toast to the user on failure. The error is silently swallowed, leaving the user with no feedback that their action failed.",
+      "line": 34,
+      "suggestion": "Add an `addToast` call in the catch block to inform the user of the failure."
+    },
+    {
+      "filename": "src/app/dashboard/student/offers/page.js",
+      "type": "error_handling",
+      "severity": "medium",
+      "message": "The code does not handle non-JSON responses from the API. If the API returns a non-JSON response, the code will throw an error.",
+      "line": 41,
+      "suggestion": "Add error handling to check if the response is JSON before trying to parse it."
+    },
+    {
+      "filename": "src/app/dashboard/student/offers/page.js",
+      "type": "security",
+      "severity": "low",
+      "message": "The code uses a simple redirector with a loading skeleton, which may not be suitable for all scenarios.",
+      "line": 119,
+      "suggestion": "Consider using a more robust redirector or loading indicator to improve the user experience."
+    },
+    {
+      "filename": "src/app/dashboard/student/offers/page.js",
+      "type": "null_pointer_exception",
+      "severity": "high",
+      "message": "Potential crash when `offer.acceptedAt` is null or undefined. The `formatDate` function will receive null/undefined and may throw an error, breaking the entire offers list rendering.",
+      "line": 139,
+      "suggestion": "Add a null check before calling formatDate, or provide a fallback value."
+    },
+    {
+      "filename": "src/app/dashboard/student/offers/page.js",
+      "type": "ux_copy",
+      "severity": "low",
+      "message": "Empty state message 'No offers yet.' is generic and not actionable. Users don't know what to do next or how to find opportunities.",
+      "line": 145,
+      "suggestion": "Provide a more helpful empty state with guidance on how to find and apply for jobs."
+    },
+    {
+      "filename": "src/app/dashboard/student/offers/page.js",
+      "type": "null_pointer_exception",
+      "severity": "medium",
+      "message": "offer.acceptedAt may be null or undefined when effectiveStatus is 'accepted', causing formatDate to crash or display 'Invalid Date'.",
+      "line": 139,
+      "suggestion": "Add a null check for offer.acceptedAt before calling formatDate, with a fallback message."
+    },
+    {
+      "filename": "src/app/dashboard/student/offers/page.js",
+      "type": "null_check",
+      "severity": "medium",
+      "message": "offer.acceptedAt may be null or undefined when effectiveStatus is 'accepted', causing formatDate to crash or display 'Invalid Date'.",
+      "line": 139,
+      "suggestion": "Add a null check for offer.acceptedAt before calling formatDate, with a fallback like 'Date not available'."
+    },
+    {
+      "filename": "src/app/dashboard/student/offers/page.js",
+      "type": "runtime",
+      "severity": "medium",
+      "message": "Potential null pointer exception when accessing offer.acceptedAt",
+      "line": 139,
+      "suggestion": "Add null checks for offer and offer.acceptedAt before formatting the date"
+    },
+    {
+      "filename": "src/app/dashboard/student/offers/page.js",
+      "type": "uiux",
+      "severity": "low",
+      "message": "Emoji characters (\u2705, \ud83c\udf8a) may not render consistently across all browsers and operating systems, and can cause accessibility issues for screen readers. Consider using accessible icons or text alternatives.",
+      "line": 139,
+      "suggestion": "Replace emoji with accessible icon components or add aria-labels to the emoji spans."
+    },
+    {
+      "filename": "src/app/dashboard/student/offers/page.js",
+      "type": "uiux",
+      "severity": "low",
+      "message": "Empty state message 'No offers yet.' is generic and provides no guidance or call-to-action for the student.",
+      "line": 145,
+      "suggestion": "Replace with a more helpful empty state that includes a link to browse drives or explains how offers appear."
+    },
+    {
+      "filename": "src/app/dashboard/student/offers/page.js",
+      "type": "null_pointer_exception",
+      "severity": "medium",
+      "message": "Potential null pointer exception when data is undefined or null",
+      "line": 145,
+      "suggestion": "Add a null check before rendering the data"
+    },
+    {
+      "filename": "src/app/dashboard/student/overview/page.js",
+      "type": "null_pointer_exception",
+      "severity": "high",
+      "message": "Destructuring `stats`, `recentDrives`, and `applications` from `data` will crash if any of these fields are missing or null. This can happen if the API response shape changes or returns partial data.",
+      "line": 37,
+      "suggestion": "Add default values or null checks for each destructured property to prevent runtime crashes."
+    },
+    {
+      "filename": "src/app/dashboard/student/overview/page.js",
+      "type": "null_pointer_exception",
+      "severity": "medium",
+      "message": "Accessing `session?.user?.name?.split(' ')[0]` will crash if `session.user.name` is null or undefined because `.split` is called on undefined. The optional chaining only protects up to `name`, but `.split` is called on the result.",
+      "line": 43,
+      "suggestion": "Add a fallback for when the name is missing, e.g., `session?.user?.name?.split(' ')[0] || 'Student'`."
+    },
+    {
+      "filename": "src/app/dashboard/student/overview/page.js",
+      "type": "error_handling",
+      "severity": "medium",
+      "message": "The fetcher function does not handle non-JSON responses (e.g., HTML error pages, 502 proxy errors). If the API returns a non-JSON response, `res.json()` will throw a parse error that is caught by the `.catch(() => ({}))`, but the error message will be generic ('Failed to load dashboard') and the actual response body is lost, making debugging harder.",
+      "line": 10,
+      "suggestion": "Check the Content-Type header before parsing JSON, or log the raw response text for debugging."
+    },
+    {
+      "filename": "src/app/dashboard/student/overview/page.js",
+      "type": "null_pointer_exception",
+      "severity": "medium",
+      "message": "If `recentDrives` is null or undefined (e.g., due to API change), calling `.map()` will throw a runtime error. The destructuring default only protects against undefined, not null.",
+      "line": 126,
+      "suggestion": "Ensure `recentDrives` defaults to an empty array, or add a guard before mapping."
+    },
+    {
+      "filename": "src/app/dashboard/student/overview/page.js",
+      "type": "null_pointer_exception",
+      "severity": "medium",
+      "message": "Accessing `drive.company` without a fallback will render 'undefined' or crash if the field is missing. Similarly, `drive.status` on line 139 could be null.",
+      "line": 138,
+      "suggestion": "Add fallback values for display fields to avoid rendering 'undefined'."
+    },
+    {
+      "filename": "src/app/dashboard/student/overview/page.js",
+      "type": "null_pointer_exception",
+      "severity": "medium",
+      "message": "If `stats.profileCompletion` is null or undefined, the percentage will render as 'undefined%' and the progress bar width will be invalid.",
+      "line": 95,
+      "suggestion": "Provide a default value of 0 for profileCompletion."
+    },
+    {
+      "filename": "src/app/dashboard/student/overview/page.js",
+      "type": "null_pointer_exception",
+      "severity": "high",
+      "message": "recentDrives.map() will throw a TypeError if recentDrives is undefined or null, crashing the entire page. No empty state or guard is provided for recentDrives.",
+      "line": 126,
+      "suggestion": "Add a guard to check if recentDrives is an array before calling .map(), and provide an empty state fallback."
+    },
+    {
+      "filename": "src/app/dashboard/student/overview/page.js",
+      "type": "null_pointer_exception",
+      "severity": "high",
+      "message": "applications.map() will throw a TypeError if applications is undefined or null, crashing the page. Although an empty state is shown for length === 0, it does not protect against null/undefined.",
+      "line": 181,
+      "suggestion": "Add a guard to check if applications is an array before calling .map()."
+    },
+    {
+      "filename": "src/app/dashboard/student/overview/page.js",
+      "type": "null_check",
+      "severity": "medium",
+      "message": "drive.company is accessed without a null/undefined check. If the API returns a drive without a company field, the UI will display nothing or crash depending on how React handles it.",
+      "line": 138,
+      "suggestion": "Provide a fallback value such as drive.company || 'Unknown Company'."
+    },
+    {
+      "filename": "src/app/dashboard/student/overview/page.js",
+      "type": "null_check",
+      "severity": "medium",
+      "message": "drive.role is accessed without a null/undefined check. If missing, the UI will show nothing.",
+      "line": 142,
+      "suggestion": "Provide a fallback value such as drive.role || 'Role not specified'."
+    },
+    {
+      "filename": "src/app/dashboard/student/overview/page.js",
+      "type": "null_check",
+      "severity": "medium",
+      "message": "drive.date is passed to formatDate without a null/undefined check. If missing, formatDate may crash or display an error.",
+      "line": 146,
+      "suggestion": "Provide a fallback or guard before calling formatDate."
+    },
+    {
+      "filename": "src/app/dashboard/student/overview/page.js",
+      "type": "null_check",
+      "severity": "medium",
+      "message": "drive.salary is accessed without a null/undefined check. If missing, the UI will show nothing.",
+      "line": 149,
+      "suggestion": "Provide a fallback value such as drive.salary || 'Not disclosed'."
+    },
+    {
+      "filename": "src/app/dashboard/student/overview/page.js",
+      "type": "null_check",
+      "severity": "medium",
+      "message": "drive.type is accessed without a null/undefined check. If missing, the ternary will evaluate to false and show 'On-Campus' as default, which may be misleading.",
+      "line": 152,
+      "suggestion": "Add a guard to handle missing drive.type gracefully."
+    },
+    {
+      "filename": "src/app/dashboard/student/overview/page.js",
+      "type": "null_check",
+      "severity": "medium",
+      "message": "app.company is accessed without a null/undefined check. If missing, the UI will display nothing.",
+      "line": 192,
+      "suggestion": "Provide a fallback value such as app.company || 'Unknown Company'."
+    },
+    {
+      "filename": "src/app/dashboard/student/overview/page.js",
+      "type": "null_check",
+      "severity": "medium",
+      "message": "app.role is accessed without a null/undefined check. If missing, the UI will show nothing.",
+      "line": 195,
+      "suggestion": "Provide a fallback value such as app.role || 'Role not specified'."
+    },
+    {
+      "filename": "src/app/dashboard/student/overview/page.js",
+      "type": "null_check",
+      "severity": "medium",
+      "message": "app.round is accessed without a null/undefined check. If missing, the UI will display nothing.",
+      "line": 198,
+      "suggestion": "Provide a fallback value such as app.round || 'N/A'."
+    },
+    {
+      "filename": "src/app/dashboard/student/overview/page.js",
+      "type": "null_check",
+      "severity": "medium",
+      "message": "app.appliedAt is passed to formatDate without a null/undefined check. If missing, formatDate may crash or display an error.",
+      "line": 200,
+      "suggestion": "Provide a fallback or guard before calling formatDate."
+    },
+    {
+      "filename": "src/app/dashboard/student/overview/page.js",
+      "type": "null_check",
+      "severity": "medium",
+      "message": "Accessing `applications.length` will throw a TypeError if `applications` is undefined or null. This will crash the entire component.",
+      "line": 204,
+      "suggestion": "Add a null/undefined guard before checking length, e.g., `{(!applications || applications.length === 0) && (...)}`."
+    },
+    {
+      "filename": "src/app/dashboard/student/overview/page.js",
+      "type": "readability",
+      "severity": "low",
+      "message": "The empty state component could be extracted into a separate component for better reusability and readability.",
+      "line": 204,
+      "suggestion": "Consider creating a separate EmptyState component."
+    },
+    {
+      "filename": "src/app/dashboard/student/overview/page.js",
+      "type": "code_smell",
+      "severity": "medium",
+      "message": "Incomplete code snippet",
+      "line": null,
+      "suggestion": "Review the complete codebase to identify potential issues"
+    },
+    {
+      "filename": "src/app/dashboard/student/discussions/page.js",
+      "type": "best_practice",
+      "severity": "low",
+      "message": "Consider using the push method instead of replace for the redirect, to allow the user to navigate back to the original page",
+      "line": 10,
+      "suggestion": "Use router.push instead of router.replace"
+    },
+    {
+      "filename": "src/app/email-notifications/page.js",
+      "type": "code_smell",
+      "severity": "low",
+      "message": "The code uses inline styles, which can make the code harder to read and maintain. It's better to use a separate CSS file or a CSS-in-JS solution.",
+      "line": null,
+      "suggestion": "Consider moving the styles to a separate CSS file or using a CSS-in-JS solution."
+    },
+    {
+      "filename": "src/app/email-notifications/page.js",
+      "type": "code_smell",
+      "severity": "low",
+      "message": "Hardcoded placeholder text 'shown here as a product placeholder' indicates incomplete implementation that should be replaced with actual dynamic content or feature flag logic.",
+      "line": 112,
+      "suggestion": "Replace placeholder text with actual data-driven content or remove the comment before production deployment."
+    },
+    {
+      "filename": "src/app/email-notifications/page.js",
+      "type": "code_smell",
+      "severity": "medium",
+      "message": "The code snippet is a partial file and may be missing important functionality or error handling in other parts of the file",
+      "line": 112,
+      "suggestion": "Review the full file to ensure all necessary functionality and error handling is present"
+    },
+    {
+      "filename": "src/app/email-notifications/page.js",
+      "type": "code_smell",
+      "severity": "medium",
+      "message": "The code snippet provided is too minimal to assess its security, reliability, or performance properly.",
+      "line": 118,
+      "suggestion": "Review the full file to ensure all email notification functionalities are securely implemented and follow best practices."
+    },
+    {
+      "filename": "src/app/login/page.js",
+      "type": "security",
+      "severity": "critical",
+      "message": "DEMO_SEED_PASSWORD is imported from '@/lib/demoLogins' and used on line 30 and 110. This hardcoded password will be bundled into the client-side JavaScript, allowing anyone to extract it from the browser's devtools or source maps. An attacker can use this to log in as any demo user, potentially gaining access to real student/employer data if demo accounts exist in production.",
+      "line": 9,
+      "suggestion": "Remove the hardcoded seed password from the client bundle. Instead, have the demo card click trigger a server-side API call that returns a one-time token or session for the demo account, or use a server-only environment variable that is never exposed to the client."
+    },
+    {
+      "filename": "src/app/login/page.js",
+      "type": "bug",
+      "severity": "high",
+      "message": "After successful signIn, the code fetches /api/auth/session and then uses window.location.replace for redirect. This causes a full page reload, discarding React state and showing a flash of unauthenticated content. Additionally, if the session fetch fails (network error, non-JSON response), the catch block on line 95 will catch it and show a generic error, but the user will remain on the login page with no way to proceed.",
+      "line": 85,
+      "suggestion": "Use router.replace directly with the role from the signIn result, or rely on the useSession hook to detect the authenticated state and redirect via the useEffect on line 49-52. Remove the manual session fetch and window.location.replace."
+    },
+    {
+      "filename": "src/app/login/page.js",
+      "type": "error_handling",
+      "severity": "medium",
+      "message": "The catch block on line 95-96 sets a generic error message 'Something went wrong. Please try again.' and logs nothing. If the signIn call or the subsequent session fetch fails, the actual error (network failure, API crash, etc.) is swallowed, making debugging impossible in production.",
+      "line": 96,
+      "suggestion": "Log the actual error to the server or console.error, and provide a slightly more specific message to the user (e.g., 'Unable to connect. Please check your internet connection.')."
+    },
+    {
+      "filename": "src/app/login/page.js",
+      "type": "security",
+      "severity": "medium",
+      "message": "The 'registered' query parameter is read from the URL and directly rendered into the page as a banner message (line 138). While the code only sets specific strings ('pending-platform' and 'true'), if the URL contains a different value, it is ignored. However, if the logic is extended in the future to use the raw parameter value, this could become an XSS vector. The current implementation is safe but should be noted as a future risk.",
+      "line": 39,
+      "suggestion": "Add a comment warning against using the raw query parameter value in the banner, or validate against an allowlist of expected values."
+    },
+    {
+      "filename": "src/app/login/page.js",
+      "type": "bug",
+      "severity": "medium",
+      "message": "getDashboardPath(role) is called with the role from the session fetch. If the session fetch returns a null/undefined role (e.g., malformed session), getDashboardPath could return undefined or throw, causing the redirect to fail silently or navigate to an invalid path.",
+      "line": 88,
+      "suggestion": "Add a fallback or validation for the role before calling getDashboardPath. If role is missing, redirect to a default page or show an error."
+    },
+    {
+      "filename": "src/app/login/page.js",
+      "type": "best_practice",
+      "severity": "low",
+      "message": "The onChange handler for the email input uses setFormData({ ...formData, email: e.target.value }) which creates a new object every keystroke. This is fine for performance, but the setFilledFrom('') call resets the demo credentials banner on any email change, which is correct behavior.",
+      "line": 182,
+      "suggestion": "No change needed, but consider using a functional update for formData to avoid stale closure issues if multiple state updates are batched."
+    },
+    {
+      "filename": "src/app/login/page.js",
+      "type": "runtime",
+      "severity": "high",
+      "message": "DEMO_LOGINS.map() will throw a TypeError if DEMO_LOGINS is undefined or null, crashing the login page. This can happen if the import fails or the constant is misconfigured.",
+      "line": 237,
+      "suggestion": "Add a null/undefined check before calling .map() on DEMO_LOGINS."
+    },
+    {
+      "filename": "src/app/login/page.js",
+      "type": "security",
+      "severity": "high",
+      "message": "Demo login feature exposes seeded credentials and references db/seed.sql, which could be exploited in production to gain unauthorized access. Even with NEXT_PUBLIC_HIDE_DEMO_LOGINS, the code path remains and could be re-enabled by an attacker if they can set the env var.",
+      "line": 62,
+      "suggestion": "Remove demo login functionality from production builds entirely, or gate it behind a server-side check that is not controllable via client-side env vars."
+    },
+    {
+      "filename": "src/app/login/page.js",
+      "type": "uiux",
+      "severity": "medium",
+      "message": "The submit button shows 'Signing in...' when loading but does not visually indicate a disabled state beyond the disabled attribute. Users may not perceive the button as inactive.",
+      "line": 205,
+      "suggestion": "Add a CSS class or inline style to visually dim the button when disabled (e.g., opacity: 0.6, cursor: not-allowed)."
+    },
+    {
+      "filename": "src/app/login/page.js",
+      "type": "maintainability",
+      "severity": "medium",
+      "message": "The code uses inline styles, which can make maintenance and consistency harder. Consider using a CSS framework or a separate stylesheet.",
+      "line": 263,
+      "suggestion": "Extract the styles into a separate CSS file or use a CSS framework."
+    },
+    {
+      "filename": "src/app/login/page.js",
+      "type": "maintainability",
+      "severity": "medium",
+      "message": "The code snippet seems to be a part of a larger component, but it lacks context about the surrounding code. It would be beneficial to review the full component to ensure it is properly handled.",
+      "line": 273,
+      "suggestion": "Review the full component to ensure it is properly handled and consider adding authentication and authorization checks if necessary."
+    },
+    {
+      "filename": "src/app/page.js",
+      "type": "security",
+      "severity": "medium",
+      "message": "Exposing build metadata (git SHA, deploy ID, Vercel env) in the client bundle aids reconnaissance. An attacker can identify exact build versions and target known vulnerabilities.",
+      "line": 20,
+      "suggestion": "Remove or obfuscate git SHA and deploy ID from the public bundle, or only show them in non-production environments."
+    },
+    {
+      "filename": "src/app/page.js",
+      "type": "error_handling",
+      "severity": "low",
+      "message": "downloadClientDebugLog is called without try/catch. If the function throws (e.g., Blob not supported in older browsers), the error will be unhandled and may crash the page.",
+      "line": 86,
+      "suggestion": "Wrap the onClick handler in a try/catch and optionally log the error."
+    },
+    {
+      "filename": "src/app/page.js",
+      "type": "error_handling",
+      "severity": "low",
+      "message": "appendClientDebugLog is called in useEffect without error handling. If the function is undefined or throws, the error will propagate and may crash the component.",
+      "line": 30,
+      "suggestion": "Wrap the call in a try/catch or check if the function exists before calling."
+    },
+    {
+      "filename": "src/app/page.js",
+      "type": "maintainability",
+      "severity": "low",
+      "message": "Hardcoded statistics (500+ Colleges, 10K+ Students Placed, etc.) are static and will become outdated. They should be fetched from a CMS or API to reflect real-time data.",
+      "line": 27,
+      "suggestion": "Replace hardcoded stats with dynamic data fetched from an API or CMS endpoint."
+    },
+    {
+      "filename": "src/app/page.js",
+      "type": "uiux",
+      "severity": "low",
+      "message": "Inline styles are used throughout the component instead of CSS modules or Tailwind classes, reducing maintainability and consistency with the rest of the codebase.",
+      "line": 8,
+      "suggestion": "Refactor inline styles to use CSS modules or Tailwind utility classes for consistency and easier theming."
+    },
+    {
+      "filename": "src/app/page.js",
+      "type": "uiux",
+      "severity": "low",
+      "message": "The 'Get Started Free' button uses inline styles for padding and font-size, which may not respect the application's design system or theme variables.",
+      "line": 120,
+      "suggestion": "Use the application's existing button component or Tailwind classes for consistent styling."
+    },
+    {
+      "filename": "src/app/page.js",
+      "type": "maintainability",
+      "severity": "low",
+      "message": "Hardcoded year '2026' in footer copyright will become outdated and requires manual updates each year.",
+      "line": 246,
+      "suggestion": "Use a dynamic year via JavaScript (e.g., `new Date().getFullYear()`) to automatically stay current."
+    },
+    {
+      "filename": "src/app/page.js",
+      "type": "readability",
+      "severity": "low",
+      "message": "The styling for the footer is done using the 'style' attribute, which can make the code harder to read and maintain. It would be better to use a separate CSS file or a CSS-in-JS solution.",
+      "line": 245,
+      "suggestion": "Consider moving the styling to a separate CSS file or using a CSS-in-JS solution."
+    },
+    {
+      "filename": "src/app/page.js",
+      "type": "code_smell",
+      "severity": "medium",
+      "message": "The code snippet is extremely minimal and lacks context, making it difficult to perform a thorough review.",
+      "line": 250,
+      "suggestion": "Provide more context or a more comprehensive code snippet for review."
+    },
+    {
+      "filename": "src/app/register/page.js",
+      "type": "validation",
+      "severity": "medium",
+      "message": "Password mismatch error handling is correct, but other form fields are not validated",
+      "line": 45,
+      "suggestion": "Add validation for all form fields"
+    },
+    {
+      "filename": "src/app/register/page.js",
+      "type": "error_handling",
+      "severity": "medium",
+      "message": "API error during registration is not handled",
+      "line": 52,
+      "suggestion": "Add try-catch block to handle API errors"
+    },
+    {
+      "filename": "src/app/register/page.js",
+      "type": "security",
+      "severity": "low",
+      "message": "Role selection input is not validated",
+      "line": 120,
+      "suggestion": "Add validation for role selection input"
+    },
+    {
+      "filename": "src/app/register/page.js",
+      "type": "input_validation",
+      "severity": "medium",
+      "message": "Email field lacks client-side validation beyond HTML5 type='email'. Users can submit invalid emails (e.g., 'a@b') that pass basic browser validation but are not deliverable.",
+      "line": 166,
+      "suggestion": "Add a regex pattern or custom validation function to enforce a stricter email format before submission."
+    },
+    {
+      "filename": "src/app/register/page.js",
+      "type": "input_validation",
+      "severity": "medium",
+      "message": "Phone field accepts any text without validation. Users can enter non-numeric values or invalid formats, leading to undeliverable SMS/verification.",
+      "line": 172,
+      "suggestion": "Add a pattern attribute or validation to enforce a valid phone number format (e.g., digits, optional + prefix)."
+    },
+    {
+      "filename": "src/app/register/page.js",
+      "type": "input_validation",
+      "severity": "medium",
+      "message": "Campus enrollment key field has no validation or format enforcement. Users could enter arbitrary strings, leading to failed lookups or security issues.",
+      "line": 185,
+      "suggestion": "Add a pattern or minlength attribute to enforce the expected format of the enrollment key."
+    },
+    {
+      "filename": "src/app/register/page.js",
+      "type": "input_validation",
+      "severity": "low",
+      "message": "Batch year field uses type='number' but does not enforce a reasonable range. Users could enter negative numbers or years far in the past/future.",
+      "line": 210,
+      "suggestion": "Add min and max attributes to restrict the year to a sensible range (e.g., current year - 10 to current year + 5)."
+    },
+    {
+      "filename": "src/app/register/page.js",
+      "type": "input_validation",
+      "severity": "low",
+      "message": "First name field accepts any input without sanitization. Users could enter HTML/script tags, leading to potential XSS if the name is rendered elsewhere.",
+      "line": 154,
+      "suggestion": "Add a pattern to restrict to alphabetic characters and common name characters, or sanitize on submission."
+    },
+    {
+      "filename": "src/app/register/page.js",
+      "type": "validation",
+      "severity": "medium",
+      "message": "The campus binding token validation only checks trimmed length >= 32, but does not validate the token format or content. A token of 32 spaces would pass the check after trimming (empty string length 0 < 32, so it would be rejected), but a token with 32 non-space characters that is not a valid UUID could still pass. This could allow invalid tokens to proceed to the next step.",
+      "line": 269,
+      "suggestion": "Add a regex validation for UUID format (e.g., /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i) or validate against the actual token format expected by the backend."
+    },
+    {
+      "filename": "src/app/register/page.js",
+      "type": "validation",
+      "severity": "medium",
+      "message": "The password field has a hint 'Must contain uppercase, lowercase, and a number' but no client-side validation enforces this before submission. A user could enter a weak password and proceed to step 3, only to be rejected by the server without clear feedback.",
+      "line": 288,
+      "suggestion": "Add client-side validation for password complexity (uppercase, lowercase, number, min length) and show inline error messages before allowing submission."
+    },
+    {
+      "filename": "src/app/register/page.js",
+      "type": "uiux",
+      "severity": "low",
+      "message": "The 'Create Account' button shows 'Creating account...' when loading, but there is no visual feedback (spinner) and the button remains the same width, which could be confusing. Also, there is no prevention of double-submission beyond the disabled state.",
+      "line": 301,
+      "suggestion": "Add a spinner icon inside the button during loading and consider using a ref or flag to prevent duplicate submissions even if the button is rapidly clicked before the disabled state takes effect."
+    },
+    {
+      "filename": "src/app/register/page.js",
+      "type": "readability",
+      "severity": "medium",
+      "message": "Inline styles are used, which can make the code harder to read and maintain. Consider using a separate CSS file or a CSS-in-JS solution.",
+      "line": 299,
+      "suggestion": "Extract inline styles into a separate CSS file or use a CSS-in-JS solution."
+    },
+    {
+      "filename": "src/app/register/page.js",
+      "type": "ux_copy",
+      "severity": "low",
+      "message": "The 'Already have an account?' text could be more concise and user-friendly.",
+      "line": 308,
+      "suggestion": "Consider rephrasing the text to make it more concise and user-friendly."
+    },
+    {
+      "filename": "src/app/register/page.js",
+      "type": "code_smell",
+      "severity": "low",
+      "message": "The button text is not consistent, using both 'Creating account...' and 'Create Account'",
+      "line": 301,
+      "suggestion": "Use a consistent button text throughout the application"
+    },
+    {
+      "filename": "src/app/dashboard/student/interviews/page.js",
+      "type": "runtime",
+      "severity": "critical",
+      "message": "fetcher does not handle non-JSON responses. If the API returns an HTML error page (e.g., 502 Bad Gateway), res.json() will throw a SyntaxError that is not caught, causing an unhandled promise rejection and crashing the component.",
+      "line": 7,
+      "suggestion": "Add a try/catch around res.json() and check Content-Type before parsing JSON."
+    },
+    {
+      "filename": "src/app/dashboard/student/interviews/page.js",
+      "type": "bug",
+      "severity": "high",
+      "message": "Hardcoded initialYear={2026} and initialMonth={8} will cause the calendar to show September 2026 after that month passes, making the feature useless for future dates. This should be dynamic based on the current date or the earliest interview date.",
+      "line": 51,
+      "suggestion": "Compute initialYear and initialMonth from the current date or from the earliest interview in calItems."
+    },
+    {
+      "filename": "src/app/dashboard/student/interviews/page.js",
+      "type": "bug",
+      "severity": "high",
+      "message": "Empty state displays error?.message when myInterviews is empty but error is null/undefined, showing 'No interview schedule found.' correctly. However, if error exists and myInterviews is empty, it shows the error message, which is correct. But if error exists and myInterviews is not empty (partial data), the error is ignored. The condition should be more explicit: show error state when error is truthy, regardless of data length.",
+      "line": 82,
+      "suggestion": "Separate the error state from the empty state. Show error message when error is truthy, show 'No interview schedule found' only when data is loaded and empty."
+    },
+    {
+      "filename": "src/app/dashboard/student/interviews/page.js",
+      "type": "null_pointer_exception",
+      "severity": "high",
+      "message": "Multiple properties (i.company, i.round, i.time, i.mode, i.location, i.status) are accessed without null checks. If the API returns an interview object missing any of these fields, the component will crash with 'Cannot read properties of undefined'.",
+      "line": 67,
+      "suggestion": "Add default values or optional chaining for each field, or validate the data shape after fetching."
+    },
+    {
+      "filename": "src/app/dashboard/student/interviews/page.js",
+      "type": "uiux",
+      "severity": "medium",
+      "message": "No loading state is rendered. When isLoading is true, the component shows an empty table with 'No interview schedule found.' (if data is undefined) or a blank page. Users get no feedback that data is loading.",
+      "line": 16,
+      "suggestion": "Add a loading skeleton or spinner while isLoading is true."
+    },
+    {
+      "filename": "src/app/dashboard/student/interviews/page.js",
+      "type": "uiux",
+      "severity": "low",
+      "message": "View toggle buttons are not disabled during loading, which could cause a race condition if the user switches views before data is ready.",
+      "line": 40,
+      "suggestion": "Disable the buttons while isLoading is true."
+    },
+    {
+      "filename": "src/app/dashboard/student/interviews/page.js",
+      "type": "uiux",
+      "severity": "low",
+      "message": "Calendar view has no loading or error state. If data is still loading, the calendar will render with an empty items array, which may be confusing. If there is an error, the calendar still renders.",
+      "line": 51,
+      "suggestion": "Show loading/error states consistently across both views."
+    },
+    {
+      "filename": "src/app/data-entry/layout.js",
+      "type": "uiux",
+      "severity": "low",
+      "message": "Hardcoded inline styles for DevScreenTag positioning may cause overlap or clipping on very small screens or when the tag content grows. The fixed positioning with top/right values does not account for responsive breakpoints.",
+      "line": 9,
+      "suggestion": "Use a CSS module or Tailwind responsive classes to handle positioning, or add a media query to adjust placement on small screens."
+    },
+    {
+      "filename": "src/app/layout.js",
+      "type": "uiux",
+      "severity": "medium",
+      "message": "Missing viewport meta tag in metadata export. Without explicit viewport configuration, mobile browsers may not render the page at the correct width, leading to poor mobile UX and potential layout issues.",
+      "line": 6,
+      "suggestion": "Add a viewport export to the metadata object to ensure proper responsive behavior on mobile devices."
+    },
+    {
+      "filename": "src/app/dashboard/student/page.js",
+      "type": "null_pointer_exception",
+      "severity": "medium",
+      "message": "Potential null-pointer crash risk when session.user is undefined",
+      "line": 9,
+      "suggestion": "Add a null check for session.user before rendering the DashboardFullScreenHub component"
+    },
+    {
+      "filename": "src/app/dashboard/student/page.js",
+      "type": "readability",
+      "severity": "low",
+      "message": "Consider adding a loading state for the session",
+      "line": 22,
+      "suggestion": "Add a loading state while waiting for the session"
+    },
+    {
+      "filename": "src/app/dashboard/student/projects/page.js",
+      "type": "null_pointer_exception",
+      "severity": "high",
+      "message": "Potential null pointer exception when row.jobType is null",
+      "line": 92,
+      "suggestion": "Add null check for row.jobType"
+    },
+    {
+      "filename": "src/app/dashboard/student/projects/page.js",
+      "type": "error_handling",
+      "severity": "high",
+      "message": "Missing error handling for fetcher function",
+      "line": 23,
+      "suggestion": "Add try-catch block to handle errors"
+    },
+    {
+      "filename": "src/app/dashboard/student/projects/page.js",
+      "type": "null_check",
+      "severity": "medium",
+      "message": "Missing null check for row.description",
+      "line": 101,
+      "suggestion": "Add null check for row.description"
+    },
+    {
+      "filename": "src/app/dashboard/student/projects/page.js",
+      "type": "code_smell",
+      "severity": "low",
+      "message": "Code smell: unnecessary conditional statement",
+      "line": 119,
+      "suggestion": "Remove unnecessary conditional statement"
+    },
+    {
+      "filename": "src/components/ConfirmDialog.js",
+      "type": "uiux",
+      "severity": "medium",
+      "message": "The dialog does not handle Escape key press to dismiss, which is a standard accessibility pattern for modals. Users relying on keyboard navigation cannot close the dialog without clicking a button.",
+      "line": 13,
+      "suggestion": "Add a useEffect with a keydown event listener for Escape key that calls onCancel when the dialog is open."
+    },
+    {
+      "filename": "src/app/dashboard/student/internships/page.js",
+      "type": "error_handling",
+      "severity": "high",
+      "message": "fetcher on line 8-13: res.json() catch on line 10 silently swallows JSON parse errors, returning an empty object. If the API returns a non-JSON response (e.g., HTML error page, plain text), the catch returns {} and the !res.ok check on line 11 will show 'Request failed (status)' with no meaningful error message. This can confuse users and hide real issues.",
+      "line": 8,
+      "suggestion": "Remove the .catch() on res.json() and let the error propagate, or handle non-JSON responses explicitly by reading the text and providing a fallback error message."
+    },
+    {
+      "filename": "src/app/dashboard/student/internships/page.js",
+      "type": "uiux",
+      "severity": "high",
+      "message": "apply function on line 24-41: No loading state is tracked, so the 'Apply' button remains clickable while the request is in flight. A user can double-click and trigger multiple POST requests, potentially creating duplicate applications or causing race conditions.",
+      "line": 24,
+      "suggestion": "Add a local state (e.g., applyingId) to disable the button and show a spinner while the request is pending."
+    },
+    {
+      "filename": "src/app/dashboard/student/internships/page.js",
+      "type": "ux_copy",
+      "severity": "medium",
+      "message": "Error display on line 61-62: The raw error.message is shown directly to the user. If the API returns a verbose or internal error (e.g., database constraint violation, stack trace), it will be exposed in the UI, which is a security and UX concern.",
+      "line": 61,
+      "suggestion": "Display a generic error message to the user and log the full error server-side. Only show specific hints (like missing SQL migrations) if the error is known and safe."
+    },
+    {
+      "filename": "src/app/dashboard/student/internships/page.js",
+      "type": "error_handling",
+      "severity": "medium",
+      "message": "Line 10: res.json().catch(() => ({})) in the apply function silently swallows JSON parse errors. If the API returns a non-JSON response (e.g., 500 HTML error page), the catch returns {} and the !res.ok check will show 'Could not apply' instead of a more specific error.",
+      "line": 10,
+      "suggestion": "Remove the .catch() and let the error propagate, or handle non-JSON responses explicitly."
+    },
+    {
+      "filename": "src/app/dashboard/student/internships/page.js",
+      "type": "performance",
+      "severity": "low",
+      "message": "The items.map on line 84-132 renders all internships at once with no pagination. If the API returns a large number of internships (e.g., 500+), this will cause a large DOM and potential performance degradation on low-end devices.",
+      "line": 84,
+      "suggestion": "Implement client-side pagination or virtual scrolling, or ensure the API supports pagination and only fetches a reasonable page size."
+    },
+    {
+      "filename": "src/app/dashboard/student/internships/page.js",
+      "type": "edge_case",
+      "severity": "low",
+      "message": "Line 96-104: The salary display logic uses formatCurrency(row.salaryMin || row.salaryMax) which will show 0 if salaryMin is 0 (a valid stipend). The condition row.salaryMin != null || row.salaryMax != null correctly allows 0, but the fallback to row.salaryMax when salaryMin is 0 may be misleading.",
+      "line": 96,
+      "suggestion": "Use a more explicit check: if salaryMin != null use that, else use salaryMax."
+    }
+  ]
+}

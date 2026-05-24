@@ -1,0 +1,428 @@
+=================================================================
+  CODESENTINEL -- BATCH 1 REPORT
+  Files 1 - 23 of 229
+  Folder : C:\Users\sandeep\Downloads\Claudes\CampusPlacement\campus-placement
+  Saved  : 01/05/2026, 21:46:22
+=================================================================
+
+  Batch Score   : 89/100
+  Files Reviewed: 23
+  Total Issues  : 70
+
+=================================================================
+  FILE: fix_emojis.js
+  Score: 93/100   Issues: 3
+
+  The provided code is a JavaScript script that replaces emojis in a file with corresponding component names. The script reads a file, replaces the emojis, and writes the updated content back to the file. The code is generally well-structured, but there are some potential issues and improvements that can be suggested. The biggest risk is the lack of error handling and validation, which could lead to unexpected behavior or data loss. The code also uses synchronous file I/O, which can be a performance bottleneck. Overall, the code is functional, but it can be improved for better reliability, performance, and maintainability.
+
+  [MEDIUM] performance -- Line 12
+  Using synchronous file I/O can be a performance bottleneck
+  Fix: Use asynchronous file I/O instead
+
+  [LOW] readability -- Line 45
+  Using `Object.entries` and `for...of` loop can be less readable than using a traditional `for` loop
+  Fix: Use a traditional `for` loop instead
+
+  [MEDIUM] error_handling -- Line 55
+  Not checking if the backup file already exists before overwriting it
+  Fix: Check if the backup file already exists and handle it accordingly
+
+=================================================================
+  FILE: src/app/api/college/drives/[id]/route.js
+  Score: 95/100   Issues: 3
+
+  The PATCH endpoint for college drives is generally well-structured with proper authentication, tenant isolation, and parameterized queries. The main risk is the lack of input validation for the drive ID (UUID format) and the social_shared array elements, which could lead to unexpected behavior or database errors. Additionally, the error handling is adequate but could benefit from more specific error messages for validation failures. Overall, the code is production-ready with minor improvements needed.
+
+  [MEDIUM] input_validation -- Line 25
+  The driveId is validated as a non-empty string but not as a valid UUID. Passing an invalid UUID (e.g., 'abc') will cause the database query to return 0 rows, resulting in a misleading 404 error instead of a 400 Bad Request.
+  Fix: Add UUID format validation for driveId to return a 400 error for invalid UUIDs before querying the database.
+
+  [LOW] input_validation -- Line 35
+  The socialShared array elements are converted to strings via String(p).toLowerCase(), but if an element is an object or null, it will become '[object Object]' or 'null', which will be filtered out by the ALLOWED_PLATFORMS check. This is safe but could silently ignore unexpected input types.
+  Fix: Add a type check to skip or warn about non-string elements in the socialShared array.
+
+  [LOW] observability -- Line 61
+  The catch block logs the error but does not include the driveId or tenantId in the log message, making it harder to correlate errors in production logs.
+  Fix: Include contextual information (driveId, tenantId) in the error log for better debugging.
+
+=================================================================
+  FILE: src/app/api/college/drives/[id]/facebook-post/route.js
+  Score: 83/100   Issues: 4
+
+  The endpoint is well-structured with parameterized queries and proper authorization. The main risk is the lack of a database-level uniqueness constraint on the Facebook post to prevent duplicate posts for the same drive, and the absence of a timeout on the external Facebook API call, which could hang the request. Additionally, the error message for a 503 is overly specific and exposes configuration details.
+
+  [MEDIUM] security -- Line 20
+  The 503 error message exposes internal configuration details (FACEBOOK_PAGE_ID, FACEBOOK_PAGE_ACCESS_TOKEN) to the client, which could aid an attacker in understanding the system's dependencies.
+  Fix: Return a generic error message like 'Facebook posting is not configured' without listing environment variable names.
+
+  [HIGH] reliability -- Line 87
+  The call to postToFacebookPageFeed has no timeout. If the Facebook API is slow or hangs, the request will hang indefinitely, potentially exhausting server resources and blocking other requests.
+  Fix: Add a timeout (e.g., 10 seconds) to the Facebook API call, either via AbortController or a timeout wrapper.
+
+  [MEDIUM] idempotency -- Line 87
+  No idempotency check is performed before posting to Facebook. If the request is retried (e.g., due to network issues), the same drive could be posted multiple times, causing duplicate Facebook posts.
+  Fix: Add a database column (e.g., facebook_post_id) to placement_drives and check if it is already set before posting. Alternatively, use a unique constraint on (drive_id, facebook_post_id) in a separate table.
+
+  [LOW] observability -- Line 94
+  The error is logged with console.error, which may not include structured context (e.g., driveId, tenantId) needed for debugging in production.
+  Fix: Use a structured logger that includes request-specific metadata like driveId and tenantId.
+
+=================================================================
+  FILE: src/app/api/clarifications/route.js
+  Score: 96/100   Issues: 2
+
+  The provided code is a Next.js API route for handling clarifications. It has proper authentication and authorization checks, and it uses parameterized queries to prevent SQL injection. However, there are some potential issues with error handling, input validation, and database query efficiency. The code also lacks logging and monitoring, which can make it difficult to debug and optimize. Overall, the code is well-structured and follows good practices, but it can be improved in some areas.
+
+  [MEDIUM] error_handling -- Line 76
+  Error handling can be improved by logging more details about the error
+  Fix: Use a logging library to log errors with more context
+
+  [LOW] input_validation -- Line 91
+  Input validation for company and postedBy can be improved
+  Fix: Use a validation library to validate user input
+
+=================================================================
+  FILE: src/app/api/college/dashboard/route.js
+  Score: 83/100   Issues: 4
+
+  The provided code snippet appears to be a part of a Next.js API route, handling GET requests for a college dashboard. It fetches various statistics and pending actions for a college admin. However, there are several potential issues and improvements that can be made, including error handling, SQL query optimization, and input validation. The code score is 82 due to the identified issues.
+
+  [MEDIUM] bug -- Line 14
+  Potential null pointer exception when accessing session.user.tenant_id or session.user.tenantId
+  Fix: Add null checks for session.user.tenant_id and session.user.tenantId
+
+  [MEDIUM] performance -- Line 17
+  SQL query can be optimized for better performance
+  Fix: Consider using indexes on columns used in WHERE and JOIN clauses
+
+  [LOW] code_smell -- Line 49
+  Variable 's' can be renamed for better readability
+  Fix: Rename variable 's' to a more descriptive name
+
+  [HIGH] error_handling -- Line 77
+  Error handling can be improved to provide more informative error messages
+  Fix: Log error details and provide a more descriptive error message
+
+=================================================================
+  FILE: src/app/api/college/drives/route.js
+  Score: 90/100   Issues: 4
+
+  The provided code is a Next.js API route for managing college drives. It handles GET and PATCH requests, with proper authentication and authorization checks. However, there are some potential issues with error handling, input validation, and database queries. The code is generally well-structured, but there are some areas for improvement. The biggest risk is the potential for SQL injection attacks, but the code uses parameterized queries, which mitigates this risk. The score is 85 due to some minor issues with error handling and input validation.
+
+  [MEDIUM] database -- Line 23
+  The database query is not using a transaction, which could lead to inconsistent data if an error occurs.
+  Fix: Use a transaction to ensure data consistency.
+
+  [MEDIUM] database -- Line 42
+  The database query is not using a transaction, which could lead to inconsistent data if an error occurs.
+  Fix: Use a transaction to ensure data consistency.
+
+  [LOW] error_handling -- Line 65
+  The error handling is not providing enough information about the error.
+  Fix: Provide more information about the error, such as the error message and stack trace.
+
+  [MEDIUM] input_validation -- Line 83
+  The input validation is not checking for invalid input.
+  Fix: Check for invalid input, such as null or undefined values.
+
+=================================================================
+  FILE: src/app/api/college/applications/route.js
+  Score: 85/100   Issues: 4
+
+  The code is generally well-structured with proper authentication, parameterized queries, and error handling. The main risks are the hardcoded LIMIT 1000 which could cause performance issues or data loss for large datasets, and the lack of pagination/filtering which limits usability. No critical security vulnerabilities were found.
+
+  [HIGH] scalability -- Line 36
+  Hardcoded LIMIT 1000 without pagination or offset will silently truncate results for tenants with more than 1000 applications, causing data loss and incomplete UI. This also risks memory pressure if the result set is large.
+  Fix: Implement cursor-based or offset pagination with a configurable limit, or remove the limit and add proper pagination parameters.
+
+  [MEDIUM] performance -- Line 18
+  The query fetches all applications for a tenant without any filtering (by status, date range, search) or pagination parameters. This will become a performance bottleneck as data grows and forces the client to handle filtering client-side.
+  Fix: Add optional query parameters for status filter, date range, search term, and pagination to reduce data transfer and database load.
+
+  [LOW] code_quality -- Line 6
+  The GET function does not accept a request parameter, making it impossible to read query parameters for filtering or pagination. This limits the API's flexibility.
+  Fix: Add the standard Next.js request parameter to the function signature to allow reading query parameters.
+
+  [LOW] observability -- Line 42
+  Error logging uses console.error with the error object but does not include structured context like tenantId, making it harder to correlate errors in production log aggregation systems.
+  Fix: Use a structured logger or include tenantId and request metadata in the error log.
+
+=================================================================
+  FILE: generate_docs.py
+  Score: 91/100   Issues: 3
+
+  The provided Python script generates a user documentation document for a Campus Placement System using the python-docx library. The script is well-structured and readable. However, there are some potential issues and improvements that can be made. The script does not handle errors well, and it does not check if the required package is installed before trying to import it. Additionally, the script does not validate the file path provided as a command-line argument. The script also uses a try-except block to catch all exceptions, which can make it difficult to diagnose issues. The script can be improved by adding more error handling and validation, and by using more specific exception handling.
+
+  [MEDIUM] error_handling -- Line 8
+  The script does not check if the required package is installed before trying to import it. It should check if the package is installed and provide a meaningful error message if it is not.
+  Fix: Use a try-except block to catch the ImportError exception and provide a meaningful error message.
+
+  [MEDIUM] validation -- Line 103
+  The script does not validate the file path provided as a command-line argument. It should check if the file path is valid and provide a meaningful error message if it is not.
+  Fix: Use the os.path module to validate the file path.
+
+  [MEDIUM] error_handling -- Line 107
+  The script uses a try-except block to catch all exceptions, which can make it difficult to diagnose issues. It should use more specific exception handling.
+  Fix: Use a try-except block to catch the specific exception that may be raised.
+
+=================================================================
+  FILE: src/app/api/admin/colleges/route.js
+  Score: 96/100   Issues: 2
+
+  The provided code is a Next.js API route for retrieving a list of colleges. It has proper authentication and authorization checks, and it uses parameterized queries to prevent SQL injection. However, there are some potential issues with error handling and logging. The code also lacks input validation for the 'page' and 'limit' query parameters, which could lead to potential security vulnerabilities.
+
+  [MEDIUM] security -- Line 14
+  Input validation is missing for 'page' and 'limit' query parameters
+  Fix: Add input validation to ensure 'page' and 'limit' are positive integers
+
+  [LOW] error_handling -- Line 54
+  Error message is not very informative
+  Fix: Log the full error object instead of just the error message
+
+=================================================================
+  FILE: src/app/api/college/drives/[id]/report/route.js
+  Score: 36/100   Issues: 5
+
+  The endpoint is generally well-structured with parameterized queries and proper authentication. However, it has a critical multi-tenancy vulnerability: the statistics and selected students queries do not filter by tenant_id, allowing a college_admin from one tenant to access application data from another tenant's drive if they know the drive ID. Additionally, the async params destructuring is incorrect for Next.js App Router (params is already a resolved object in route handlers), which will cause a runtime error. The error message is generic and lacks observability details.
+
+  [HIGH] runtime -- Line 13
+  Incorrect async destructuring of params. In Next.js App Router route handlers, params is already a resolved object, not a Promise. Using `await params` will cause a runtime error or return undefined, breaking the endpoint.
+  Fix: Remove the await keyword and destructure params directly.
+
+  [CRITICAL] multi_tenancy -- Line 36
+  The statistics query (line 36-41) and selected students query (line 60-66) do not filter by tenant_id. A college_admin from tenant A can access application data for a drive belonging to tenant B by providing a valid drive ID, leading to cross-tenant data leakage.
+  Fix: Add a tenant_id filter to both queries by joining with placement_drives or student_profiles to ensure only data from the same tenant is returned.
+
+  [CRITICAL] multi_tenancy -- Line 60
+  The selected students query does not filter by tenant_id, allowing cross-tenant data access. A college_admin from tenant A can retrieve student profile details (name, roll number, department, CGPA) from tenant B's drive.
+  Fix: Add a tenant_id filter by joining with placement_drives or student_profiles to restrict results to the current tenant.
+
+  [MEDIUM] observability -- Line 84
+  The error log only logs the error object without structured context (driveId, tenantId, request path). In production, this makes debugging failures difficult as there is no correlation ID or request metadata.
+  Fix: Use structured logging with context fields such as driveId, tenantId, and a request correlation ID.
+
+  [LOW] ux_copy -- Line 85
+  The error message 'Failed to generate drive report' is generic and does not provide any actionable information to the user. For 5xx errors, this is acceptable, but the server-side logging should be more detailed.
+  Fix: No change needed for the client-facing message, but ensure server-side logging captures the root cause.
+
+=================================================================
+  FILE: src/app/api/audit/reports/export/route.js
+  Score: 94/100   Issues: 2
+
+  The provided code is a Next.js API route for exporting audit reports. It has proper authentication and authorization checks, and it uses parameterized queries to prevent SQL injection. However, there are some potential issues with error handling and logging. The code does not handle all possible error scenarios, and it logs errors to the console instead of using a logging library. Additionally, the code does not validate user input properly, which could lead to security vulnerabilities.
+
+  [MEDIUM] error_handling -- Line 27
+  The code does not handle all possible error scenarios. It only catches errors that occur during the execution of the query, but it does not handle errors that may occur during the execution of the putObjectText or sendMail functions.
+  Fix: Add try-catch blocks to handle errors that may occur during the execution of the putObjectText or sendMail functions.
+
+  [MEDIUM] input_validation -- Line 31
+  The code does not validate user input properly. It only trims the input, but it does not check if the input is valid.
+  Fix: Add input validation to check if the input is valid.
+
+=================================================================
+  FILE: src/app/api/admin/employers/route.js
+  Score: 94/100   Issues: 2
+
+  The provided code is generally well-structured and secure, but there are a few areas that need improvement. The code is vulnerable to potential SQL injection attacks, although the current implementation uses parameterized queries which mitigates this risk. However, there are some issues with error handling and logging. The code also lacks input validation for the 'page' and 'limit' query parameters. Additionally, the code does not handle cases where the 'searchParams' object is null or undefined.
+
+  [MEDIUM] input_validation -- Line 14
+  The 'page' and 'limit' query parameters are not validated properly. This could lead to potential security vulnerabilities or errors.
+  Fix: Add input validation for the 'page' and 'limit' query parameters to ensure they are valid numbers.
+
+  [MEDIUM] error_handling -- Line 46
+  The error message is not very informative. It would be better to log the entire error object instead of just the error message.
+  Fix: Log the entire error object instead of just the error message.
+
+=================================================================
+  FILE: src/app/api/audit/logs/route.js
+  Score: 83/100   Issues: 4
+
+  The audit log retrieval endpoint is well-structured with parameterized queries and proper authorization. The main risk is the absence of a database-level index on `audit_logs.tenant_id` and `created_at`, which will cause full table scans under load. Additionally, the `old_values` and `new_values` columns may contain PII that is exposed in API responses without restriction. The error handling is adequate but lacks structured logging.
+
+  [HIGH] database -- Line 50
+  Missing index on audit_logs.tenant_id and created_at. The query filters by tenant_id and orders by created_at DESC. Without a composite index on (tenant_id, created_at), this query will perform a full table scan on the audit_logs table, causing severe performance degradation as the table grows.
+  Fix: Add a composite index on audit_logs(tenant_id, created_at DESC) to support the WHERE and ORDER BY clauses efficiently.
+
+  [MEDIUM] data_integrity -- Line 50
+  The query selects old_values and new_values which may contain PII (personally identifiable information) such as email addresses, phone numbers, or other sensitive data. These are returned to the client without any filtering or redaction, potentially exposing sensitive data to college_admin users who may not need full visibility.
+  Fix: Either omit old_values/new_values from the response for non-super-admin roles, or implement a redaction function that masks sensitive fields before returning.
+
+  [MEDIUM] observability -- Line 60
+  Error logging uses console.error with a generic message. In production, this lacks structured context (request ID, tenant ID, user ID, query parameters) making it difficult to correlate errors with specific requests or debug issues.
+  Fix: Use a structured logger that includes request context (correlation ID, tenant ID, user ID, query params) and stack trace.
+
+  [LOW] edge_case -- Line 25
+  If limit query parameter is not a valid integer, Number.parseInt returns NaN, and Math.max(1, NaN) returns NaN, causing the query to fail with a PostgreSQL error. This is partially mitigated by Math.min(1000, NaN) which returns NaN, but the query will still fail.
+  Fix: Add a fallback for NaN after parseInt, e.g., use Number.isNaN to default to 300.
+
+=================================================================
+  FILE: src/app/api/admin/pending-registrations/route.js
+  Score: 91/100   Issues: 3
+
+  The provided code is a migration script for a PostgreSQL database and handles pending registrations. It has proper authentication and authorization checks, but there are some potential issues with error handling, database queries, and input validation. The code score is 82 due to some medium-severity issues.
+
+  [MEDIUM] database -- Line 17
+  The database query for pending registrations does not have a limit or pagination, which could lead to performance issues if there are many pending registrations.
+  Fix: Add a limit or pagination to the database query for pending registrations.
+
+  [MEDIUM] input_validation -- Line 67
+  The input validation for the userId and action parameters is not robust and could lead to errors if the input is not valid.
+  Fix: Add more robust input validation for the userId and action parameters.
+
+  [MEDIUM] database -- Line 93
+  The database query for rejecting a pending registration does not check if the registration has already been rejected.
+  Fix: Add a check to see if the registration has already been rejected before updating the database.
+
+=================================================================
+  FILE: scripts/run-migration-002.js
+  Score: 84/100   Issues: 3
+
+  The provided code is a migration script for a PostgreSQL database. It reads environment variables from a .env.local file, checks for the existence of a migration file, and applies the migration to the database. The script has some potential issues, such as not handling errors properly and not validating user input. The score is 80 due to some minor issues and potential security vulnerabilities.
+
+  [MEDIUM] error_handling -- Line 11
+  The script does not handle errors properly when reading the .env.local file.
+  Fix: Add try-catch blocks to handle potential errors when reading the file.
+
+  [MEDIUM] validation -- Line 43
+  The script does not validate the NODE_ENV environment variable.
+  Fix: Add validation to ensure the NODE_ENV variable is one of the allowed values.
+
+  [HIGH] security -- Line 73
+  The script uses the rejectUnauthorized option for SSL connections, which can be a security risk if not handled properly.
+  Fix: Ensure that the rejectUnauthorized option is set to true and that the CA certificate is properly configured.
+
+=================================================================
+  FILE: src/app/api/audit/reports/route.js
+  Score: 94/100   Issues: 2
+
+  The provided code is generally well-structured and secure. It properly handles authentication and authorization, and it uses parameterized queries to prevent SQL injection. However, there are a few potential issues that need to be addressed, such as input validation and error handling. The code also lacks logging and monitoring, which is crucial for a production-ready system.
+
+  [MEDIUM] input_validation -- Line 15
+  The code does not validate the tenantId query parameter. It should check if the parameter is a valid UUID.
+  Fix: Use a UUID validation library to check the tenantId parameter.
+
+  [MEDIUM] input_validation -- Line 25
+  The code does not validate the limit query parameter. It should check if the parameter is a positive integer.
+  Fix: Use a validation library to check the limit parameter.
+
+=================================================================
+  FILE: src/app/api/auth/[...nextauth]/route.js
+  Score: 96/100   Issues: 2
+
+  The provided code is a Next.js API route for authentication using NextAuth. It imports the authentication options from another file and creates a handler for the authentication process. The code is well-structured and secure, but there are a few potential issues that need to be addressed. The code does not handle errors explicitly, and it does not validate the authentication options. However, the code is simple and does not seem to have any major security vulnerabilities. The score is 90 due to the lack of error handling and validation.
+
+  [MEDIUM] error_handling -- Line 4
+  The code does not handle errors explicitly during the authentication process
+  Fix: Add try-catch blocks to handle errors during the authentication process
+
+  [LOW] validation -- Line 1
+  The code does not validate the authentication options
+  Fix: Add validation for the authentication options to ensure they are valid
+
+=================================================================
+  FILE: run_tests.js
+  Score: 93/100   Issues: 3
+
+  The provided code is a test runner that updates HTML files with test results. It uses the `cheerio` library to parse and modify the HTML. The code is generally well-structured, but there are some potential issues with error handling and file system operations. The code also uses synchronous file system operations, which can be a performance bottleneck. The biggest risk is the potential for file corruption or data loss if the code fails to write the updated HTML file correctly.
+
+  [MEDIUM] error_handling -- Line 11
+  The code catches file read errors, but it throws the error again without providing any additional context. This can make it difficult to diagnose the issue.
+  Fix: Consider logging the error with more context before throwing it again.
+
+  [MEDIUM] performance -- Line 67
+  The code uses synchronous file system operations, which can be a performance bottleneck.
+  Fix: Consider using asynchronous file system operations instead.
+
+  [LOW] error_handling -- Line 86
+  The code catches any errors that occur during the execution of the `processHtml` function, but it only logs the error and sets the process exit code. This can make it difficult to diagnose the issue.
+  Fix: Consider providing more context when logging the error.
+
+=================================================================
+  FILE: scripts/seed_email_marketing_sqlite.py
+  Score: 96/100   Issues: 2
+
+  The provided Python script is used to create and update a SQLite database for email marketing website sources. It creates a table if it does not exist and inserts or updates records based on a list of URLs. The script is well-structured and follows good practices. However, there are some potential issues that need to be addressed, such as error handling and potential SQL injection vulnerabilities. The script does not handle errors that may occur during database operations, and it uses parameterized queries to prevent SQL injection. The score is 85 due to the lack of error handling and potential issues with the database connection.
+
+  [MEDIUM] error_handling -- Line 56
+  The script does not handle errors that may occur during database operations
+  Fix: Add try-except blocks to handle potential errors
+
+  [LOW] sql_injection -- Line 75
+  The script uses parameterized queries to prevent SQL injection, but it's still important to ensure that the input data is validated and sanitized
+  Fix: Validate and sanitize the input data before using it in the SQL query
+
+=================================================================
+  FILE: src/app/api/admin/users/route.js
+  Score: 97/100   Issues: 3
+
+  The code is clean and well-structured with proper authentication, error handling, and parameterized queries. The main risk is the lack of tenant isolation for super_admin queries, which is acceptable given the role's scope. No critical or high-severity issues found.
+
+  [LOW] best_practice -- Line 9
+  Session user role check assumes session.user.role exists. If session is valid but user object is malformed, this will throw a TypeError.
+  Fix: Add optional chaining or a check for session.user?.role before comparison.
+
+  [LOW] data_integrity -- Line 14
+  Query selects all users across all tenants. For a super_admin this is acceptable, but if this endpoint is ever reused for tenant-scoped admins, it would leak cross-tenant data.
+  Fix: Consider adding a WHERE tenant_id = $1 clause if this endpoint is extended to non-super-admin roles.
+
+  [LOW] observability -- Line 29
+  Error is logged with console.error but lacks structured context (request ID, tenant ID, user ID) making it hard to correlate in production log aggregation.
+  Fix: Use a structured logger that includes request context.
+
+=================================================================
+  FILE: src/app/api/admin/dashboard/route.js
+  Score: 93/100   Issues: 3
+
+  The provided code is generally well-structured and secure, but there are a few potential issues that need to be addressed. The code does not handle database query errors properly, and it does not validate the session user role correctly. Additionally, the code does not handle the case where the database queries return null or undefined values. The score is 80 due to these potential issues.
+
+  [MEDIUM] error_handling -- Line 14
+  The database query does not handle errors properly. If the query fails, it will return null or undefined, which can cause errors in the subsequent code.
+  Fix: Add error handling for the database query to handle potential errors.
+
+  [MEDIUM] authentication -- Line 10
+  The session user role is not validated correctly. If the user role is not 'super_admin', it will return a 401 error, but it does not check if the user is authenticated.
+  Fix: Add authentication check to ensure the user is authenticated before checking the user role.
+
+  [LOW] null_check -- Line 30
+  The code does not handle null or undefined values from the database queries. If the queries return null or undefined, it can cause errors in the subsequent code.
+  Fix: Add null checks for the database query results to handle potential null or undefined values.
+
+=================================================================
+  FILE: run-sql.js
+  Score: 88/100   Issues: 4
+
+  The provided code is a PostgreSQL database setup and schema reset script. It has some potential issues, including the use of synchronous I/O for reading environment files and SQL scripts, and the lack of input validation for the database connection string. Additionally, the script does not handle errors well, and it does not provide any feedback to the user in case of an error. However, the script does use a secure way to connect to the database, and it uses a transaction to ensure that the schema reset is atomic.
+
+  [MEDIUM] bug -- Line 11
+  The readEnvLocal function uses synchronous I/O to read the environment file, which can block the event loop.
+  Fix: Use asynchronous I/O to read the environment file.
+
+  [MEDIUM] bug -- Line 93
+  The schemaSql variable is read using synchronous I/O, which can block the event loop.
+  Fix: Use asynchronous I/O to read the schema SQL file.
+
+  [MEDIUM] bug -- Line 97
+  The seedSql variable is read using synchronous I/O, which can block the event loop.
+  Fix: Use asynchronous I/O to read the seed SQL file.
+
+  [MEDIUM] bug -- Line 104
+  The error handling in the catch block does not provide any feedback to the user.
+  Fix: Add feedback to the user in case of an error.
+
+=================================================================
+  FILE: src/app/api/admin/settings/route.js
+  Score: 93/100   Issues: 3
+
+  The provided code is a Next.js API route for handling admin settings. It has proper authentication and authorization checks, and it validates user input. However, there are some potential issues with error handling, database queries, and security. The code score is 82 due to some medium-severity issues found.
+
+  [MEDIUM] database -- Line 54
+  The database query is not using a transaction, which could lead to inconsistent data in case of an error
+  Fix: Use a transaction to ensure data consistency
+
+  [MEDIUM] database -- Line 101
+  The database query is using JSON.stringify, which could lead to a SQL injection vulnerability
+  Fix: Use a parameterized query to prevent SQL injection
+
+  [LOW] error_handling -- Line 58
+  The error handling is logging the error to the console, but it's not providing any additional information
+  Fix: Provide more information about the error, such as the error message and stack trace

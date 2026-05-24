@@ -1,0 +1,68 @@
+=================================================================
+  CODESENTINEL -- BATCH 10 REPORT
+  Files 226 - 228 of 229
+  Folder : C:\Users\sandeep\Downloads\Claudes\CampusPlacement\campus-placement
+  Saved  : 01/05/2026, 20:54:00
+=================================================================
+
+  Batch Score   : 90/100
+  Files Reviewed: 3
+  Total Issues  : 10
+
+=================================================================
+  FILE: src/lib/validators.js
+  Score: 92/100   Issues: 4
+
+  The validators are generally well-structured with clear regex patterns and basic input checks. The primary risks are: (1) `validateRequired` treats falsy values like `0` or `false` as missing, which can cause false positives for valid data; (2) `sanitizeInput` only strips `<` and `>` but does not prevent XSS in HTML attributes or other contexts; (3) `validatePhone` allows spaces and dashes but does not normalize them, leading to inconsistent stored values; (4) `validateCGPA` and `validatePercentage` accept strings that parse to valid numbers, but do not reject non-numeric strings like 'abc' (handled by isNaN). Overall, the code is clean and low-risk for a validation layer.
+
+  [MEDIUM] bug -- Line 48
+  validateRequired treats falsy values like 0, false, or empty string as missing, which can incorrectly reject valid numeric or boolean fields.
+  Fix: Check for null/undefined explicitly instead of using truthy check.
+
+  [MEDIUM] security -- Line 40
+  sanitizeInput only strips < and > characters, which is insufficient to prevent XSS in HTML attributes, URLs, or CSS contexts. An attacker can still inject event handlers or other dangerous patterns.
+  Fix: Use a dedicated sanitization library like DOMPurify on the server, or encode HTML entities instead of stripping angle brackets.
+
+  [LOW] validation -- Line 17
+  validatePhone allows spaces and dashes but does not normalize them, leading to inconsistent stored phone numbers.
+  Fix: Strip non-digit characters after validation to store a canonical format.
+
+  [LOW] validation -- Line 31
+  validateCGPA and validatePercentage accept any string that parseFloat can convert, including strings like '8.5abc' which parse to 8.5. This may allow unexpected input.
+  Fix: Add a check that the entire string is a valid number, e.g., using Number.isFinite(Number(value)) or a regex.
+
+=================================================================
+  FILE: src/middleware.js
+  Score: 84/100   Issues: 3
+
+  The middleware is concise and correctly handles authentication redirects for /login and /data-entry paths. The primary risk is that the matcher only covers /login and /data-entry, leaving all other routes unprotected by middleware-level auth checks. This means unauthenticated users can access any other page (e.g., /dashboard/student) directly, relying solely on client-side or API-level enforcement. Additionally, the middleware does not validate the token's existence or expiration beyond checking the role, which could allow expired tokens to pass through. The code is otherwise clean and well-structured.
+
+  [HIGH] authentication -- Line 36
+  The middleware returns NextResponse.next() for all paths except /login and /data-entry, meaning unauthenticated users can access any other route (e.g., /dashboard/student, /dashboard/admin) without any middleware-level auth check. This bypasses the intended protection and relies entirely on client-side or API-level enforcement, which is insufficient for a production SaaS application.
+  Fix: Add a catch-all auth check for all protected routes (e.g., /dashboard, /api) to redirect unauthenticated users to /login.
+
+  [MEDIUM] authentication -- Line 22
+  The token check only verifies that token.role exists, but does not validate token expiration or signature. An expired or tampered token with a role property would pass this check, potentially granting unauthorized access to /data-entry.
+  Fix: Use getToken with a verification step or check token.exp to ensure the token is not expired.
+
+  [MEDIUM] configuration -- Line 53
+  The matcher only covers /login and /data-entry paths. All other routes (e.g., /dashboard, /api) are not matched by the middleware, so the middleware function never runs for them. This means the auth redirect logic for non-login paths is effectively dead code for most routes.
+  Fix: Expand the matcher to include all protected routes, or restructure the middleware to run on all paths and skip public ones internally.
+
+=================================================================
+  FILE: test-db.js
+  Score: 95/100   Issues: 3
+
+  The provided code snippet is a simple test script to verify the connection to a PostgreSQL database. It uses the `pg` module to create a pool and execute a query to select the current server time. The script handles connection errors and exits the process accordingly. However, there are some potential issues, such as the hardcoded connection string and the lack of input validation. The score is 80 due to these issues and the fact that the script does not handle all possible error scenarios.
+
+  [MEDIUM] security -- Line 4
+  Hardcoded connection string with plaintext password
+  Fix: Use environment variables or a secure secrets management system to store sensitive credentials
+
+  [LOW] performance -- Line 10
+  Using `Date.now()` to measure connection time may not be accurate
+  Fix: Consider using a more precise timing method, such as `performance.now()` or a dedicated timing library
+
+  [LOW] error_handling -- Line 14
+  Only logging the error message to the console, but not providing any additional context or debugging information
+  Fix: Consider logging the full error object or providing more context to aid in debugging

@@ -1,0 +1,691 @@
+{
+  "job_id": "cdaf76d0def7425d",
+  "batch": 2,
+  "folder_path": "C:\\Users\\sandeep\\Downloads\\Claudes\\iso\\system",
+  "model_used": "nvidia/meta/llama-3.3-70b-instruct",
+  "saved_at": "2026-05-05T01:22:41.662514",
+  "files": [
+    {
+      "filename": "src/app/layout.tsx",
+      "score": 99,
+      "summary": "The root layout is clean and minimal, with proper font loading and provider/shell composition. No runtime failures, security vulnerabilities, or data integrity issues are present in this file. The only minor concern is the hardcoded title/description in metadata, which may need to be dynamic for multi-tenant scenarios, but this is a low-severity observation.",
+      "issues_count": 1,
+      "test_cases": [
+        "Should render the layout with correct font classes applied to html/body elements",
+        "Should wrap children in AppProviders and AppShell in correct order",
+        "Should apply geistMono variable class to body element",
+        "Should render with antialiased and min-h-screen utility classes on body"
+      ],
+      "time_taken": 6.3,
+      "provider": "nvidia"
+    },
+    {
+      "filename": "src/components/AppProviders.tsx",
+      "score": 100,
+      "summary": "The AppProviders component is minimal and functionally correct, wrapping children with ThemeProvider and Toaster. No runtime failures, security vulnerabilities, or data integrity issues are present. The code is clean and well-structured for its purpose. The only minor concern is the hardcoded `enableSystem={false}` which may limit user preference for system theme, but this is a design choice rather than a defect.",
+      "issues_count": 0,
+      "test_cases": [
+        "Should render children correctly within ThemeProvider",
+        "Should display Toaster at top-center with rich colors and close button",
+        "Should apply 'light' theme by default when no theme is set",
+        "Should not react to system theme changes when enableSystem is false",
+        "Should handle null/undefined children gracefully (React.Fragment behavior)"
+      ],
+      "time_taken": 11.52,
+      "provider": "nvidia"
+    },
+    {
+      "filename": "src/app/page.tsx",
+      "score": 99,
+      "summary": "The provided code snippet is a simple React page component that renders a LandingPage within a Suspense fallback. The code is clean and minimal, with no apparent runtime failures, security vulnerabilities, or data integrity issues. However, the lack of input validation, error handling, and authorization checks could be a concern in a larger context. The code score is relatively high due to its simplicity and adherence to best practices.",
+      "issues_count": 1,
+      "test_cases": [
+        "Should render the LandingPage component without errors",
+        "Should display the fallback text when the LandingPage component is loading",
+        "Should handle errors properly if the LandingPage component fails to render"
+      ],
+      "time_taken": 29.38,
+      "provider": "nvidia"
+    },
+    {
+      "filename": "src/app/risk/page.tsx",
+      "score": 96,
+      "summary": "The provided code snippet is a React functional component named RiskPage. It appears to be a part of a larger application, possibly a risk management or compliance tool. The component renders a simple page with a heading, a paragraph of text, and a DocumentWorkspace component in 'risk' mode. There are no apparent security vulnerabilities, runtime failures, or data integrity issues in this specific code snippet. However, the lack of input validation, error handling, and authorization checks in this component could be a concern if it is used to handle sensitive data or user input. The code quality is good, with proper formatting and naming conventions.",
+      "issues_count": 2,
+      "test_cases": [
+        "Should render the RiskPage component without errors",
+        "Should display the correct heading and paragraph text",
+        "Should render the DocumentWorkspace component in 'risk' mode"
+      ],
+      "time_taken": 38.63,
+      "provider": "nvidia"
+    },
+    {
+      "filename": "src/app/overview/page.tsx",
+      "score": 95,
+      "summary": "The provided code is generally well-structured and follows good practices. However, there are some potential issues that need to be addressed, such as the lack of error handling for database queries and the potential for SQL injection attacks. Additionally, the code could benefit from more robust input validation and sanitization. Overall, the code is well-organized, but some improvements are needed to ensure its security and reliability.",
+      "issues_count": 3,
+      "test_cases": [
+        "Should handle database query errors gracefully",
+        "Should prevent SQL injection attacks",
+        "Should validate and sanitize user input"
+      ],
+      "time_taken": 47.68,
+      "provider": "nvidia"
+    },
+    {
+      "filename": "src/components/OverviewImportSection.tsx",
+      "score": 93,
+      "summary": "The component is functionally correct for its purpose of downloading CSV templates and a guide. The main risks are the lack of error handling in the `downloadCsv` calls (which could silently fail), the use of `window.setTimeout` in the `stagger` function without cleanup (potential memory leak if the component unmounts), and the absence of accessibility attributes on the buttons. No security vulnerabilities are present.",
+      "issues_count": 3,
+      "test_cases": [
+        "Should handle downloadCsv throwing an error gracefully without breaking the stagger sequence",
+        "Should not trigger downloads if the component unmounts before the staggered timeouts fire",
+        "Should verify that all three CSV files and the guide are downloaded when clicking 'Download all templates + guide'",
+        "Should verify that only the guide CSV is downloaded when clicking 'Guide only (CSV)'",
+        "Should handle the case where assetTemplateExampleRow returns an empty object gracefully",
+        "Should handle the case where ASSET_IMPORT_HEADERS is empty gracefully"
+      ],
+      "time_taken": 18.76,
+      "provider": "nvidia"
+    },
+    {
+      "filename": "src/components/CsvImportToolbar.tsx",
+      "score": 93,
+      "summary": "The provided CsvImportToolbar component appears to be generally correct but has some potential issues. It lacks input validation for the uploaded CSV file, which could lead to security vulnerabilities. Additionally, the component does not handle errors well, and the busy state is not properly reset in case of an error. The code also uses a generic error message for network errors, which may not be helpful for debugging. However, the component does handle the import process correctly and provides a good user experience.",
+      "issues_count": 3,
+      "test_cases": [
+        "Should handle invalid CSV file upload",
+        "Should handle network error during import",
+        "Should reset busy state after import failure",
+        "Should provide more specific error messages for debugging"
+      ],
+      "time_taken": 32.81,
+      "provider": "nvidia"
+    },
+    {
+      "filename": "src/app/risk/scope/page.tsx",
+      "score": 97,
+      "summary": "The provided code snippet is a simple React page component that renders a ScopeHierarchyWorkspace component. There are no critical security vulnerabilities, runtime failures, or data integrity issues in this specific code. However, the lack of input validation, error handling, and authorization checks in the ScopeHierarchyWorkspace component itself could pose risks if not properly addressed elsewhere in the application. The code is well-structured and readable.",
+      "issues_count": 1,
+      "test_cases": [
+        "Should render the ScopeHierarchyWorkspace component with the correct title and description",
+        "Should handle errors and exceptions properly if the ScopeHierarchyWorkspace component fails to render",
+        "Should validate and sanitize any user input passed to the ScopeHierarchyWorkspace component"
+      ],
+      "time_taken": 41.12,
+      "provider": "nvidia"
+    },
+    {
+      "filename": "src/components/ui/skeleton.tsx",
+      "score": 99,
+      "summary": "The Skeleton component is a minimal, well-structured UI primitive with no runtime, security, or data-flow concerns. It uses a utility class merger and a standard animation pattern. The only minor issue is the lack of an explicit display name for debugging in React DevTools, which is a low-severity maintainability concern. No critical or high-severity issues found.",
+      "issues_count": 1,
+      "test_cases": [
+        "Should render a div with the 'animate-pulse rounded-md bg-muted' classes and any additional className passed via props",
+        "Should spread additional div props (e.g., style, id, aria-label) correctly onto the element",
+        "Should render without crashing when no className is provided",
+        "Should render without crashing when className is an empty string",
+        "Should render without crashing when className is a complex Tailwind string with multiple classes",
+        "Should render without crashing when no props are passed (only default props)"
+      ],
+      "time_taken": 9.71,
+      "provider": "nvidia"
+    },
+    {
+      "filename": "src/components/ui/label.tsx",
+      "score": 100,
+      "summary": "The Label component is a thin wrapper around the native <label> element with Tailwind styling. It is functionally correct and follows React best practices by forwarding props and using cn() for class merging. No critical, high, or medium severity issues were found. The component is production-ready as-is.",
+      "issues_count": 0,
+      "test_cases": [
+        "Should render a <label> element with the given className merged via cn()",
+        "Should forward all native <label> attributes (htmlFor, id, etc.) via {...props}",
+        "Should apply the default styling classes when no className is provided",
+        "Should override default styles when a conflicting className is passed (e.g., 'text-lg')",
+        "Should render children passed as text or elements between the tags",
+        "Should handle an empty props object gracefully",
+        "Should not break when data-slot='label' is overridden via props (though unlikely)"
+      ],
+      "time_taken": 12.84,
+      "provider": "nvidia"
+    },
+    {
+      "filename": "src/components/ui/button.tsx",
+      "score": 99,
+      "summary": "The Button component is well-structured, using a primitive from @base-ui/react and class-variance-authority for variants. No runtime failures, security vulnerabilities, or data integrity issues are present. The code is clean, maintainable, and follows best practices for a UI component. The only minor concern is the extremely long class string in the cva definition, which could be split for readability, but this is a low-severity code style issue.",
+      "issues_count": 1,
+      "test_cases": [
+        "Should render with default variant and size when no props provided",
+        "Should apply correct classes for each variant (default, outline, secondary, ghost, destructive, link)",
+        "Should apply correct classes for each size (default, xs, sm, lg, icon, icon-xs, icon-sm, icon-lg)",
+        "Should merge custom className with variant classes via cn()",
+        "Should forward all additional props to the underlying ButtonPrimitive",
+        "Should handle disabled state via disabled prop (pointer-events-none, opacity-50)",
+        "Should handle aria-invalid state for destructive variant styling",
+        "Should handle focus-visible state with ring styles",
+        "Should handle active state with translate-y-px (except for elements with haspopup)",
+        "Should render SVG children with correct sizing and pointer-events-none",
+        "Should handle data-[icon=inline-start] and data-[icon=inline-end] attributes for padding adjustments",
+        "Should work within a button-group slot with rounded-lg override"
+      ],
+      "time_taken": 24.32,
+      "provider": "nvidia"
+    },
+    {
+      "filename": "src/components/LandingPage.tsx",
+      "score": 59,
+      "summary": "The landing page is well-structured with proper error handling and a safe redirect mechanism. The main risks are the hardcoded demo password in the client bundle (exposed to all users) and the lack of rate limiting on the login endpoint, which could enable credential stuffing attacks. The component handles network errors and 401 responses gracefully, but the demo password disclosure is a significant security concern for a production SaaS application.",
+      "issues_count": 6,
+      "test_cases": [
+        "Should display 'already signed in' banner when /api/auth/me returns a user object",
+        "Should redirect to /overview on successful login when no next parameter is provided",
+        "Should redirect to the safe next path on successful login when next starts with / and not //",
+        "Should ignore next parameter that starts with // (open redirect protection)",
+        "Should show error message with seed hint on 401 response",
+        "Should show 'Network error. Try again.' on fetch failure",
+        "Should disable submit button and show 'Signing in\u2026' while request is in flight",
+        "Should fill email and password when a demo tenant button is clicked",
+        "Should trim and lowercase email before sending to API",
+        "Should not crash if /api/auth/me returns non-JSON response",
+        "Should not crash if login API returns non-JSON response",
+        "Should cancel the auth check fetch on unmount to prevent state update on unmounted component",
+        "Should handle empty email or password (HTML5 required validation catches it, but test server-side rejection)",
+        "Should handle extremely long email or password inputs without crashing",
+        "Should handle rapid repeated form submissions (only one request should be in flight due to busy state)",
+        "Should handle concurrent demo tenant button clicks and form submission gracefully"
+      ],
+      "time_taken": 37.67,
+      "provider": "nvidia"
+    },
+    {
+      "filename": "src/components/ui/card.tsx",
+      "score": 99,
+      "summary": "This is a well-structured, clean UI component library for a Card primitive. No runtime failures, security vulnerabilities, or data integrity issues are present. The code is purely presentational with no side effects, external calls, or state management. The only minor concern is the lack of explicit display names for the function components, which can hinder debugging in React DevTools. Overall, this is production-ready code.",
+      "issues_count": 1,
+      "test_cases": [
+        "Should render Card with default size and apply correct CSS classes",
+        "Should render Card with size='sm' and apply data-size='sm' attribute",
+        "Should render CardHeader, CardTitle, CardDescription, CardContent, CardFooter, CardAction in correct order",
+        "Should forward additional className prop to each subcomponent",
+        "Should forward arbitrary HTML div props (e.g., id, style, onClick) to the root div of each component",
+        "Should render CardFooter with border-top and muted background",
+        "Should render CardAction in the correct grid position (col-start-2, row-span-2)",
+        "Should render CardContent with correct padding for default and sm sizes",
+        "Should render CardTitle with font-heading class and correct size variant",
+        "Should render CardDescription with muted foreground color"
+      ],
+      "time_taken": 23.22,
+      "provider": "nvidia"
+    },
+    {
+      "filename": "src/components/ui/input.tsx",
+      "score": 99,
+      "summary": "The Input component is a thin wrapper around @base-ui/react's InputPrimitive with Tailwind styling. The code is clean and minimal, with no security, runtime, or data integrity issues. The only concern is a minor maintainability point: the className string is very long and could be extracted for readability. Overall, this is production-ready.",
+      "issues_count": 1,
+      "test_cases": [
+        "Should render with default type 'text' when no type prop is provided",
+        "Should apply custom className alongside default styles",
+        "Should pass all additional props (e.g., placeholder, disabled, required) to the underlying input element",
+        "Should render with aria-invalid styles when aria-invalid prop is set to true",
+        "Should render disabled state with correct cursor and opacity styles",
+        "Should render file input type with correct file button styles",
+        "Should handle ref forwarding correctly (if InputPrimitive supports refs)"
+      ],
+      "time_taken": 23.12,
+      "provider": "nvidia"
+    },
+    {
+      "filename": "src/components/ui/alert-dialog.tsx",
+      "score": 98,
+      "summary": "The provided code snippet is a well-structured and readable React component library for alert dialogs. It appears to be a part of a larger application and follows best practices for coding standards and organization. However, there are some minor issues and suggestions for improvement, such as adding type annotations for function parameters and return types, and considering the use of a more robust CSS framework for styling.",
+      "issues_count": 2,
+      "test_cases": [
+        "Should render alert dialog with correct title and description",
+        "Should handle cancel button click correctly",
+        "Should render alert dialog with correct actions and buttons"
+      ],
+      "time_taken": 42.89,
+      "provider": "nvidia"
+    },
+    {
+      "filename": "src/components/AppShell.tsx",
+      "score": 94,
+      "summary": "The provided AppShell component appears to be well-structured and clean. However, there are some potential issues that need to be addressed, such as missing error handling, potential memory leaks, and inconsistent coding styles. The component also lacks input validation and sanitization, which could lead to security vulnerabilities.",
+      "issues_count": 2,
+      "test_cases": [
+        "Should handle API errors and exceptions properly",
+        "Should prevent memory leaks by cleaning up event listeners and timeouts",
+        "Should validate and sanitize user input to prevent security vulnerabilities",
+        "Should handle cases where the user is not authenticated or authorized"
+      ],
+      "time_taken": 64.47,
+      "provider": "nvidia"
+    },
+    {
+      "filename": "src/components/TruncatedText.tsx",
+      "score": 99,
+      "summary": "The provided TruncatedText component is well-structured and functional. It handles text truncation and expansion correctly, with proper handling of edge cases such as empty or null text. However, there are some minor issues and suggestions for improvement, including the potential for inconsistent styling and the lack of accessibility features for screen readers.",
+      "issues_count": 1,
+      "test_cases": [
+        "Should render truncated text with 'more' button",
+        "Should expand text when 'more' button is clicked",
+        "Should render full text when 'less' button is clicked",
+        "Should handle empty or null text correctly",
+        "Should preserve newlines when expanded"
+      ],
+      "time_taken": 55.6,
+      "provider": "nvidia"
+    },
+    {
+      "filename": "src/components/ui/table.tsx",
+      "score": 99,
+      "summary": "This is a well-structured, standard shadcn/ui table component with no runtime, security, or data integrity issues. The code is clean, uses proper TypeScript generics, and follows React best practices. The only minor concern is the lack of a `role` attribute on the container div for accessibility, but this is a low-severity enhancement. Overall, the component is production-ready.",
+      "issues_count": 1,
+      "test_cases": [
+        "Should render a table with headers, body, and footer correctly",
+        "Should apply custom className to each subcomponent",
+        "Should pass additional HTML attributes (e.g., id, style) to the underlying elements",
+        "Should render an empty table body without errors",
+        "Should handle a large number of rows without performance degradation (virtualization not expected here)",
+        "Should render TableCaption with correct styling and text",
+        "Should support checkbox in TableHead and TableCell without extra padding",
+        "Should have correct ARIA roles for accessibility (table, row, columnheader, gridcell)"
+      ],
+      "time_taken": 44.39,
+      "provider": "nvidia"
+    },
+    {
+      "filename": "src/components/ui/textarea.tsx",
+      "score": 96,
+      "summary": "The Textarea component is a thin wrapper around the native HTML textarea element with Tailwind CSS styling. It is functionally correct and follows the established pattern of other UI primitives in the codebase. The main risk is the lack of a controlled/uncontrolled value management pattern, which could lead to unexpected behavior in forms. No critical or high-severity issues found.",
+      "issues_count": 2,
+      "test_cases": [
+        "Should render with default placeholder text",
+        "Should apply custom className alongside default styles",
+        "Should forward all native textarea props (rows, cols, maxLength, etc.)",
+        "Should handle controlled value changes via onChange prop",
+        "Should display disabled state correctly with cursor-not-allowed",
+        "Should show aria-invalid styling when invalid prop is passed",
+        "Should handle empty value gracefully",
+        "Should support field-sizing-content for auto-resize behavior",
+        "Should work with form libraries (react-hook-form, formik) via ref forwarding",
+        "Should handle very large text input without performance degradation"
+      ],
+      "time_taken": 41.98,
+      "provider": "nvidia"
+    },
+    {
+      "filename": "src/db/index.ts",
+      "score": 13,
+      "summary": "The database connection module is simple and functional, but has several critical production-readiness issues. The use of better-sqlite3 (a synchronous SQLite driver) in a Next.js serverless environment will block the event loop and cause timeouts under load. The global singleton pattern prevents hot-reload in development and creates connection leaks in serverless contexts. There is no connection pooling, no health check, no graceful shutdown, and no environment validation. The synchronous file system operations in resolveDbPath will also block. For a production SaaS, this should be replaced with an async PostgreSQL driver (e.g., pg with drizzle-orm/pg) or at minimum wrapped with connection pooling and async I/O.",
+      "issues_count": 8,
+      "test_cases": [
+        "Should handle concurrent requests without blocking the event loop (stress test with 100 concurrent requests)",
+        "Should fail gracefully when DATABASE_URL points to a non-writable directory",
+        "Should not leak database connections when the serverless function cold-starts multiple times",
+        "Should validate that DATABASE_URL is set and the path is writable at startup, not lazily",
+        "Should handle the case where the database file is corrupted (e.g., after an unclean shutdown)",
+        "Should not crash the entire process if a single query fails (async error handling)",
+        "Should support multiple tenants with separate database files or schemas",
+        "Should provide a health check endpoint that verifies the database is reachable and writable",
+        "Should close the database connection gracefully on SIGTERM/SIGINT to prevent data corruption",
+        "Should not use synchronous I/O in a serverless environment (Next.js API routes)"
+      ],
+      "time_taken": 65.75,
+      "provider": "nvidia"
+    },
+    {
+      "filename": "src/components/ui/sonner.tsx",
+      "score": 98,
+      "summary": "The provided code snippet is a React component named Toaster, which is a wrapper around the Sonner Toaster component. It uses the Next.js theme and provides a set of icons for different toast types. The code is generally well-structured and follows good practices. However, there are some potential issues that need to be addressed, such as the lack of error handling and the use of hardcoded CSS values.",
+      "issues_count": 2,
+      "test_cases": [
+        "Should render the toaster with the correct theme",
+        "Should display the correct icon for each toast type",
+        "Should handle errors when rendering the toaster"
+      ],
+      "time_taken": 71.56,
+      "provider": "nvidia"
+    }
+  ],
+  "batch_score": 92,
+  "total_issues": 42,
+  "issues": [
+    {
+      "filename": "src/app/layout.tsx",
+      "type": "saas_completeness",
+      "severity": "low",
+      "message": "Metadata title and description are hardcoded. In a multi-tenant SaaS application, the page title should be dynamic based on the tenant's name or branding to avoid all tenants showing the same generic title.",
+      "line": 17,
+      "suggestion": "Consider using generateMetadata or a dynamic metadata function that reads tenant settings from the database or context."
+    },
+    {
+      "filename": "src/app/page.tsx",
+      "type": "best_practice",
+      "severity": "low",
+      "message": "The HomePage component does not perform any input validation or error handling. While this may not be a concern in this specific context, it is a good practice to include basic validation and error handling in all components.",
+      "line": 4,
+      "suggestion": "Add basic input validation and error handling to the HomePage component."
+    },
+    {
+      "filename": "src/app/risk/page.tsx",
+      "type": "authorization",
+      "severity": "medium",
+      "message": "The RiskPage component does not appear to have any authorization checks, which could allow unauthorized access to sensitive data or functionality.",
+      "line": null,
+      "suggestion": "Add authorization checks to ensure that only authorized users can access the RiskPage component and its functionality."
+    },
+    {
+      "filename": "src/app/risk/page.tsx",
+      "type": "code_smell",
+      "severity": "low",
+      "message": "The component does not have any input validation or error handling, which could lead to issues if it is used to handle user input or sensitive data.",
+      "line": null,
+      "suggestion": "Add input validation and error handling to ensure that the component can handle user input and sensitive data correctly."
+    },
+    {
+      "filename": "src/app/overview/page.tsx",
+      "type": "error_handling",
+      "severity": "medium",
+      "message": "Database queries are not wrapped in try-catch blocks, which could lead to unhandled errors",
+      "line": 25,
+      "suggestion": "Add try-catch blocks to handle potential database query errors"
+    },
+    {
+      "filename": "src/app/overview/page.tsx",
+      "type": "sql_injection",
+      "severity": "low",
+      "message": "SQL queries use parameterized placeholders, which reduces the risk of SQL injection attacks",
+      "line": 27,
+      "suggestion": "Continue using parameterized placeholders to prevent SQL injection attacks"
+    },
+    {
+      "filename": "src/app/overview/page.tsx",
+      "type": "input_validation",
+      "severity": "low",
+      "message": "User input is not validated or sanitized, which could lead to security vulnerabilities",
+      "line": 50,
+      "suggestion": "Add input validation and sanitization to prevent security vulnerabilities"
+    },
+    {
+      "filename": "src/components/OverviewImportSection.tsx",
+      "type": "memory",
+      "severity": "medium",
+      "message": "The `stagger` function uses `window.setTimeout` without any cleanup mechanism. If the component unmounts before all timeouts fire, the callbacks will still execute, potentially causing state updates on an unmounted component or triggering unwanted downloads.",
+      "line": 17,
+      "suggestion": "Use a ref to track timeouts and clear them in a useEffect cleanup function, or use a library like `p-limit` with delays."
+    },
+    {
+      "filename": "src/components/OverviewImportSection.tsx",
+      "type": "error_handling",
+      "severity": "medium",
+      "message": "The `downloadGuide` and `downloadAllTemplates` callbacks call `downloadCsv` without any try/catch. If `downloadCsv` throws (e.g., due to a browser API failure or a bug in the function), the error will be unhandled and could crash the component or leave the user with no feedback.",
+      "line": 22,
+      "suggestion": "Wrap each `downloadCsv` call in a try/catch block and log the error, optionally showing a user-facing notification."
+    },
+    {
+      "filename": "src/components/OverviewImportSection.tsx",
+      "type": "uiux",
+      "severity": "low",
+      "message": "The buttons lack accessible labels (aria-label) and are not disabled during the staggered download process, which could lead to double-clicks triggering duplicate downloads.",
+      "line": 101,
+      "suggestion": "Add aria-label attributes and disable the buttons while downloads are in progress using a loading state."
+    },
+    {
+      "filename": "src/components/CsvImportToolbar.tsx",
+      "type": "security",
+      "severity": "medium",
+      "message": "Lack of input validation for uploaded CSV file",
+      "line": 43,
+      "suggestion": "Add input validation to ensure the uploaded file is a valid CSV file"
+    },
+    {
+      "filename": "src/components/CsvImportToolbar.tsx",
+      "type": "error_handling",
+      "severity": "medium",
+      "message": "Generic error message for network errors",
+      "line": 69,
+      "suggestion": "Provide a more specific error message for debugging"
+    },
+    {
+      "filename": "src/components/CsvImportToolbar.tsx",
+      "type": "code_smell",
+      "severity": "low",
+      "message": "Busy state not properly reset in case of error",
+      "line": 72,
+      "suggestion": "Reset busy state in the catch block"
+    },
+    {
+      "filename": "src/app/risk/scope/page.tsx",
+      "type": "authorization",
+      "severity": "medium",
+      "message": "The ScopeHierarchyWorkspace component is not explicitly checked for authorization or access control. Ensure that proper checks are in place to restrict access to authorized users.",
+      "line": 5,
+      "suggestion": "Implement authorization checks before rendering the ScopeHierarchyWorkspace component."
+    },
+    {
+      "filename": "src/components/ui/skeleton.tsx",
+      "type": "maintainability",
+      "severity": "low",
+      "message": "The Skeleton function component lacks an explicit displayName property. In React DevTools, the component will appear as 'Skeleton' (inferred from function name), but setting displayName explicitly is a best practice for forwardRef or higher-order components and ensures consistent debugging across minified builds.",
+      "line": 3,
+      "suggestion": "Add Skeleton.displayName = 'Skeleton' after the function definition to improve debugging and maintainability."
+    },
+    {
+      "filename": "src/components/ui/button.tsx",
+      "type": "code_quality",
+      "severity": "low",
+      "message": "The class string in the cva base is extremely long (over 500 characters), making it hard to read and maintain. This could be split into multiple lines or extracted into a constant for better readability.",
+      "line": 7,
+      "suggestion": "Break the long class string into multiple lines or use a template literal with line breaks for clarity."
+    },
+    {
+      "filename": "src/components/LandingPage.tsx",
+      "type": "security",
+      "severity": "critical",
+      "message": "DEMO_PASSWORD is imported from @/lib/demo-tenants and displayed on line 103. This hardcodes the demo password in the client bundle, exposing it to all users via browser devtools. An attacker can use this to log in as any demo tenant and potentially pivot to other accounts if the demo password is reused or if the demo accounts have elevated privileges.",
+      "line": 6,
+      "suggestion": "Remove the hardcoded demo password from the client bundle. Instead, use a server-side endpoint to generate temporary demo credentials or implement a 'one-click demo login' that authenticates via a server-side token."
+    },
+    {
+      "filename": "src/components/LandingPage.tsx",
+      "type": "security",
+      "severity": "high",
+      "message": "The login endpoint /api/auth/login is called without any rate limiting or CSRF protection. An attacker can brute-force credentials or perform credential stuffing attacks against any user account, including demo accounts. The demo password is also publicly known, making demo accounts trivially accessible.",
+      "line": 46,
+      "suggestion": "Implement rate limiting on the login endpoint (e.g., using a middleware or external service like Upstash Ratelimit). Add CSRF protection for state-changing requests. Consider adding account lockout after N failed attempts."
+    },
+    {
+      "filename": "src/components/LandingPage.tsx",
+      "type": "security",
+      "severity": "medium",
+      "message": "The safeNext redirect validation only checks that nextRaw starts with '/' and not '//'. This is insufficient to prevent open redirect attacks. An attacker could use a URL like '/evil.com' (single slash) or '/\\evil.com' (backslash) to redirect users to malicious sites after login.",
+      "line": 12,
+      "suggestion": "Use a more robust URL validation: parse the URL and check that the hostname is empty (relative path) or matches an allowlist of domains. Alternatively, use a lookup table of valid redirect paths."
+    },
+    {
+      "filename": "src/components/LandingPage.tsx",
+      "type": "error_handling",
+      "severity": "low",
+      "message": "The /api/auth/me fetch on line 26 does not handle network errors or non-JSON responses. If the API is down or returns an error, the promise rejection will be unhandled (the async IIFE is voided). This could cause a runtime error in the console but won't crash the app due to the void operator.",
+      "line": 26,
+      "suggestion": "Add a try/catch around the fetch call to handle network errors gracefully, and check the response status before parsing JSON."
+    },
+    {
+      "filename": "src/components/LandingPage.tsx",
+      "type": "error_handling",
+      "severity": "low",
+      "message": "The catch on line 68 catches all errors and shows a generic 'Network error' message. However, if the login API returns a non-JSON response (e.g., a 500 HTML error page), the res.json() on line 54 will throw, and the catch block will replace the actual error with a generic message. This hides the real server error from the user.",
+      "line": 54,
+      "suggestion": "Separate the JSON parsing error from the network error. If res.json() fails, still use the response status to provide a more specific error message."
+    },
+    {
+      "filename": "src/components/LandingPage.tsx",
+      "type": "security",
+      "severity": "low",
+      "message": "The demo password is displayed in plain text on the page. While this is intentional for demo purposes, it normalizes exposing credentials in the UI, which could be a bad pattern if extended to production accounts.",
+      "line": 103,
+      "suggestion": "Consider hiding the password behind a toggle or removing the display entirely, relying on the 'one-click' demo buttons instead."
+    },
+    {
+      "filename": "src/components/ui/card.tsx",
+      "type": "code_quality",
+      "severity": "low",
+      "message": "Card component (and all other function components) lack an explicit displayName property. This makes debugging in React DevTools harder, as the component will appear as an anonymous function or inferred name.",
+      "line": 5,
+      "suggestion": "Add a static displayName property to each component for better debugging and dev tooling support."
+    },
+    {
+      "filename": "src/components/ui/input.tsx",
+      "type": "maintainability",
+      "severity": "low",
+      "message": "The className string on line 12 is extremely long (over 600 characters), making the component harder to read and maintain. This is a code smell that could lead to merge conflicts and readability issues.",
+      "line": 12,
+      "suggestion": "Extract the long className string into a constant or use a utility function to compose classes conditionally."
+    },
+    {
+      "filename": "src/components/ui/alert-dialog.tsx",
+      "type": "readability",
+      "severity": "low",
+      "message": "Consider adding type annotations for function parameters and return types",
+      "line": 9,
+      "suggestion": "Add type annotations for function parameters and return types to improve code readability and maintainability"
+    },
+    {
+      "filename": "src/components/ui/alert-dialog.tsx",
+      "type": "readability",
+      "severity": "low",
+      "message": "Consider using a more robust CSS framework for styling",
+      "line": 25,
+      "suggestion": "Consider using a more robust CSS framework such as Tailwind CSS or Bootstrap to improve styling consistency and maintainability"
+    },
+    {
+      "filename": "src/components/AppShell.tsx",
+      "type": "error_handling",
+      "severity": "medium",
+      "message": "Missing error handling for API call to /api/auth/me",
+      "line": 58,
+      "suggestion": "Add try-catch block to handle potential errors"
+    },
+    {
+      "filename": "src/components/AppShell.tsx",
+      "type": "security",
+      "severity": "medium",
+      "message": "Missing input validation and sanitization for user input",
+      "line": 103,
+      "suggestion": "Add input validation and sanitization to prevent security vulnerabilities"
+    },
+    {
+      "filename": "src/components/TruncatedText.tsx",
+      "type": "code_smell",
+      "severity": "low",
+      "message": "The text normalization logic could be extracted into a separate function for better readability and maintainability.",
+      "line": 25,
+      "suggestion": "Extract text normalization logic into a separate function"
+    },
+    {
+      "filename": "src/components/ui/table.tsx",
+      "type": "uiux",
+      "severity": "low",
+      "message": "The container div wrapping the table lacks a `role` attribute. For accessibility, a role of 'group' or 'region' with an aria-label could help screen readers understand the scrollable table context.",
+      "line": 9,
+      "suggestion": "Add role='region' and aria-label or aria-labelledby to the container div for better screen reader support."
+    },
+    {
+      "filename": "src/components/ui/textarea.tsx",
+      "type": "uiux",
+      "severity": "medium",
+      "message": "Textarea component does not forward refs via React.forwardRef, which breaks integration with form libraries (react-hook-form, formik) that rely on refs for field registration and validation.",
+      "line": 5,
+      "suggestion": "Wrap the component with React.forwardRef to properly forward the ref to the underlying textarea element."
+    },
+    {
+      "filename": "src/components/ui/textarea.tsx",
+      "type": "code_quality",
+      "severity": "low",
+      "message": "Component lacks a displayName property, which makes debugging harder in React DevTools and error stack traces.",
+      "line": 5,
+      "suggestion": "Add Textarea.displayName = 'Textarea' after the component definition."
+    },
+    {
+      "filename": "src/db/index.ts",
+      "type": "performance",
+      "severity": "critical",
+      "message": "better-sqlite3 is a synchronous SQLite driver. In a Next.js serverless environment (API routes), synchronous I/O blocks the entire event loop, making the server unresponsive to other requests during database operations. This will cause severe performance degradation and timeouts under any concurrent load.",
+      "line": 25,
+      "suggestion": "Replace better-sqlite3 with an async PostgreSQL driver (e.g., 'pg' with drizzle-orm/pg) for production, or use better-sqlite3 only in a non-serverless context with a dedicated worker thread."
+    },
+    {
+      "filename": "src/db/index.ts",
+      "type": "reliability",
+      "severity": "critical",
+      "message": "The global singleton pattern (globalForDb) prevents hot-reload in development and creates connection leaks in serverless environments. In Next.js serverless functions, each cold start creates a new connection that is never closed, leading to file descriptor exhaustion and database corruption over time.",
+      "line": 17,
+      "suggestion": "Use a module-level singleton with proper cleanup on hot-reload (module.hot?.dispose) and avoid global state in serverless functions. For serverless, use a connection pool that is managed by the runtime."
+    },
+    {
+      "filename": "src/db/index.ts",
+      "type": "reliability",
+      "severity": "high",
+      "message": "Synchronous fs.existsSync and fs.mkdirSync block the event loop during database initialization. In a serverless environment, this adds latency to every cold start and can cause timeouts if the filesystem is slow (e.g., network-mounted storage).",
+      "line": 11,
+      "suggestion": "Use async fs.promises.mkdir with { recursive: true } which does not require an existence check, or move this to a startup script that runs before the server starts."
+    },
+    {
+      "filename": "src/db/index.ts",
+      "type": "configuration",
+      "severity": "high",
+      "message": "DATABASE_URL defaults to './data/compliance.db' which is a relative path. In a serverless environment, the working directory may not be writable or may be ephemeral, causing data loss on every deployment. There is no validation that the environment variable is set.",
+      "line": 8,
+      "suggestion": "Require DATABASE_URL to be explicitly set in production, validate it at startup, and fail fast with a clear error message if it is missing or invalid."
+    },
+    {
+      "filename": "src/db/index.ts",
+      "type": "reliability",
+      "severity": "high",
+      "message": "No graceful shutdown mechanism. When the process receives SIGTERM (e.g., during deployment), the database connection is not closed, which can corrupt the WAL journal and lead to data loss or corruption on the next startup.",
+      "line": 33,
+      "suggestion": "Register a process signal handler that closes the database connection before exit."
+    },
+    {
+      "filename": "src/db/index.ts",
+      "type": "observability",
+      "severity": "medium",
+      "message": "No health check or readiness probe. There is no way for a load balancer or orchestrator to verify that the database is reachable and the application is ready to serve traffic.",
+      "line": 22,
+      "suggestion": "Add a health check function that performs a simple query (e.g., SELECT 1) and returns the status."
+    },
+    {
+      "filename": "src/db/index.ts",
+      "type": "data_integrity",
+      "severity": "medium",
+      "message": "WAL journal mode is enabled but there is no checkpoint configuration. Under heavy write load, the WAL file can grow unbounded, consuming disk space and degrading performance.",
+      "line": 26,
+      "suggestion": "Configure WAL checkpointing with a reasonable size limit or auto-checkpoint interval."
+    },
+    {
+      "filename": "src/db/index.ts",
+      "type": "code_smell",
+      "severity": "low",
+      "message": "Re-exporting all schema exports via `export * from './schema'` can cause naming collisions if schema exports a symbol with the same name as an existing export (e.g., 'getDb'). This is a maintainability concern.",
+      "line": 40,
+      "suggestion": "Import schema explicitly and re-export only what is needed, or use a namespace import."
+    },
+    {
+      "filename": "src/components/ui/sonner.tsx",
+      "type": "code_smell",
+      "severity": "low",
+      "message": "The theme value is not validated, which could lead to errors if an invalid theme is provided",
+      "line": 8,
+      "suggestion": "Add validation for the theme value"
+    },
+    {
+      "filename": "src/components/ui/sonner.tsx",
+      "type": "code_smell",
+      "severity": "low",
+      "message": "The CSS values are hardcoded, which could make it difficult to maintain and update the styles",
+      "line": 32,
+      "suggestion": "Consider using a CSS-in-JS solution or a theme provider to manage the styles"
+    }
+  ]
+}

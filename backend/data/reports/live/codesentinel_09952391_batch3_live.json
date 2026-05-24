@@ -1,0 +1,1213 @@
+{
+  "job_id": "0995239186b944ef",
+  "batch": 3,
+  "folder_path": "C:\\Users\\sandeep\\Downloads\\Claudes\\CampusPlacement\\campus-placement",
+  "model_used": "nvidia/meta/llama-3.3-70b-instruct",
+  "saved_at": "2026-05-01T10:36:35.676110",
+  "files": [
+    {
+      "filename": "src/app/api/employer/assessments/template/route.js",
+      "score": 85,
+      "summary": "The file is a simple CSV template download endpoint with no authentication, authorization, or rate limiting. While functionally correct for its purpose, the lack of any access control means this endpoint is publicly accessible, which could be abused for excessive downloads or information gathering. The CSV content itself is static sample data and poses no data leak risk. The biggest issue is the missing security controls on a production endpoint.",
+      "issues_count": 4
+    },
+    {
+      "filename": "src/app/api/employer/assessments/route.js",
+      "score": 96,
+      "summary": "The provided API route for employer assessments is well-structured and handles authentication, authorization, and error handling properly. However, there are some potential issues with input validation, error handling, and database query efficiency. The code is generally secure, but some improvements can be made to enhance reliability and performance.",
+      "issues_count": 2
+    },
+    {
+      "filename": "src/app/api/employer/calendar/route.js",
+      "score": 88,
+      "summary": "The code is simple and functional but has several issues: the session user ID fallback is fragile, the query lacks tenant isolation, the LIMIT 500 is arbitrary and unbounded, and the error message is generic. The biggest risk is potential cross-tenant data exposure if the employer profile lookup fails silently, returning an empty array instead of an error. Overall, the code is acceptable for a basic feature but needs hardening for production.",
+      "issues_count": 6
+    },
+    {
+      "filename": "src/app/api/data-entry/users/route.js",
+      "score": 78,
+      "summary": "The code is well-structured with proper authentication, parameterized queries, and tenant isolation. The biggest risk is the lack of input validation for email format and password strength, which could lead to invalid data being stored. Additionally, the DELETE endpoint does not check if the user has associated records (e.g., student_profiles, applications), which could cause foreign key constraint failures or orphaned data. The GET endpoint has a hard limit of 300 users without pagination, which may cause performance issues for large tenants. Overall, the code is production-ready with minor improvements needed.",
+      "issues_count": 7
+    },
+    {
+      "filename": "src/app/api/data-entry/options/route.js",
+      "score": 55,
+      "summary": "The code has a critical multi-tenancy vulnerability: the employer_profiles query (line 50-55) has no tenant_id filter, exposing all employers across all tenants to any authenticated data-entry user. Additionally, the query fetches up to 300 users without pagination or search, which will cause performance degradation and potential timeouts as data grows. The error handling is minimal and exposes no actionable feedback. The code is otherwise well-structured with parameterized queries and proper session validation.",
+      "issues_count": 6
+    },
+    {
+      "filename": "src/app/api/data-entry/placement-drives/route.js",
+      "score": 70,
+      "summary": "The code is well-structured with proper authentication, parameterized queries, and tenant isolation. The biggest risk is the lack of input validation for the `driveDate` field, which could cause a database error if an invalid date string is provided. Additionally, the GET endpoint has no pagination and a hard limit of 300 rows, which may cause performance issues for tenants with many drives. The error handling exposes internal error messages to the client, which is a minor security concern.",
+      "issues_count": 14
+    },
+    {
+      "filename": "src/app/api/discussions/route.js",
+      "score": 7,
+      "summary": "The discussions API stores all thread data inside the tenant's JSONB `settings` column, which will cause unbounded growth, race conditions, and data loss under concurrent writes. The `nowLabel()` function returns a static string 'Just now' instead of a real timestamp, making the 'lastActivity' field useless for sorting or display. There is no input sanitization for thread content, no pagination, and no database-level isolation for the read-modify-write pattern in POST and PATCH. The biggest risk is data corruption and loss when multiple users reply simultaneously.",
+      "issues_count": 10
+    },
+    {
+      "filename": "src/app/api/employer/engagement-listings/route.js",
+      "score": 86,
+      "summary": "The provided API route for employer engagement listings is well-structured and handles authentication and error handling properly. However, there are some issues that need to be addressed, such as the lack of input validation, potential SQL injection vulnerability, and missing tenant isolation in the query. The code also lacks rate limiting and proper logging mechanisms.",
+      "issues_count": 3
+    },
+    {
+      "filename": "src/app/api/employer/drives/route.js",
+      "score": 75,
+      "summary": "The code is well-structured with proper authentication, parameterized queries, and transactional integrity. The biggest risk is the lack of input validation on the POST body fields (e.g., driveDate, venue) which could lead to runtime crashes or data corruption. Additionally, the GET endpoint has no pagination, which could cause performance issues with large datasets. The error handling is generally good but could expose internal error messages in some cases.",
+      "issues_count": 8
+    },
+    {
+      "filename": "src/app/api/employer/dashboard/route.js",
+      "score": 38,
+      "summary": "The employer dashboard endpoint has a critical multi-tenancy vulnerability: the `campusId` parameter is not validated to ensure it belongs to the same tenant hierarchy as the employer, allowing an employer to access dashboard data for any campus by simply changing the `campusId` query parameter. Additionally, the stats query uses 6 correlated subqueries that will perform poorly at scale, and the error handler exposes internal error messages. The code lacks input validation, rate limiting, and proper tenant isolation checks. Score is capped at 40 due to the critical security issue.",
+      "issues_count": 10
+    },
+    {
+      "filename": "src/app/api/employer/interviews/route.js",
+      "score": 84,
+      "summary": "The provided API endpoint for employer interviews has several issues, including a lack of input validation, potential SQL injection vulnerabilities, and missing error handling. The code is well-structured, but there are some security concerns that need to be addressed. The biggest risk is the lack of input validation, which could lead to security vulnerabilities. Additionally, the code uses parameterized queries, which is good for preventing SQL injection attacks.",
+      "issues_count": 3
+    },
+    {
+      "filename": "src/app/api/employer/jobs/visibility/route.js",
+      "score": 72,
+      "summary": "The code is well-structured with proper authentication, parameterized queries, and transaction usage. The biggest risk is the lack of input validation on tenantIds (no UUID format check, no limit on array size), which could lead to database errors or abuse. Additionally, the error handler exposes the raw error message to the client, which may leak internal details. The session user ID fallback (session.user.id || session.user.sub) is fragile and inconsistent with other endpoints.",
+      "issues_count": 6
+    },
+    {
+      "filename": "src/app/api/employer/offers/options/route.js",
+      "score": 75,
+      "summary": "The endpoint has a critical information disclosure vulnerability by exposing all student PII (name, email, college) associated with any drive the employer has, without verifying the employer's relationship to those drives. Additionally, the error handler leaks internal error messages to the client, and the query lacks pagination for the students result which could cause performance issues. The code is otherwise well-structured with parameterized queries and proper authentication checks.",
+      "issues_count": 5
+    },
+    {
+      "filename": "src/app/api/employer/profile/logo/complete/route.js",
+      "score": 48,
+      "summary": "The endpoint is simple and uses parameterized queries, but it has a critical security vulnerability by exposing the raw error message to the client, which could leak sensitive information. Additionally, it lacks input validation for the file URL, missing tenant isolation checks, and has no verification that the uploaded file is actually an image or that the URL is safe. The error handling also exposes internal details.",
+      "issues_count": 6
+    },
+    {
+      "filename": "src/app/api/employer/offers/route.js",
+      "score": 62,
+      "summary": "The employer offers API is generally well-structured with proper authentication, parameterized queries, and tenant isolation via employer_id. The biggest risk is the lack of input validation on the POST endpoint \u2014 studentId is not validated to exist or belong to the employer's tenant, allowing creation of offers for arbitrary students. Additionally, the GET endpoint exposes internal error messages to clients, and the PATCH endpoint has a logic bug where the status check allows any value through. The 500-row limit without pagination is a scalability concern.",
+      "issues_count": 10
+    },
+    {
+      "filename": "src/app/api/employer/profile/logo/presign/route.js",
+      "score": 38,
+      "summary": "The endpoint is concise and follows a reasonable pattern, but has a critical security vulnerability: the `fileName` is used unsanitized in the presigned URL generation, enabling path traversal and arbitrary file overwrite in S3. Additionally, the error handler leaks internal error messages to the client, and there is no tenant-scoped validation to prevent cross-tenant logo overwrites. The file size check is bypassable if `fileSize` is NaN or negative, and the content-type check is case-sensitive, rejecting valid uppercase MIME types.",
+      "issues_count": 7
+    },
+    {
+      "filename": "src/app/api/employer/profile/route.js",
+      "score": 84,
+      "summary": "The employer profile API route is generally well-structured with proper authentication, parameterized queries, and input validation for the founded year and company type. The biggest risk is the lack of input validation on several fields (contactEmail, website, logoUrl) which could allow invalid data to be stored, and the absence of tenant isolation checks (though employer profiles are user-scoped). Additionally, the error messages are generic and the catch blocks lack structured logging, making debugging difficult in production. The code is clean and maintainable, but these gaps reduce reliability and observability.",
+      "issues_count": 8
+    },
+    {
+      "filename": "src/app/api/employer/sponsorships/route.js",
+      "score": 82,
+      "summary": "The endpoint is well-structured with proper authentication, parameterized queries, and error handling. The biggest risk is the lack of input validation on the `campusId` parameter (not present in this file but noted from context) and the potential for cross-tenant data leakage if the employer is not scoped to specific tenants. The code is clean and maintainable, but the multi-tenancy boundary is not enforced.",
+      "issues_count": 5
+    },
+    {
+      "filename": "src/app/api/feedback/route.js",
+      "score": 93,
+      "summary": "The code is generally well-structured with proper authentication and parameterized queries. However, there are some issues with error handling and input validation. The biggest risk is the lack of input validation for the 'category' field, which could lead to potential security vulnerabilities. Additionally, the error handling mechanism could be improved to provide more specific and actionable error messages.",
+      "issues_count": 3
+    },
+    {
+      "filename": "src/app/api/feedback/[id]/route.js",
+      "score": 53,
+      "summary": "The feedback API endpoint is generally well-structured with parameterized queries and role-based access control. The biggest risk is the exposure of raw database error messages in production responses (lines 59, 92, 144), which could leak schema details. Additionally, the GET endpoint lacks tenant isolation for super_admin access, potentially allowing cross-tenant data access. The POST endpoint has a race condition between the status update and reply insertion, and the PATCH endpoint does not verify that the feedback record belongs to the same tenant as the admin. Overall, the code is clean but has several medium-severity issues that should be addressed before production deployment.",
+      "issues_count": 12
+    }
+  ],
+  "batch_score": 68,
+  "total_issues": 135,
+  "issues": [
+    {
+      "filename": "src/app/api/employer/assessments/template/route.js",
+      "type": "authentication",
+      "severity": "high",
+      "message": "GET handler has no authentication check. Any unauthenticated user can download the template, potentially enabling enumeration or abuse.",
+      "line": 4,
+      "suggestion": "Add authentication middleware to verify the user is logged in and has an employer role before serving the file."
+    },
+    {
+      "filename": "src/app/api/employer/assessments/template/route.js",
+      "type": "security_abuse",
+      "severity": "medium",
+      "message": "No rate limiting on this endpoint. An attacker could repeatedly download the template to cause unnecessary load or bandwidth costs.",
+      "line": 4,
+      "suggestion": "Implement rate limiting middleware or use platform-level rate limiting (e.g., Vercel WAF, Cloudflare) to restrict requests per IP/user."
+    },
+    {
+      "filename": "src/app/api/employer/assessments/template/route.js",
+      "type": "code_smell",
+      "severity": "low",
+      "message": "BOM character (\\uFEFF) is hardcoded as a string prefix. While functional, this is fragile and could be accidentally removed or misformatted.",
+      "line": 19,
+      "suggestion": "Use a constant or utility function to prepend the BOM, making the intent clearer and the code more maintainable."
+    },
+    {
+      "filename": "src/app/api/employer/assessments/template/route.js",
+      "type": "observability",
+      "severity": "low",
+      "message": "No logging or metrics for template downloads. Cannot track how often this endpoint is accessed or by whom.",
+      "line": 4,
+      "suggestion": "Add structured logging for each download request, including user ID (if authenticated) and timestamp."
+    },
+    {
+      "filename": "src/app/api/employer/assessments/route.js",
+      "type": "input_validation",
+      "severity": "medium",
+      "message": "The limit parameter in the query string is not validated properly, which could lead to potential security issues.",
+      "line": 23,
+      "suggestion": "Add input validation for the limit parameter to ensure it is a positive integer."
+    },
+    {
+      "filename": "src/app/api/employer/assessments/route.js",
+      "type": "error_handling",
+      "severity": "low",
+      "message": "The error handling in the catch block could be improved to provide more informative error messages.",
+      "line": 34,
+      "suggestion": "Add more informative error messages to the catch block to help with debugging."
+    },
+    {
+      "filename": "src/app/api/employer/calendar/route.js",
+      "type": "bug",
+      "severity": "medium",
+      "message": "Fallback from session.user.id to session.user.sub is fragile and may fail if neither is present, causing a database error or returning events for the wrong user.",
+      "line": 13,
+      "suggestion": "Use a single reliable source for the user ID, e.g., session.user.id, and validate it exists before proceeding."
+    },
+    {
+      "filename": "src/app/api/employer/calendar/route.js",
+      "type": "error_handling",
+      "severity": "medium",
+      "message": "Returning an empty events array when employer profile is not found silently swallows a potential misconfiguration or data inconsistency. It should return an error or at least log a warning.",
+      "line": 16,
+      "suggestion": "Return a 404 or 403 error if the employer profile is missing, as this indicates an invalid state."
+    },
+    {
+      "filename": "src/app/api/employer/calendar/route.js",
+      "type": "scalability",
+      "severity": "medium",
+      "message": "Hardcoded LIMIT 500 is arbitrary and may cause performance issues or missing data for employers with many drives. It should be configurable or use pagination.",
+      "line": 24,
+      "suggestion": "Add a query parameter for limit with a default and maximum cap, or implement cursor-based pagination."
+    },
+    {
+      "filename": "src/app/api/employer/calendar/route.js",
+      "type": "multi_tenancy",
+      "severity": "low",
+      "message": "The query filters by employer_id but does not include a tenant_id check. While the employer_id is scoped to the user, adding an explicit tenant filter would provide defense-in-depth against cross-tenant data leakage.",
+      "line": 22,
+      "suggestion": "Add a tenant_id filter from the session or employer profile to ensure data isolation."
+    },
+    {
+      "filename": "src/app/api/employer/calendar/route.js",
+      "type": "ux_copy",
+      "severity": "low",
+      "message": "Error message 'Failed to load calendar events' is generic and not actionable for the user. It should be more specific or include a reference ID for support.",
+      "line": 41,
+      "suggestion": "Return a more user-friendly message and log the error with a correlation ID."
+    },
+    {
+      "filename": "src/app/api/employer/calendar/route.js",
+      "type": "edge_case",
+      "severity": "low",
+      "message": "Using String(r.drive_date).slice(0, 10) assumes the date is always in ISO format. If the database returns a different format or null, it may produce unexpected results.",
+      "line": 31,
+      "suggestion": "Use a proper date formatting library or ensure the database returns ISO format. Handle null explicitly."
+    },
+    {
+      "filename": "src/app/api/data-entry/users/route.js",
+      "type": "validation",
+      "severity": "medium",
+      "message": "No email format validation or password strength check. Invalid email formats (e.g., 'user@') or weak passwords (e.g., '123') will be accepted and stored, leading to unusable accounts.",
+      "line": 41,
+      "suggestion": "Add email regex validation and minimum password length check before hashing."
+    },
+    {
+      "filename": "src/app/api/data-entry/users/route.js",
+      "type": "data_integrity",
+      "severity": "high",
+      "message": "DELETE endpoint does not check for associated records (e.g., student_profiles, applications, offers) before deleting a user. This will cause a foreign key constraint violation (due to ON DELETE CASCADE) and silently delete all associated data, which may be unintended and cause data loss.",
+      "line": 116,
+      "suggestion": "Add a check for associated records before deletion, or use a soft delete approach (set is_active=false) instead of hard delete."
+    },
+    {
+      "filename": "src/app/api/data-entry/users/route.js",
+      "type": "scalability",
+      "severity": "medium",
+      "message": "GET endpoint has a hard limit of 300 users without pagination or offset. For tenants with more than 300 users, this will silently truncate results, and the client has no way to fetch the remaining users.",
+      "line": 26,
+      "suggestion": "Add pagination support with page and limit query parameters, and return total count for the client to implement pagination UI."
+    },
+    {
+      "filename": "src/app/api/data-entry/users/route.js",
+      "type": "logic",
+      "severity": "medium",
+      "message": "The isActive assignment `body?.isActive === false ? false : true` will set isActive to true even if isActive is undefined or null. This means a PUT request without isActive field will always set the user to active, which may be unintended if the client only wants to update other fields.",
+      "line": 88,
+      "suggestion": "Only update isActive if it is explicitly provided in the request body."
+    },
+    {
+      "filename": "src/app/api/data-entry/users/route.js",
+      "type": "observability",
+      "severity": "low",
+      "message": "Error logging in POST handler uses console.error with the full error object, which may include sensitive information (e.g., stack traces with internal paths) in production logs.",
+      "line": 69,
+      "suggestion": "Use a structured logger that redacts sensitive fields, or log only the error message and a correlation ID."
+    },
+    {
+      "filename": "src/app/api/data-entry/users/route.js",
+      "type": "error_handling",
+      "severity": "low",
+      "message": "Error responses in GET, PUT, and DELETE handlers expose the raw error.message to the client, which may leak internal implementation details (e.g., database constraint names, connection errors).",
+      "line": 31,
+      "suggestion": "Return a generic error message to the client and log the detailed error server-side."
+    },
+    {
+      "filename": "src/app/api/data-entry/users/route.js",
+      "type": "code_smell",
+      "severity": "low",
+      "message": "The role filter in GET uses string concatenation for the WHERE clause, which is safe because the role value is validated against ALLOWED_ROLES, but it's fragile and could be simplified.",
+      "line": 19,
+      "suggestion": "Use a conditional parameter approach instead of string concatenation."
+    },
+    {
+      "filename": "src/app/api/data-entry/options/route.js",
+      "type": "multi_tenancy",
+      "severity": "critical",
+      "message": "The employer_profiles query on line 50-55 has no WHERE clause filtering by tenant_id. This means any authenticated data-entry user can see ALL employers across ALL tenants, which is a severe cross-tenant data leak. The query also lacks a tenant_id column in the SELECT, making it impossible to filter post-query.",
+      "line": 50,
+      "suggestion": "Add a WHERE tenant_id = $1 clause to the employer_profiles query, and ensure the employer_profiles table has a tenant_id column (it currently does not in the schema, so a schema migration is needed first)."
+    },
+    {
+      "filename": "src/app/api/data-entry/options/route.js",
+      "type": "performance",
+      "severity": "high",
+      "message": "Five parallel queries are executed without any pagination or search parameters, fetching up to 300 users and 200 records each. As the tenant grows, this will cause significant database load, memory pressure, and slow response times. The LIMIT clauses are arbitrary and may not match actual UI needs.",
+      "line": 15,
+      "suggestion": "Implement cursor-based pagination or add search/filter parameters to reduce result sets. Consider lazy-loading or virtual scrolling in the UI instead of fetching all options upfront."
+    },
+    {
+      "filename": "src/app/api/data-entry/options/route.js",
+      "type": "error_handling",
+      "severity": "medium",
+      "message": "The catch block logs the error to console but returns a generic 'Failed to load options' message. In production, this provides no actionable information to the user or operator. The error is also not structured for observability (no error code, no request ID).",
+      "line": 66,
+      "suggestion": "Return a more specific error message based on error type, include a correlation ID, and log structured error details for debugging."
+    },
+    {
+      "filename": "src/app/api/data-entry/options/route.js",
+      "type": "security",
+      "severity": "medium",
+      "message": "The tenantId is taken directly from URL search params without validation that it's a valid UUID or that the data-entry user has access to that specific tenant. An attacker could pass arbitrary tenant IDs to access data from other tenants.",
+      "line": 10,
+      "suggestion": "Validate that tenantId is a valid UUID format and that the authenticated user's session has explicit access to that tenant before proceeding."
+    },
+    {
+      "filename": "src/app/api/data-entry/options/route.js",
+      "type": "reliability",
+      "severity": "medium",
+      "message": "Using Promise.all with five independent queries means if any single query fails, the entire request fails with a 500 error. This is fragile and provides no partial data to the UI, which could still be useful.",
+      "line": 15,
+      "suggestion": "Use Promise.allSettled instead of Promise.all to handle partial failures gracefully, returning available data with error indicators for failed queries."
+    },
+    {
+      "filename": "src/app/api/data-entry/options/route.js",
+      "type": "performance",
+      "severity": "low",
+      "message": "The student_profiles query joins with users table but selects all columns from student_profiles (sp.* is implied by selecting specific columns, but the join may still be expensive). Consider adding an index on sp.tenant_id and sp.created_at for better performance.",
+      "line": 33,
+      "suggestion": "Add a composite index on student_profiles(tenant_id, created_at DESC) to optimize the ORDER BY and WHERE clause."
+    },
+    {
+      "filename": "src/app/api/data-entry/placement-drives/route.js",
+      "type": "validation",
+      "severity": "high",
+      "message": "driveDate is not validated before being passed to the database query. If an invalid date string (e.g., 'not-a-date', '2025-13-01') is provided, PostgreSQL will throw a date/time field value out of range error, causing a 500 response.",
+      "line": 47,
+      "suggestion": "Validate driveDate using a library like date-fns or a regex before passing to the query. Return a 400 error if invalid."
+    },
+    {
+      "filename": "src/app/api/data-entry/placement-drives/route.js",
+      "type": "validation",
+      "severity": "medium",
+      "message": "driveDate is not validated in PUT method (line 99). Same issue as POST.",
+      "line": 47,
+      "suggestion": "Apply the same validation for driveDate in the PUT handler."
+    },
+    {
+      "filename": "src/app/api/data-entry/placement-drives/route.js",
+      "type": "validation",
+      "severity": "medium",
+      "message": "maxStudents is not validated for negative values or non-integer values. Number('abc') returns NaN, which is not finite, so it becomes null. But negative numbers like -5 will be passed to the database, which may accept them but is semantically invalid.",
+      "line": 49,
+      "suggestion": "Validate that maxStudents is a positive integer if provided."
+    },
+    {
+      "filename": "src/app/api/data-entry/placement-drives/route.js",
+      "type": "validation",
+      "severity": "medium",
+      "message": "maxStudents is not validated in PUT method (line 101). Same issue as POST.",
+      "line": 101,
+      "suggestion": "Apply the same validation for maxStudents in the PUT handler."
+    },
+    {
+      "filename": "src/app/api/data-entry/placement-drives/route.js",
+      "type": "performance",
+      "severity": "medium",
+      "message": "GET endpoint has no pagination and a hard limit of 300 rows. For tenants with many placement drives, this could cause performance issues and return too much data. Also, there is no offset, so users cannot paginate through results.",
+      "line": 22,
+      "suggestion": "Implement pagination using query parameters (page, limit) with a default limit and maximum cap."
+    },
+    {
+      "filename": "src/app/api/data-entry/placement-drives/route.js",
+      "type": "security",
+      "severity": "low",
+      "message": "Error message from the database is exposed to the client in the catch block. This could leak internal details (e.g., table names, constraint violations) in production.",
+      "line": 32,
+      "suggestion": "Log the full error server-side and return a generic error message to the client."
+    },
+    {
+      "filename": "src/app/api/data-entry/placement-drives/route.js",
+      "type": "security",
+      "severity": "low",
+      "message": "Error message from the database is exposed to the client in POST catch block.",
+      "line": 82,
+      "suggestion": "Log the full error server-side and return a generic error message."
+    },
+    {
+      "filename": "src/app/api/data-entry/placement-drives/route.js",
+      "type": "security",
+      "severity": "low",
+      "message": "Error message from the database is exposed to the client in PUT catch block.",
+      "line": 116,
+      "suggestion": "Log the full error server-side and return a generic error message."
+    },
+    {
+      "filename": "src/app/api/data-entry/placement-drives/route.js",
+      "type": "security",
+      "severity": "low",
+      "message": "Error message from the database is exposed to the client in DELETE catch block.",
+      "line": 140,
+      "suggestion": "Log the full error server-side and return a generic error message."
+    },
+    {
+      "filename": "src/app/api/data-entry/placement-drives/route.js",
+      "type": "validation",
+      "severity": "low",
+      "message": "employerId is not validated as a valid UUID. If an invalid string is provided, the database will throw an invalid input syntax for type uuid error.",
+      "line": 50,
+      "suggestion": "Validate employerId as a valid UUID if provided, or use a regex check."
+    },
+    {
+      "filename": "src/app/api/data-entry/placement-drives/route.js",
+      "type": "validation",
+      "severity": "low",
+      "message": "employerId is not validated in PUT method (line 102). Same issue as POST.",
+      "line": 102,
+      "suggestion": "Apply the same UUID validation for employerId in the PUT handler."
+    },
+    {
+      "filename": "src/app/api/data-entry/placement-drives/route.js",
+      "type": "validation",
+      "severity": "low",
+      "message": "id is not validated as a valid UUID in PUT method. An invalid id will cause a database error.",
+      "line": 95,
+      "suggestion": "Validate id as a valid UUID before querying."
+    },
+    {
+      "filename": "src/app/api/data-entry/placement-drives/route.js",
+      "type": "validation",
+      "severity": "low",
+      "message": "id is not validated as a valid UUID in DELETE method. Same issue as PUT.",
+      "line": 129,
+      "suggestion": "Validate id as a valid UUID before querying."
+    },
+    {
+      "filename": "src/app/api/data-entry/placement-drives/route.js",
+      "type": "code_smell",
+      "severity": "low",
+      "message": "GET method does not use the tenantFromRequest helper function, unlike POST/PUT/DELETE. This is inconsistent but functionally correct since GET does not have a body.",
+      "line": 19,
+      "suggestion": "For consistency, consider using tenantFromRequest for GET as well, though it will always fall back to query params."
+    },
+    {
+      "filename": "src/app/api/discussions/route.js",
+      "type": "bug",
+      "severity": "high",
+      "message": "nowLabel() returns a static string 'Just now' instead of an actual timestamp. This makes the 'lastActivity' field meaningless for sorting, filtering, or displaying relative time. Threads will always appear equally recent.",
+      "line": 6,
+      "suggestion": "Return an ISO 8601 timestamp (e.g., new Date().toISOString()) and compute relative time on the client side."
+    },
+    {
+      "filename": "src/app/api/discussions/route.js",
+      "type": "bug",
+      "severity": "high",
+      "message": "Thread ID is generated using Date.now() which is not unique under high concurrency. Two threads created in the same millisecond will have the same ID, causing data loss.",
+      "line": 74,
+      "suggestion": "Use a cryptographically random ID (e.g., crypto.randomUUID()) or a combination of timestamp + random suffix."
+    },
+    {
+      "filename": "src/app/api/discussions/route.js",
+      "type": "concurrency",
+      "severity": "critical",
+      "message": "POST handler performs a read-modify-write on tenant settings without any locking or transaction isolation. Two concurrent POST requests will both load the same threads array, each prepend their new thread, and the second write will overwrite the first, causing data loss.",
+      "line": 72,
+      "suggestion": "Use a database transaction with SELECT FOR UPDATE on the tenants row, or use a JSONB append operation (e.g., jsonb_set) to atomically prepend the new thread."
+    },
+    {
+      "filename": "src/app/api/discussions/route.js",
+      "type": "concurrency",
+      "severity": "critical",
+      "message": "PATCH handler has the same race condition as POST. Two concurrent replies to the same thread will both load the same replies array, each append their reply, and the second write will overwrite the first, losing one reply.",
+      "line": 117,
+      "suggestion": "Use the same SELECT FOR UPDATE transaction pattern as POST, or use a JSONB path update to atomically append to the replies array."
+    },
+    {
+      "filename": "src/app/api/discussions/route.js",
+      "type": "security",
+      "severity": "high",
+      "message": "No sanitization or length validation on topic, company, campus, or text fields. An attacker can inject arbitrary JSON, HTML, or extremely long strings, leading to XSS in the frontend or database storage abuse.",
+      "line": 65,
+      "suggestion": "Strip HTML tags, enforce maximum lengths (e.g., topic max 200 chars, text max 5000 chars), and validate against allowed character patterns."
+    },
+    {
+      "filename": "src/app/api/discussions/route.js",
+      "type": "performance",
+      "severity": "medium",
+      "message": "All threads are loaded into memory and returned in a single response. As the number of threads grows, this will cause high memory usage and slow responses. There is no pagination or limit.",
+      "line": 47,
+      "suggestion": "Implement pagination using query parameters (page, limit) and slice the threads array server-side."
+    },
+    {
+      "filename": "src/app/api/discussions/route.js",
+      "type": "error_handling",
+      "severity": "medium",
+      "message": "If the tenant is not found, the API returns an empty threads array with a 200 status. This could mask configuration errors or invalid tenant IDs. A 404 status would be more appropriate.",
+      "line": 43,
+      "suggestion": "Return a 404 status when the tenant is not found, unless the caller explicitly expects an empty result."
+    },
+    {
+      "filename": "src/app/api/discussions/route.js",
+      "type": "multi_tenancy",
+      "severity": "medium",
+      "message": "resolveTenantId allows any role to pass a campusId query parameter, which could let an employer or super_admin access discussions of any tenant by guessing or enumerating tenant IDs. There is no check that the employer belongs to that tenant.",
+      "line": 25,
+      "suggestion": "For employer role, validate that the employer's tenant_id matches the requested campusId, or restrict to session tenant only."
+    },
+    {
+      "filename": "src/app/api/discussions/route.js",
+      "type": "data_integrity",
+      "severity": "low",
+      "message": "Reply 'role' is derived from session.user.role, but the mapping is incomplete: 'super_admin' is not mapped, so it will fall through to 'company' which is misleading.",
+      "line": 84,
+      "suggestion": "Add a mapping for super_admin or default to 'admin'."
+    },
+    {
+      "filename": "src/app/api/discussions/route.js",
+      "type": "observability",
+      "severity": "medium",
+      "message": "Error logging uses console.error with a generic prefix but does not include the tenantId or any correlation ID, making it difficult to debug issues in production.",
+      "line": 50,
+      "suggestion": "Include tenantId and a request correlation ID in the error log."
+    },
+    {
+      "filename": "src/app/api/employer/engagement-listings/route.js",
+      "type": "security",
+      "severity": "high",
+      "message": "The query lacks tenant isolation, potentially exposing data from other tenants",
+      "line": 13,
+      "suggestion": "Add a tenant_id filter to the query to ensure only authorized data is returned"
+    },
+    {
+      "filename": "src/app/api/employer/engagement-listings/route.js",
+      "type": "error_handling",
+      "severity": "medium",
+      "message": "The error handling mechanism is too generic and does not provide relevant context for debugging purposes",
+      "line": 49,
+      "suggestion": "Improve error handling by logging relevant context and providing more specific error messages"
+    },
+    {
+      "filename": "src/app/api/employer/engagement-listings/route.js",
+      "type": "authentication",
+      "severity": "low",
+      "message": "The authentication mechanism is not explicitly validated for the employer role",
+      "line": 7,
+      "suggestion": "Explicitly validate the employer role in the authentication mechanism"
+    },
+    {
+      "filename": "src/app/api/employer/drives/route.js",
+      "type": "runtime",
+      "severity": "high",
+      "message": "toLocaleDateString on row.drive_date may throw if drive_date is an invalid date string or null. The code checks for null but if drive_date is a malformed string, it will crash.",
+      "line": 117,
+      "suggestion": "Wrap the date formatting in a try-catch or use a library like date-fns for safe parsing."
+    },
+    {
+      "filename": "src/app/api/employer/drives/route.js",
+      "type": "input_validation",
+      "severity": "medium",
+      "message": "request.json() catch returns empty object, but no validation that body is actually an object. If body is an array or primitive, destructuring will silently produce undefined values, leading to potential crashes later.",
+      "line": 53,
+      "suggestion": "Validate that body is a plain object before destructuring."
+    },
+    {
+      "filename": "src/app/api/employer/drives/route.js",
+      "type": "input_validation",
+      "severity": "medium",
+      "message": "tenantId is not validated as a UUID. If a non-UUID string is passed, the database query will fail with a cast error, resulting in a 500 response.",
+      "line": 66,
+      "suggestion": "Validate tenantId format using a UUID regex before querying."
+    },
+    {
+      "filename": "src/app/api/employer/drives/route.js",
+      "type": "performance",
+      "severity": "medium",
+      "message": "GET endpoint has no pagination or limit. If an employer has thousands of drives, this query will return all rows, causing memory pressure and slow responses.",
+      "line": 25,
+      "suggestion": "Add pagination with limit and offset, or at least a reasonable default limit."
+    },
+    {
+      "filename": "src/app/api/employer/drives/route.js",
+      "type": "error_handling",
+      "severity": "medium",
+      "message": "In the catch block, e.message is returned to the client. If the error is unexpected (e.g., database connection failure), the internal error message may leak implementation details.",
+      "line": 148,
+      "suggestion": "Return a generic error message for unexpected errors and log the details server-side."
+    },
+    {
+      "filename": "src/app/api/employer/drives/route.js",
+      "type": "reliability",
+      "severity": "low",
+      "message": "notifyUsersOneAtATime is called inside the transaction. If the notification service fails (e.g., network error), the entire transaction will roll back, preventing the drive from being created even though the drive creation itself succeeded.",
+      "line": 120,
+      "suggestion": "Move notification sending outside the transaction, or handle notification failure gracefully without rolling back the drive creation."
+    },
+    {
+      "filename": "src/app/api/employer/drives/route.js",
+      "type": "input_validation",
+      "severity": "low",
+      "message": "driveDate is accepted as any value from the request body. If it is not a valid date string or null, the database may throw a cast error or store an incorrect value.",
+      "line": 59,
+      "suggestion": "Validate driveDate format before passing to the query."
+    },
+    {
+      "filename": "src/app/api/employer/drives/route.js",
+      "type": "input_validation",
+      "severity": "low",
+      "message": "venue is trimmed but not validated for length. A very long venue string could cause issues in the database or UI.",
+      "line": 64,
+      "suggestion": "Add a maximum length check for venue."
+    },
+    {
+      "filename": "src/app/api/employer/dashboard/route.js",
+      "type": "multi_tenancy",
+      "severity": "critical",
+      "message": "The `campusId` parameter is accepted directly from the client without any validation that the employer is authorized to access data for that campus. An employer can change the `campusId` query parameter to access dashboard data for any campus in the system, leading to cross-tenant data leakage of applications, offers, and placement drive information.",
+      "line": 14,
+      "suggestion": "Validate that the campusId belongs to a tenant that the employer is associated with, or that the employer has been granted access to that specific campus."
+    },
+    {
+      "filename": "src/app/api/employer/dashboard/route.js",
+      "type": "performance",
+      "severity": "high",
+      "message": "The stats query uses 6 correlated subqueries that each scan the same tables (placement_drives, applications, offers) with the same filters. This will cause 6 separate table scans for every request, leading to poor performance as data grows. At scale, this could cause database CPU saturation and request timeouts.",
+      "line": 22,
+      "suggestion": "Rewrite as a single query with conditional aggregation (COUNT with CASE/WHERE) to scan each table once."
+    },
+    {
+      "filename": "src/app/api/employer/dashboard/route.js",
+      "type": "null_pointer_exception",
+      "severity": "high",
+      "message": "If `empQuery.rows` is empty (no employer profile found), accessing `empQuery.rows[0]?.id` returns undefined, and the subsequent `if (!employerId)` check throws a generic error. However, if `empQuery.rows` is null or undefined (e.g., query returns null), this will throw a TypeError that is caught by the generic error handler, returning a 500 with a misleading message.",
+      "line": 19,
+      "suggestion": "Add explicit check for empQuery.rows existence before accessing the first element, and return a 404 if no employer profile exists."
+    },
+    {
+      "filename": "src/app/api/employer/dashboard/route.js",
+      "type": "null_pointer_exception",
+      "severity": "medium",
+      "message": "If the stats query returns no rows (e.g., no drives exist for this employer/campus), `statsQuery.rows[0]` will be undefined, and accessing `.active_jobs` on undefined will throw a TypeError. The `|| 0` fallback only works if the property exists but is null, not if the entire row is missing.",
+      "line": 57,
+      "suggestion": "Add a check for statsQuery.rows[0] existence before accessing properties, or use a default empty object."
+    },
+    {
+      "filename": "src/app/api/employer/dashboard/route.js",
+      "type": "observability",
+      "severity": "medium",
+      "message": "The error is logged with console.error but without a correlation ID or structured context (employerId, campusId, userId). In production with multiple concurrent requests, it's impossible to correlate this error log with the specific request that caused it.",
+      "line": 68,
+      "suggestion": "Use structured logging with request context including userId, campusId, and a correlation ID."
+    },
+    {
+      "filename": "src/app/api/employer/dashboard/route.js",
+      "type": "ux_copy",
+      "severity": "medium",
+      "message": "The error message 'Failed to load employer dashboard data' is generic and not actionable for the user. It doesn't indicate whether the issue is a network problem, a missing profile, or a server error.",
+      "line": 70,
+      "suggestion": "Provide more specific error messages based on the error type, and include a suggestion for the user (e.g., 'Please try again' or 'Contact support if this persists')."
+    },
+    {
+      "filename": "src/app/api/employer/dashboard/route.js",
+      "type": "performance",
+      "severity": "medium",
+      "message": "The recent applications query uses LIMIT 5 without an OFFSET or pagination cursor, and the upcoming drives query uses LIMIT 2. While these are small limits, the queries still scan all matching rows before applying the limit. As the number of applications grows, this will become increasingly expensive.",
+      "line": 43,
+      "suggestion": "Add appropriate indexes on (employer_id, tenant_id, applied_at) for the applications query and (employer_id, tenant_id, drive_date) for the drives query to support efficient ordering and limiting."
+    },
+    {
+      "filename": "src/app/api/employer/dashboard/route.js",
+      "type": "authentication",
+      "severity": "medium",
+      "message": "The role check only verifies the role is 'employer' but does not verify that the employer profile belongs to the same user. A user with role 'employer' could potentially access another employer's data if the session user ID is manipulated or if there's a mismatch between the auth system and the employer_profiles table.",
+      "line": 9,
+      "suggestion": "Add a join between the session user and the employer_profiles table to ensure the employer profile belongs to the authenticated user."
+    },
+    {
+      "filename": "src/app/api/employer/dashboard/route.js",
+      "type": "data_integrity",
+      "severity": "low",
+      "message": "The name concatenation `u.first_name || ' ' || COALESCE(u.last_name, '')` will produce a trailing space when last_name is NULL (e.g., 'John ' instead of 'John'). This is a minor cosmetic issue but could affect frontend display.",
+      "line": 33,
+      "suggestion": "Use TRIM or CONCAT_WS to handle NULL last_name gracefully."
+    },
+    {
+      "filename": "src/app/api/employer/dashboard/route.js",
+      "type": "configuration",
+      "severity": "low",
+      "message": "The endpoint has no rate limiting. An attacker could call this endpoint repeatedly to scrape data or cause a DoS on the database.",
+      "line": 6,
+      "suggestion": "Add rate limiting middleware (e.g., 100 requests per minute per user) to protect the database from excessive queries."
+    },
+    {
+      "filename": "src/app/api/employer/interviews/route.js",
+      "type": "security",
+      "severity": "high",
+      "message": "Input validation is missing for campusId, round, date, and time",
+      "line": 49,
+      "suggestion": "Add input validation to prevent security vulnerabilities"
+    },
+    {
+      "filename": "src/app/api/employer/interviews/route.js",
+      "type": "error_handling",
+      "severity": "medium",
+      "message": "Error handling is missing when getting the tenant",
+      "line": 63,
+      "suggestion": "Add error handling to prevent crashes"
+    },
+    {
+      "filename": "src/app/api/employer/interviews/route.js",
+      "type": "security",
+      "severity": "medium",
+      "message": "Potential SQL injection vulnerability when saving interview plans",
+      "line": 80,
+      "suggestion": "Use parameterized queries to prevent SQL injection attacks"
+    },
+    {
+      "filename": "src/app/api/employer/jobs/visibility/route.js",
+      "type": "input_validation",
+      "severity": "high",
+      "message": "No validation that tenantIds contains valid UUIDs. Invalid UUID strings will cause a PostgreSQL error when cast to uuid, resulting in a 500 error. Also no limit on array size - an attacker could send thousands of tenantIds causing resource exhaustion.",
+      "line": 24,
+      "suggestion": "Validate each tenantId is a valid UUID format and limit the array to a reasonable maximum (e.g., 100)."
+    },
+    {
+      "filename": "src/app/api/employer/jobs/visibility/route.js",
+      "type": "security",
+      "severity": "high",
+      "message": "Error handler exposes raw error message (e.message) to the client, which may leak internal implementation details, database schema info, or stack traces in production.",
+      "line": 76,
+      "suggestion": "Return a generic error message to the client and log the full error server-side."
+    },
+    {
+      "filename": "src/app/api/employer/jobs/visibility/route.js",
+      "type": "reliability",
+      "severity": "medium",
+      "message": "Session user ID fallback (session.user.id || session.user.sub) is fragile and inconsistent. If session.user.id is undefined but session.user.sub exists, it may not match the expected user_id format in the database, leading to a 404 or incorrect data access.",
+      "line": 19,
+      "suggestion": "Use a consistent session user ID field across all endpoints, or validate the fallback matches the expected UUID format."
+    },
+    {
+      "filename": "src/app/api/employer/jobs/visibility/route.js",
+      "type": "multi_tenancy",
+      "severity": "medium",
+      "message": "The employer_profiles query does not include a tenant_id filter. While the user_id is unique per user, this assumes the employer profile belongs to the correct tenant context. If a user has multiple employer profiles across tenants (unlikely but possible), this could return the wrong one.",
+      "line": 32,
+      "suggestion": "Add a tenant_id filter if the session contains tenant context, or ensure the user_id is globally unique across tenants."
+    },
+    {
+      "filename": "src/app/api/employer/jobs/visibility/route.js",
+      "type": "performance",
+      "severity": "low",
+      "message": "The for loop inside the transaction executes individual queries for each tenantId. For large arrays (e.g., 100 tenants), this results in 100+ sequential database round-trips inside a single transaction, which can be slow and hold locks longer than necessary.",
+      "line": 49,
+      "suggestion": "Use a single INSERT ... SELECT query with a VALUES list or UNNEST to batch the operation, reducing round-trips to 1-2 queries."
+    },
+    {
+      "filename": "src/app/api/employer/jobs/visibility/route.js",
+      "type": "performance",
+      "severity": "low",
+      "message": "force-dynamic disables caching for this route, which is appropriate for a POST endpoint but should be noted as intentional.",
+      "line": 6,
+      "suggestion": "No change needed, but ensure this is intentional for the route."
+    },
+    {
+      "filename": "src/app/api/employer/offers/options/route.js",
+      "type": "security",
+      "severity": "high",
+      "message": "Error handler at line 61 exposes internal error.message to the client, which may leak database schema details, query patterns, or other sensitive information in production.",
+      "line": 60,
+      "suggestion": "Return a generic error message to the client and log the detailed error server-side only."
+    },
+    {
+      "filename": "src/app/api/employer/offers/options/route.js",
+      "type": "multi_tenancy",
+      "severity": "high",
+      "message": "The students query at lines 37-46 returns all students who applied to ANY drive owned by this employer, without verifying the employer's relationship to those drives or checking tenant boundaries. An employer could see students from drives they don't own if the employer_id is compromised or manipulated.",
+      "line": 37,
+      "suggestion": "Add a join to verify the employer owns the drive, and consider adding tenant_id filtering to ensure cross-tenant data isolation."
+    },
+    {
+      "filename": "src/app/api/employer/offers/options/route.js",
+      "type": "performance",
+      "severity": "medium",
+      "message": "Students query has a hard LIMIT of 500 without pagination support. An employer with many drives/applications will hit this limit and miss data, or the query will load large result sets into memory.",
+      "line": 45,
+      "suggestion": "Add cursor-based or offset pagination with page/limit parameters, or at minimum add an ORDER BY on a unique column to ensure consistent pagination."
+    },
+    {
+      "filename": "src/app/api/employer/offers/options/route.js",
+      "type": "edge_case",
+      "severity": "low",
+      "message": "Student name construction at line 54 uses fallback to email or 'Unknown Student' if both first_name and last_name are null/empty. This could expose email addresses in UI dropdowns where a display name is expected.",
+      "line": 54,
+      "suggestion": "Use a more privacy-preserving fallback like 'Student #{id}' or just omit the name field if unavailable."
+    },
+    {
+      "filename": "src/app/api/employer/offers/options/route.js",
+      "type": "performance",
+      "severity": "low",
+      "message": "Drives query has a hard LIMIT of 300 without pagination. An employer with more than 300 drives will have incomplete data returned.",
+      "line": 33,
+      "suggestion": "Add pagination support with page/limit query parameters."
+    },
+    {
+      "filename": "src/app/api/employer/profile/logo/complete/route.js",
+      "type": "security",
+      "severity": "critical",
+      "message": "Exposing raw error message (e.message) to the client can leak sensitive information such as database schema, connection strings, or internal paths. This is a security vulnerability.",
+      "line": 27,
+      "suggestion": "Return a generic error message to the client and log the full error server-side."
+    },
+    {
+      "filename": "src/app/api/employer/profile/logo/complete/route.js",
+      "type": "input_validation",
+      "severity": "high",
+      "message": "No validation that fileUrl is a valid, safe URL. An attacker could provide a javascript: URL, a data URL, or a path traversal string, leading to XSS or other attacks when the URL is rendered.",
+      "line": 13,
+      "suggestion": "Validate the fileUrl against a strict URL pattern (e.g., must start with https:// and end with a known image extension) and sanitize it before storing."
+    },
+    {
+      "filename": "src/app/api/employer/profile/logo/complete/route.js",
+      "type": "multi_tenancy",
+      "severity": "high",
+      "message": "The UPDATE query does not verify that the employer profile belongs to the same tenant as the user. A malicious employer user could potentially update another tenant's employer profile if they know the user_id, though the query uses session.user.id which is scoped to the user. However, there is no tenant isolation check to ensure the profile belongs to the user's tenant.",
+      "line": 18,
+      "suggestion": "Add a JOIN or subquery to verify the employer profile's tenant_id matches the user's tenant_id."
+    },
+    {
+      "filename": "src/app/api/employer/profile/logo/complete/route.js",
+      "type": "null_pointer_exception",
+      "severity": "medium",
+      "message": "If session is null (not authenticated), accessing session.user will throw a TypeError and crash the handler before the 401 response is returned.",
+      "line": 9,
+      "suggestion": "Check if session exists before accessing session.user."
+    },
+    {
+      "filename": "src/app/api/employer/profile/logo/complete/route.js",
+      "type": "observability",
+      "severity": "medium",
+      "message": "Error logging does not include a correlation ID or structured context, making it difficult to trace errors in production.",
+      "line": 26,
+      "suggestion": "Use structured logging with a correlation ID and include relevant context (user ID, request path)."
+    },
+    {
+      "filename": "src/app/api/employer/profile/logo/complete/route.js",
+      "type": "code_smell",
+      "severity": "low",
+      "message": "The response returns the fileUrl directly without sanitization. If the URL contains malicious content, it could be rendered unsafely on the client.",
+      "line": 24,
+      "suggestion": "Sanitize the URL before returning it, or return a boolean success flag only."
+    },
+    {
+      "filename": "src/app/api/employer/offers/route.js",
+      "type": "validation",
+      "severity": "high",
+      "message": "No validation that studentId exists in student_profiles table or belongs to the same tenant as the employer. This allows creating offers for arbitrary or non-existent students, leading to data integrity issues and potential abuse.",
+      "line": 70,
+      "suggestion": "Add a database check before INSERT to verify studentId exists and optionally belongs to a tenant the employer is authorized for."
+    },
+    {
+      "filename": "src/app/api/employer/offers/route.js",
+      "type": "logic",
+      "severity": "high",
+      "message": "The status validation check `!['revoked'].includes(status)` only allows 'revoked', but the condition is inverted \u2014 it returns 400 when status IS 'revoked'. This means the PATCH endpoint will always reject valid requests and accept any other status value, including empty string or invalid statuses.",
+      "line": 109,
+      "suggestion": "Change the condition to check that status is exactly 'revoked' and reject otherwise."
+    },
+    {
+      "filename": "src/app/api/employer/offers/route.js",
+      "type": "error_handling",
+      "severity": "medium",
+      "message": "Error response includes `error.message` which may leak internal details (e.g., database constraint violations, stack traces) to the client in production.",
+      "line": 54,
+      "suggestion": "Return a generic error message and log the detailed error server-side only."
+    },
+    {
+      "filename": "src/app/api/employer/offers/route.js",
+      "type": "scalability",
+      "severity": "medium",
+      "message": "Hard limit of 500 rows without pagination or cursor-based fetching. As the number of offers grows, this will become slow and memory-intensive, and clients cannot fetch beyond the first 500.",
+      "line": 46,
+      "suggestion": "Implement cursor-based pagination or offset/limit with a page parameter."
+    },
+    {
+      "filename": "src/app/api/employer/offers/route.js",
+      "type": "error_handling",
+      "severity": "medium",
+      "message": "Error response in POST also leaks `error.message` to the client, potentially exposing internal details.",
+      "line": 93,
+      "suggestion": "Return a generic error message and log the detailed error server-side only."
+    },
+    {
+      "filename": "src/app/api/employer/offers/route.js",
+      "type": "error_handling",
+      "severity": "medium",
+      "message": "Error response in PATCH also leaks `error.message` to the client.",
+      "line": 124,
+      "suggestion": "Return a generic error message and log the detailed error server-side only."
+    },
+    {
+      "filename": "src/app/api/employer/offers/route.js",
+      "type": "data_integrity",
+      "severity": "medium",
+      "message": "Salary is parsed with `Number(body?.salary || 0)` which converts non-numeric strings to 0 silently. This could mask input errors and store incorrect salary data.",
+      "line": 73,
+      "suggestion": "Validate that salary is a positive number and return a 400 error if invalid."
+    },
+    {
+      "filename": "src/app/api/employer/offers/route.js",
+      "type": "data_integrity",
+      "severity": "low",
+      "message": "No check for duplicate offers \u2014 the same employer could create multiple offers for the same student and drive combination, leading to duplicate records.",
+      "line": 82,
+      "suggestion": "Add a UNIQUE constraint on (student_id, drive_id, employer_id) or check for existing offers before insert."
+    },
+    {
+      "filename": "src/app/api/employer/offers/route.js",
+      "type": "code_smell",
+      "severity": "low",
+      "message": "Returning empty array with 200 status when employer profile is missing is misleading \u2014 it should return 404 to distinguish 'no offers' from 'employer not found'.",
+      "line": 26,
+      "suggestion": "Return 404 with an appropriate error message when employer profile is not found."
+    },
+    {
+      "filename": "src/app/api/employer/offers/route.js",
+      "type": "code_smell",
+      "severity": "low",
+      "message": "COALESCE with CONCAT for student_name may produce 'Unknown Student' even when the student exists but has no name set, which could be confusing.",
+      "line": 32,
+      "suggestion": "Consider using a more descriptive fallback like 'Student (ID: ...)' or just returning null and handling in the frontend."
+    },
+    {
+      "filename": "src/app/api/employer/profile/logo/presign/route.js",
+      "type": "security",
+      "severity": "critical",
+      "message": "fileName is used unsanitized in createEmployerLogoPresign, enabling path traversal (e.g., '../../malicious.png') to overwrite arbitrary S3 keys, potentially compromising other tenants' logos or system files.",
+      "line": 20,
+      "suggestion": "Sanitize fileName by stripping path separators, restricting to alphanumeric and safe characters, and prefixing with a tenant/user-specific directory."
+    },
+    {
+      "filename": "src/app/api/employer/profile/logo/presign/route.js",
+      "type": "validation",
+      "severity": "high",
+      "message": "fileSize is converted with Number() which returns NaN for non-numeric strings; NaN > MAX_BYTES is false, bypassing the size check. Also, negative values pass the check.",
+      "line": 22,
+      "suggestion": "Validate that fileSize is a positive finite number before comparing."
+    },
+    {
+      "filename": "src/app/api/employer/profile/logo/presign/route.js",
+      "type": "validation",
+      "severity": "high",
+      "message": "contentType check is case-sensitive; 'IMAGE/JPEG' or 'image/JPEG' will be rejected, causing valid uploads to fail.",
+      "line": 26,
+      "suggestion": "Normalize contentType to lowercase before checking."
+    },
+    {
+      "filename": "src/app/api/employer/profile/logo/presign/route.js",
+      "type": "error_handling",
+      "severity": "high",
+      "message": "Error message is leaked to the client via e.message, which may expose internal details (e.g., S3 bucket names, stack traces) in production.",
+      "line": 38,
+      "suggestion": "Return a generic error message and log the full error server-side."
+    },
+    {
+      "filename": "src/app/api/employer/profile/logo/presign/route.js",
+      "type": "multi_tenancy",
+      "severity": "medium",
+      "message": "No tenant_id validation ensures the employer profile belongs to the same tenant as the session user, allowing a user from tenant A to overwrite logos of tenant B if the S3 key is predictable.",
+      "line": 30,
+      "suggestion": "Fetch the employer profile and verify tenant_id matches session.tenant_id before generating presigned URL."
+    },
+    {
+      "filename": "src/app/api/employer/profile/logo/presign/route.js",
+      "type": "error_handling",
+      "severity": "medium",
+      "message": "req.json() can throw a SyntaxError if the body is malformed JSON, which is caught by the generic catch but returns a confusing error message.",
+      "line": 19,
+      "suggestion": "Wrap req.json() in a try-catch and return a clear 400 error for invalid JSON."
+    },
+    {
+      "filename": "src/app/api/employer/profile/logo/presign/route.js",
+      "type": "code_smell",
+      "severity": "low",
+      "message": "Default fileName 'logo' is generic and could cause collisions if multiple users upload without specifying a name.",
+      "line": 20,
+      "suggestion": "Use a unique identifier (e.g., timestamp + userId) as the default filename."
+    },
+    {
+      "filename": "src/app/api/employer/profile/route.js",
+      "type": "validation",
+      "severity": "medium",
+      "message": "contactEmail is not validated for email format. Invalid email addresses will be stored in the database, potentially causing downstream failures in email notifications or contact features.",
+      "line": 65,
+      "suggestion": "Add email format validation using a regex or a library like validator.js before storing."
+    },
+    {
+      "filename": "src/app/api/employer/profile/route.js",
+      "type": "validation",
+      "severity": "medium",
+      "message": "website and logoUrl are not validated for URL format. Invalid URLs will be stored, potentially breaking frontend links or causing security issues (e.g., javascript: URLs).",
+      "line": 68,
+      "suggestion": "Add URL validation using a regex or URL constructor to ensure valid http/https URLs."
+    },
+    {
+      "filename": "src/app/api/employer/profile/route.js",
+      "type": "observability",
+      "severity": "medium",
+      "message": "Error logging uses console.error with a generic message and the error object. In production, this lacks structured context (request ID, user ID, stack trace) making debugging difficult. The error response is also generic ('Failed to load employer profile'), which is acceptable for a 500 but could be improved.",
+      "line": 47,
+      "suggestion": "Use a structured logger (e.g., pino) with context fields, or at minimum include the error stack and user ID in the log."
+    },
+    {
+      "filename": "src/app/api/employer/profile/route.js",
+      "type": "observability",
+      "severity": "medium",
+      "message": "Same as above for PATCH error handling. Missing structured logging and generic error response.",
+      "line": 134,
+      "suggestion": "Add structured logging with user ID and request context."
+    },
+    {
+      "filename": "src/app/api/employer/profile/route.js",
+      "type": "error_handling",
+      "severity": "low",
+      "message": "request.json() can throw a SyntaxError if the body is malformed JSON. This is caught by the outer try/catch but results in a generic 500 error instead of a 400 Bad Request.",
+      "line": 62,
+      "suggestion": "Wrap request.json() in a try/catch and return a 400 error for invalid JSON."
+    },
+    {
+      "filename": "src/app/api/employer/profile/route.js",
+      "type": "edge_case",
+      "severity": "low",
+      "message": "When locations is a string, splitting by comma may not handle all cases (e.g., locations with commas in the name, or empty strings after split). The current filter(Boolean) handles empty strings, but edge cases like trailing commas could produce empty strings that are filtered out.",
+      "line": 91,
+      "suggestion": "Consider using a more robust parsing approach or document that locations should be an array in the API contract."
+    },
+    {
+      "filename": "src/app/api/employer/profile/route.js",
+      "type": "validation",
+      "severity": "low",
+      "message": "companySize is truncated to 50 characters with .slice(0, 50) but no validation that it matches expected company size values (e.g., '1-10', '11-50'). Invalid values will be stored.",
+      "line": 72,
+      "suggestion": "Consider validating companySize against a predefined list of allowed values, or at least document the expected format."
+    },
+    {
+      "filename": "src/app/api/employer/profile/route.js",
+      "type": "maintainability",
+      "severity": "low",
+      "message": "The getEmployerByUser function is duplicated in other employer API routes (drives, interviews, etc.). This violates DRY and could lead to inconsistencies if the query changes.",
+      "line": 10,
+      "suggestion": "Extract getEmployerByUser into a shared utility module (e.g., @/lib/employer) and import it across all employer routes."
+    },
+    {
+      "filename": "src/app/api/employer/sponsorships/route.js",
+      "type": "multi_tenancy",
+      "severity": "high",
+      "message": "The query fetches ALL colleges (tenants) without any employer-specific filtering. An employer can see sponsorship opportunities for all colleges, even those they have no relationship with. This is a cross-tenant data leakage vulnerability.",
+      "line": 17,
+      "suggestion": "Add a join or subquery to filter colleges based on the employer's authorized tenants (e.g., from employer_profiles or a tenant_employer mapping table)."
+    },
+    {
+      "filename": "src/app/api/employer/sponsorships/route.js",
+      "type": "multi_tenancy",
+      "severity": "medium",
+      "message": "The sponsorship opportunities query also fetches all active opportunities without employer scoping. Combined with the colleges query, this leaks sponsorship data across tenants.",
+      "line": 24,
+      "suggestion": "Filter sponsorship_opportunities by the same set of authorized tenant IDs."
+    },
+    {
+      "filename": "src/app/api/employer/sponsorships/route.js",
+      "type": "data_integrity",
+      "severity": "medium",
+      "message": "The price formatting uses `Number(row.price_inr || 0)` which converts a decimal string to a number, potentially losing precision for large financial values. Additionally, the formatted string '\u20b9X' is not suitable for programmatic use (e.g., sorting, calculations).",
+      "line": 50,
+      "suggestion": "Return the raw numeric price alongside the formatted string, or use a dedicated currency formatting library that preserves precision."
+    },
+    {
+      "filename": "src/app/api/employer/sponsorships/route.js",
+      "type": "edge_case",
+      "severity": "low",
+      "message": "The benefits field is assumed to be an array, but if the database returns a JSON string (e.g., '[\"benefit1\"]') instead of a parsed array, `Array.isArray` will return false and benefits will be an empty array. This could silently drop data.",
+      "line": 51,
+      "suggestion": "Add a safe parse step: if benefits is a string, try JSON.parse; otherwise fall back to empty array."
+    },
+    {
+      "filename": "src/app/api/employer/sponsorships/route.js",
+      "type": "code_smell",
+      "severity": "low",
+      "message": "The paymentInfo object is hardcoded with all null values. This suggests the feature is incomplete or the data is not being fetched from the database. It may confuse frontend developers expecting real data.",
+      "line": 68,
+      "suggestion": "Either remove the paymentInfo field if not yet implemented, or fetch the employer's payment details from the database."
+    },
+    {
+      "filename": "src/app/api/feedback/route.js",
+      "type": "input_validation",
+      "severity": "medium",
+      "message": "The 'category' field is not validated against a whitelist of allowed categories, which could lead to potential security vulnerabilities.",
+      "line": 56,
+      "suggestion": "Add input validation for the 'category' field to ensure it only accepts allowed categories."
+    },
+    {
+      "filename": "src/app/api/feedback/route.js",
+      "type": "error_handling",
+      "severity": "low",
+      "message": "The error message for invalid category input is not very specific or actionable.",
+      "line": 63,
+      "suggestion": "Improve the error message to provide more context and guidance for the user."
+    },
+    {
+      "filename": "src/app/api/feedback/route.js",
+      "type": "error_handling",
+      "severity": "medium",
+      "message": "The error handling mechanism could be improved to provide more specific and actionable error messages.",
+      "line": 75,
+      "suggestion": "Improve the error handling mechanism to provide more context and guidance for the user."
+    },
+    {
+      "filename": "src/app/api/feedback/[id]/route.js",
+      "type": "security",
+      "severity": "high",
+      "message": "Exposing raw database error message (e.message) in the response body leaks internal schema details, table names, and query structure to the client. This is a security vulnerability that aids attackers in crafting further exploits.",
+      "line": 59,
+      "suggestion": "Remove the 'detail' field from the error response. Log the full error server-side and return a generic error message to the client."
+    },
+    {
+      "filename": "src/app/api/feedback/[id]/route.js",
+      "type": "security",
+      "severity": "high",
+      "message": "Same issue as line 59: raw database error message exposed in PATCH endpoint response.",
+      "line": 92,
+      "suggestion": "Remove the 'detail' field from the error response."
+    },
+    {
+      "filename": "src/app/api/feedback/[id]/route.js",
+      "type": "security",
+      "severity": "high",
+      "message": "Same issue as line 59: raw database error message exposed in POST endpoint response.",
+      "line": 144,
+      "suggestion": "Remove the 'detail' field from the error response."
+    },
+    {
+      "filename": "src/app/api/feedback/[id]/route.js",
+      "type": "multi_tenancy",
+      "severity": "medium",
+      "message": "Super admin can access any feedback record without tenant isolation. In a multi-tenant system, super_admin should still be scoped to a tenant or have explicit cross-tenant access only when needed. This could allow a super_admin from one tenant to view feedback from another tenant if the id is known or guessed.",
+      "line": 19,
+      "suggestion": "Add a tenant_id filter for super_admin as well, or ensure that super_admin access is explicitly logged and audited. Consider adding a tenant_id column to platform_feedback or using a separate tenant-scoped query."
+    },
+    {
+      "filename": "src/app/api/feedback/[id]/route.js",
+      "type": "concurrency",
+      "severity": "medium",
+      "message": "Race condition: between checking the feedback status (line 110) and updating it (line 125-129), another concurrent request could change the status, leading to an inconsistent state. The status update should be atomic with the reply insertion, or use a database-level lock.",
+      "line": 123,
+      "suggestion": "Use a single transaction that inserts the reply and updates the status atomically. Alternatively, use SELECT ... FOR UPDATE to lock the feedback row before reading and updating."
+    },
+    {
+      "filename": "src/app/api/feedback/[id]/route.js",
+      "type": "multi_tenancy",
+      "severity": "medium",
+      "message": "PATCH endpoint does not verify that the feedback record belongs to the same tenant as the admin. A super_admin could update feedback from any tenant without proper scoping.",
+      "line": 79,
+      "suggestion": "Add a tenant_id filter to the UPDATE query to ensure the feedback belongs to the admin's tenant."
+    },
+    {
+      "filename": "src/app/api/feedback/[id]/route.js",
+      "type": "multi_tenancy",
+      "severity": "medium",
+      "message": "POST endpoint checks if feedback exists but does not verify tenant ownership. A super_admin could reply to feedback from another tenant.",
+      "line": 110,
+      "suggestion": "Add tenant_id filter to the SELECT query."
+    },
+    {
+      "filename": "src/app/api/feedback/[id]/route.js",
+      "type": "error_handling",
+      "severity": "low",
+      "message": "Silently swallowing the '42P01' error (table not found) for replies could hide other missing table errors. The catch block only re-throws if the code is not 42P01, but if the table is missing, the replies array remains empty, which might be misleading.",
+      "line": 53,
+      "suggestion": "Log a warning when the replies table is missing, and consider returning a partial response with a warning header instead of silently returning an empty array."
+    },
+    {
+      "filename": "src/app/api/feedback/[id]/route.js",
+      "type": "validation",
+      "severity": "low",
+      "message": "The 'id' parameter is not validated as a UUID. If a non-UUID string is passed, the database query will fail with a casting error, which is caught and returned as a 503. This could be used for a DoS attack by sending many invalid IDs.",
+      "line": 15,
+      "suggestion": "Validate that 'id' matches a UUID format before using it in the query. Return a 400 error for invalid format."
+    },
+    {
+      "filename": "src/app/api/feedback/[id]/route.js",
+      "type": "validation",
+      "severity": "low",
+      "message": "The status is trimmed but not validated for empty string after trimming. If body.status is an empty string, it will be rejected by ALLOWED_STATUS check, but the error message 'Invalid status' is not very helpful.",
+      "line": 74,
+      "suggestion": "Add a specific check for empty status and return a clearer error message."
+    },
+    {
+      "filename": "src/app/api/feedback/[id]/route.js",
+      "type": "validation",
+      "severity": "low",
+      "message": "Message is trimmed but not checked for length. A very long message could cause database storage issues or performance degradation.",
+      "line": 107,
+      "suggestion": "Add a maximum length validation for the message (e.g., 5000 characters) and return a 400 error if exceeded."
+    },
+    {
+      "filename": "src/app/api/feedback/[id]/route.js",
+      "type": "performance",
+      "severity": "low",
+      "message": "The replies query is executed unconditionally even when the feedback item is not found (the check happens after the query). This is a minor inefficiency but could be optimized by moving the replies query inside the if block after confirming the item exists.",
+      "line": 38,
+      "suggestion": "Move the replies query inside the if block after the rowCount check, or use a single query with a JOIN to fetch both item and replies."
+    }
+  ]
+}

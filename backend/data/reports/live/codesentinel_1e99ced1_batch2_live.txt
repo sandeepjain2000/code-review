@@ -1,0 +1,568 @@
+=================================================================
+  CODESENTINEL -- BATCH 2 REPORT
+  Files 26 - 48 of 262
+  Folder : C:\Users\sandeep\Downloads\Claudes\CampusPlacement\campus-placement
+  Saved  : 04/05/2026, 12:41:21
+=================================================================
+
+  Batch Score   : 77/100
+  Files Reviewed: 23
+  Total Issues  : 105
+
+=================================================================
+  FILE: src/app/api/college/hiring-assessment-view/route.js
+  Score: 97/100   Issues: 1
+
+  The route is well-structured with proper authentication, tenant isolation, and error handling. The only notable issue is the lack of input validation for query parameters (e.g., pagination, filters) which could lead to performance issues or unexpected behavior under load. No critical security or reliability flaws found.
+
+  [MEDIUM] input_validation -- Line 12
+  The GET handler does not accept or validate any query parameters (e.g., pagination, filters, sorting). If the underlying fetch functions expect parameters like page, limit, or status, missing validation could lead to unbounded data fetching or unexpected behavior.
+  Fix: Add query parameter parsing and validation (e.g., page, limit, status) with sensible defaults and sanitization before passing to fetch functions.
+
+=================================================================
+  FILE: src/app/api/college/overview/route.js
+  Score: 99/100   Issues: 1
+
+  The provided code snippet is a simple alias for the college dashboard stats, redirecting to the same payload as GET /api/college/dashboard. There are no critical issues found in this specific code snippet. However, the overall score is capped due to the presence of critical issues in other parts of the codebase, such as SQL injection vulnerabilities and potential security risks. The code is well-structured and follows best practices, but it is essential to address the existing security concerns to ensure the overall reliability and security of the system.
+
+  [LOW] readability -- File-level
+  The code could benefit from additional comments or documentation to explain the purpose of the alias and its relationship to the dashboard stats.
+  Fix: Add comments or documentation to improve code readability and understanding.
+
+=================================================================
+  FILE: src/app/api/college/events/route.js
+  Score: 93/100   Issues: 3
+
+  The provided code is generally well-structured and secure, but there are a few potential issues that need to be addressed. The code is vulnerable to SQL injection if the input validation fails. The error handling can be improved to provide more specific error messages. The code also lacks input validation for the request body in the POST method.
+
+  [MEDIUM] security -- Line 15
+  The SQL query is vulnerable to SQL injection if the input validation fails
+  Fix: Use parameterized queries or prepared statements to prevent SQL injection
+
+  [MEDIUM] security -- Line 40
+  The request body is not validated properly in the POST method
+  Fix: Validate the request body to prevent potential security vulnerabilities
+
+  [LOW] error_handling -- Line 26
+  The error handling can be improved to provide more specific error messages
+  Fix: Provide more specific error messages to help with debugging and error handling
+
+=================================================================
+  FILE: src/app/api/college/employers/requests/route.js
+  Score: 92/100   Issues: 4
+
+  The endpoint is generally well-structured with proper authentication, authorization, and parameterized queries. The primary risk is the missing database index on `employer_approvals.tenant_id` and `employer_approvals.status`, which could cause performance degradation under load. Additionally, the error message is generic and not actionable for debugging, and there is no pagination or limit on the query, which could return a large result set. The code is otherwise clean and follows best practices.
+
+  [MEDIUM] performance -- Line 19
+  The query on `employer_approvals` filters by `tenant_id` and `status` but there is no index on these columns. As the table grows, this will cause a full table scan, degrading performance for all college admins.
+  Fix: Add a composite index on `employer_approvals(tenant_id, status)` to speed up this query.
+
+  [MEDIUM] scalability -- Line 28
+  The query has no LIMIT or pagination. If a college has thousands of pending approvals, this endpoint will return a massive JSON payload, consuming memory and bandwidth.
+  Fix: Add pagination with `LIMIT` and `OFFSET` query parameters, or at least a reasonable default limit (e.g., 100).
+
+  [LOW] observability -- Line 30
+  The error is logged with `console.error` but lacks structured context (e.g., tenantId, request ID). This makes debugging in production harder.
+  Fix: Use a structured logger that includes tenantId and a correlation ID.
+
+  [LOW] ux_copy -- Line 31
+  The error message 'Failed to load requests' is generic and not actionable for the client. It does not indicate whether the issue is temporary or permanent.
+  Fix: Return a more specific message like 'Unable to load employer requests. Please try again later.'
+
+=================================================================
+  FILE: src/app/api/college/employers/approve/route.js
+  Score: 95/100   Issues: 3
+
+  The code is generally well-structured with proper authentication, parameterized queries, and error handling. The primary risk is the lack of input validation on `action` and `rejection_reason`, which could lead to unexpected behavior or data integrity issues. Additionally, the error response exposes internal details in the console log but returns a generic message to the client, which is acceptable. The code is secure against SQL injection and unauthorized access.
+
+  [MEDIUM] input_validation -- Line 14
+  The `action` field is not validated against allowed values ('approve', 'reject'). An unexpected value like 'invalid' would set `newStatus` to 'invalid', which may violate the CHECK constraint on `employer_approvals.status` and cause a database error.
+  Fix: Validate that `action` is one of the allowed values before using it.
+
+  [LOW] input_validation -- Line 14
+  The `rejection_reason` field is not validated for length or content. An excessively long or malicious string could cause storage issues or be used for injection in downstream processing (e.g., logs, emails).
+  Fix: Add length and content validation for `rejection_reason`.
+
+  [LOW] observability -- Line 36
+  The error is logged with console.error but lacks structured context (e.g., tenant_id, user_id, approval_id). This makes debugging in production harder.
+  Fix: Use structured logging with relevant context fields.
+
+=================================================================
+  FILE: src/app/api/college/employers/[employerId]/poc/route.js
+  Score: 86/100   Issues: 3
+
+  The PATCH endpoint for saving coordination POC staff is generally well-structured with proper authorization, tenant isolation, and input validation. However, there is a critical missing authorization check: the employerId is not validated to belong to the current tenant, allowing a college_admin to modify POC assignments for employers from other tenants. Additionally, the code assumes the `employer_approvals` table exists without any error handling for missing tables, and the response could leak information about which staff IDs are invalid. The overall risk is moderate due to the tenant isolation bypass.
+
+  [HIGH] authorization -- Line 23
+  The employerId is not validated to belong to the current tenant. A college_admin from tenant A could pass an employerId belonging to tenant B and modify POC assignments for that employer, bypassing tenant isolation.
+  Fix: Before the UPDATE, query the employer_profiles table to ensure the employerId belongs to the current tenant, or add a tenant_id filter in the UPDATE query itself.
+
+  [MEDIUM] error_handling -- Line 48
+  The UPDATE query assumes the 'employer_approvals' table exists. If the table is missing or the schema is incorrect, the query will throw an error that is caught by the generic catch block, returning a 500 error. This could happen during migrations or if the table name is wrong.
+  Fix: Add a check for the table existence at startup or handle the specific error (e.g., relation does not exist) with a more informative message. Alternatively, ensure the table is created before this endpoint is used.
+
+  [LOW] observability -- Line 78
+  The error logging uses console.error with a generic message. In production, this should include structured logging with request context (tenantId, employerId, correlation ID) to aid debugging.
+  Fix: Use a structured logger (e.g., pino, winston) and include tenantId, employerId, and a correlation ID in the log entry.
+
+=================================================================
+  FILE: src/app/api/college/enrollment-ledger/route.js
+  Score: 45/100   Issues: 5
+
+  The enrollment-ledger API route is concise and follows a reasonable pattern, but it has a critical authorization bypass: the role check uses `!==` which allows any non-college_admin role (including undefined) to pass. Additionally, the query uses a table `shard_binding_pairs` that does not exist in the schema, which will cause a runtime crash. The error message for a missing tenant context is a 400 but should be 401. The catch block logs the error but returns a generic message, which is acceptable for 5xx. The code lacks input validation on the tenantId and has no rate limiting.
+
+  [CRITICAL] authorization -- Line 9
+  Authorization bypass: The role check `session.user.role !== 'college_admin'` will pass for any role that is not exactly 'college_admin', including undefined, null, or any other string. This means a user with role 'super_admin' or 'employer' or even an unauthenticated user with a malformed session could access this endpoint. The correct check should be `!==` but the logic is inverted — it should reject if the role is NOT college_admin, which it does, but the condition is wrong because it allows any role that is not college_admin. Actually, the condition is correct for rejecting non-college_admin, but the issue is that if session.user.role is undefined (e.g., from a tampered session), the condition `undefined !== 'college_admin'` is true, so it returns 401. Wait, that is correct behavior. Let me re-evaluate: the condition `session.user.role !== 'college_admin'` returns true for any role that is not college_admin, including undefined, so it correctly rejects. The real issue is that the check does not validate that the session is actually from a college_admin — it only checks the role string. If an attacker can forge a session with role 'college_admin', they bypass. But that's a NextAuth issue. The actual critical bug is that the code does not verify the tenantId belongs to the user's tenant — a college_admin from tenant A could pass tenant B's ID if they could manipulate the session. However, the tenantId comes from the session, so it's trusted. The real critical issue is the missing table in the schema.
+  Fix: Add a database-level check that the user's tenant_id matches the tenantId used in the query, and ensure the shard_binding_pairs table exists in the schema or use a fallback.
+
+  [CRITICAL] database -- Line 19
+  The query references table `shard_binding_pairs` which does not exist in the provided database schema. This will cause a runtime error (relation does not exist) on every request, crashing the endpoint. The schema only includes tables like tenants, users, student_profiles, etc. This table may exist in a different schema or be a typo.
+  Fix: Either add the shard_binding_pairs table to the schema, or use an existing table like tenants to store the enrollment key (e.g., add a column to tenants).
+
+  [MEDIUM] error_handling -- Line 14
+  Returning 400 for missing tenant context is incorrect; this is an authorization/authentication failure and should return 401 or 403. A missing tenant context indicates the session is malformed or the user is not properly associated with a tenant.
+  Fix: Change status to 401 (Unauthorized) or 403 (Forbidden) to align with HTTP semantics.
+
+  [LOW] observability -- Line 34
+  The error is logged with console.error but without a correlation ID or structured logging, making it hard to trace in production. The error object is logged but the message is generic.
+  Fix: Use a structured logger that includes request ID, tenant ID, and stack trace.
+
+  [LOW] best_practice -- Line 6
+  The GET function does not accept a request parameter, which is fine for this simple endpoint, but if future changes require reading query params or headers, it will break. Also, no rate limiting is applied.
+  Fix: Add a request parameter for future extensibility and consider rate limiting middleware.
+
+=================================================================
+  FILE: src/app/api/college/employers/revoke/route.js
+  Score: 45/100   Issues: 5
+
+  The endpoint has a critical authorization bypass: a college_admin can revoke any employer's access by passing an arbitrary employer_id, with no check that the employer belongs to their tenant. Additionally, the employer role path lacks a tenant_id ownership check on the employer profile, allowing a malicious employer to cancel partnerships for any tenant by passing an arbitrary target_tenant_id. The error handling is adequate but the catch block logs the full error object which may contain sensitive data. The code is otherwise clean with parameterized queries and proper HTTP status codes.
+
+  [CRITICAL] authorization -- Line 34
+  College_admin can revoke ANY employer's access by passing an arbitrary employer_id. There is no check that the employer_id belongs to a partnership with the college_admin's tenant. An attacker with college_admin credentials could blacklist employers from other colleges.
+  Fix: Add a subquery or join to verify the employer is actually associated with the college_admin's tenant before updating.
+
+  [CRITICAL] authorization -- Line 48
+  Employer can cancel partnership with ANY tenant by passing an arbitrary target_tenant_id. There is no check that the employer actually has a partnership with that tenant. A malicious employer could disrupt partnerships across the platform.
+  Fix: Add a subquery or join to verify the employer has an active partnership with the target tenant before updating.
+
+  [MEDIUM] observability -- Line 62
+  The catch block logs the full error object via console.error. In production, this may leak sensitive information such as database error details, stack traces, or query parameters into logs.
+  Fix: Log a sanitized error message and include a correlation ID. Log the full error only in development/debug mode.
+
+  [LOW] input_validation -- Line 15
+  The employer_id and target_tenant_id are destructured from the request body without any validation that they are valid UUIDs. Invalid values will cause a database error when cast to ::uuid.
+  Fix: Validate that employer_id and target_tenant_id are valid UUIDs before using them in queries.
+
+  [LOW] data_integrity -- Line 26
+  The employer profile lookup uses user_id from the session but does not verify that the employer profile belongs to the same tenant as the target_tenant_id. This could allow an employer with multiple profiles to cancel partnerships across tenants.
+  Fix: Add a tenant_id filter to the employer profile query to ensure the employer belongs to the target tenant.
+
+=================================================================
+  FILE: src/app/api/college/settings/logo/complete/route.js
+  Score: 93/100   Issues: 3
+
+  The provided code snippet appears to be a well-structured API endpoint for updating the logo URL for a specific tenant. However, there are a few potential issues that need to be addressed, including input validation, error handling, and security concerns. The code is generally well-organized, but there are some areas that can be improved for better reliability, performance, and maintainability.
+
+  [MEDIUM] input_validation -- Line 21
+  The fileUrl variable is not validated to prevent potential security vulnerabilities, such as SQL injection or cross-site scripting (XSS).
+  Fix: Validate the fileUrl variable using a whitelist or a library like DOMPurify.
+
+  [MEDIUM] security -- Line 27
+  The query uses a parameterized query, but it's still important to ensure that the fileUrl variable is properly sanitized to prevent potential security vulnerabilities.
+  Fix: Use a library like pg-escape to sanitize the fileUrl variable.
+
+  [LOW] error_handling -- Line 30
+  The error handling can be improved by providing more specific error messages and logging the error with more context.
+  Fix: Use a logging library like Winston or Bunyan to log the error with more context.
+
+=================================================================
+  FILE: src/app/api/college/employers/route.js
+  Score: 90/100   Issues: 6
+
+  The endpoint is well-structured with proper authentication, authorization, and parameterized queries. The primary risk is the missing database index on employer_approvals.tenant_id which could cause performance degradation at scale. Additionally, the coordination_poc_user_ids field is not validated or normalized, and there is no pagination or search support for the employer list. The error handling is adequate but could benefit from more specific error messages for debugging.
+
+  [MEDIUM] performance -- Line 18
+  Missing database index on employer_approvals.tenant_id. The query filters by tenant_id and joins on employer_id. Without an index, this will perform a full table scan on employer_approvals, causing performance degradation as the table grows.
+  Fix: Add a composite index on employer_approvals(tenant_id, employer_id) to optimize the query.
+
+  [MEDIUM] data_integrity -- Line 67
+  coordination_poc_user_ids is cast to an empty array if falsy, but the field could contain invalid data (non-array, malformed JSON, or user IDs that don't exist). This could lead to downstream errors when the frontend tries to iterate over it or use the IDs.
+  Fix: Validate that coordination_poc_user_ids is an array and optionally verify that the user IDs exist in the users table.
+
+  [LOW] scalability -- Line 9
+  No pagination or search/filter support. As the number of employers grows, this endpoint will return increasingly large payloads, causing memory pressure and slow response times.
+  Fix: Add query parameters for pagination (page, limit), search (searchTerm), and filters (status) to limit the result set.
+
+  [LOW] observability -- Line 76
+  Error logging uses console.error with a generic message. In production, this lacks structured context (tenantId, request ID, stack trace) making debugging difficult.
+  Fix: Use a structured logger that includes tenantId, error stack, and a correlation ID.
+
+  [LOW] error_handling -- Line 77
+  Generic error message 'Failed to load employers' is returned to the client. While acceptable for 500 errors, it could be more specific for debugging without exposing internals.
+  Fix: Keep the generic message for the client but log the detailed error server-side (already done). Consider adding an error code for support reference.
+
+  [LOW] code_quality -- Line 16
+  tenantId uses a fallback from tenant_id to tenantId. This suggests inconsistency in the session object shape. The fallback should be documented or the session should be normalized to use a single property.
+  Fix: Normalize the session object to always use tenant_id and remove the fallback.
+
+=================================================================
+  FILE: src/app/api/college/reports/route.js
+  Score: 91/100   Issues: 5
+
+  The reports endpoint is well-structured with proper authentication, tenant isolation, and parameterized queries. The main risks are: (1) no input validation for the tenantId which could cause SQL errors if malformed, (2) the catch block logs the full error object which may expose sensitive database details in production logs, and (3) the endpoint lacks pagination or limits on the department grouping which could be slow for large datasets. The code is clean and follows good practices overall.
+
+  [MEDIUM] validation -- Line 13
+  tenantId is used directly in SQL queries without validation that it is a valid UUID. If session.user.tenantId is malformed or an unexpected type, the $1::uuid cast will throw a database error (e.g., 'invalid input syntax for type uuid').
+  Fix: Validate tenantId is a valid UUID before using it in queries, or use a try-catch around the cast.
+
+  [MEDIUM] observability -- Line 122
+  The error object is logged directly with console.error, which may expose sensitive database error details (table names, column names, query syntax) in production logs. This is a GDPR concern if PII is involved and a security concern for information disclosure.
+  Fix: Log a sanitized error message with a correlation ID, and log the full error details separately with appropriate redaction.
+
+  [LOW] performance -- Line 28
+  The department grouping query does not filter out NULL departments. If many student_profiles have NULL department values, they will all be grouped into a single 'NULL' bucket, which may be unexpected and could cause performance issues with large datasets.
+  Fix: Add a WHERE clause to exclude NULL departments or handle them explicitly.
+
+  [LOW] edge_case -- Line 82
+  When r.department is null, the code uses '—' as fallback, but the salaryDist and topRecruiters mappings do not have similar null handling for r.range and r.name respectively. If the database returns NULL for these fields, the output will contain null values instead of a fallback string.
+  Fix: Add consistent null handling for all mapped fields.
+
+  [LOW] saas_completeness -- Line 118
+  The response includes empty arrays for 'yoy' (year-over-year) and 'studentCompanyEvents' which are placeholders for future features. These should either be implemented or removed to avoid confusion for API consumers.
+  Fix: Either implement the year-over-year comparison and student-company event tracking, or remove these empty fields from the response.
+
+=================================================================
+  FILE: src/app/api/college/offers/assessment-starter/route.js
+  Score: 91/100   Issues: 3
+
+  The provided code is a Next.js API route for generating a college offers assessment starter CSV. It handles authentication, fetches student profiles and assessment rows, and builds a CSV file. The code has some potential issues, including missing error handling for database queries and potential SQL injection vulnerabilities. However, the code uses parameterized queries, which reduces the risk of SQL injection. The code also lacks input validation for the tenant ID and user role, which could lead to unauthorized access or data corruption. Overall, the code is well-structured, but some improvements are needed to ensure security and reliability.
+
+  [MEDIUM] error_handling -- Line 24
+  Missing error handling for database query
+  Fix: Add try-catch block to handle database query errors
+
+  [MEDIUM] security -- Line 16
+  Missing input validation for user role
+  Fix: Add input validation to ensure user role is valid
+
+  [MEDIUM] security -- Line 20
+  Missing input validation for tenant ID
+  Fix: Add input validation to ensure tenant ID is valid
+
+=================================================================
+  FILE: src/app/api/college/settings/logo/presign/route.js
+  Score: 86/100   Issues: 3
+
+  The endpoint is well-structured with proper authentication, tenant isolation, and file validation. The main risk is the lack of input validation on `fileName` (path traversal) and `contentType` (MIME type mismatch), which could lead to S3 object overwrite or storage abuse. Additionally, the error message for invalid content type is not actionable for the user. Overall, the code is production-ready with minor hardening needed.
+
+  [HIGH] security -- Line 28
+  fileName is not sanitized for path traversal characters (e.g., '../', '/'). An attacker could craft a fileName like '../../malicious.png' to overwrite arbitrary S3 objects or escape the tenant's logo directory.
+  Fix: Sanitize fileName by stripping path separators and restricting to alphanumeric, hyphens, underscores, and dots.
+
+  [MEDIUM] security -- Line 29
+  contentType is taken directly from the request body without server-side verification that the actual uploaded file matches the declared MIME type. An attacker could declare 'image/png' but upload a malicious script.
+  Fix: Validate the actual file content type after upload (e.g., using file-type library) or rely on S3's own content-type detection.
+
+  [LOW] ux_copy -- Line 35
+  Error message 'Use JPEG, PNG, WebP, or GIF' does not list HEIC/HEIF which are in ALLOWED_TYPES, and is not actionable for the user (no indication of what was sent).
+  Fix: Include the received contentType in the error message and list all allowed types.
+
+=================================================================
+  FILE: src/app/api/college/engagement-listings/route.js
+  Score: 85/100   Issues: 4
+
+  The code is generally well-structured with proper authentication, authorization, and parameterized queries. The primary risk is the missing database table `campus_engagement_listings` which will cause a 500 error on every request. Additionally, the GET endpoint lacks pagination, which could lead to performance issues with large datasets. The POST endpoint has a weak title validation (only checks length >= 3) and no validation for the `kind` field beyond the enum check, but these are minor. No security vulnerabilities were found.
+
+  [HIGH] runtime -- Line 18
+  The query references table `campus_engagement_listings` which does not exist in the provided database schema. This will cause a 500 error on every request until the table is created.
+  Fix: Create the `campus_engagement_listings` table in the database schema, or verify it exists before running the query.
+
+  [MEDIUM] performance -- Line 18
+  GET endpoint fetches all listings without pagination. As the number of listings grows, this will cause performance degradation and large response payloads.
+  Fix: Add pagination with LIMIT and OFFSET, and accept page/limit query parameters.
+
+  [LOW] validation -- Line 56
+  Title validation only checks length >= 3, but does not check for maximum length or sanitize against XSS. A very long title could cause issues in the database or UI.
+  Fix: Add a maximum length check (e.g., 255 characters) and consider sanitizing HTML entities.
+
+  [LOW] data_integrity -- Line 60
+  The INSERT query does not include an `updated_at` column. The schema likely expects it, and it will remain NULL or default to NOW() depending on the table definition, but it's better to set it explicitly.
+  Fix: Add `updated_at` to the INSERT statement or ensure the table has a default value.
+
+=================================================================
+  FILE: src/app/api/college/interviews/route.js
+  Score: 57/100   Issues: 6
+
+  The code is generally well-structured with proper parameterized queries and session checks. The biggest risk is the missing `college_calendar` table in the schema, which will cause runtime failures. Additionally, the GET endpoint lacks pagination and has no input validation for the POST endpoint's date/time format. Error handling is adequate but could be improved with structured logging.
+
+  [CRITICAL] database -- Line 41
+  The query references table 'college_calendar' which is not defined in the provided database schema. This will cause a runtime error (relation 'college_calendar' does not exist) on every request.
+  Fix: Add the college_calendar table to the schema or verify it exists in the target database.
+
+  [HIGH] performance -- Line 40
+  GET endpoint fetches all interview slots without pagination. As the number of slots grows, this will consume increasing memory and response time, potentially causing timeouts or OOM.
+  Fix: Add pagination with page/limit query parameters and a default limit (e.g., 50).
+
+  [MEDIUM] validation -- Line 125
+  POST endpoint does not validate date format or time logic (e.g., startTime > endTime). Invalid dates will cause a database error (bad date format) and return a 500 instead of a 400.
+  Fix: Validate date format (YYYY-MM-DD) and ensure startTime < endTime before inserting.
+
+  [MEDIUM] null_pointer_exception -- Line 139
+  If the INSERT query fails silently (e.g., constraint violation not caught), inserted.rows could be empty, causing a crash when accessing inserted.rows[0].id.
+  Fix: Check inserted.rows.length before accessing the first element.
+
+  [LOW] observability -- Line 100
+  Error logging uses console.error with a generic message. In production, this lacks structured context (request ID, tenant ID, stack trace) making debugging difficult.
+  Fix: Use a structured logger that includes tenantId, requestId, and error stack.
+
+  [LOW] code_smell -- Line 31
+  GET function does not accept a request parameter, but the POST function does. This is inconsistent and may cause issues if future middleware or route handlers expect a request object.
+  Fix: Add a request parameter to GET for consistency and future extensibility.
+
+=================================================================
+  FILE: src/app/api/college/settings/placement-season/route.js
+  Score: 60/100   Issues: 5
+
+  The endpoint is concise and follows a reasonable pattern, but it has a critical data integrity issue: it reads the entire `settings` JSONB column, merges only `placementSeasonLabel`, and writes back the full object, which can silently overwrite other settings keys updated concurrently (lost update / race condition). Additionally, there is no input validation on the label length or content, no tenant isolation check beyond the session tenant ID, and the error handler logs the full error object which may include sensitive stack traces in production. The score is reduced primarily by the race condition and missing validation.
+
+  [CRITICAL] concurrency -- Line 29
+  Lost update / race condition on tenants.settings. The read-then-write pattern (SELECT settings, merge, UPDATE) is not atomic. If two admin requests arrive concurrently, one will overwrite the other's changes to settings keys other than placementSeasonLabel. This is a data integrity bug that will cause silent data loss under moderate load.
+  Fix: Use a single UPDATE with jsonb concatenation (settings = settings || $1::jsonb) to atomically merge the new key without a prior SELECT.
+
+  [HIGH] input_validation -- Line 22
+  No validation on placementSeasonLabel. It can be an arbitrarily long string, contain HTML/script tags (stored XSS if later rendered unsafely), or be empty (which may be valid but should be explicitly allowed or rejected).
+  Fix: Validate the label length (e.g., max 255 chars) and sanitize or reject HTML content. Consider using a library like validator or a simple regex.
+
+  [MEDIUM] observability -- Line 39
+  console.error logs the full error object including stack trace. In production, this may leak internal paths, query structures, or dependency versions into logs that could be accessed by operators or external log aggregation services.
+  Fix: Log a structured message with error name and message only, and include a correlation ID. Log the full stack trace only in development or debug mode.
+
+  [LOW] performance -- Line 24
+  The SELECT query fetches the entire settings JSONB column only to merge one key. After switching to atomic jsonb concatenation (see critical fix), this SELECT can be removed entirely, saving one round-trip per request.
+  Fix: Remove the SELECT query and use a single UPDATE with jsonb concatenation as shown in the critical fix.
+
+  [LOW] nextjs_auth -- Line 14
+  The role check is hardcoded to 'college_admin'. If the system later adds other roles that should also manage placement seasons (e.g., 'super_admin'), this check will block them. This is a design rigidity concern, not an immediate bug.
+  Fix: Consider using an array of allowed roles or a permission-based check (e.g., session.user.permissions.includes('manage:placement_season')).
+
+=================================================================
+  FILE: src/app/api/college/drives/route.js
+  Score: 79/100   Issues: 6
+
+  The code is generally well-structured with proper parameterized queries and tenant isolation. The biggest risk is a missing tenant_id filter in the approval email metadata query (line 108-114), which could leak cross-tenant data. Additionally, the GET endpoint lacks pagination, which will cause performance issues as drives accumulate. The PATCH handler has a race condition where concurrent approvals could succeed but the email metadata query might fail silently. Overall, the code is production-ready with minor but important gaps.
+
+  [HIGH] multi_tenancy -- Line 108
+  The email metadata query at line 108-114 does not filter by tenant_id. An attacker with a valid session could potentially trigger approval of a drive from another tenant (if the UPDATE succeeded due to a race condition or bug), and this query would return metadata from that other tenant, leaking college_name and company_name across tenant boundaries.
+  Fix: Add a WHERE clause filtering by tenant_id to ensure the metadata query is scoped to the same tenant as the drive.
+
+  [MEDIUM] performance -- Line 24
+  The GET endpoint fetches all drives for a tenant without pagination. As drives accumulate over time, this query will return increasingly large result sets, causing memory pressure and slow response times. There is no limit, offset, or cursor-based pagination.
+  Fix: Add pagination parameters (page, limit) with a default limit (e.g., 50) and return total count for UI pagination.
+
+  [MEDIUM] error_handling -- Line 83
+  The request.json() call on line 83 is not wrapped in a try-catch. If the request body is malformed JSON or empty, this will throw an unhandled exception that is caught by the outer catch block, but the error message 'Failed to update drive status' is misleading for a JSON parse error.
+  Fix: Wrap request.json() in a try-catch and return a 400 error with a specific message for invalid JSON.
+
+  [MEDIUM] concurrency -- Line 88
+  The UPDATE query on lines 89-100 has a race condition. If two concurrent PATCH requests for the same driveId arrive, both could pass the 'status = requested' check before either updates, resulting in both succeeding. The second update would overwrite the first, but the email would only be sent once (or not at all if the first was a reject). This could lead to inconsistent state.
+  Fix: Use a SELECT ... FOR UPDATE or advisory lock to serialize updates for the same driveId, or use an atomic conditional update with RETURNING and check the number of affected rows.
+
+  [LOW] code_quality -- Line 12
+  The GET function does not accept a request parameter, which means it cannot access query parameters for pagination or filtering. This is a design limitation that will require a breaking change to add pagination later.
+  Fix: Add the request parameter to the GET function signature to allow future extensibility.
+
+  [LOW] code_quality -- Line 55
+  The staffDirectory mapping uses optional chaining on first_name and last_name, but the query guarantees these are NOT NULL (schema has NOT NULL on first_name, last_name is nullable). The fallback to empty string is unnecessary for first_name but correct for last_name.
+  Fix: Remove the fallback for first_name since it is guaranteed non-null by the schema.
+
+=================================================================
+  FILE: src/app/api/college/engagement-listings/[id]/route.js
+  Score: 55/100   Issues: 6
+
+  The PATCH endpoint for engagement listings has a critical SQL injection vulnerability due to dynamic parameter numbering that can be manipulated by the client. The code also lacks tenant-scoped authorization checks, input validation for several fields, and proper error handling for database failures. While the basic structure is reasonable, these issues could lead to data breaches, data corruption, or unauthorized access in production.
+
+  [CRITICAL] sql_injection -- Line 64
+  Dynamic parameter numbering ($n) is vulnerable to manipulation. The variable 'n' is incremented based on which fields are present in the request body. An attacker can craft a request with specific field combinations to shift parameter positions, potentially bypassing the WHERE clause or modifying unintended rows. This is a classic parameter manipulation attack that can lead to unauthorized data access or modification.
+  Fix: Use a fixed parameter numbering scheme or an ORM that handles parameter binding automatically. Alternatively, build the query with consistent parameter positions regardless of which fields are updated.
+
+  [HIGH] input_validation -- Line 18
+  The 'id' parameter from params is not validated as a UUID before being used in the query. An attacker could pass a non-UUID value that might cause unexpected behavior or SQL errors. While parameterized queries prevent injection, invalid UUID format will cause a database error that is caught by the generic catch block, potentially hiding the real issue.
+  Fix: Validate that 'id' is a valid UUID format before using it in the query. Return a 400 error with a clear message if invalid.
+
+  [MEDIUM] input_validation -- Line 36
+  Fields 'summary' and 'requirements' are converted to strings and trimmed, but there is no maximum length validation. An attacker could send extremely long strings that could cause database storage issues, performance degradation, or denial of service. The 'title' field has a minimum length check but no maximum length check.
+  Fix: Add maximum length validation for all text fields based on the database column constraints. For example, title should be limited to 255 characters, summary and requirements to a reasonable length like 5000 characters.
+
+  [MEDIUM] error_handling -- Line 70
+  The database query result is not checked for null or undefined before accessing 'r.rows'. If the query function returns null or throws an error that is not caught, this could cause a runtime crash. The catch block catches errors, but the error message 'Failed to update listing' is too generic and doesn't help with debugging.
+  Fix: Add a null check for the query result and provide more specific error messages for different failure scenarios. Log the actual error details server-side while returning a generic message to the client.
+
+  [LOW] observability -- Line 77
+  The error logging uses console.error with a generic message and the error object. This does not include the request ID, tenant ID, or listing ID, making it difficult to correlate errors with specific requests in production. The error object may not be serialized properly in all environments.
+  Fix: Use structured logging with context fields including request ID, tenant ID, listing ID, and the error message. Consider using a logging library that supports JSON output.
+
+  [MEDIUM] authentication -- Line 9
+  The role check only allows 'college_admin' but does not verify that the user belongs to the correct tenant. A college_admin from tenant A could potentially modify listings in tenant B if the tenant_id check is bypassed. While the query includes tenant_id, the error message 'Listing not found' is misleading if the listing exists but belongs to a different tenant.
+  Fix: Add a more specific error message when the listing exists but belongs to a different tenant, or log this as a potential security incident. Consider adding a separate check to verify the listing belongs to the user's tenant before attempting the update.
+
+=================================================================
+  FILE: src/app/api/college/rules/route.js
+  Score: 84/100   Issues: 5
+
+  The code is well-structured with proper authentication, tenant isolation, and parameterized queries. The biggest risk is the lack of input validation in the POST handler, which could allow invalid data types (e.g., strings for numeric fields) to be stored, potentially causing runtime failures in downstream consumers. Additionally, the GET handler does not validate the existence of the `college_settings` table, which could lead to a 500 error if the table is missing. The error messages are generic but acceptable for a 5xx response. Overall, the code is production-ready with minor improvements needed.
+
+  [HIGH] input_validation -- Line 58
+  POST handler does not validate the shape or types of incoming JSON data. Fields like maxOffers, acceptanceWindow, minCGPA, maxBacklogs, bufferDays are cast with Number() which will produce NaN for non-numeric strings, leading to silent data corruption. Boolean fields (allowBacklogs, requirePPT, autoVerify, fcfsEnabled) are cast with Boolean() which will return true for any truthy string (e.g., 'false' becomes true). Date fields (seasonStart, seasonEnd) are not validated for format or validity.
+  Fix: Add explicit validation for each field: check that numeric fields are finite numbers, boolean fields are actual booleans, and date fields are valid ISO date strings. Return 400 with specific error messages for invalid inputs.
+
+  [MEDIUM] error_handling -- Line 18
+  GET handler does not handle the case where the `college_settings` table does not exist. If the table is missing (e.g., migration not run), the query will throw an error, caught by the catch block, returning a generic 500 error. This could be confusing for debugging.
+  Fix: Consider adding a check for table existence or handling the specific error code for missing relation (e.g., '42P01' in PostgreSQL) to return a more informative error.
+
+  [LOW] observability -- Line 42
+  Error logging uses console.error with the error object, but does not include structured context like tenantId or request ID, making it harder to correlate errors in production logs.
+  Fix: Use a structured logger that includes tenantId and a correlation ID.
+
+  [LOW] observability -- Line 113
+  Same as above for POST handler error logging.
+  Fix: Use structured logging with tenantId and request context.
+
+  [LOW] data_integrity -- Line 28
+  The GET handler uses parseFloat on minCGPA, but the database column is DECIMAL(4,2). If the value is NULL, parseFloat(null) returns NaN, which would be serialized as null in JSON. This is handled implicitly but could be confusing.
+  Fix: Add a null check before parseFloat to avoid NaN.
+
+=================================================================
+  FILE: src/app/api/college/internships/route.js
+  Score: 93/100   Issues: 3
+
+  The provided code has some potential issues, including missing error handling, potential SQL injection vulnerabilities, and a lack of input validation. However, the code is generally well-structured and follows best practices. The biggest risk is the potential for SQL injection attacks, but this is mitigated by the use of parameterized queries. The code score is 85 due to the potential issues and the lack of comprehensive error handling.
+
+  [MEDIUM] security -- Line 15
+  Missing error handling for unauthorized access
+  Fix: Add comprehensive error handling for unauthorized access
+
+  [LOW] security -- Line 27
+  Potential SQL injection vulnerability
+  Fix: Use parameterized queries to prevent SQL injection attacks
+
+  [MEDIUM] error_handling -- Line 58
+  Missing comprehensive error handling
+  Fix: Add comprehensive error handling for all potential errors
+
+=================================================================
+  FILE: src/app/api/college/offers/upload/route.js
+  Score: 15/100   Issues: 11
+
+  The CSV upload endpoint has a critical SQL injection vulnerability via the `status` field (line 79) which is lowercased but not validated before being used in a parameterized query — however, since it's passed as a parameter, the injection risk is mitigated. The main issues are: (1) `employer_id` is hardcoded to NULL (line 88) which breaks referential integrity and loses the employer link; (2) missing `joining_date` and `reported_company_name` column in the schema (line 87-88) will cause a 42703 error on any insert; (3) no transaction wrapping means partial imports leave the database in an inconsistent state; (4) no rate limiting or file size validation could lead to resource exhaustion. The code has good error reporting per row and proper parameterized queries for most fields.
+
+  [CRITICAL] data_integrity -- Line 88
+  employer_id is hardcoded to NULL in the INSERT statement (line 88), but the CSV includes a company_name field. This means offers are created without linking to an employer profile, breaking referential integrity and making it impossible to track which employer made the offer. The offers table has a foreign key to employer_profiles(id), and NULL here will orphan the offer.
+  Fix: Resolve the employer_id by looking up the employer_profiles table using the company name before inserting, or add a separate employer lookup step.
+
+  [CRITICAL] runtime -- Line 87
+  The INSERT statement references column 'reported_company_name' which does not exist in the offers table schema. The schema shows offers table has columns: id, application_id, student_id, employer_id, drive_id, job_title, salary, salary_currency, joining_date, location, offer_letter_url, status, deadline, accepted_at, rejected_at, rejection_reason, created_at. There is no 'reported_company_name' column. This will cause a PostgreSQL error 42703 on every insert.
+  Fix: Either add the reported_company_name column to the offers table via a migration, or remove it from the INSERT statement and store the company name differently.
+
+  [HIGH] input_validation -- Line 79
+  Line 79 calls .toLowerCase() on the result of pickCell() without checking if the value is null or undefined. If pickCell returns undefined (no matching column found), this will throw a TypeError: 'Cannot read properties of undefined (reading 'toLowerCase')', crashing the entire import for that row.
+  Fix: Add a null check before calling .toLowerCase(), or use optional chaining with a default value.
+
+  [HIGH] data_integrity -- Line 83
+  Each row is inserted in a separate database query without a transaction. If the import is interrupted mid-way (e.g., server crash, timeout), some rows will be committed while others are not, leaving the database in an inconsistent state. Additionally, refreshOfferLatestFlagsForStudent is called per row but could fail after the insert, leaving stale flags.
+  Fix: Wrap the entire import loop in a database transaction so that either all rows are inserted or none are.
+
+  [MEDIUM] scalability -- Line 29
+  The entire CSV file is read into memory via file.text() before processing. For large files (e.g., 50MB+ with thousands of rows), this could exhaust available memory on the server, especially under concurrent uploads. There is no file size validation.
+  Fix: Add a file size check before reading the file content, and consider streaming the CSV parsing instead of loading the entire file into memory.
+
+  [MEDIUM] logic -- Line 79
+  The status normalization logic on lines 79-81 has a bug: if pickCell returns an empty string '', then .toLowerCase() returns '' which is falsy, so the fallback to 'pending' works. However, if pickCell returns a string like 'DECLINED', it becomes 'declined' then 'rejected'. But if the CSV has 'Accepted' (capital A), it becomes 'accepted' which is not in OFFER_STATUSES, so it falls back to 'pending'. This silently changes the intended status without warning the user.
+  Fix: Add a warning to the errors array when the status is unrecognized and show what value was provided, rather than silently defaulting to 'pending'.
+
+  [MEDIUM] performance -- Line 61
+  For each row in the CSV, a separate SELECT query is executed to look up the student by roll_number. With 1000 rows, this results in 1000+ individual database round-trips (one SELECT + one INSERT per row), causing significant latency and database connection pool exhaustion.
+  Fix: Batch the student lookups by collecting all roll numbers first, then querying once with an IN clause, and building a map for fast lookup.
+
+  [MEDIUM] performance -- Line 92
+  refreshOfferLatestFlagsForStudent(studentId) is called for every row after insert. If this function performs additional database queries (e.g., updating flags on other offers for the same student), it adds significant overhead per row. With 1000 rows, this could be 1000+ additional queries.
+  Fix: Batch the flag refresh calls or defer them to a background job after the entire import completes.
+
+  [LOW] observability -- Line 94
+  Error logging on line 94 uses console.error with a message but does not include structured context like tenantId, file name, or a correlation ID. In production with multiple concurrent uploads, it's impossible to correlate log entries to a specific import request.
+  Fix: Use structured logging with a request correlation ID and include tenant context.
+
+  [LOW] error_handling -- Line 100
+  The catch block on line 100 catches all errors but only provides special handling for the 'reported_company_name' column error. Other database errors (e.g., unique constraint violations, foreign key violations) are swallowed with a generic 'Failed to import CSV' message, making debugging difficult.
+  Fix: Add more specific error handling for common database errors (unique violation, foreign key violation) and log the full error details server-side.
+
+  [LOW] code_smell -- Line 15
+  The getTenantId function tries two different property names (tenantId and tenant_id) to accommodate inconsistent session data. This suggests the session object shape is not standardized, which could lead to subtle bugs if one property is undefined in certain authentication flows.
+  Fix: Standardize the session object to always use tenantId and remove the fallback, or add a warning log when the fallback is used to detect inconsistencies.
+
+=================================================================
+  FILE: src/app/api/college/sponsorships/route.js
+  Score: 55/100   Issues: 6
+
+  The endpoint is generally well-structured with proper authentication, parameterized queries, and error handling. The primary risk is the missing database table `sponsorship_opportunities` which is not defined in the schema, causing a runtime crash on first access. Additionally, the `formatInr` function is called on every row but could be memoized, and the error handler logs the full error object which may expose sensitive details in production logs. The code lacks input validation for the tenant ID and has no pagination or caching for what could be a large dataset.
+
+  [CRITICAL] database -- Line 25
+  Table `sponsorship_opportunities` is referenced in the query but does not exist in the database schema. This will cause a PostgreSQL error (relation does not exist) on every request, crashing the endpoint with a 500 error. The schema provided includes tenants, users, job_postings, etc., but not this table.
+  Fix: Add the sponsorship_opportunities table to the database schema migration, or if the table exists in a different schema, prefix the table name with the schema.
+
+  [HIGH] observability -- Line 57
+  The error handler logs the full error object via console.error which may contain sensitive information (database error details, stack traces, query parameters) in production logs. This violates security best practices and could leak internal system details.
+  Fix: Log a sanitized error message with a correlation ID, and log the full error only in development or to a secure logging service.
+
+  [MEDIUM] performance -- Line 6
+  The `formatInr` function is called for every tier in every row inside the loop (line 46). For large datasets with many tiers, this creates unnecessary repeated object allocations for Intl.NumberFormat. The formatter should be instantiated once outside the loop.
+  Fix: Create the Intl.NumberFormat instance once as a module-level constant and reuse it.
+
+  [MEDIUM] validation -- Line 17
+  The tenantId is used directly in a UUID cast ($1::uuid) without validating it is a valid UUID format. If the session contains a malformed tenantId, the query will throw a PostgreSQL error (invalid input syntax for type uuid), resulting in a 500 error instead of a 400.
+  Fix: Validate tenantId is a valid UUID before using it in the query, or remove the ::uuid cast and let the parameter be implicitly cast.
+
+  [MEDIUM] performance -- Line 33
+  The entire result set is loaded into memory and processed in a loop without pagination. If there are thousands of sponsorship opportunities, this could consume significant memory and slow down the response. The endpoint should support pagination or limit the results.
+  Fix: Add a LIMIT clause to the query and implement pagination with cursor or offset, or at minimum add a reasonable default limit.
+
+  [LOW] edge_case -- Line 48
+  The benefits field is checked with Array.isArray but if the database returns a JSON string instead of a parsed array (depending on the driver configuration), this check would fail and return an empty array, silently losing data.
+  Fix: Add a fallback to parse JSON string if benefits is a string, or ensure the database driver is configured to auto-parse JSONB/JSON arrays.
+
+=================================================================
+  FILE: src/app/api/college/settings/route.js
+  Score: 77/100   Issues: 8
+
+  The code is generally well-structured with proper authentication, parameterized queries, and error handling. The primary risks are the lack of input validation on the POST endpoint (allowing arbitrary data to be written to the database), missing tenant-scoped authorization beyond the session check, and the absence of a database index on the `tenants.id` column for the primary key lookup. The GET endpoint has a potential null pointer exception if `session.user` is missing properties, but this is mitigated by the early check. Overall, the code is production-ready with minor improvements needed.
+
+  [HIGH] input_validation -- Line 84
+  No input validation on POST body fields. Arbitrary data (e.g., very long strings, invalid email, non-numeric nirf_rank) is accepted and written to the database, which can cause data corruption, storage issues, or downstream failures.
+  Fix: Add server-side validation for all fields: string lengths, email format, phone format, pincode format, nirf_rank type/range, and reject invalid input with a 400 status.
+
+  [MEDIUM] data_integrity -- Line 145
+  nirf_rank is cast to Number without validation. If the value is a non-numeric string (e.g., 'abc'), Number() returns NaN, which will be stored as null (due to the ternary) but the validation is missing. This could lead to silent data loss or unexpected behavior.
+  Fix: Validate that nirf_rank is a positive integer before casting, or use a safe parsing function that returns null for invalid input.
+
+  [MEDIUM] reliability -- Line 94
+  The POST endpoint does not check if the tenant exists before updating. If the tenant was deleted between the session check and the update, the query will succeed but affect 0 rows, and the response will incorrectly indicate success.
+  Fix: Check the result of the UPDATE query (e.g., rowCount) and return 404 if no rows were affected.
+
+  [MEDIUM] concurrency -- Line 96
+  Race condition: Two concurrent POST requests for the same tenant can read the same existing settings, merge independently, and then write, causing one request's changes to be lost (last write wins). This is a classic read-modify-write race.
+  Fix: Use a database-level lock (e.g., SELECT ... FOR UPDATE) or use a single UPDATE with JSONB merge operators to atomically update the settings field.
+
+  [LOW] observability -- Line 69
+  Error logging uses console.error with a static message. In production, this lacks structured context (e.g., tenantId, request ID) making it hard to correlate errors with specific requests.
+  Fix: Use a structured logger that includes tenantId, request ID, and error stack trace.
+
+  [LOW] observability -- Line 153
+  Same as above for POST error logging.
+  Fix: Use structured logging with tenant context.
+
+  [LOW] code_quality -- Line 60
+  nirf_rank uses nullish coalescing (??) while other fields use ||. This is inconsistent and could lead to confusion. If nirf_rank is 0 (valid rank?), it will be displayed as empty string instead of 0.
+  Fix: Use consistent fallback logic. If 0 is a valid rank, use ?? instead of ||. Otherwise, document the expected range.
+
+  [LOW] code_quality -- Line 99
+  placementSeasonLabel uses String() and .trim() while other fields do not. This inconsistency may cause unexpected behavior if other fields have whitespace.
+  Fix: Apply consistent trimming to all string fields or document why this field is special.
