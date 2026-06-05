@@ -42,7 +42,8 @@ CREATE TABLE IF NOT EXISTS scan_jobs (
     error_detail  TEXT,
     max_files     INTEGER NOT NULL DEFAULT -1,
     sleep_between_files INTEGER NOT NULL DEFAULT 30,
-    context       TEXT
+    context       TEXT,
+    focus_areas   TEXT
 )
 """
 
@@ -81,6 +82,7 @@ async def _ensure_tables(db: aiosqlite.Connection) -> None:
             "ALTER TABLE scan_jobs ADD COLUMN max_files     INTEGER NOT NULL DEFAULT -1",
             "ALTER TABLE scan_jobs ADD COLUMN sleep_between_files INTEGER NOT NULL DEFAULT 30",
             "ALTER TABLE scan_jobs ADD COLUMN context       TEXT",
+            "ALTER TABLE scan_jobs ADD COLUMN focus_areas   TEXT",
         ]
         for sql in _migrations:
             try:
@@ -102,13 +104,21 @@ async def _open_db():
         yield db
 
 
-async def create_job(job_id: str, folder_path: str, max_files: int = -1, sleep_secs: int = 30, context: Optional[str] = None) -> None:
+async def create_job(
+    job_id: str,
+    folder_path: str,
+    max_files: int = -1,
+    sleep_secs: int = 30,
+    context: Optional[str] = None,
+    focus_areas: Optional[str] = None,
+) -> None:
     """Insert a new running job record."""
     async with _open_db() as db:
         await _ensure_tables(db)
         await db.execute(
-            "INSERT INTO scan_jobs (job_id, status, folder_path, max_files, sleep_between_files, context, start_time) VALUES (?, 'running', ?, ?, ?, ?, ?)",
-            (job_id, folder_path, max_files, sleep_secs, context, time.time()),
+            "INSERT INTO scan_jobs (job_id, status, folder_path, max_files, sleep_between_files, context, focus_areas, start_time) "
+            "VALUES (?, 'running', ?, ?, ?, ?, ?, ?)",
+            (job_id, folder_path, max_files, sleep_secs, context, focus_areas, time.time()),
         )
         await db.commit()
 

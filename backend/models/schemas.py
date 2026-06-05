@@ -75,7 +75,20 @@ class IssueType(str, Enum):
     FEATURE_FLAG = "feature_flag"
     NEXTJS_AUTH = "nextjs_auth"
     CHUNK_PARTIAL = "chunk_partial"
-
+    # Broad review categories for production-grade assessments
+    PRODUCTION_READINESS = "production_readiness"
+    ARCHITECTURE = "architecture"
+    TESTING = "testing"
+    API_DESIGN = "api_design"
+    DEPENDENCY_HYGIENE = "dependency_hygiene"
+    DOCUMENTATION = "documentation"
+    # Deploy, ops, and governance criteria
+    CHANGE_RISK = "change_risk"
+    ROLLBACK_CONFIDENCE = "rollback_confidence"
+    SLO_IMPACT = "slo_impact"
+    COMPLIANCE = "compliance"
+    RELEASE_READINESS = "release_readiness"
+    OWNERSHIP_RUNBOOK = "ownership_runbook"
 
 
 class ReviewStatus(str, Enum):

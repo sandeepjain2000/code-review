@@ -58,6 +58,41 @@
     .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
     .form-group { margin-bottom: 14px; }
 
+    /* Review category picker */
+    .cat-presets { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+    .cat-preset-btn { font-size: 11px; padding: 5px 12px; border-radius: 99px; border: 1px solid var(--border); background: var(--surface2); color: var(--text2); cursor: pointer; transition: all 0.15s; }
+    .cat-preset-btn:hover { border-color: var(--accent); color: var(--accent2); }
+    .cat-preset-btn.active { background: rgba(99,102,241,0.12); border-color: var(--accent); color: var(--accent2); font-weight: 600; }
+    .cat-toolbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 10px; font-size: 11px; color: var(--text3); }
+    .cat-toolbar button { background: none; border: none; color: var(--accent2); cursor: pointer; font-size: 11px; font-weight: 600; padding: 0; }
+    .cat-groups { max-height: 280px; overflow-y: auto; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); }
+    .cat-group { border-bottom: 1px solid var(--border); }
+    .cat-group:last-child { border-bottom: none; }
+    .cat-group-head { display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; background: var(--surface2); cursor: pointer; font-size: 12px; font-weight: 600; color: var(--text); user-select: none; }
+    .cat-group-head span { font-size: 10px; color: var(--text3); font-weight: 500; }
+    .cat-chips { display: flex; flex-wrap: wrap; gap: 6px; padding: 10px 12px; }
+    .cat-chip { font-size: 11px; padding: 4px 10px; border-radius: 99px; border: 1px solid var(--border); background: var(--surface); color: var(--text2); cursor: pointer; transition: all 0.12s; }
+    .cat-chip:hover { border-color: var(--accent); }
+    .cat-chip.on { background: rgba(99,102,241,0.14); border-color: var(--accent); color: var(--accent2); font-weight: 600; }
+    .cat-summary { margin-top: 8px; font-size: 11px; color: var(--text2); }
+    .cat-summary strong { color: var(--accent2); }
+    .cat-focus-card {
+      border: 2px solid rgba(99,102,241,0.35);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-bottom: 18px;
+      background: linear-gradient(180deg, rgba(99,102,241,0.06) 0%, var(--surface) 100%);
+    }
+    .cat-focus-card > label,
+    .cat-focus-card .card-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--accent2);
+      text-transform: none;
+      letter-spacing: 0;
+      margin-bottom: 10px;
+    }
+
     /* Buttons */
     .btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; border: none; transition: all 0.15s; }
     .btn-primary { background: var(--accent); color: #fff; }
@@ -180,6 +215,8 @@
 <body>
 <noscript><div style="padding:24px;font-family:sans-serif">JavaScript is required for CodeSentinel.</div></noscript>
 <div id="root"></div>
+
+<script src="/review-categories-data.js"></script>
 
 <script type="text/babel" data-presets="react">
 /** API base: ?api=http://host:port override; else same origin when served at /ui from FastAPI; else localhost:8000 */
@@ -655,12 +692,149 @@ function ProviderErrorPanel({ apiBase, active, eventLog, setEventLog, staticData
   );
 }
 
+// ── Review category picker ────────────────────────────────────────────────────
+
+function ReviewCategoryPicker({ apiBase, selected, onChange }) {
+  const defaultMeta = () => window.REVIEW_CATEGORIES_META || { groups: [], presets: [], all_ids: [] };
+  const [meta, setMeta] = useState(defaultMeta);
+  const [openGroups, setOpenGroups] = useState(() => {
+    const open = {};
+    (defaultMeta().groups || []).forEach(g => { open[g.id] = true; });
+    return open;
+  });
+
+  useEffect(() => {
+    fetch(`${apiBase}/review/categories`)
+      .then(r => r.ok ? r.json() : Promise.reject())
+      .then(data => {
+        setMeta(data);
+        const open = {};
+        (data.groups || []).forEach(g => { open[g.id] = true; });
+        setOpenGroups(open);
+      })
+      .catch(() => { /* keep embedded defaultMeta */ });
+  }, [apiBase]);
+
+  const toggle = (id) => {
+    const next = selected.includes(id)
+      ? selected.filter(x => x !== id)
+      : [...selected, id];
+    onChange(next);
+  };
+
+  const toggleGroup = (group) => {
+    const ids = group.categories.map(c => c.id);
+    const allOn = ids.every(id => selected.includes(id));
+    if (allOn) {
+      onChange(selected.filter(id => !ids.includes(id)));
+    } else {
+      const merged = [...selected];
+      ids.forEach(id => { if (!merged.includes(id)) merged.push(id); });
+      onChange(merged);
+    }
+  };
+
+  const presetActive = (preset) => {
+    if (!preset.categories?.length) return !selected.length;
+    return preset.categories.length === selected.length
+      && preset.categories.every(id => selected.includes(id));
+  };
+
+  if (!meta || !meta.groups || !meta.groups.length) {
+    return (
+      <div className="cat-focus-card form-group">
+        <div className="card-title">Review focus — categories</div>
+        <div style={{ fontSize: 12, color: "var(--critical)" }}>
+          Category list failed to load. Hard-refresh the page (Ctrl+F5) or restart the backend.
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="cat-focus-card form-group">
+      <div className="card-title">Review focus — what to assess</div>
+      <div style={{ fontSize: 12, color: "var(--text2)", marginBottom: 10, lineHeight: 1.5 }}>
+        Choose which areas the AI should evaluate. <strong>Leave all unchecked</strong> for a full review (all dimensions).
+        Use presets for common goals (production grade, security, best practices).
+      </div>
+
+      <div className="cat-presets">
+        {meta.presets.map(preset => (
+          <button
+            key={preset.id}
+            type="button"
+            className={`cat-preset-btn${presetActive(preset) ? " active" : ""}`}
+            title={preset.description || ""}
+            onClick={() => onChange(preset.categories ? [...preset.categories] : [])}
+          >
+            {preset.label}
+          </button>
+        ))}
+      </div>
+
+      <div className="cat-toolbar">
+        <button type="button" onClick={() => onChange([...meta.all_ids])}>Select all</button>
+        <span>·</span>
+        <button type="button" onClick={() => onChange([])}>Clear (full review)</button>
+        {selected.length > 0 && (
+          <span style={{ marginLeft: "auto" }}><strong>{selected.length}</strong> categor{selected.length === 1 ? "y" : "ies"} selected</span>
+        )}
+      </div>
+
+      <div className="cat-groups">
+        {meta.groups.map(group => {
+          const ids = group.categories.map(c => c.id);
+          const onCount = ids.filter(id => selected.includes(id)).length;
+          const expanded = openGroups[group.id];
+          return (
+            <div key={group.id} className="cat-group">
+              <div
+                className="cat-group-head"
+                onClick={() => setOpenGroups(o => ({ ...o, [group.id]: !o[group.id] }))}
+              >
+                {group.label}
+                <span>{onCount}/{ids.length} · {expanded ? "▼" : "▶"}</span>
+              </div>
+              {expanded && (
+                <div className="cat-chips">
+                  <button type="button" className="cat-chip" style={{ fontStyle: "italic" }}
+                    onClick={() => toggleGroup(group)}>
+                    {onCount === ids.length ? "Deselect group" : "Select group"}
+                  </button>
+                  {group.categories.map(cat => (
+                    <button
+                      key={cat.id}
+                      type="button"
+                      className={`cat-chip${selected.includes(cat.id) ? " on" : ""}`}
+                      onClick={() => toggle(cat.id)}
+                    >
+                      {cat.label}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      <div className="cat-summary">
+        {selected.length === 0
+          ? "Mode: full review — all prompt dimensions apply."
+          : `Mode: focused review — only issues tagged with selected types will be reported.`}
+      </div>
+    </div>
+  );
+}
+
 // ── Tabs ──────────────────────────────────────────────────────────────────────
 
 function SnippetTab({ apiBase }) {
   const [code, setCode]   = useState("");
   const [file, setFile]   = useState("snippet.py");
   const [ctx,  setCtx]    = useState("");
+  const [focusAreas, setFocusAreas] = useState([]);
   const [loading, setLoading] = useState(false);
   const [result, setResult]   = useState(null);
   const [error,  setError]    = useState(null);
@@ -672,7 +846,10 @@ function SnippetTab({ apiBase }) {
       const resp = await fetch(`${apiBase}/review/snippet`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code, filename: file, context: ctx || null }),
+        body: JSON.stringify({
+          code, filename: file, context: ctx || null,
+          focus_areas: focusAreas.length ? focusAreas : null,
+        }),
       });
       if (!resp.ok) throw new Error(`${resp.status}: ${await resp.text()}`);
       setResult(await resp.json());
@@ -687,6 +864,7 @@ function SnippetTab({ apiBase }) {
 
       {!result && !loading && (
         <div className="card">
+          <ReviewCategoryPicker apiBase={apiBase} selected={focusAreas} onChange={setFocusAreas} />
           <div className="form-row">
             <div className="form-group">
               <label>Filename (for language detection)</label>
@@ -784,6 +962,7 @@ function PRTab({ apiBase }) {
   const [repo,   setRepo]   = useState("");
   const [prNum,  setPrNum]  = useState("");
   const [diffOnly, setDiff] = useState(true);
+  const [focusAreas, setFocusAreas] = useState([]);
   const [loading, setLoading] = useState(false);
   const [result, setResult]   = useState(null);
   const [error,  setError]    = useState(null);
@@ -795,7 +974,10 @@ function PRTab({ apiBase }) {
       const resp = await fetch(`${apiBase}/review/pr`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ owner, repo, pull_number: parseInt(prNum), diff_only: diffOnly }),
+        body: JSON.stringify({
+          owner, repo, pull_number: parseInt(prNum), diff_only: diffOnly,
+          focus_areas: focusAreas.length ? focusAreas : null,
+        }),
       });
       if (!resp.ok) throw new Error(`${resp.status}: ${await resp.text()}`);
       setResult(await resp.json());
@@ -819,6 +1001,7 @@ function PRTab({ apiBase }) {
             <label>Paste GitHub PR URL (auto-fill)</label>
             <input type="text" placeholder="https://github.com/owner/repo/pull/42" onChange={e=>parsePrUrl(e.target.value)} />
           </div>
+          <ReviewCategoryPicker apiBase={apiBase} selected={focusAreas} onChange={setFocusAreas} />
           <div className="form-row">
             <div className="form-group">
               <label>Owner</label>
@@ -858,6 +1041,7 @@ function FolderTab({ apiBase, scanning, setScanning, eventLog, setEventLog }) {
   const [maxFiles, setMax]     = useState(50);
   const [sleepSecs, setSleep]  = useState(10);
   const [ctx,      setCtx]     = useState("");
+  const [focusAreas, setFocusAreas] = useState([]);
   const [result,    setResult]   = useState(null);
   const [error,     setError]    = useState(null);
   const [progress,  setProgress] = useState(null);
@@ -1170,7 +1354,13 @@ function FolderTab({ apiBase, scanning, setScanning, eventLog, setEventLog }) {
       const resp = await fetch(`${apiBase}/review/folder/start`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ folder_path: path, max_files: maxFiles, sleep_between_files: sleepSecs, context: ctx || null }),
+        body: JSON.stringify({
+          folder_path: path,
+          max_files: maxFiles,
+          sleep_between_files: sleepSecs,
+          context: ctx || null,
+          focus_areas: focusAreas.length ? focusAreas : null,
+        }),
       });
       if (!resp.ok) throw new Error(`${resp.status}: ${await resp.text()}`);
       ({ job_id } = await resp.json());
@@ -1463,6 +1653,7 @@ function FolderTab({ apiBase, scanning, setScanning, eventLog, setEventLog }) {
 
       {!scanning && !result && (
         <div className="card">
+          <ReviewCategoryPicker apiBase={apiBase} selected={focusAreas} onChange={setFocusAreas} />
           <div className="form-group">
             <label>Absolute folder path (on the backend server)</label>
             <input type="text" value={path} onChange={e=>setPath(e.target.value)} placeholder="C:\projects\my-app" />

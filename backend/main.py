@@ -202,7 +202,9 @@ app.include_router(github_router)
 # Root + static UI (avoid opening frontend/index.html via file:// — CDNs / Babel often fail)
 # ---------------------------------------------------------------------------
 
-_FRONTEND_INDEX = Path(__file__).resolve().parent.parent / "frontend" / "index.html"
+_FRONTEND_DIR = Path(__file__).resolve().parent.parent / "frontend"
+_FRONTEND_INDEX = _FRONTEND_DIR / "index.html"
+_NO_CACHE = {"Cache-Control": "no-store, no-cache, must-revalidate"}
 
 
 @app.get("/", include_in_schema=False)
@@ -224,7 +226,29 @@ async def web_ui():
             status_code=500,
             content={"detail": "frontend/index.html not found", "expected": str(_FRONTEND_INDEX)},
         )
-    return FileResponse(_FRONTEND_INDEX, media_type="text/html; charset=utf-8")
+    return FileResponse(
+        _FRONTEND_INDEX,
+        media_type="text/html; charset=utf-8",
+        headers=_NO_CACHE,
+    )
+
+
+def _categories_data_js_response():
+    path = _FRONTEND_DIR / "review-categories-data.js"
+    if not path.is_file():
+        return JSONResponse(status_code=404, content={"detail": "review-categories-data.js not found"})
+    return FileResponse(path, media_type="application/javascript", headers=_NO_CACHE)
+
+
+@app.get("/review-categories-data.js", include_in_schema=False)
+async def review_categories_data_js():
+    """Category metadata for the UI (works from /ui and static dev server)."""
+    return _categories_data_js_response()
+
+
+@app.get("/assets/review-categories-data.js", include_in_schema=False)
+async def review_categories_data_js_assets():
+    return _categories_data_js_response()
 
 
 # ---------------------------------------------------------------------------

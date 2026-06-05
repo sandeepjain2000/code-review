@@ -5,6 +5,7 @@ prompts.py — Prompt templates for the code review AI.
 from pathlib import Path
 from typing import List, Optional
 from models.schemas import IssueType
+from utils.review_categories import focus_areas_instruction
 
 
 def _load_schema() -> str:
@@ -219,6 +220,65 @@ _SYSTEM_PROMPT_TEMPLATE = (
     "- **Background Jobs / Cron**: Ensure idempotency, safe retries, and correct tenant context in workers.\n"
     "- **Email & Webhooks**: Verify signatures, don't trust payloads, and ensure no secrets in logs.\n"
     "- **Feature Flags**: Put risky paths behind env flags for safer rollout.\n\n"
+    "### 33. Production-Readiness Gates\n"
+    "- Classify production blockers explicitly under `production_readiness` when deploy risk is high.\n"
+    "- Verify startup safety: fail-fast configuration validation, dependency checks, and graceful startup errors.\n"
+    "- Verify runtime safety: bounded retries, backpressure controls, resource cleanup, and graceful shutdown.\n"
+    "- Verify deploy safety: backward-compatible changes, migration sequencing, and rollback readiness.\n"
+    "- Verify operational safety: health/readiness/liveness checks and observable failure modes.\n\n"
+    "### 34. Best Practices & Engineering Standards\n"
+    "- Flag broad best-practice gaps under `best_practice` and architectural concerns under `architecture`.\n"
+    "- Separation of concerns: handlers, domain logic, data access, and infrastructure concerns should not be tightly coupled.\n"
+    "- Prefer explicit contracts/types over implicit assumptions at API and module boundaries.\n"
+    "- Avoid hidden side effects and global mutable state that make behavior non-deterministic.\n"
+    "- Ensure naming, module boundaries, and abstractions reflect business intent.\n\n"
+    "### 35. Testing & Quality Gates\n"
+    "- Classify testing gaps under `testing` when critical behavior lacks meaningful automated tests.\n"
+    "- Verify coverage across unit, integration, and end-to-end paths for critical workflows.\n"
+    "- Ensure tests include negative paths, retries/timeouts, and realistic failure simulation.\n"
+    "- Verify deterministic test behavior (no hidden clock/network/flaky dependency assumptions).\n\n"
+    "### 36. API Design & Backward Compatibility\n"
+    "- Classify contract and compatibility issues under `api_design`.\n"
+    "- Check request/response schema stability, pagination consistency, and error contract consistency.\n"
+    "- Flag silent breaking changes (field renames, semantic changes, stricter validation without versioning).\n"
+    "- Ensure idempotency and retry-safe semantics for mutating endpoints where clients may retry.\n\n"
+    "### 37. Dependency Hygiene & Supply Chain\n"
+    "- Classify dependency and supply-chain concerns under `dependency_hygiene`.\n"
+    "- Flag unpinned or stale critical dependencies, missing vulnerability patch strategy, and unsupported packages.\n"
+    "- Check unsafe transitive dependency usage, over-broad permissions, and install-time script risk.\n"
+    "- Ensure lockfiles and reproducible build expectations are followed.\n\n"
+    "### 38. Documentation & Operability\n"
+    "- Classify documentation/operability gaps under `documentation` when maintainers cannot safely run or support the system.\n"
+    "- Verify runbook-quality docs for setup, deploy, rollback, incident response, and known failure modes.\n"
+    "- Ensure environment configuration, secrets handling, and migration procedures are documented.\n"
+    "- Flag missing contract docs for public APIs and integration points.\n\n"
+    "### 39. Change Risk Classification\n"
+    "- Classify deploy blast-radius and coupling risk under `change_risk`.\n"
+    "- Assess how localized failures are: single file vs cross-service vs data-wide impact.\n"
+    "- Flag high coupling (shared mutable state, tight sync calls across boundaries) that amplifies incident scope.\n"
+    "- Note whether the change is safe to ship incrementally or requires coordinated releases.\n\n"
+    "### 40. Rollback Confidence\n"
+    "- Classify rollback and data-recovery gaps under `rollback_confidence`.\n"
+    "- Schema/migration changes: backward compatibility, expand-contract-shrink, reversible migrations.\n"
+    "- Feature toggles: can bad behavior be disabled without redeploy? Data repair paths after partial writes?\n"
+    "- Cached or async consumers: stale state after rollback — is it handled?\n\n"
+    "### 41. SLO & Error-Budget Impact\n"
+    "- Classify latency, availability, and error-rate risks under `slo_impact`.\n"
+    "- New hot paths, extra sync I/O, or unbounded work that can burn latency/error budget.\n"
+    "- Missing timeouts, missing circuit breakers, or fan-out that worsens tail latency.\n"
+    "- Noisy failure modes that could spike 5xx or retry storms affecting dependents.\n\n"
+    "### 42. Compliance by Domain\n"
+    "- Classify domain-specific compliance gaps under `compliance` (use `gdpr` only for EU data-protection specifics).\n"
+    "- When context suggests regulated workloads: PCI (card data), HIPAA (PHI), SOC2-style controls (access logging, change management).\n"
+    "- Data retention, audit trails, least-privilege access, and evidence for controls — only when applicable from code or comments.\n\n"
+    "### 43. Release Readiness\n"
+    "- Classify rollout strategy gaps under `release_readiness`.\n"
+    "- Canary/gradual rollout, feature flags for risky paths, kill switches, and monitoring tied to release.\n"
+    "- Versioning of APIs/config when multiple clients or environments exist.\n\n"
+    "### 44. Ownership & Runbook Completeness\n"
+    "- Classify on-call and operational ownership gaps under `ownership_runbook`.\n"
+    "- Clear ownership for critical paths, alert routing, and actionable runbooks (not generic wiki links).\n"
+    "- In-code: TODO/FIXME on critical flows, missing links to SLOs or dashboards where teams expect them.\n\n"
     "## Output Format\n"
     "You MUST respond with ONLY a valid JSON object — no markdown, no preamble, no explanation outside the JSON.\n\n"
     "### JSON Schema:\n"
@@ -233,7 +293,7 @@ _SYSTEM_PROMPT_TEMPLATE = (
     "- line: Exact line number from the numbered code. Use null for file-level issues.\n"
     "- line_end: End line for multi-line issues. Omit if single line.\n"
     "- severity: critical (crashes/breach/data loss in production), high (fails under real usage), medium (fails only in specific edge cases), low (code smell only).\n"
-    "- type: One of: bug, security, performance, readability, maintainability, best_practice, type_error, dead_code, dependency, error_handling, observability, data_integrity, reliability, multi_tenancy, gdpr, configuration, scalability, runtime, database, concurrency, memory, network, logic, validation, authentication, authorization, idempotency, edge_case, business_logic, security_abuse, environment_drift, cognitive_complexity, data_lifecycle, uiux, saas_completeness, ux_copy, code_smell, null_pointer_exception, null_check, input_validation, sql_injection, code_quality, csv_injection, client_secret, upload_abuse, auth_hardening, tls_ssl, webhook_security, feature_flag, nextjs_auth, chunk_partial.\n"
+    "- type: One of: bug, security, performance, readability, maintainability, best_practice, type_error, dead_code, dependency, error_handling, observability, data_integrity, reliability, multi_tenancy, gdpr, configuration, scalability, runtime, database, concurrency, memory, network, logic, validation, authentication, authorization, idempotency, edge_case, business_logic, security_abuse, environment_drift, cognitive_complexity, data_lifecycle, uiux, saas_completeness, ux_copy, code_smell, null_pointer_exception, null_check, input_validation, sql_injection, code_quality, csv_injection, client_secret, upload_abuse, auth_hardening, tls_ssl, webhook_security, feature_flag, nextjs_auth, chunk_partial, production_readiness, architecture, testing, api_design, dependency_hygiene, documentation, change_risk, rollback_confidence, slo_impact, compliance, release_readiness, ownership_runbook.\n"
     "- message: Name the exact variable/function/line. Explain precisely what breaks, when, and the real-world impact (data leak, crash, wrong output).\n"
     "- suggestion: One-sentence description of the fix approach.\n"
     "- code_snippet: REQUIRED for every high/critical issue — copy the exact problematic lines from the file.\n"
@@ -291,7 +351,10 @@ def build_review_prompt(
         parts.append(f"**Language:** {lang_hint}")
     if context:
         parts.append(f"\n**Context about this code:**\n{context}\n")
-    if focus_areas:
+    scope = focus_areas_instruction(focus_areas)
+    if scope:
+        parts.append(scope)
+    elif focus_areas:
         area_names = ", ".join(a.value for a in focus_areas)
         parts.append(f"\n**Focus areas for this review:** {area_names}\n")
     parts.append(f"\n**Code to review:**\n```{lang_hint or ''}\n{numbered_code}\n```")
@@ -315,7 +378,10 @@ def build_diff_prompt(
     parts.append(f"\n**File changed:** `{filename}`")
     if context:
         parts.append(f"\n**Additional context:** {context}\n")
-    if focus_areas:
+    scope = focus_areas_instruction(focus_areas)
+    if scope:
+        parts.append(scope)
+    elif focus_areas:
         area_names = ", ".join(a.value for a in focus_areas)
         parts.append(f"\n**Focus areas:** {area_names}\n")
     parts.append(f"\n**Diff:**\n```diff\n{diff}\n```")

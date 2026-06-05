@@ -42,6 +42,7 @@ from services.review_service import _build_overall_summary, get_review_service
 from services.scanner_service import get_scanner_service
 from utils.circuit_breaker import get_circuit_breaker
 from utils.rate_limiter import all_limiter_status
+from utils.review_categories import categories_payload, parse_focus_areas_json, serialize_focus_areas
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/review", tags=["review"])
@@ -71,6 +72,15 @@ def _audit_log(job_id: str, action: str, details: str = "") -> None:
     log_line = f"[{ts}] JOB: {job_id} | ACTION: {action} | {details}\n"
     with open(audit_file, "a", encoding="utf-8") as f:
         f.write(log_line)
+
+
+# ---------------------------------------------------------------------------
+# Review categories (for UI focus selection)
+# ---------------------------------------------------------------------------
+
+@router.get("/categories", summary="List review focus categories and presets")
+async def list_review_categories():
+    return categories_payload()
 
 
 # ---------------------------------------------------------------------------
@@ -206,7 +216,8 @@ async def start_folder_scan(
         str(request.folder_path),
         request.max_files,
         request.sleep_between_files,
-        request.context
+        request.context,
+        serialize_focus_areas(request.focus_areas),
     )
     _audit_log(job_id, "SCAN_STARTED", f"Path: {request.folder_path}, MaxFiles: {request.max_files}, Sleep: {request.sleep_between_files}s")
     background_tasks.add_task(_run_streaming_folder_scan, job_id, request, queue, request.sleep_between_files)
@@ -244,7 +255,8 @@ async def resume_folder_scan(
         folder_path=job["folder_path"],
         max_files=max_files,
         sleep_between_files=job.get("sleep_between_files", 5),
-        context=job.get("context")
+        context=job.get("context"),
+        focus_areas=parse_focus_areas_json(job.get("focus_areas")),
     )
     
     queue: asyncio.Queue = asyncio.Queue()
